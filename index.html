@@ -1,0 +1,131 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>JusTini's Cloud Floor & Cash</title>
+<style>
+:root{--bg:#10151e;--panel:#1a2230;--line:#364255;--text:#f7f8fb;--muted:#aeb8c8;--accent:#d6b267}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,sans-serif}
+button,input,select,textarea{font:inherit;border:1px solid var(--line);border-radius:10px;background:#232d3b;color:var(--text);padding:10px}
+button{font-weight:700}.primary{background:var(--accent);color:#202733}.hidden{display:none!important}
+header{position:sticky;top:0;z-index:10;display:flex;gap:8px;align-items:center;padding:10px;background:#111821;border-bottom:1px solid var(--line)}
+header strong{flex:1}.wrap{max-width:760px;margin:auto;padding:12px 12px 90px}.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:8px}.field{margin-bottom:9px}label{display:block;font-size:12px;color:var(--muted);margin-bottom:4px}input,select,textarea{width:100%}
+.tabs{display:flex;gap:7px;overflow:auto;margin-bottom:10px}.tabs button.active{background:var(--accent);color:#202733}
+.floor{position:relative;width:100%;aspect-ratio:1.22/1;background:#232c39;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.table{position:absolute;display:flex;align-items:center;justify-content:center;flex-direction:column;background:#9298a2;color:#17202a;border:2px solid rgba(255,255,255,.25);font-size:10px;font-weight:800}
+.table.round{border-radius:50%}.table.square,.table.rect{border-radius:8px}.table.selected{outline:4px solid white}
+.table .tiny{font-size:8px}.alert{animation:blink 1s infinite}@keyframes blink{50%{box-shadow:0 0 0 7px rgba(255,255,255,.45)}}
+.actions{position:fixed;bottom:8px;left:8px;right:8px;display:grid;grid-template-columns:repeat(4,1fr);gap:6px;background:#111821;border:1px solid var(--line);padding:7px;border-radius:13px;z-index:15}
+.actions button{font-size:11px;padding:9px 4px}.sheet{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:30;display:flex;align-items:flex-end}
+.sheet>div{background:var(--panel);width:100%;max-height:90vh;overflow:auto;border-radius:18px 18px 0 0;padding:15px}
+.nav{display:flex;gap:6px;overflow:auto}.nav button{white-space:nowrap}.record{border:1px solid var(--line);border-radius:10px;padding:9px;margin-top:7px;font-size:12px}.muted{color:var(--muted);font-size:12px}
+</style>
+</head>
+<body>
+<section id="auth" class="wrap">
+  <div class="card"><h2>JusTini's Cloud App</h2>
+    <div class="field"><label>Full name</label><input id="name"></div>
+    <div class="field"><label>Email</label><input id="email" type="email"></div>
+    <div class="field"><label>Password</label><input id="password" type="password"></div>
+    <button id="signup" class="primary">Create account</button>
+    <button id="signin">Sign in</button>
+    <div id="authMsg" class="muted"></div>
+  </div>
+</section>
+<section id="app" class="hidden">
+<header><strong id="who"></strong><button id="cashBtn">Cash Forms</button><button id="logout">Log out</button></header>
+<div class="wrap">
+  <div class="tabs" id="roomTabs"></div>
+  <div class="floor" id="floor"></div>
+</div>
+<div id="actions" class="actions hidden">
+  <button id="assign">Assign</button><button id="seat">Seat</button><button id="status">Status</button><button id="clear">Clear</button>
+</div>
+</section>
+
+<div id="modal" class="sheet hidden"><div><h3 id="modalTitle"></h3><div id="modalBody"></div><button id="modalClose" style="width:100%;margin-top:8px">Cancel</button></div></div>
+
+<script src="config.js"></script>
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.95.0/+esm';
+const cfg=window.JT_CONFIG;
+if(!cfg||cfg.SUPABASE_URL.includes('PASTE_')) alert('Open config.js and paste your Supabase URL and publishable key.');
+const sb=createClient(cfg.SUPABASE_URL,cfg.SUPABASE_PUBLISHABLE_KEY);
+let profile=null,tables=[],room='Main Dining',selected=[];
+
+const $=id=>document.getElementById(id);
+function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+function elapsed(iso){if(!iso)return'';const m=Math.floor((Date.now()-new Date(iso))/60000);return m>=60?`${Math.floor(m/60)}h ${m%60}m`:`${m}m`}
+async function ensureProfile(user,name=''){
+  let {data}=await sb.from('profiles').select('*').eq('id',user.id).maybeSingle();
+  if(!data){await sb.from('profiles').insert({id:user.id,full_name:name||user.email});data={id:user.id,full_name:name||user.email,role:'employee'}}
+  profile=data; $('who').textContent=profile.full_name||user.email;
+}
+async function log(action,details={}){await sb.from('activity_log').insert({user_id:profile.id,user_name:profile.full_name,action,details})}
+async function load(){
+  const {data,error}=await sb.from('floor_tables').select('*').order('table_name');if(error)return alert(error.message);
+  tables=data; render();
+}
+function render(){
+  const rooms=[...new Set(tables.map(t=>t.room))];$('roomTabs').innerHTML='';
+  rooms.forEach(r=>{const b=document.createElement('button');b.textContent=r;b.className=r===room?'active':'';b.onclick=()=>{room=r;selected=[];render()};$('roomTabs').append(b)});
+  $('floor').innerHTML='';
+  tables.filter(t=>t.room===room).forEach(t=>{
+    const d=document.createElement('div');d.className=`table ${t.shape} ${selected.includes(t.id)?'selected':''} ${t.service_status!=='ready'?'alert':''}`;
+    Object.assign(d.style,{left:t.x+'%',top:t.y+'%',width:t.w+'%',height:t.h+'%'});
+    d.innerHTML=`<div>${esc(t.table_name)}</div><div class="tiny">${t.party_name?esc(t.party_name):t.assigned_server?esc(t.assigned_server):t.seat_count+' seats'}</div><div class="tiny">${t.seated_at?elapsed(t.seated_at):t.service_status!=='ready'?esc(t.service_status):''}</div>`;
+    d.onclick=()=>{selected.includes(t.id)?selected=selected.filter(x=>x!==t.id):selected.push(t.id);render()};
+    $('floor').append(d)
+  });
+  $('actions').classList.toggle('hidden',!selected.length)
+}
+function modal(title,body){$('modalTitle').textContent=title;$('modalBody').innerHTML=body;$('modal').classList.remove('hidden')}
+$('modalClose').onclick=()=>$('modal').classList.add('hidden');
+
+$('assign').onclick=()=>modal('Assign selected tables',`<div class="field"><label>Server name</label><input id="v1"></div><button id="go" class="primary" style="width:100%">Assign</button>`);
+$('seat').onclick=()=>modal('Seat selected tables',`<div class="field"><label>Walk-in or reservation</label><select id="v0"><option>Walk-in</option><option>Reservation</option></select></div><div class="field"><label>Party name</label><input id="v1"></div><div class="field"><label>Guests</label><input id="v2" type="number"></div><button id="go" class="primary" style="width:100%">Seat</button>`);
+$('status').onclick=()=>modal('Update status',`<div class="field"><label>Status</label><select id="v1"><option value="ready">Ready</option><option value="needs_bussing">Needs Bussing</option><option value="needs_resetting">Needs Resetting</option><option value="needs_manager">Needs Manager</option></select></div><button id="go" class="primary" style="width:100%">Apply</button>`);
+$('clear').onclick=async()=>{await sb.from('floor_tables').update({party_name:null,guest_count:null,seated_at:null,service_status:'needs_bussing',status_started_at:new Date().toISOString(),updated_by:profile.id}).in('id',selected);await log('Cleared tables',{tables:selected});selected=[];await load()};
+
+$('modal').addEventListener('click',async e=>{
+ if(e.target.id!=='go')return;
+ const title=$('modalTitle').textContent;
+ if(title.startsWith('Assign')){const v=$('v1').value.trim();await sb.from('floor_tables').update({assigned_server:v,updated_by:profile.id}).in('id',selected);await log('Assigned tables',{tables:selected,server:v})}
+ if(title.startsWith('Seat')){const name=$('v1').value.trim(),guests=Number($('v2').value||1);await sb.from('floor_tables').update({party_name:name||$('v0').value,guest_count:guests,seated_at:new Date().toISOString(),service_status:'ready',status_started_at:null,updated_by:profile.id}).in('id',selected);await log('Seated party',{tables:selected,name,guests,type:$('v0').value})}
+ if(title.startsWith('Update')){const s=$('v1').value;await sb.from('floor_tables').update({service_status:s,status_started_at:s==='ready'?null:new Date().toISOString(),updated_by:profile.id}).in('id',selected);await log('Updated table status',{tables:selected,status:s})}
+ $('modal').classList.add('hidden');selected=[];await load()
+});
+
+function cashHome(){
+ modal('Cash Forms',`<div class="nav"><button data-form="drawer">Drawer</button><button data-form="deposit">Deposit</button><button data-form="adjustment">Void / Comp</button><button data-form="manager">Manager Cashout</button><button data-form="history">History</button></div><div id="cashArea" style="margin-top:10px"></div>`)
+}
+$('cashBtn').onclick=cashHome;
+$('modal').addEventListener('click',e=>{const f=e.target.dataset.form;if(!f)return;renderCashForm(f)});
+async function renderCashForm(f){
+ const a=$('cashArea');
+ if(f==='drawer')a.innerHTML=`<div class="field"><label>Drawer</label><input id="c1"></div><div class="field"><label>Bartender</label><input id="c2" value="${esc(profile.full_name)}"></div><div class="row"><div class="field"><label>Start time</label><input id="c3" type="time"></div><div class="field"><label>Start count</label><input id="c4" type="number" step=".01"></div></div><button id="cashSubmit" data-kind="drawer" class="primary">Submit opening count</button>`;
+ if(f==='deposit')a.innerHTML=`<div class="field"><label>Employee</label><input id="c1" value="${esc(profile.full_name)}"></div><div class="field"><label>Cash turned in to</label><input id="c2"></div><div class="row"><div class="field"><label>Time in</label><input id="c3" type="time"></div><div class="field"><label>Time out</label><input id="c4" type="time"></div></div><div class="row"><div class="field"><label>Net sales</label><input id="c5" type="number" step=".01"></div><div class="field"><label>Cash deposit</label><input id="c6" type="number" step=".01"></div></div><div class="row"><div class="field"><label>Comp total</label><input id="c7" type="number" step=".01"></div><div class="field"><label>Void total</label><input id="c8" type="number" step=".01"></div></div><button id="cashSubmit" data-kind="deposit" class="primary">Submit deposit</button>`;
+ if(f==='adjustment')a.innerHTML=`<div class="field"><label>Employee</label><input id="c1" value="${esc(profile.full_name)}"></div><div class="field"><label>Type</label><select id="c2"><option value="comp">Comp / discount</option><option value="void">Void</option></select></div><div class="field"><label>Amount</label><input id="c3" type="number" step=".01"></div><div class="field"><label>Check number</label><input id="c4"></div><div class="field"><label>Reason</label><input id="c5"></div><div class="field"><label>Verified by</label><input id="c6"></div><div class="field"><label>Whose code was used</label><input id="c7"></div><div class="field"><label>Receipt photo with issue circled</label><input id="c8" type="file" accept="image/*" capture="environment"></div><button id="cashSubmit" data-kind="adjustment" class="primary">Submit receipt</button>`;
+ if(f==='manager')a.innerHTML=`<div class="field"><label>Manager</label><input id="c1" value="${esc(profile.full_name)}"></div><div class="row"><div class="field"><label>Date</label><input id="c2" type="date"></div><div class="field"><label>Shift</label><input id="c3"></div></div><div class="row"><div class="field"><label>All cash collected</label><input id="c4" type="number" step=".01"></div><div class="field"><label>Expected deposit</label><input id="c5" type="number" step=".01"></div></div><div class="row"><div class="field"><label>Actual deposit</label><input id="c6" type="number" step=".01"></div><div class="field"><label>Paid outs</label><input id="c7" type="number" step=".01"></div></div><div class="field"><label>Paid ins</label><input id="c8" type="number" step=".01"></div><div class="field"><label>Where deposit was left</label><input id="c9"></div><button id="cashSubmit" data-kind="manager" class="primary">Submit cashout</button>`;
+ if(f==='history'){const [d,v,c,m]=await Promise.all([sb.from('cash_drawer_entries').select('*').order('created_at',{ascending:false}).limit(20),sb.from('cash_deposits').select('*').order('created_at',{ascending:false}).limit(20),sb.from('cash_adjustments').select('*').order('created_at',{ascending:false}).limit(20),sb.from('manager_cashouts').select('*').order('created_at',{ascending:false}).limit(20)]);a.innerHTML=[...d.data.map(x=>`<div class="record">Drawer ${esc(x.drawer_name)} — ${esc(x.bartender_name)} — $${x.start_count}</div>`),...v.data.map(x=>`<div class="record">Deposit ${esc(x.employee_name)} — $${x.cash_deposit}</div>`),...c.data.map(x=>`<div class="record">${esc(x.adjustment_type)} ${esc(x.employee_name)} — $${x.amount}</div>`),...m.data.map(x=>`<div class="record">Manager cashout ${esc(x.manager_name)} — $${x.actual_deposit}</div>`)].join('')}
+}
+$('modal').addEventListener('click',async e=>{
+ const kind=e.target.dataset.kind;if(!kind)return;
+ try{
+  if(kind==='drawer')await sb.from('cash_drawer_entries').insert({drawer_name:$('c1').value,bartender_name:$('c2').value,start_time:$('c3').value,start_count:Number($('c4').value),created_by:profile.id});
+  if(kind==='deposit')await sb.from('cash_deposits').insert({employee_name:$('c1').value,turned_in_to:$('c2').value,time_in:$('c3').value,time_out:$('c4').value||null,net_sales:Number($('c5').value),cash_deposit:Number($('c6').value),comp_total:Number($('c7').value||0),void_total:Number($('c8').value||0),created_by:profile.id});
+  if(kind==='adjustment'){const file=$('c8').files[0];if(!file)throw new Error('Receipt photo required');const path=`${profile.id}/${Date.now()}-${file.name}`;const up=await sb.storage.from('cash-receipts').upload(path,file);if(up.error)throw up.error;await sb.from('cash_adjustments').insert({employee_name:$('c1').value,adjustment_type:$('c2').value,amount:Number($('c3').value),check_number:$('c4').value,reason:$('c5').value,verified_by:$('c6').value,code_owner:$('c7').value,receipt_path:path,created_by:profile.id})}
+  if(kind==='manager')await sb.from('manager_cashouts').insert({manager_name:$('c1').value,shift_date:$('c2').value,shift_name:$('c3').value,cash_collected:Number($('c4').value),expected_deposit:Number($('c5').value),actual_deposit:Number($('c6').value),paid_outs:Number($('c7').value||0),paid_ins:Number($('c8').value||0),deposit_location:$('c9').value,created_by:profile.id});
+  await log('Submitted cash form',{kind});alert('Submitted successfully');renderCashForm('history')
+ }catch(err){alert(err.message)}
+});
+
+$('signup').onclick=async()=>{const email=$('email').value,password=$('password').value,name=$('name').value;const {data,error}=await sb.auth.signUp({email,password,options:{data:{full_name:name}}});$('authMsg').textContent=error?.message||'Account created. Check email if confirmation is enabled.';if(data.user&&!error)await ensureProfile(data.user,name)};
+$('signin').onclick=async()=>{const {data,error}=await sb.auth.signInWithPassword({email:$('email').value,password:$('password').value});$('authMsg').textContent=error?.message||'';if(data.user&&!error){await ensureProfile(data.user);start()}};
+$('logout').onclick=async()=>{await sb.auth.signOut();location.reload()};
+async function start(){$('auth').classList.add('hidden');$('app').classList.remove('hidden');await load();sb.channel('floor-live').on('postgres_changes',{event:'*',schema:'public',table:'floor_tables'},load).subscribe()}
+const {data:{session}}=await sb.auth.getSession();if(session){await ensureProfile(session.user);start()}
+setInterval(render,30000);
+</script>
+</body></html>
