@@ -1,5 +1,0 @@
-// Paste values from Supabase Dashboard → Connect
-window.JT_CONFIG = {
-  SUPABASE_URL: "PASTE_YOUR_PROJECT_URL_HERE",
-  SUPABASE_PUBLISHABLE_KEY: "PASTE_YOUR_PUBLISHABLE_KEY_HERE"
-};
