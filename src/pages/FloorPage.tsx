@@ -480,7 +480,7 @@ export function FloorPage() {
                     value={member.user_id}
                   >
                     {memberName(member.user_id)} ·{' '}
-                    {member.role.replaceAll('_', ' ')}
+                    {member.role.split('_').join(' ')}
                   </option>
                 ))}
               </select>
