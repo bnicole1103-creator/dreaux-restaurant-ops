@@ -33,7 +33,121 @@ a { color: inherit; text-decoration: none; }
 .metric-card span { display: block; color: #94a3b8; font-size: 12px; }
 .metric-card strong { display: block; margin-top: 8px; font-size: 28px; }
 .empty-state { margin-top: 18px; padding: 28px; text-align: center; }
+.room-tabs {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  margin: 18px 0 12px;
+  padding-bottom: 4px;
+}
 
+.room-tabs button {
+  flex: 0 0 auto;
+  padding: 10px 14px;
+  border: 1px solid #334155;
+  border-radius: 12px;
+  background: #111b2d;
+  color: #94a3b8;
+  font-weight: 700;
+}
+
+.room-tabs button.active {
+  background: #d6b267;
+  color: #1e293b;
+}
+
+.floor-canvas {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  border: 1px solid #25344a;
+  border-radius: 18px;
+  background: #1c2534;
+}
+
+.floor-table {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 2px;
+  padding: 4px;
+  border: 2px solid rgba(255, 255, 255, 0.18);
+  background: #9ca3af;
+  color: #172033;
+  transition:
+    transform 0.15s ease,
+    outline 0.15s ease;
+}
+
+.floor-table:hover {
+  transform: scale(1.03);
+}
+
+.floor-table.round {
+  border-radius: 50%;
+}
+
+.floor-table.square,
+.floor-table.rectangle {
+  border-radius: 10px;
+}
+
+.floor-table.selected {
+  outline: 4px solid #f8fafc;
+  outline-offset: 2px;
+}
+
+.floor-table strong {
+  font-size: clamp(10px, 2.5vw, 16px);
+}
+
+.floor-table span {
+  font-size: clamp(7px, 1.8vw, 11px);
+}
+
+.floor-action-bar {
+  position: fixed;
+  right: 10px;
+  bottom: 82px;
+  left: 10px;
+  z-index: 25;
+  display: grid;
+  grid-template-columns: 1.4fr repeat(4, 1fr);
+  gap: 6px;
+  align-items: center;
+  padding: 8px;
+  border: 1px solid #334155;
+  border-radius: 14px;
+  background: rgba(15, 23, 42, 0.98);
+}
+
+.floor-action-bar span {
+  padding-left: 6px;
+  font-size: 12px;
+  color: #cbd5e1;
+}
+
+.floor-action-bar button {
+  padding: 9px 6px;
+  border: 1px solid #334155;
+  border-radius: 10px;
+  background: #111b2d;
+  color: #f8fafc;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.floor-action-bar button:disabled {
+  opacity: 0.45;
+}
+
+@media (min-width: 760px) {
+  .floor-canvas {
+    aspect-ratio: 1.4 / 1;
+  }
+}
 .bottom-nav { position: fixed; right: 8px; bottom: 8px; left: 8px; z-index: 20; display: grid; grid-template-columns: repeat(5,1fr); gap: 4px; padding: 7px; border: 1px solid #273449; border-radius: 16px; background: rgba(17,27,45,.98); }
 .bottom-nav a { display: grid; justify-items: center; gap: 4px; padding: 8px 4px; border-radius: 11px; color: #94a3b8; font-size: 10px; }
 .bottom-nav a.active { color: #1e293b; background: #d6b267; }
