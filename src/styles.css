@@ -151,3 +151,77 @@ a { color: inherit; text-decoration: none; }
 .bottom-nav { position: fixed; right: 8px; bottom: 8px; left: 8px; z-index: 20; display: grid; grid-template-columns: repeat(5,1fr); gap: 4px; padding: 7px; border: 1px solid #273449; border-radius: 16px; background: rgba(17,27,45,.98); }
 .bottom-nav a { display: grid; justify-items: center; gap: 4px; padding: 8px 4px; border-radius: 11px; color: #94a3b8; font-size: 10px; }
 .bottom-nav a.active { color: #1e293b; background: #d6b267; }
+.shift-toolbar {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-top: 16px;
+}
+
+.shift-toolbar select {
+  flex: 1;
+}
+
+.shift-toolbar select,
+.shift-toolbar button,
+.modal-card select {
+  padding: 10px 12px;
+  border: 1px solid #334155;
+  border-radius: 11px;
+  background: #111b2d;
+  color: #f8fafc;
+}
+
+.inline-error {
+  margin-top: 10px;
+  padding: 10px 12px;
+  border: 1px solid #7f1d1d;
+  border-radius: 10px;
+  background: #450a0a;
+  color: #fecaca;
+  font-size: 13px;
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  align-items: end;
+  background: rgba(0, 0, 0, 0.7);
+}
+
+.modal-card {
+  width: 100%;
+  max-height: 85vh;
+  overflow-y: auto;
+  padding: 20px;
+  border-radius: 20px 20px 0 0;
+  background: #111b2d;
+}
+
+.modal-card h2 {
+  margin-top: 0;
+}
+
+.modal-card label {
+  display: grid;
+  gap: 6px;
+  color: #cbd5e1;
+  font-size: 13px;
+}
+
+.modal-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 18px;
+}
+
+.modal-actions button {
+  padding: 11px;
+  border: 1px solid #334155;
+  border-radius: 11px;
+  background: #0f172a;
+  color: #f8fafc;
+}
