@@ -1,4 +1,4 @@
-# Dreaux Restaurant Ops
+# LNX Systems
 
 Professional multi-tenant restaurant operations platform.
 

@@ -31,7 +31,7 @@ export function LoginPage() {
   return (
     <div className="auth-page">
       <form className="auth-card" onSubmit={submit}>
-        <p className="eyebrow">Dreaux Systems</p>
+        <p className="eyebrow">LNX Systems</p>
         <h1>Restaurant Operations</h1>
         <p className="muted">Floor, cash, tasks, rewards, and reporting.</p>
 

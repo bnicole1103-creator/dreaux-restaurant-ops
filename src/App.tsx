@@ -8,6 +8,7 @@ import { DashboardPage } from './pages/DashboardPage'
 import { FloorPage } from './pages/FloorPage'
 import { CashPage } from './pages/CashPage'
 import { PlaceholderPage } from './pages/PlaceholderPage'
+import { TeamPage } from './pages/TeamPage'
 
 export default function App() {
   const [session, setSession] = useState<Session | null>(null)
@@ -40,7 +41,7 @@ export default function App() {
         <Route path="/cash" element={<CashPage />} />
         <Route path="/tasks" element={<PlaceholderPage title="Tasks" />} />
         <Route path="/rewards" element={<PlaceholderPage title="Rewards" />} />
-        <Route path="/team" element={<PlaceholderPage title="Team" />} />
+        <Route path="/team" element={<TeamPage />} />
         <Route path="/reports" element={<PlaceholderPage title="Reports" />} />
         <Route path="/admin" element={<PlaceholderPage title="Admin" />} />
         <Route path="*" element={<Navigate to="/" replace />} />

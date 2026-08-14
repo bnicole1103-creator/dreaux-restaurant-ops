@@ -1,6 +1,6 @@
 import type { PropsWithChildren } from 'react'
 import type { Session } from '@supabase/supabase-js'
-import { Banknote, ClipboardCheck, Gift, Home, LayoutGrid, LogOut } from 'lucide-react'
+import { Banknote, ClipboardCheck, Gift, Home, LayoutGrid, LogOut , Users} from 'lucide-react'
 import { NavLink } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 
@@ -12,6 +12,7 @@ const links = [
   { to: '/cash', label: 'Cash', icon: Banknote },
   { to: '/tasks', label: 'Tasks', icon: ClipboardCheck },
   { to: '/rewards', label: 'Rewards', icon: Gift },
+  { to: '/team', label: 'Team', icon: Users },
 ]
 
 export function AppShell({ session, children }: Props) {
@@ -19,7 +20,7 @@ export function AppShell({ session, children }: Props) {
     <div className="app-shell">
       <header className="topbar">
         <div>
-          <strong>Dreaux Restaurant Ops</strong>
+          <strong>LNX Systems</strong>
           <span>{session.user.email}</span>
         </div>
         <button className="icon-button" onClick={() => supabase.auth.signOut()} aria-label="Sign out">
