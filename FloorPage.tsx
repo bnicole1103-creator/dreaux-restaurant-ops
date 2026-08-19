@@ -56,7 +56,11 @@ type ActiveTableSession = {
   seatedAt: string
   tableIds: string[]
 }
-
+type RoomOption = {
+  id: string
+  name: string
+  display_order: number
+}
 
 type ReservationRecord = {
   id: string
