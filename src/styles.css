@@ -33,347 +33,576 @@ a { color: inherit; text-decoration: none; }
 .metric-card span { display: block; color: #94a3b8; font-size: 12px; }
 .metric-card strong { display: block; margin-top: 8px; font-size: 28px; }
 .empty-state { margin-top: 18px; padding: 28px; text-align: center; }
-.room-tabs {
-  display: flex;
-  gap: 8px;
-  overflow-x: auto;
-  margin: 18px 0 12px;
-  padding-bottom: 4px;
-}
 
-.room-tabs button {
-  flex: 0 0 auto;
-  padding: 10px 14px;
-  border: 1px solid #334155;
-  border-radius: 12px;
-  background: #111b2d;
-  color: #94a3b8;
-  font-weight: 700;
-}
-
-.room-tabs button.active {
-  background: #d6b267;
-  color: #1e293b;
-}
-
-.floor-canvas {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 1 / 1;
-  overflow: hidden;
-  border: 1px solid #25344a;
-  border-radius: 18px;
-  background: #1c2534;
-}
-
-.floor-table {
-  position: absolute;
-  display: grid;
-  place-items: center;
-  align-content: center;
-  gap: 2px;
-  padding: 4px;
-  border: 2px solid rgba(255, 255, 255, 0.18);
-  background: #9ca3af;
-  color: #172033;
-  transition:
-    transform 0.15s ease,
-    outline 0.15s ease;
-}
-
-.floor-table:hover {
-  transform: scale(1.03);
-}
-
-.floor-table.round {
-  border-radius: 50%;
-}
-
-.floor-table.square,
-.floor-table.rectangle {
-  border-radius: 10px;
-}
-
-.floor-table.selected {
-  outline: 4px solid #f8fafc;
-  outline-offset: 2px;
-}
-
-.floor-table strong {
-  font-size: clamp(10px, 2.5vw, 16px);
-}
-
-.floor-table span {
-  font-size: clamp(7px, 1.8vw, 11px);
-}
-
-.floor-action-bar {
-  position: fixed;
-  right: 10px;
-  bottom: 82px;
-  left: 10px;
-  z-index: 25;
-  display: grid;
-  grid-template-columns: 1.4fr repeat(4, 1fr);
-  gap: 6px;
-  align-items: center;
-  padding: 8px;
-  border: 1px solid #334155;
-  border-radius: 14px;
-  background: rgba(15, 23, 42, 0.98);
-}
-
-.floor-action-bar span {
-  padding-left: 6px;
-  font-size: 12px;
-  color: #cbd5e1;
-}
-
-.floor-action-bar button {
-  padding: 9px 6px;
-  border: 1px solid #334155;
-  border-radius: 10px;
-  background: #111b2d;
-  color: #f8fafc;
-  font-size: 11px;
-  font-weight: 700;
-}
-
-.floor-action-bar button:disabled {
-  opacity: 0.45;
-}
-
-@media (min-width: 760px) {
-  .floor-canvas {
-    aspect-ratio: 1.4 / 1;
-  }
-}
 .bottom-nav { position: fixed; right: 8px; bottom: 8px; left: 8px; z-index: 20; display: grid; grid-template-columns: repeat(5,1fr); gap: 4px; padding: 7px; border: 1px solid #273449; border-radius: 16px; background: rgba(17,27,45,.98); }
 .bottom-nav a { display: grid; justify-items: center; gap: 4px; padding: 8px 4px; border-radius: 11px; color: #94a3b8; font-size: 10px; }
 .bottom-nav a.active { color: #1e293b; background: #d6b267; }
-.shift-toolbar {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  margin-top: 16px;
+/* Keep page content above the fixed bottom navigation */
+.page,
+.page-content,
+main,
+form {
+  padding-bottom: 140px;
 }
 
-.shift-toolbar select {
-  flex: 1;
+/* If a form has action buttons near the bottom, keep them visible */
+.form-actions,
+.modal-actions,
+.page-actions {
+  position: relative;
+  z-index: 5;
+  margin-top: 20px;
+  margin-bottom: 24px;
 }
 
-.shift-toolbar select,
-.shift-toolbar button,
-.modal-card select {
-  padding: 10px 12px;
-  border: 1px solid #334155;
-  border-radius: 11px;
-  background: #111b2d;
-  color: #f8fafc;
-}
-
-.inline-error {
-  margin-top: 10px;
-  padding: 10px 12px;
-  border: 1px solid #7f1d1d;
-  border-radius: 10px;
-  background: #450a0a;
-  color: #fecaca;
-  font-size: 13px;
-}
-
-.modal-backdrop {
+/* Bottom navigation stays fixed */
+.bottom-nav {
   position: fixed;
-  inset: 0;
-  z-index: 50;
-  display: grid;
-  align-items: end;
-  background: rgba(0, 0, 0, 0.7);
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 100;
 }
 
-.modal-card {
+/* Extra space for iPhone/iPad home indicator */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .bottom-nav {
+    padding-bottom: calc(12px + env(safe-area-inset-bottom));
+  }
+
+  .page,
+  .page-content,
+  main,
+  form {
+    padding-bottom: calc(150px + env(safe-area-inset-bottom));
+  }
+}
+/* Keep page content above the fixed bottom navigation */
+
+/* ===== MOBILE / TABLET BOTTOM NAV FIX ===== */
+
+.app-shell {
+  min-height: 100dvh;
+}
+
+.app-content {
+  min-height: 0;
+  padding-bottom: calc(190px + env(safe-area-inset-bottom));
+}
+
+.app-content form {
+  padding-bottom: 40px;
+}
+
+.form-actions,
+.modal-actions,
+.page-actions {
+  position: relative;
+  z-index: 5;
+  margin-top: 24px;
+  margin-bottom: 32px;
+}
+
+.bottom-nav {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+  padding-bottom: calc(12px + env(safe-area-inset-bottom));
+}
+
+.app-content > *:last-child {
+  margin-bottom: 40px;
+}
+
+@media (max-width: 1024px) {
+  .app-content {
+    padding-bottom: calc(210px + env(safe-area-inset-bottom));
+  }
+
+  .app-content form {
+    padding-bottom: 60px;
+  }
+}
+
+/* ===== CLOSEOUT COMPACT LAYOUT ===== */
+/* Scoped to the Closeout page by its unique shift-score element */
+
+.app-content:has(.shift-score-number) {
   width: 100%;
-  max-height: 85vh;
-  overflow-y: auto;
-  padding: 20px;
-  border-radius: 20px 20px 0 0;
-  background: #111b2d;
-}
-
-.modal-card h2 {
-  margin-top: 0;
-}
-
-.modal-card label {
-  display: grid;
-  gap: 6px;
-  color: #cbd5e1;
-  font-size: 13px;
-}
-
-.modal-actions {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  margin-top: 18px;
-}
-
-.modal-actions button {
-  padding: 11px;
-  border: 1px solid #334155;
-  border-radius: 11px;
-  background: #0f172a;
-  color: #f8fafc;
-}
-/* =========================
-   DAILY CLOSEOUT PAGE
-   ========================= */
-
-.page {
-  padding: 24px 28px 150px;
-  max-width: 1200px;
+  max-width: 900px;
   margin: 0 auto;
+  padding-left: 16px;
+  padding-right: 16px;
+  padding-bottom: calc(220px + env(safe-area-inset-bottom));
 }
 
-.page-header {
-  margin-bottom: 28px;
+/* Restore clean dark cards */
+.app-content:has(.shift-score-number) .card {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  margin: 0 0 18px;
+  padding: 20px;
+  border: 1px solid #2a3547;
+  border-radius: 20px;
+  background: #111a2b;
 }
 
-.page-header h1 {
-  margin: 4px 0 8px;
+/* Section headings */
+.app-content:has(.shift-score-number) .card h2 {
+  margin: 0 0 18px;
+  font-size: 1.45rem;
+  line-height: 1.2;
 }
 
-.card {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 18px;
-  padding: 22px;
-  margin-bottom: 22px;
-}
-
-.card h2 {
-  margin-top: 0;
-  margin-bottom: 20px;
-}
-
-.form-grid {
+/* Keep fields organized */
+.app-content:has(.shift-score-number) .form-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 18px;
+  gap: 16px;
+  width: 100%;
 }
 
-.form-grid label,
-.card > label {
+/* Labels always sit above their own field */
+.app-content:has(.shift-score-number) label {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  align-items: stretch;
+  gap: 7px;
+  min-width: 0;
+  width: 100%;
+  font-size: 0.95rem;
+  line-height: 1.3;
   font-weight: 600;
 }
 
-.form-grid input,
-.form-grid select,
-.card input,
-.card select,
-.card textarea {
+/* Normal-sized fields instead of giant white bubbles */
+.app-content:has(.shift-score-number) input,
+.app-content:has(.shift-score-number) select,
+.app-content:has(.shift-score-number) textarea {
+  display: block;
   width: 100%;
+  max-width: 100%;
   box-sizing: border-box;
   min-height: 46px;
+  height: auto;
+  margin: 0;
   padding: 10px 12px;
+  border: 1px solid #3a4658;
   border-radius: 10px;
-  font-size: 16px;
-}
-
-.role-description {
-  margin-top: 16px;
-  padding: 14px 16px;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.04);
-  line-height: 1.5;
-}
-
-.role-description p {
-  margin: 6px 0 0;
-}
-
-.closeout-room-group {
-  margin-top: 22px;
-}
-
-.closeout-room-group h3 {
-  margin-bottom: 12px;
-}
-
-.closeout-table-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-.table-select-button {
-  min-width: 68px;
-  min-height: 44px;
-  padding: 8px 14px;
-  border-radius: 999px;
-  border: 2px solid transparent;
-  cursor: pointer;
-  font-weight: 700;
-  transition:
-    transform 0.15s ease,
-    border-color 0.15s ease,
-    background 0.15s ease;
-}
-
-.table-select-button:hover {
-  transform: translateY(-1px);
-}
-
-.table-select-button.selected {
-  background: #d9b45f;
+  background: #f4f4f5;
   color: #101827;
-  border-color: #f4d98c;
-  box-shadow: 0 0 0 3px rgba(217, 180, 95, 0.18);
+  font: inherit;
 }
 
-.primary-button {
+.app-content:has(.shift-score-number) textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+/* Score section */
+.app-content:has(.shift-score-number) .shift-score-number {
+  margin: 10px 0;
+  font-size: 2rem;
+  font-weight: 800;
+}
+
+.app-content:has(.shift-score-number) .point-adjustment-list {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.app-content:has(.shift-score-number) .point-adjustment {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 9px 0;
+  border-bottom: 1px solid #273246;
+}
+
+/* Submit area stays clear of bottom navigation */
+.app-content:has(.shift-score-number) .primary-button {
   width: 100%;
-  min-height: 52px;
-  margin-top: 18px;
-  margin-bottom: 24px;
+  min-height: 50px;
+  margin-top: 14px;
+  margin-bottom: 35px;
   border-radius: 12px;
-  font-size: 17px;
-  font-weight: 700;
 }
 
-/* keep bottom navigation from covering the form */
-.bottom-nav {
-  z-index: 1000;
-}
-
-/* extra room below page content for fixed bottom nav */
-.page .card:last-child {
-  margin-bottom: 120px;
-}
-
-/* mobile + iPad portrait */
-@media (max-width: 800px) {
-  .page {
-    padding: 20px 18px 170px;
+/* Phones / narrow iPad windows */
+@media (max-width: 700px) {
+  .app-content:has(.shift-score-number) {
+    padding-left: 12px;
+    padding-right: 12px;
   }
 
-  .form-grid {
+  .app-content:has(.shift-score-number) .card {
+    padding: 17px;
+    border-radius: 17px;
+  }
+
+  .app-content:has(.shift-score-number) .form-grid {
     grid-template-columns: 1fr;
     gap: 14px;
   }
 
-  .card {
-    padding: 18px;
+  .app-content:has(.shift-score-number) input,
+  .app-content:has(.shift-score-number) select {
+    min-height: 44px;
+  }
+}
+
+
+/* ===== CLOSEOUT COMPACT LAYOUT ===== */
+/* Scoped to the Closeout page by its unique shift-score element */
+
+.app-content:has(.shift-score-number) {
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  padding-left: 16px;
+  padding-right: 16px;
+  padding-bottom: calc(220px + env(safe-area-inset-bottom));
+}
+
+/* Restore clean dark cards */
+.app-content:has(.shift-score-number) .card {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  margin: 0 0 18px;
+  padding: 20px;
+  border: 1px solid #2a3547;
+  border-radius: 20px;
+  background: #111a2b;
+}
+
+/* Section headings */
+.app-content:has(.shift-score-number) .card h2 {
+  margin: 0 0 18px;
+  font-size: 1.45rem;
+  line-height: 1.2;
+}
+
+/* Keep fields organized */
+.app-content:has(.shift-score-number) .form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  width: 100%;
+}
+
+/* Labels always sit above their own field */
+.app-content:has(.shift-score-number) label {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 7px;
+  min-width: 0;
+  width: 100%;
+  font-size: 0.95rem;
+  line-height: 1.3;
+  font-weight: 600;
+}
+
+/* Normal-sized fields instead of giant white bubbles */
+.app-content:has(.shift-score-number) input,
+.app-content:has(.shift-score-number) select,
+.app-content:has(.shift-score-number) textarea {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  min-height: 46px;
+  height: auto;
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px solid #3a4658;
+  border-radius: 10px;
+  background: #f4f4f5;
+  color: #101827;
+  font: inherit;
+}
+
+.app-content:has(.shift-score-number) textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+/* Score section */
+.app-content:has(.shift-score-number) .shift-score-number {
+  margin: 10px 0;
+  font-size: 2rem;
+  font-weight: 800;
+}
+
+.app-content:has(.shift-score-number) .point-adjustment-list {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.app-content:has(.shift-score-number) .point-adjustment {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 9px 0;
+  border-bottom: 1px solid #273246;
+}
+
+/* Submit area stays clear of bottom navigation */
+.app-content:has(.shift-score-number) .primary-button {
+  width: 100%;
+  min-height: 50px;
+  margin-top: 14px;
+  margin-bottom: 35px;
+  border-radius: 12px;
+}
+
+/* Phones / narrow iPad windows */
+@media (max-width: 700px) {
+  .app-content:has(.shift-score-number) {
+    padding-left: 12px;
+    padding-right: 12px;
   }
 
-  .closeout-table-grid {
-    gap: 8px;
+  .app-content:has(.shift-score-number) .card {
+    padding: 17px;
+    border-radius: 17px;
   }
 
-  .table-select-button {
-    min-width: 64px;
+  .app-content:has(.shift-score-number) .form-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
   }
+
+  .app-content:has(.shift-score-number) input,
+  .app-content:has(.shift-score-number) select {
+    min-height: 44px;
+  }
+}
+
+
+/* ===== TABLE DETAILS MODAL ===== */
+
+.table-details-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 5000;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 12px;
+  background: rgba(3, 9, 20, 0.76);
+  backdrop-filter: blur(4px);
+}
+
+.table-details-modal {
+  width: min(620px, 100%);
+  max-height: 82dvh;
+  overflow-y: auto;
+  background: #111827;
+  border: 1px solid #334155;
+  border-radius: 22px;
+  padding: 18px;
+  padding-bottom:
+    calc(
+      22px +
+      env(safe-area-inset-bottom)
+    );
+  box-shadow:
+    0 18px 55px
+    rgba(0, 0, 0, 0.45);
+}
+
+.table-details-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.table-details-header h2 {
+  margin: 3px 0 4px;
+  font-size: 28px;
+}
+
+.table-details-close {
+  width: 42px;
+  height: 42px;
+  flex: 0 0 42px;
+  padding: 0;
+  border-radius: 50%;
+  font-size: 26px;
+  line-height: 1;
+}
+
+.table-details-section {
+  display: grid;
+  gap: 8px;
+  padding: 14px;
+  margin-top: 10px;
+  background:
+    rgba(255, 255, 255, 0.035);
+  border: 1px solid #29384d;
+  border-radius: 14px;
+}
+
+.table-details-label {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  opacity: 0.65;
+}
+
+.table-details-unassigned {
+  opacity: 0.7;
+}
+
+.table-details-reservations {
+  display: grid;
+  gap: 8px;
+}
+
+.table-details-reservation {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 10px;
+  border-radius: 10px;
+  background:
+    rgba(255, 255, 255, 0.045);
+}
+
+.table-details-reservation div {
+  display: grid;
+  gap: 3px;
+}
+
+.table-details-reservation span {
+  font-size: 13px;
+  opacity: 0.7;
+}
+
+.table-details-actions {
+  display: grid;
+  grid-template-columns:
+    1fr 1fr;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.table-details-actions button {
+  min-height: 48px;
+}
+
+@media (max-width: 600px) {
+  .table-details-backdrop {
+    padding: 8px;
+  }
+
+  .table-details-modal {
+    max-height: 78dvh;
+  }
+}
+
+/* ===== TONIGHT'S FLOOR CARDS ===== */
+
+.tonights-floor-panel {
+  margin: 18px 0;
+}
+
+.tonights-floor-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.tonights-floor-heading h2 {
+  margin: 2px 0 0;
+  font-size: 24px;
+}
+
+.tonights-floor-grid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns:
+    repeat(
+      auto-fit,
+      minmax(220px, 1fr)
+    );
+}
+
+.tonights-floor-card {
+  display: grid;
+  gap: 12px;
+  width: 100%;
+  padding: 14px;
+  text-align: left;
+  color: inherit;
+  background: #111827;
+  border: 1px solid #334155;
+  border-radius: 16px;
+}
+
+.tonights-floor-card-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.tonights-floor-card-top strong {
+  font-size: 18px;
+}
+
+.tonights-floor-card-top span {
+  font-size: 12px;
+  opacity: 0.7;
+  white-space: nowrap;
+}
+
+.tonights-floor-card-metrics {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.tonights-floor-card-metrics div {
+  display: grid;
+  gap: 3px;
+  padding: 9px;
+  border-radius: 10px;
+  background:
+    rgba(255, 255, 255, 0.04);
+}
+
+.tonights-floor-card-metrics span {
+  font-size: 11px;
+  opacity: 0.65;
+}
+
+.tonights-floor-card-metrics strong {
+  font-size: 20px;
+}
+
+.tonights-floor-card-tables {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.tonights-floor-card-tables span {
+  padding: 5px 8px;
+  font-size: 12px;
+  border-radius: 999px;
+  background:
+    rgba(255, 255, 255, 0.06);
 }

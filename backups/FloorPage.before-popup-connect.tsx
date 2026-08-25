@@ -1,4 +1,3 @@
-import { TonightsFloorCards } from '../components/TonightsFloorCards'
 import { TableDetailsModal } from '../components/TableDetailsModal'
 import { useEffect, useMemo, useState } from 'react'
 import { supabase } from '../lib/supabase'
@@ -2083,17 +2082,6 @@ const [partySize, setPartySize] = useState(1)
         </p>
       </div>
 
-            <TonightsFloorCards
-        tables={tables}
-        assignments={assignments}
-        teamMembers={team
-          .filter((member) => Boolean(member.user_id))
-          .map((member) => ({
-            user_id: member.user_id as string,
-          }))}
-        memberName={memberName}
-      />
-
       <div className="shift-toolbar">
         {shifts.length > 0 ? (
           <select
@@ -2411,16 +2399,7 @@ const [partySize, setPartySize] = useState(1)
             tables={tables}
             assignments={assignments}
             reservations={reservations}
-            teamMembers={team
-              .filter((member) => Boolean(member.user_id))
-              .map((member) => ({
-                user_id: member.user_id as string,
-              }))}
             memberName={memberName}
-            selectedServerId={selectedServerId ?? ''}
-            onServerChange={(serverId) =>
-              setSelectedServerId(serverId)
-            }
             onClose={() =>
               setSelectedTableIds([])
             }

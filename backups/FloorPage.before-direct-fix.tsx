@@ -1,5 +1,3 @@
-import { TonightsFloorCards } from '../components/TonightsFloorCards'
-import { TableDetailsModal } from '../components/TableDetailsModal'
 import { useEffect, useMemo, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { loadTenantData } from '../lib/tenant'
@@ -2076,25 +2074,15 @@ const [partySize, setPartySize] = useState(1)
           FloorFlow
         </p>
 
-        <h1>Live floor</h1>
+        <h1>FLOOR RENDER TEST 1317</h1>
 
         <p className="muted">
           {locationName}
         </p>
       </div>
 
-            <TonightsFloorCards
-        tables={tables}
-        assignments={assignments}
-        teamMembers={team
-          .filter((member) => Boolean(member.user_id))
-          .map((member) => ({
-            user_id: member.user_id as string,
-          }))}
-        memberName={memberName}
-      />
-
-      <div className="shift-toolbar">
+      
+<div className="shift-toolbar">
         {shifts.length > 0 ? (
           <select
             value={activeShiftId}
@@ -2403,32 +2391,6 @@ const [partySize, setPartySize] = useState(1)
           </div>
         </div>
       )}
-
-            {selectedTableIds.length > 0 &&
-        !showSeatPanel && (
-          <TableDetailsModal
-            selectedTableIds={selectedTableIds}
-            tables={tables}
-            assignments={assignments}
-            reservations={reservations}
-            teamMembers={team
-              .filter((member) => Boolean(member.user_id))
-              .map((member) => ({
-                user_id: member.user_id as string,
-              }))}
-            memberName={memberName}
-            selectedServerId={selectedServerId ?? ''}
-            onServerChange={(serverId) =>
-              setSelectedServerId(serverId)
-            }
-            onClose={() =>
-              setSelectedTableIds([])
-            }
-            onSeat={() =>
-              setShowSeatPanel(true)
-            }
-          />
-        )}
 
       {/* TABLE ACTION BAR */}
       {selectedTableIds.length > 0 && (
