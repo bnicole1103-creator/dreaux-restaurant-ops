@@ -2677,6 +2677,27 @@ const [partySize, setPartySize] = useState(1)
             <p className="eyebrow">Reservations</p>
             <h2>Today's Reservations</h2>
 
+            <div style={{ marginTop: '12px', marginBottom: '16px' }}>
+              <button
+                type="button"
+                onClick={() =>
+                  document
+                    .getElementById('reservation-upload-input')
+                    ?.click()
+                }
+              >
+                Upload Reservations
+              </button>
+
+              <input
+                id="reservation-upload-input"
+                type="file"
+                accept=".csv,text/csv"
+                onChange={handleReservationUpload}
+                style={{ display: 'none' }}
+              />
+            </div>
+
             {reservationUploadMessage && (
               <div
                 style={{
