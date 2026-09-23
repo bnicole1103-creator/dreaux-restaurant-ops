@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { loadTenantData } from '../lib/tenant'
 import {
@@ -185,6 +185,11 @@ const [partySize, setPartySize] = useState(1)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
+
+  // --- Floor arrangement (drag-to-position) ---
+  const [arrangeMode, setArrangeMode] = useState(false)
+  const [draggingTableId, setDraggingTableId] = useState('')
+  const floorCanvasRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
     async function loadFloor() {
@@ -1127,6 +1132,8 @@ const [partySize, setPartySize] = useState(1)
   )
 
   function toggleTable(tableId: string) {
+    if (arrangeMode) return
+
     setSelectedTableIds((current) =>
       current.includes(tableId)
         ? current.filter(
@@ -1134,6 +1141,90 @@ const [partySize, setPartySize] = useState(1)
           )
         : [...current, tableId],
     )
+  }
+
+  // --- Drag-to-position handlers (Arrange Floor mode) ---
+  function handleTablePointerDown(
+    event: React.PointerEvent<HTMLButtonElement>,
+    tableId: string,
+  ) {
+    if (!arrangeMode) return
+
+    event.currentTarget.setPointerCapture(event.pointerId)
+    setDraggingTableId(tableId)
+  }
+
+  function handleTablePointerMove(
+    event: React.PointerEvent<HTMLButtonElement>,
+  ) {
+    if (!arrangeMode || !draggingTableId) return
+
+    const canvas = floorCanvasRef.current
+
+    if (!canvas) return
+
+    const rect = canvas.getBoundingClientRect()
+
+    const table = tables.find(
+      (item) => item.id === draggingTableId,
+    )
+
+    if (!table) return
+
+    const rawX =
+      ((event.clientX - rect.left) / rect.width) * 100 -
+      table.width / 2
+
+    const rawY =
+      ((event.clientY - rect.top) / rect.height) * 100 -
+      table.height / 2
+
+    const clampedX = Math.max(
+      0,
+      Math.min(100 - table.width, rawX),
+    )
+
+    const clampedY = Math.max(
+      0,
+      Math.min(100 - table.height, rawY),
+    )
+
+    setTables((current) =>
+      current.map((item) =>
+        item.id === draggingTableId
+          ? {
+              ...item,
+              position_x: clampedX,
+              position_y: clampedY,
+            }
+          : item,
+      ),
+    )
+  }
+
+  async function handleTablePointerUp() {
+    if (!arrangeMode || !draggingTableId) return
+
+    const tableId = draggingTableId
+    setDraggingTableId('')
+
+    const table = tables.find(
+      (item) => item.id === tableId,
+    )
+
+    if (!table) return
+
+    const { error: positionError } = await supabase
+      .from('floor_tables')
+      .update({
+        position_x: table.position_x,
+        position_y: table.position_y,
+      })
+      .eq('id', tableId)
+
+    if (positionError) {
+      setError(positionError.message)
+    }
   }
 
   function memberName(userId: string) {
@@ -1955,6 +2046,25 @@ const [partySize, setPartySize] = useState(1)
         </button>
 
         <button
+          onClick={() => {
+            setArrangeMode((current) => !current)
+            setSelectedTableIds([])
+          }}
+          disabled={!activeRoomId}
+          style={
+            arrangeMode
+              ? {
+                  background: '#f4b860',
+                  color: '#111827',
+                  fontWeight: 700,
+                }
+              : undefined
+          }
+        >
+          {arrangeMode ? '✓ Done Arranging' : 'Arrange Floor'}
+        </button>
+
+        <button
           onClick={() => setShowRotationPanel(true)}
           disabled={!activeShiftId}
         >
@@ -1965,6 +2075,22 @@ const [partySize, setPartySize] = useState(1)
       {error && (
         <div className="inline-error">
           {error}
+        </div>
+      )}
+
+      {arrangeMode && (
+        <div
+          style={{
+            padding: '10px 14px',
+            margin: '10px 0',
+            borderRadius: '10px',
+            background: '#111b2d',
+            border: '1px dashed #f4b860',
+            color: '#f4b860',
+            fontSize: '13px',
+          }}
+        >
+          Drag any table to match your real floor layout. Positions save automatically when you let go.
         </div>
       )}
 
@@ -1988,7 +2114,19 @@ const [partySize, setPartySize] = useState(1)
       </div>
 
       {/* LIVE FLOOR */}
-      <div className="floor-canvas">
+      <div
+        className="floor-canvas"
+        ref={floorCanvasRef}
+        style={
+          arrangeMode
+            ? {
+                position: 'relative',
+                border: '1px dashed #f4b860',
+                touchAction: 'none',
+              }
+            : { position: 'relative' }
+        }
+      >
         {activeTables.map((table) => {
           const selected =
             selectedTableIds.includes(
@@ -2027,10 +2165,36 @@ const [partySize, setPartySize] = useState(1)
                   : undefined,
                 border: selected
                   ? '3px solid #f4b860'
+                  : arrangeMode
+                  ? '2px dashed #94a3b8'
                   : undefined,
+                cursor: arrangeMode
+                  ? 'grab'
+                  : undefined,
+                touchAction: arrangeMode
+                  ? 'none'
+                  : undefined,
+                opacity:
+                  arrangeMode &&
+                  draggingTableId === table.id
+                    ? 0.7
+                    : undefined,
               }}
               onClick={() =>
                 toggleTable(table.id)
+              }
+              onPointerDown={(event) =>
+                handleTablePointerDown(
+                  event,
+                  table.id,
+                )
+              }
+              onPointerMove={
+                handleTablePointerMove
+              }
+              onPointerUp={handleTablePointerUp}
+              onPointerCancel={
+                handleTablePointerUp
               }
             >
               <strong>
