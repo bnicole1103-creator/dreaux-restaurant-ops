@@ -2568,7 +2568,7 @@ const [partySize, setPartySize] = useState(1)
         </div>
       )}
 
-            {selectedTableIds.length > 0 &&
+            {selectedTableIds.length === 1 &&
         !showSeatPanel && (
           <TableDetailsModal
             selectedTableIds={selectedTableIds}
