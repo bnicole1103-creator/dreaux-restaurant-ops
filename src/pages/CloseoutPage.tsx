@@ -246,65 +246,28 @@ function calculateShiftPoints({
    * count it as at least one void.
    */
 
-  const hasVoidActivity =
-    voidCount > 0 ||
-    voidValue > 0
+  /*
+   * ==============================
+   * VOIDS + DISCOUNTS
+   * ==============================
+   *
+   * No bonus for $0.
+   * No penalty through $15.
+   * Dollar values over $15 = -4.
+   */
 
-  if (!hasVoidActivity) {
+  if (voidValue > 15) {
     adjustments.push({
-      code: 'NO_VOIDS',
-      description:
-        'No voids',
-      points: 5,
-    })
-  } else {
-    const countForPenalty =
-      voidCount > 0
-        ? Math.round(voidCount)
-        : 1
-
-    adjustments.push({
-      code: 'VOID_PENALTY',
-      description:
-        `${countForPenalty} ${
-          countForPenalty === 1
-            ? 'void'
-            : 'voids'
-        }`,
-      points:
-        countForPenalty * -4,
+      code: 'VOID_OVER_15',
+      description: `$${voidValue.toFixed(2)} in voids`,
+      points: -4,
     })
   }
 
-  /*
-   * =====================================
-   * DISCOUNTS
-   * =====================================
-   *
-   * $0 = +5
-   * $0.01 through $10 = 0
-   * Over $10 = -4
-   */
-
-  if (discountValue <= 0) {
+  if (discountValue > 15) {
     adjustments.push({
-      code: 'NO_DISCOUNTS',
-      description:
-        'No discounts',
-      points: 5,
-    })
-  } else if (
-    discountValue > 10
-  ) {
-    adjustments.push({
-      code:
-        'DISCOUNTS_OVER_10',
-
-      description:
-        `$${discountValue.toFixed(
-          2
-        )} in discounts`,
-
+      code: 'DISCOUNT_OVER_15',
+      description: `$${discountValue.toFixed(2)} in discounts`,
       points: -4,
     })
   }
@@ -369,9 +332,14 @@ export function CloseoutPage() {
   const [employees, setEmployees] =
     useState<EmployeeOption[]>([])
 
+  const [peerVoteEmployeeId, setPeerVoteEmployeeId] = useState('')
+  const [peerVoteReason, setPeerVoteReason] = useState('')
+  const [peerVoteOtherReason, setPeerVoteOtherReason] = useState('')
+
   const [tables, setTables] =
     useState<TableOption[]>([])
 
+  const [shiftType, setShiftType] = useState('');
   const [scheduledTime, setScheduledTime] =
     useState('')
 
@@ -400,7 +368,14 @@ export function CloseoutPage() {
 
   const [jobRole, setJobRole] =
     useState<JobRole>('server')
+const [registerCash, setRegisterCash] =
+  useState('')
 
+const [registerImbalanceReason, setRegisterImbalanceReason] =
+  useState('')
+
+const [registerVerifiedBy, setRegisterVerifiedBy] =
+  useState('')
   const [
     selectedTableIds,
     setSelectedTableIds,
@@ -1291,6 +1266,19 @@ export function CloseoutPage() {
             />
           </label>
 
+          <label>
+            Shift
+
+            <select
+              value={shiftType}
+              onChange={(event) => setShiftType(event.target.value)}
+            >
+              <option value="">Select Shift</option>
+              <option value="AM">AM</option>
+              <option value="PM">PM</option>
+              <option value="TO_VOLUME">To Volume</option>
+            </select>
+          </label>
         </div>
       </div>
 
@@ -1351,7 +1339,15 @@ export function CloseoutPage() {
           Cash & Adjustments
         </h2>
 
-        <div className="form-grid">
+        <div className="form-grid"
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+                gap: '16px',
+                alignItems: 'start',
+                width: '100%',
+              }}
+            >
 
           <label>
             Cash Deposit
@@ -1373,25 +1369,6 @@ export function CloseoutPage() {
             />
           </label>
 
-          <label>
-            Number of Voids
-
-            <input
-              type="number"
-              min="0"
-              value={
-                voidCount
-              }
-              onChange={(
-                event
-              ) =>
-                setVoidCount(
-                  event.target
-                    .value
-                )
-              }
-            />
-          </label>
 
           <label>
             Total Value of Voids
@@ -1496,7 +1473,70 @@ export function CloseoutPage() {
           </p>
         </div>
       </div>
+{jobRole === 'main_bartender' && (
+  <div className="card">
+    <h2>Register Closeout</h2>
 
+    <label>
+      Cash Left in Register
+      <input
+        type="number"
+        step="0.01"
+        min="0"
+        value={registerCash}
+        onChange={(event) =>
+          setRegisterCash(event.target.value)
+        }
+        placeholder="200.00"
+        required
+      />
+    </label>
+
+    {registerCash !== '' &&
+      Number(registerCash) !== 200 && (
+        <>
+          <label>
+            Why is the register not at $200?
+            <textarea
+              value={registerImbalanceReason}
+              onChange={(event) =>
+                setRegisterImbalanceReason(
+                  event.target.value
+                )
+              }
+              required
+            />
+          </label>
+
+          <label>
+            Who verified the imbalance?
+            <select
+              value={registerVerifiedBy}
+              onChange={(event) =>
+                setRegisterVerifiedBy(
+                  event.target.value
+                )
+              }
+              required
+            >
+              <option value="">
+                Select verifier
+              </option>
+
+              {employees.map((employee) => (
+                <option
+                  key={employee.user_id}
+                  value={employee.user_id}
+                >
+                  {employee.full_name}
+                </option>
+              ))}
+            </select>
+          </label>
+        </>
+      )}
+  </div>
+      )}
       <div className="card">
         <h2>
           Tables Worked
@@ -1542,6 +1582,17 @@ export function CloseoutPage() {
                             ? 'table-select-button selected'
                             : 'table-select-button'
                         }
+                        style={
+                          selected
+                            ? {
+                                backgroundColor: '#d9b45b',
+                                color: '#111827',
+                                borderColor: '#d9b45b',
+                                boxShadow: '0 0 0 2px rgba(217, 180, 91, 0.35)',
+                                fontWeight: 700,
+                              }
+                            : undefined
+                        }
 
                         onClick={() =>
                           toggleTable(
@@ -1577,6 +1628,80 @@ export function CloseoutPage() {
                 .join(', ')
             : 'None'}
         </p>
+      </div>
+
+      <div className="card">
+        <h2>Peer Recognition ⭐ +5 Points</h2>
+
+        <div className="form-grid">
+          <label>
+            Which team member contributed the most to a successful shift?
+            <select
+              value={peerVoteEmployeeId}
+              onChange={(event) =>
+                setPeerVoteEmployeeId(event.target.value)
+              }
+            >
+              <option value="">Choose team member</option>
+
+              {employees
+                .map((employee) => (
+                  <option
+                    key={employee.user_id}
+                    value={employee.user_id}
+                  >
+                    {employee.preferred_name ||
+                      employee.full_name ||
+                      employee.user_id}
+                  </option>
+                ))}
+            </select>
+          </label>
+
+          <label>
+            Why are you recognizing them?
+            <select
+              value={peerVoteReason}
+              onChange={(event) => {
+                setPeerVoteReason(event.target.value)
+
+                if (event.target.value !== 'Other') {
+                  setPeerVoteOtherReason('')
+                }
+              }}
+            >
+              <option value="">Choose reason</option>
+              <option value="Teamwork">Teamwork</option>
+              <option value="Positive Attitude / Motivation">
+                Positive Attitude / Motivation
+              </option>
+              <option value="Helped During a Rush">
+                Helped During a Rush
+              </option>
+              <option value="Guest Support">Guest Support</option>
+              <option value="Leadership">Leadership</option>
+              <option value="Communication">Communication</option>
+              <option value="Went Above & Beyond">
+                Went Above & Beyond
+              </option>
+              <option value="Other">Other</option>
+            </select>
+          </label>
+
+          {peerVoteReason === 'Other' && (
+            <label>
+              Tell us why
+              <input
+                type="text"
+                value={peerVoteOtherReason}
+                onChange={(event) =>
+                  setPeerVoteOtherReason(event.target.value)
+                }
+                placeholder="Enter reason"
+              />
+            </label>
+          )}
+        </div>
       </div>
 
       <div className="card">
