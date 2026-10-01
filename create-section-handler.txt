@@ -1,0 +1,83 @@
+  async function handleCreateSection() {
+    if (!activeShiftId) {
+      setError(
+        'Open or select a shift first.',
+      )
+      return
+    }
+
+    if (
+      !selectedServerId ||
+      selectedTableIds.length === 0
+    ) {
+      return
+    }
+
+    const finalSectionName =
+      sectionName.trim() ||
+      `Section ${String.fromCharCode(
+        65 + sectionCards.length,
+      )}`
+
+    try {
+      setSaving(true)
+      setError('')
+
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser()
+
+      if (userError) throw userError
+
+      if (!user) {
+        throw new Error(
+          'You must be signed in.',
+        )
+      }
+
+      const {
+        data: configuration,
+        error: configurationError,
+      } = await supabase
+        .from('section_configurations')
+        .insert({
+          organization_id: organizationId,
+          location_id: locationId,
+          name: finalSectionName,
+          total_seats: selectedSeatCount,
+          is_saved_template: false,
+          created_by: user.id,
+        })
+        .select('id')
+        .single()
+
+      if (configurationError) {
+        throw configurationError
+      }
+
+      const configurationTables =
+        selectedTableIds.map((tableId) => ({
+          section_configuration_id:
+            configuration.id,
+          table_id: tableId,
+        }))
+
+      const {
+        error: configurationTablesError,
+      } = await supabase
+        .from('section_configuration_tables')
+        .insert(configurationTables)
+
+      if (configurationTablesError) {
+        throw configurationTablesError
+      }
+
+      const {
+        data: shiftSection,
+        error: shiftSectionError,
+      } = await supabase
+        .from('shift_sections')
+        .insert({
+          organization_id: organizationId,
+          location_id: locationId,

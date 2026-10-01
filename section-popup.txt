@@ -1,0 +1,35 @@
+      {showSectionPanel && (
+        <div className="modal-backdrop">
+          <div className="modal-card">
+            <h2>Create section</h2>
+
+            <label>
+              Section name
+
+              <input
+                value={sectionName}
+                onChange={(event) =>
+                  setSectionName(
+                    event.target.value,
+                  )
+                }
+                placeholder="Optional — Section A"
+              />
+            </label>
+
+            <label
+              style={{
+                marginTop: '14px',
+              }}
+            >
+              Server
+
+              <select
+                value={selectedServerId}
+                onChange={(event) =>
+                  setSelectedServerId(
+                    event.target.value,
+                  )
+                }
+              >
+                <option value="">

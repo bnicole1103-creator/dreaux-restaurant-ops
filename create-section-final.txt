@@ -1,0 +1,31 @@
+      setError('')
+
+      const primaryTableId = selectedTableIds[0]
+
+      const assignedServer = assignments.find(
+        (item) => item.table_id === primaryTableId,
+      )
+
+      const {
+        data: session,
+        error: sessionError,
+      } = await supabase
+        .from('table_sessions')
+        .insert({
+          organization_id: organizationId,
+          location_id: locationId,
+          shift_id: activeShiftId,
+          table_id: primaryTableId,
+          server_id: assignedServer?.server_id ?? null,
+          guest_name: guestName.trim() || null,
+          guest_phone: guestPhone.trim() || null,
+          guest_email: guestEmail.trim() || null,
+          party_size: partySize,
+          status: 'seated',
+          seated_at: new Date().toISOString(),
+        })
+        .select('id')
+        .single()
+
+      if (sessionError) {
+        throw sessionError

@@ -1,0 +1,40 @@
+                {selectedTables
+                  .map(
+                    (table) =>
+                      table.table_name,
+                  )
+                  .join(', ')}
+              </div>
+
+              <div
+                style={{
+                  marginTop: '6px',
+                  opacity: 0.75,
+                }}
+              >
+                {selectedSeatCount} seats
+              </div>
+            </div>
+
+            <div className="modal-actions">
+              <button
+                onClick={() => {
+                  setShowSectionPanel(false)
+                  setSectionName('')
+                  setSelectedServerId('')
+                }}
+              >
+                Cancel
+              </button>
+
+              <button
+                className="primary-button"
+                onClick={
+                  handleCreateSection
+                }
+                disabled={
+                  !selectedServerId ||
+                  saving
+                }
+              >
+                {saving

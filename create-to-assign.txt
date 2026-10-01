@@ -1,0 +1,53 @@
+      const {
+        data: shiftSection,
+        error: shiftSectionError,
+      } = await supabase
+        .from('shift_sections')
+        .insert({
+          organization_id: organizationId,
+          location_id: locationId,
+          shift_id: activeShiftId,
+          section_configuration_id:
+            configuration.id,
+          employee_id: selectedServerId,
+          assigned_by: user.id,
+          assignment_status: 'active',
+        })
+        .select('id')
+        .single()
+
+      if (shiftSectionError) {
+        throw shiftSectionError
+      }
+
+      const shiftTables =
+        selectedTableIds.map((tableId) => ({
+          shift_section_id:
+            shiftSection.id,
+          table_id: tableId,
+        }))
+
+      const { error: shiftTablesError } =
+        await supabase
+          .from('shift_section_tables')
+          .insert(shiftTables)
+
+      if (shiftTablesError) {
+        throw shiftTablesError
+      }
+
+      const assignmentRows =
+        selectedTableIds.map((tableId) => ({
+          organization_id: organizationId,
+          location_id: locationId,
+          shift_id: activeShiftId,
+          table_id: tableId,
+          server_id: selectedServerId,
+          assigned_by: user.id,
+          assigned_at:
+            new Date().toISOString(),
+        }))
+
+      const { error: assignmentError } =
+        await supabase
+          .from('server_assignments')

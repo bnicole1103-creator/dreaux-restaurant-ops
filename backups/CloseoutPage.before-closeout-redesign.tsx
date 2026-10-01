@@ -246,28 +246,65 @@ function calculateShiftPoints({
    * count it as at least one void.
    */
 
-  /*
-   * ==============================
-   * VOIDS + DISCOUNTS
-   * ==============================
-   *
-   * No bonus for $0.
-   * No penalty through $15.
-   * Dollar values over $15 = -4.
-   */
+  const hasVoidActivity =
+    voidCount > 0 ||
+    voidValue > 0
 
-  if (voidValue > 15) {
+  if (!hasVoidActivity) {
     adjustments.push({
-      code: 'VOID_OVER_15',
-      description: `$${voidValue.toFixed(2)} in voids`,
-      points: -4,
+      code: 'NO_VOIDS',
+      description:
+        'No voids',
+      points: 5,
+    })
+  } else {
+    const countForPenalty =
+      voidCount > 0
+        ? Math.round(voidCount)
+        : 1
+
+    adjustments.push({
+      code: 'VOID_PENALTY',
+      description:
+        `${countForPenalty} ${
+          countForPenalty === 1
+            ? 'void'
+            : 'voids'
+        }`,
+      points:
+        countForPenalty * -4,
     })
   }
 
-  if (discountValue > 15) {
+  /*
+   * =====================================
+   * DISCOUNTS
+   * =====================================
+   *
+   * $0 = +5
+   * $0.01 through $10 = 0
+   * Over $10 = -4
+   */
+
+  if (discountValue <= 0) {
     adjustments.push({
-      code: 'DISCOUNT_OVER_15',
-      description: `$${discountValue.toFixed(2)} in discounts`,
+      code: 'NO_DISCOUNTS',
+      description:
+        'No discounts',
+      points: 5,
+    })
+  } else if (
+    discountValue > 10
+  ) {
+    adjustments.push({
+      code:
+        'DISCOUNTS_OVER_10',
+
+      description:
+        `$${discountValue.toFixed(
+          2
+        )} in discounts`,
+
       points: -4,
     })
   }
@@ -332,14 +369,9 @@ export function CloseoutPage() {
   const [employees, setEmployees] =
     useState<EmployeeOption[]>([])
 
-  const [peerVoteEmployeeId, setPeerVoteEmployeeId] = useState('')
-  const [peerVoteReason, setPeerVoteReason] = useState('')
-  const [peerVoteOtherReason, setPeerVoteOtherReason] = useState('')
-
   const [tables, setTables] =
     useState<TableOption[]>([])
 
-  const [shiftType, setShiftType] = useState('');
   const [scheduledTime, setScheduledTime] =
     useState('')
 
@@ -368,14 +400,7 @@ export function CloseoutPage() {
 
   const [jobRole, setJobRole] =
     useState<JobRole>('server')
-const [registerCash, setRegisterCash] =
-  useState('')
 
-const [registerImbalanceReason, setRegisterImbalanceReason] =
-  useState('')
-
-const [registerVerifiedBy, setRegisterVerifiedBy] =
-  useState('')
   const [
     selectedTableIds,
     setSelectedTableIds,
@@ -894,34 +919,6 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
             ),
         })
 
-      // Peer Recognition validation
-      if (!peerVoteEmployeeId) {
-        throw new Error(
-          'Please choose a teammate for Peer Recognition.'
-        )
-      }
-
-      if (peerVoteEmployeeId === user.id) {
-        throw new Error(
-          'You cannot select yourself for Peer Recognition.'
-        )
-      }
-
-      if (!peerVoteReason) {
-        throw new Error(
-          'Please choose a Peer Recognition reason.'
-        )
-      }
-
-      if (
-        peerVoteReason === 'Other' &&
-        !peerVoteOtherReason.trim()
-      ) {
-        throw new Error(
-          'Please enter a reason for Peer Recognition.'
-        )
-      }
-
       const {
         data: closeout,
         error:
@@ -1136,64 +1133,6 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
         }
       }
 
-      // Save Peer Recognition award separately.
-      // This awards +5 to the selected teammate without
-      // changing the submitting employee's shift score.
-      const peerRecognitionDescription =
-        peerVoteReason === 'Other'
-          ? peerVoteOtherReason.trim()
-          : peerVoteReason
-
-      const {
-        error: peerRecognitionError,
-      } = await supabase
-        .from(
-          'reward_point_transactions'
-        )
-        .insert({
-          organization_id:
-            organizationId,
-
-          location_id:
-            locationId,
-
-          user_id:
-            peerVoteEmployeeId,
-
-          closeout_id:
-            closeout.id,
-
-          business_date:
-            new Date()
-              .toISOString()
-              .slice(
-                0,
-                10
-              ),
-
-          action_code:
-            'PEER_RECOGNITION',
-
-          description:
-            `Peer Recognition: ${peerRecognitionDescription}`,
-
-          points:
-            5,
-        })
-
-      if (
-        peerRecognitionError
-      ) {
-        console.error(
-          'Peer Recognition save error:',
-          peerRecognitionError
-        )
-
-        warnings.push(
-          'Peer Recognition points need review'
-        )
-      }
-
       const submittedScore =
         finalPoints.shiftScore
 
@@ -1352,19 +1291,6 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
             />
           </label>
 
-          <label>
-            Shift
-
-            <select
-              value={shiftType}
-              onChange={(event) => setShiftType(event.target.value)}
-            >
-              <option value="">Select Shift</option>
-              <option value="AM">AM</option>
-              <option value="PM">PM</option>
-              <option value="TO_VOLUME">To Volume</option>
-            </select>
-          </label>
         </div>
       </div>
 
@@ -1425,15 +1351,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
           Cash & Adjustments
         </h2>
 
-        <div className="form-grid"
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
-                gap: '16px',
-                alignItems: 'start',
-                width: '100%',
-              }}
-            >
+        <div className="form-grid">
 
           <label>
             Cash Deposit
@@ -1455,6 +1373,25 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
             />
           </label>
 
+          <label>
+            Number of Voids
+
+            <input
+              type="number"
+              min="0"
+              value={
+                voidCount
+              }
+              onChange={(
+                event
+              ) =>
+                setVoidCount(
+                  event.target
+                    .value
+                )
+              }
+            />
+          </label>
 
           <label>
             Total Value of Voids
@@ -1559,70 +1496,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
           </p>
         </div>
       </div>
-{jobRole === 'main_bartender' && (
-  <div className="card">
-    <h2>Register Closeout</h2>
 
-    <label>
-      Cash Left in Register
-      <input
-        type="number"
-        step="0.01"
-        min="0"
-        value={registerCash}
-        onChange={(event) =>
-          setRegisterCash(event.target.value)
-        }
-        placeholder="200.00"
-        required
-      />
-    </label>
-
-    {registerCash !== '' &&
-      Number(registerCash) !== 200 && (
-        <>
-          <label>
-            Why is the register not at $200?
-            <textarea
-              value={registerImbalanceReason}
-              onChange={(event) =>
-                setRegisterImbalanceReason(
-                  event.target.value
-                )
-              }
-              required
-            />
-          </label>
-
-          <label>
-            Who verified the imbalance?
-            <select
-              value={registerVerifiedBy}
-              onChange={(event) =>
-                setRegisterVerifiedBy(
-                  event.target.value
-                )
-              }
-              required
-            >
-              <option value="">
-                Select verifier
-              </option>
-
-              {employees.map((employee) => (
-                <option
-                  key={employee.user_id}
-                  value={employee.user_id}
-                >
-                  {employee.full_name}
-                </option>
-              ))}
-            </select>
-          </label>
-        </>
-      )}
-  </div>
-      )}
       <div className="card">
         <h2>
           Tables Worked
@@ -1668,17 +1542,6 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
                             ? 'table-select-button selected'
                             : 'table-select-button'
                         }
-                        style={
-                          selected
-                            ? {
-                                backgroundColor: '#d9b45b',
-                                color: '#111827',
-                                borderColor: '#d9b45b',
-                                boxShadow: '0 0 0 2px rgba(217, 180, 91, 0.35)',
-                                fontWeight: 700,
-                              }
-                            : undefined
-                        }
 
                         onClick={() =>
                           toggleTable(
@@ -1714,75 +1577,6 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
                 .join(', ')
             : 'None'}
         </p>
-      </div>
-
-
-      <div className="card">
-        <h2>⭐ Peer Recognition — +5 Points</h2>
-
-        <div className="form-grid">
-          <label>
-            Which team member contributed the most to a successful shift?
-
-            <select
-              value={peerVoteEmployeeId}
-              onChange={(e) => setPeerVoteEmployeeId(e.target.value)}
-            >
-              <option value="">Select a teammate</option>
-
-              {employees.map((employee) => (
-                <option
-                  key={employee.user_id}
-                  value={employee.user_id}
-                >
-                  {employee.preferred_name ||
-                    employee.full_name ||
-                    employee.user_id}
-                </option>
-              ))}
-            </select>
-          </label>
-
-          <label>
-            Why are you recognizing them?
-
-            <select
-              value={peerVoteReason}
-              onChange={(e) => setPeerVoteReason(e.target.value)}
-            >
-              <option value="">Select a reason</option>
-              <option value="Teamwork">Teamwork</option>
-              <option value="Positive Attitude / Motivation">
-                Positive Attitude / Motivation
-              </option>
-              <option value="Helped During a Rush">
-                Helped During a Rush
-              </option>
-              <option value="Guest Support">Guest Support</option>
-              <option value="Leadership">Leadership</option>
-              <option value="Communication">Communication</option>
-              <option value="Went Above & Beyond">
-                Went Above &amp; Beyond
-              </option>
-              <option value="Other">Other</option>
-            </select>
-          </label>
-
-          {peerVoteReason === 'Other' && (
-            <label>
-              Tell us why you're recognizing them:
-
-              <input
-                type="text"
-                value={peerVoteOtherReason}
-                onChange={(e) =>
-                  setPeerVoteOtherReason(e.target.value)
-                }
-                placeholder="Enter recognition reason"
-              />
-            </label>
-          )}
-        </div>
       </div>
 
       <div className="card">

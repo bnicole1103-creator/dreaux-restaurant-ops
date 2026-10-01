@@ -1,0 +1,31 @@
+      setSelectedTableIds([])
+      setSelectedServerId('')
+      setSectionName('')
+      setShowSectionPanel(false)
+    } catch (caughtError) {
+      setError(
+        caughtError instanceof Error
+          ? caughtError.message
+          : 'Unable to create the section.',
+      )
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="empty-state">
+        Loading floor plan…
+      </div>
+    )
+  }
+  async function handleSeatGuests() {
+    if (selectedTableIds.length === 0 || !activeShiftId) {
+      setError('Select at least one table and open a shift first.')
+      return
+    }
+
+    try {
+      setSaving(true)
+      setError('')

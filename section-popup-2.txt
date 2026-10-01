@@ -1,0 +1,40 @@
+                  Choose an employee
+                </option>
+
+                {team.map((member) => (
+                  <option
+                    key={member.user_id}
+                    value={member.user_id}
+                  >
+                    {memberName(
+                      member.user_id,
+                    )}{' '}
+                    ·{' '}
+                    {member.role
+                      .split('_')
+                      .join(' ')}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <div
+              style={{
+                padding: '12px',
+                borderRadius: '12px',
+                background: '#0f172a',
+                marginTop: '14px',
+              }}
+            >
+              <strong>
+                {selectedTableIds.length}{' '}
+                {selectedTableIds.length === 1
+                  ? 'table'
+                  : 'tables'}
+              </strong>
+
+              <div
+                style={{
+                  marginTop: '6px',
+                }}
+              >

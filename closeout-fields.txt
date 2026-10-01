@@ -1,0 +1,181 @@
+              type="number"
+              step="0.01"
+              value={
+                cashDeposit
+              }
+              onChange={(
+                event
+              ) =>
+                setCashDeposit(
+                  event.target
+                    .value
+                )
+              }
+            />
+          </label>
+
+          <label>
+            Number of Voids
+
+            <input
+              type="number"
+              min="0"
+              value={
+                voidCount
+              }
+              onChange={(
+                event
+              ) =>
+                setVoidCount(
+                  event.target
+                    .value
+                )
+              }
+            />
+          </label>
+
+          <label>
+            Total Value of Voids
+
+            <input
+              type="number"
+              step="0.01"
+              value={
+                voidValue
+              }
+              onChange={(
+                event
+              ) =>
+                setVoidValue(
+                  event.target
+                    .value
+                )
+              }
+            />
+          </label>
+
+          <label>
+            Total Value of Discounts
+
+            <input
+              type="number"
+              step="0.01"
+              value={
+                discountValue
+              }
+              onChange={(
+                event
+              ) =>
+                setDiscountValue(
+                  event.target
+                    .value
+                )
+              }
+            />
+          </label>
+
+        </div>
+      </div>
+
+      <div className="card">
+        <h2>
+          Role Worked
+        </h2>
+
+        <select
+          value={
+            jobRole
+          }
+          onChange={(
+            event
+          ) =>
+            setJobRole(
+              event.target
+                .value as JobRole
+            )
+          }
+        >
+          {(
+            Object.keys(
+              ROLE_LABELS
+            ) as JobRole[]
+          ).map(
+            (role) => (
+              <option
+                key={
+                  role
+                }
+                value={
+                  role
+                }
+              >
+                {
+                  ROLE_LABELS[
+                    role
+                  ]
+                }
+              </option>
+            )
+          )}
+        </select>
+
+        <div className="role-description">
+          <strong>
+            {
+              ROLE_LABELS[
+                jobRole
+              ]
+            }
+          </strong>
+
+          <p>
+            {
+              ROLE_DESCRIPTIONS[
+                jobRole
+              ]
+            }
+          </p>
+        </div>
+      </div>
+
+      <div className="card">
+        <h2>
+          Tables Worked
+        </h2>
+
+        {Object.entries(
+          groupedTables
+        ).map(
+          ([
+            roomName,
+            roomTables,
+          ]) => (
+            <div
+              key={
+                roomName
+              }
+              className="closeout-room-group"
+            >
+              <h3>
+                {
+                  roomName
+                }
+              </h3>
+
+              <div className="closeout-table-grid">
+
+                {roomTables.map(
+                  (table) => {
+                    const selected =
+                      selectedTableIds.includes(
+                        table.id
+                      )
+
+                    return (
+                      <button
+                        key={
+                          table.id
+                        }
+                        type="button"
+
+                        className={

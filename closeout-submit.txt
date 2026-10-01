@@ -1,0 +1,83 @@
+
+      <div className="card">
+        <h2>
+          Certification
+        </h2>
+
+        <label
+          style={{
+            display:
+              'flex',
+
+            gap: 12,
+
+            alignItems:
+              'flex-start',
+          }}
+        >
+          <input
+            type="checkbox"
+            checked={
+              certified
+            }
+            onChange={(
+              event
+            ) =>
+              setCertified(
+                event.target
+                  .checked
+              )
+            }
+          />
+
+          <span>
+            I confirm that
+            the information
+            in this closeout
+            is accurate.
+          </span>
+        </label>
+      </div>
+
+      <div className="card">
+        <h2>
+          Review & Submit
+        </h2>
+
+        {pointResult && (
+          <p>
+            <strong>
+              Shift Score:
+            </strong>{' '}
+
+            {
+              pointResult.shiftScore
+            }
+          </p>
+        )}
+
+        <button
+          type="button"
+          className="primary-button"
+          onClick={
+            submitCloseout
+          }
+          disabled={
+            saving
+          }
+        >
+          {saving
+            ? 'Submitting...'
+            : 'Submit Daily Closeout'}
+        </button>
+      </div>
+
+      <div
+        style={{
+          height: 160,
+        }}
+      />
+
+    </section>
+  )
+}

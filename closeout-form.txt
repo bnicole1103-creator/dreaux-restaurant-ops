@@ -1,0 +1,101 @@
+              type="number"
+              step="0.01"
+              value={
+                cashDeposit
+              }
+              onChange={(
+                event
+              ) =>
+                setCashDeposit(
+                  event.target
+                    .value
+                )
+              }
+            />
+          </label>
+
+          <label>
+            Number of Voids
+
+            <input
+              type="number"
+              min="0"
+              value={
+                voidCount
+              }
+              onChange={(
+                event
+              ) =>
+                setVoidCount(
+                  event.target
+                    .value
+                )
+              }
+            />
+          </label>
+
+          <label>
+            Total Value of Voids
+
+            <input
+              type="number"
+              step="0.01"
+              value={
+                voidValue
+              }
+              onChange={(
+                event
+              ) =>
+                setVoidValue(
+                  event.target
+                    .value
+                )
+              }
+            />
+          </label>
+
+          <label>
+            Total Value of Discounts
+
+            <input
+              type="number"
+              step="0.01"
+              value={
+                discountValue
+              }
+              onChange={(
+                event
+              ) =>
+                setDiscountValue(
+                  event.target
+                    .value
+                )
+              }
+            />
+          </label>
+
+        </div>
+      </div>
+
+      <div className="card">
+        <h2>
+          Role Worked
+        </h2>
+
+        <select
+          value={
+            jobRole
+          }
+          onChange={(
+            event
+          ) =>
+            setJobRole(
+              event.target
+                .value as JobRole
+            )
+          }
+        >
+          {(
+            Object.keys(
+              ROLE_LABELS
+            ) as JobRole[]

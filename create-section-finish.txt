@@ -1,0 +1,31 @@
+
+      const assignmentRows =
+        selectedTableIds.map((tableId) => ({
+          organization_id: organizationId,
+          location_id: locationId,
+          shift_id: activeShiftId,
+          table_id: tableId,
+          server_id: selectedServerId,
+          assigned_by: user.id,
+          assigned_at:
+            new Date().toISOString(),
+        }))
+
+      const { error: assignmentError } =
+        await supabase
+          .from('server_assignments')
+          .upsert(assignmentRows, {
+            onConflict:
+              'shift_id,table_id',
+          })
+
+      if (assignmentError) {
+        throw assignmentError
+      }
+
+      await Promise.all([
+        loadAssignments(activeShiftId),
+        loadSections(activeShiftId),
+      ])
+
+      setSelectedTableIds([])

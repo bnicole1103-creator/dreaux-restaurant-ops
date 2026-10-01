@@ -1,0 +1,196 @@
+  async function submitCloseout() {
+    try {
+      setSaving(true)
+      setError('')
+      setMessage('')
+
+      const {
+        data: { user },
+        error: userError,
+      } =
+        await supabase.auth.getUser()
+
+      if (userError) {
+        throw userError
+      }
+
+      if (!user) {
+        throw new Error(
+          'You must be signed in.'
+        )
+      }
+
+      if (
+        !organizationId ||
+        !locationId
+      ) {
+        throw new Error(
+          'Organization or location is missing.'
+        )
+      }
+
+      if (!scheduledTime) {
+        throw new Error(
+          'Enter your scheduled time.'
+        )
+      }
+
+      if (!clockInTime) {
+        throw new Error(
+          'Enter your actual clock-in time.'
+        )
+      }
+
+      if (!moneyTurnedInTo) {
+        throw new Error(
+          'Select who received your money.'
+        )
+      }
+
+      if (!certified) {
+        throw new Error(
+          'Please confirm that the closeout information is accurate.'
+        )
+      }
+
+      const finalPoints =
+        calculateShiftPoints({
+          scheduledTime,
+
+          clockInTime,
+
+          netSales:
+            numberValue(
+              netSales
+            ),
+
+          salesTarget:
+            numberValue(
+              salesTarget
+            ),
+
+          voidCount:
+            Number(
+              voidCount || 0
+            ),
+
+          voidValue:
+            numberValue(
+              voidValue
+            ),
+
+          discountValue:
+            numberValue(
+              discountValue
+            ),
+        })
+
+      const {
+        data: closeout,
+        error:
+          closeoutError,
+      } = await supabase
+        .from(
+          'daily_closeouts'
+        )
+        .insert({
+          organization_id:
+            organizationId,
+
+          location_id:
+            locationId,
+
+          user_id:
+            user.id,
+
+          closeout_date:
+            new Date()
+              .toISOString()
+              .slice(0, 10),
+
+          scheduled_start:
+            scheduledTime,
+
+          clock_in:
+            clockInTime,
+
+          job_role:
+            jobRole,
+
+          net_sales:
+            numberValue(
+              netSales
+            ),
+
+          sales_target:
+            numberValue(
+              salesTarget
+            ),
+
+          cash_deposit:
+            numberValue(
+              cashDeposit
+            ),
+
+          void_count:
+            Number(
+              voidCount || 0
+            ),
+
+          void_value:
+            numberValue(
+              voidValue
+            ),
+
+          discount_value:
+            numberValue(
+              discountValue
+            ),
+
+          money_turned_in_to:
+            moneyTurnedInTo,
+
+          drinks_made_by:
+            drinkMaker ||
+            null,
+
+          notes:
+            notes.trim() ||
+            null,
+
+          employee_certified:
+            certified,
+
+          status:
+            'submitted',
+
+          shift_score:
+            finalPoints.shiftScore,
+
+          points_delta:
+            finalPoints.pointsDelta,
+
+          points_summary:
+            finalPoints.adjustments,
+        })
+        .select('id')
+        .single()
+
+      if (closeoutError) {
+        throw closeoutError
+      }
+
+      const warnings:
+        string[] = []
+
+      /*
+       * Save tables worked.
+       */
+
+      if (
+        closeout?.id &&
+        selectedTables.length >
+          0
+      ) {
+        const tableRows =
+          selectedTables.map(

@@ -1716,6 +1716,79 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
         </p>
       </div>
 
+      <div className="card">
+        <h2>Peer Recognition ⭐ +5 Points</h2>
+
+        <div className="form-grid">
+          <label>
+            Which team member contributed the most to a successful shift?
+            <select
+              value={peerVoteEmployeeId}
+              onChange={(event) =>
+                setPeerVoteEmployeeId(event.target.value)
+              }
+            >
+              <option value="">Choose team member</option>
+
+              {employees
+                .map((employee) => (
+                  <option
+                    key={employee.user_id}
+                    value={employee.user_id}
+                  >
+                    {employee.preferred_name ||
+                      employee.full_name ||
+                      employee.user_id}
+                  </option>
+                ))}
+            </select>
+          </label>
+
+          <label>
+            Why are you recognizing them?
+            <select
+              value={peerVoteReason}
+              onChange={(event) => {
+                setPeerVoteReason(event.target.value)
+
+                if (event.target.value !== 'Other') {
+                  setPeerVoteOtherReason('')
+                }
+              }}
+            >
+              <option value="">Choose reason</option>
+              <option value="Teamwork">Teamwork</option>
+              <option value="Positive Attitude / Motivation">
+                Positive Attitude / Motivation
+              </option>
+              <option value="Helped During a Rush">
+                Helped During a Rush
+              </option>
+              <option value="Guest Support">Guest Support</option>
+              <option value="Leadership">Leadership</option>
+              <option value="Communication">Communication</option>
+              <option value="Went Above & Beyond">
+                Went Above & Beyond
+              </option>
+              <option value="Other">Other</option>
+            </select>
+          </label>
+
+          {peerVoteReason === 'Other' && (
+            <label>
+              Tell us why
+              <input
+                type="text"
+                value={peerVoteOtherReason}
+                onChange={(event) =>
+                  setPeerVoteOtherReason(event.target.value)
+                }
+                placeholder="Enter reason"
+              />
+            </label>
+          )}
+        </div>
+      </div>
 
       <div className="card">
         <h2>⭐ Peer Recognition — +5 Points</h2>
