@@ -2,6 +2,7 @@ import type { PropsWithChildren } from 'react'
 import type { Session } from '@supabase/supabase-js'
 
 import {
+  BookOpen,
   Banknote,
   BarChart3,
   ClipboardCheck,
@@ -61,6 +62,7 @@ const links = [
     label: 'Team',
     icon: Users,
   },
+  { to: '/quizzes', label: 'Quizzes', icon: BookOpen },
 ]
 
 export function AppShell({

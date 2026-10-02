@@ -1,3 +1,5 @@
+import { QuizBuilderPage } from './pages/QuizBuilderPage'
+import { QuizzesPage } from './pages/QuizzesPage'
 import { SignupGate } from './components/SignupGate'
 import { PermissionsPage } from './pages/PermissionsPage'
 import { ManagementOnly } from './components/ManagementAccess'
@@ -109,6 +111,8 @@ export default function App() {
     <SignupGate key={session.user.id} userId={session.user.id}>
     <AppShell session={session}>
       <Routes>
+        <Route path="/quizzes" element={<QuizzesPage />} />
+        <Route path="/quizzes/build" element={<ManagementOnly><QuizBuilderPage /></ManagementOnly>} />
 
         <Route
           path="/"
