@@ -1,3 +1,4 @@
+import { SignupGate } from './components/SignupGate'
 import { PermissionsPage } from './pages/PermissionsPage'
 import { ManagementOnly } from './components/ManagementAccess'
 import { CloseoutHub } from './pages/CloseoutHub'
@@ -105,6 +106,7 @@ export default function App() {
   }
 
   return (
+    <SignupGate key={session.user.id} userId={session.user.id}>
     <AppShell session={session}>
       <Routes>
 
@@ -171,5 +173,6 @@ export default function App() {
 
       </Routes>
     </AppShell>
+    </SignupGate>
   )
 }

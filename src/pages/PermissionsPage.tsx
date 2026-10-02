@@ -1,3 +1,4 @@
+import { SignupApprovals } from '../components/SignupApprovals'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
@@ -37,6 +38,7 @@ export function PermissionsPage() {
  <p>Choose access for each employee at this location. Their job role stays the same.</p>
  <article className="mod-review"><p><strong>Staff:</strong> own closeout summary.</p><p><strong>Manager:</strong> all staff summaries, team recap, manager closeout, and point adjustments.</p><p><strong>General Manager:</strong> manager access plus form settings, point rules, and permissions.</p></article>
  {error && <p role="alert">{error}</p>}{message && <p role="status">{message}</p>}
+ {location && <SignupApprovals location={location} />}
  {loading ? <p>Loading permissions…</p> : members.map(m=><article className="mod-review" key={m.user_id}>
  <h2>{m.name}</h2><p>Job role: {m.job_role.replace(/_/g,' ')}</p>
  <label>Access<select disabled={!!saving} value={drafts[m.user_id] ?? m.access_level} onChange={e=>setDrafts(d=>({...d,[m.user_id]:e.target.value as Access}))}>

@@ -1,8 +1,9 @@
+import { registrationToken } from '../components/SignupGate'
 import { FormEvent, useState } from 'react'
 import { supabase } from '../lib/supabase'
 
 export function LoginPage() {
-  const [mode, setMode] = useState<'signin' | 'signup'>('signin')
+  const [mode, setMode] = useState<'signin' | 'signup'>(registrationToken() ? 'signup' : 'signin')
   const [fullName, setFullName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -18,12 +19,15 @@ export function LoginPage() {
       ? await supabase.auth.signUp({
           email,
           password,
-          options: { data: { full_name: fullName } },
+          options: {
+            data: { full_name: fullName.trim(), registration_token: registrationToken() },
+            emailRedirectTo: window.location.origin + '/',
+          },
         })
       : await supabase.auth.signInWithPassword({ email, password })
 
     setMessage(result.error?.message ?? (mode === 'signup'
-      ? 'Account created. Check your email if confirmation is enabled.'
+      ? 'Check your email to confirm your account. Then sign in and wait for GM approval.'
       : 'Signed in.'))
     setSubmitting(false)
   }
@@ -35,6 +39,7 @@ export function LoginPage() {
         <h1>Restaurant Operations</h1>
         <p className="muted">Floor, cash, tasks, rewards, and reporting.</p>
 
+        {mode === 'signup' && <p>Your GM must approve location access after signup.</p>}
         {mode === 'signup' && (
           <label>Full name
             <input value={fullName} onChange={(e) => setFullName(e.target.value)} required />
