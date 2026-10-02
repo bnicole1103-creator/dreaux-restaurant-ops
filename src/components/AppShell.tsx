@@ -53,7 +53,7 @@ const links = [
   },
   {
     to: '/rewards',
-    label: 'Rewards',
+    label: 'Points',
     icon: Gift,
   },
   {

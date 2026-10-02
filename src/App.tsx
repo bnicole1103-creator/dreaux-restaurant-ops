@@ -1,3 +1,4 @@
+import { PointsPage } from './pages/PointsPage'
 import { ResetPasswordPage } from './pages/ResetPasswordPage'
 import { useEffect, useState } from 'react'
 import type { Session } from '@supabase/supabase-js'
@@ -142,7 +143,7 @@ export default function App() {
         <Route
           path="/rewards"
           element={
-            <PlaceholderPage title="Rewards" />
+            <PointsPage />
           }
         />
 
