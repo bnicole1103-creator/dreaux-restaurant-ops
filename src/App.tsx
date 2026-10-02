@@ -1,3 +1,4 @@
+import { ManagerCloseoutPage } from './pages/ManagerCloseoutPage'
 import { PointsPage } from './pages/PointsPage'
 import { ResetPasswordPage } from './pages/ResetPasswordPage'
 import { useEffect, useState } from 'react'
@@ -117,6 +118,8 @@ export default function App() {
           path="/cash"
           element={<CashPage />}
         />
+
+        <Route path="/manager-closeout" element={<ManagerCloseoutPage />} />
 
         <Route
           path="/closeout"

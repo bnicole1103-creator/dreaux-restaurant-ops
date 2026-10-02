@@ -1137,7 +1137,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
       }
 
       // Save Peer Recognition award separately.
-      // This awards +5 to the selected teammate without
+      // This awards +2 to the selected teammate without
       // changing the submitting employee's shift score.
       const peerRecognitionDescription =
         peerVoteReason === 'Other'
@@ -1178,7 +1178,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
             `Peer Recognition: ${peerRecognitionDescription}`,
 
           points:
-            5,
+            2,
         })
 
       if (
