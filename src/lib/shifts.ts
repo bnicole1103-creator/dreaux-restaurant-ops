@@ -9,8 +9,10 @@ export type Shift = {
   status: 'scheduled' | 'open' | 'closed' | 'cancelled'
 }
 
-function todayDate() {
-  return new Date().toISOString().slice(0, 10)
+export function todayDate() {
+  const parts = new Intl.DateTimeFormat('en-US', {timeZone: 'America/Chicago', year: 'numeric', month: '2-digit', day: '2-digit'}).formatToParts(new Date())
+  const get = (type: string) => parts.find(p => p.type === type)?.value
+  return `${get('year')}-${get('month')}-${get('day')}`
 }
 
 export async function loadTodayShifts(
@@ -68,3 +70,4 @@ export async function createShift({
 
   return data as Shift
 }
+

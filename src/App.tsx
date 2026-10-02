@@ -1,3 +1,5 @@
+import { PermissionsPage } from './pages/PermissionsPage'
+import { ManagementOnly } from './components/ManagementAccess'
 import { CloseoutHub } from './pages/CloseoutHub'
 import { CloseoutSettingsPage } from './pages/CloseoutSettingsPage'
 import { ManagerCloseoutPage } from './pages/ManagerCloseoutPage'
@@ -122,8 +124,10 @@ export default function App() {
         />
 
         <Route path="/manager-closeout" element={<Navigate to="/closeout/manager" replace />} />
-        <Route path="/closeout/manager" element={<ManagerCloseoutPage />} />
-        <Route path="/closeout/settings" element={<CloseoutSettingsPage />} />
+        <Route path="/closeout/manager" element={<ManagementOnly><ManagerCloseoutPage /></ManagementOnly>} />
+        <Route path="/closeout/settings" element={<ManagementOnly gmOnly><CloseoutSettingsPage key="settings" /></ManagementOnly>} />
+        <Route path="/closeout/awards" element={<ManagementOnly><CloseoutSettingsPage key="awards" awardsOnly /></ManagementOnly>} />
+        <Route path="/closeout/permissions" element={<ManagementOnly gmOnly><PermissionsPage /></ManagementOnly>} />
         <Route path="/closeout/staff" element={<CloseoutPage />} />
 
         <Route

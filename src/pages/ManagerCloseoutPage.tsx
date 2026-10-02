@@ -32,6 +32,8 @@ export function ManagerCloseoutPage() {
   const [date, setDate] = useState(localDate)
   const [shifts, setShifts] = useState<Shift[]>([])
   const [shiftId, setShiftId] = useState('')
+  const [newShiftName, setNewShiftName] = useState('Dinner')
+  const [creatingShift, setCreatingShift] = useState(false)
   const [reviews, setReviews] = useState<Review[]>([])
   const [deposit, setDeposit] = useState('')
   const [cashLeft, setCashLeft] = useState('')
@@ -91,7 +93,7 @@ export function ManagerCloseoutPage() {
           .eq('location_id', locationId).eq('shift_date', date)
           .neq('status', 'cancelled').order('created_at')
         if (queryError) throw queryError
-        if (active) setShifts((data ?? []) as Shift[])
+        if (active) { const rows = (data ?? []) as Shift[]; setShifts(rows); if(rows.length === 1) setShiftId(rows[0].id) }
       } catch (e) { if (active) setError(errorMessage(e)) }
       finally { if (active) setShiftLoading(false) }
     })()
@@ -127,6 +129,21 @@ export function ManagerCloseoutPage() {
     return () => { active = false }
   }, [shiftId, currentUser, elevated])
 
+  async function addShift() {
+    const requestedDate = date
+    if(creatingShift || !newShiftName.trim()) return
+    setCreatingShift(true); setError('')
+    try {
+      const {data, error} = await supabase.rpc('closeout_create_shift', {
+        p_location_id: locationId, p_date: requestedDate, p_name: newShiftName.trim()
+      })
+      if(error) throw error
+      const shift = data as Shift
+      setShifts(rows => rows.some(row => row.id === shift.id) ? rows : [...rows, shift])
+      setShiftId(shift.id)
+    } catch(e) { setError(errorMessage(e)) }
+    finally { setCreatingShift(false) }
+  }
   function toggle(id: string) {
     setConfirmed(false)
     setReviews(rows => rows.some(r => r.user_id === id)
@@ -174,7 +191,7 @@ export function ManagerCloseoutPage() {
     {message && <p role="status">{message}</p>}
     {allowed && <>
       <form onSubmit={submit}>
-        <fieldset disabled={saving} className="mod-controls">
+        <fieldset disabled={saving || creatingShift} className="mod-controls">
           <label>Shift date<input type="date" required max={localDate()} value={date}
             onChange={e => setDate(e.target.value)} /></label>
           <label>Shift<select required value={shiftId} disabled={shiftLoading}
@@ -184,7 +201,15 @@ export function ManagerCloseoutPage() {
           </select></label>
         </fieldset>
         {shiftLoading && <p>Loading shifts…</p>}
-        {!shiftLoading && !shifts.length && <p>No shifts found for this date. Create the shift on the Floor page first.</p>}
+        {!shiftLoading && <div className="mod-review">
+          {!shifts.length && <p>No shifts have been created for this date. Create one here to start the closeout.</p>}
+          <fieldset disabled={saving || creatingShift} className="mod-fields">
+            <label>Create another shift<select value={newShiftName} onChange={e => setNewShiftName(e.target.value)}>
+              <option value="Brunch">Brunch</option><option value="Lunch">Lunch</option><option value="Dinner">Dinner</option><option value="Full Day">Full Day</option>
+            </select></label>
+            <button type="button" disabled={!newShiftName || date > localDate()} onClick={() => void addShift()}>{creatingShift ? 'Creating…' : 'Create / Select Shift'}</button>
+          </fieldset>
+        </div>}
         {reviewLoading && <p>Loading private reviews…</p>}
         {shiftId && !reviewLoading && <fieldset disabled={saving || !canEdit}>
           <legend>Shift closeout</legend>
@@ -212,14 +237,17 @@ export function ManagerCloseoutPage() {
           </article>}
           <h2>Staff who worked this shift</h2>
           <p>Select everyone you supervised. Your own rating is completed by another manager.</p>
-          {Array.from(new Set([...team.map(m => m.user_id), ...reviews.map(r => r.user_id)])).map(id => {
+          <label>Add staff member<select value="" onChange={e => {if(e.target.value) toggle(e.target.value)}}>
+            <option value="">Select staff who worked this shift</option>
+            {team.filter(m => !reviews.some(r => r.user_id === m.user_id)).map(m => <option key={m.user_id} value={m.user_id}>{m.profile?.preferred_name || m.profile?.full_name || 'Team member'} · {m.role.replace(/_/g, ' ')}</option>)}
+          </select></label>
+          {reviews.map(review => {
+            const id = review.user_id
             const member = team.find(m => m.user_id === id)
-            const review = reviews.find(r => r.user_id === id)
             const name = member?.profile?.preferred_name || member?.profile?.full_name || 'Former team member'
-            return <article className="mod-review" key={id}>
-              <label className="mod-check"><input type="checkbox" checked={!!review}
-                onChange={() => toggle(id)} />{name}{member ? ` · ${member.role.replace(/_/g, ' ')}` : ''}</label>
-              {review && <div className="mod-fields">
+            return <article className="mod-review" key={id}><h3>{name}</h3>
+              <button type="button" onClick={() => toggle(id)}>Remove from this shift</button>
+              <div className="mod-fields">
                 <label>{questionLabel(config, 'rating', 'Rating')} · {name}<select required value={review.rating || ''}
                   onChange={e => update(id, { rating: Number(e.target.value) })}>
                   <option value="">Select 1–10</option>
@@ -228,7 +256,7 @@ export function ManagerCloseoutPage() {
                 <label>{questionLabel(config, 'rating_reason', 'Why? (private)')}<textarea required maxLength={2000} rows={3} value={review.reason}
                   onChange={e => update(id, { reason: e.target.value })}
                   placeholder="Describe specific actions or examples from this shift." /></label>
-              </div>}
+              </div>
             </article>
           })}
           <label className="mod-check"><input type="checkbox" required checked={confirmed}

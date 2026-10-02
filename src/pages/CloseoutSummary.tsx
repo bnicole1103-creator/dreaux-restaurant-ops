@@ -1,3 +1,4 @@
+import { todayDate } from '../lib/shifts'
 import { useEffect, useMemo, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { loadTenantData } from '../lib/tenant'
@@ -162,9 +163,8 @@ function roleLabel(role: string) {
 }
 
 export function CloseoutSummaryPage() {
-  const today = new Date()
-    .toISOString()
-    .slice(0, 10)
+  const today = todayDate()
+  const [isManager, setIsManager] = useState(false)
 
   const [selectedDate, setSelectedDate] =
     useState(today)
@@ -276,47 +276,22 @@ export function CloseoutSummaryPage() {
       setLoading(true)
       setError('')
 
+      setCloseouts([])
+      setProfiles([])
+      setCloseoutTables([])
+      setIsManager(false)
+      const {data: auth, error: authError} = await supabase.auth.getUser()
+      if(authError) throw authError
+      if(!auth.user) throw new Error("Please sign in again.")
+      const {data: manager, error: accessError} = await supabase.rpc("mod_is_manager", {p_location_id: targetLocationId})
+      if(accessError) throw accessError
+      setIsManager(!!manager)
+      let query = supabase.from("daily_closeouts").select(`id,user_id,closeout_date,scheduled_start,clock_in,job_role,net_sales,sales_target,cash_deposit,void_count,void_value,discount_value,money_turned_in_to,drinks_made_by,notes,shift_score,points_delta,points_summary,status,created_at`).eq("location_id",targetLocationId).eq("closeout_date",businessDate).order("created_at",{ascending:true})
+      if(!manager) query=query.eq("user_id",auth.user.id)
       const {
         data: closeoutRows,
         error: closeoutError,
-      } = await supabase
-        .from('daily_closeouts')
-        .select(`
-          id,
-          user_id,
-          closeout_date,
-          scheduled_start,
-          clock_in,
-          job_role,
-          net_sales,
-          sales_target,
-          cash_deposit,
-          void_count,
-          void_value,
-          discount_value,
-          money_turned_in_to,
-          drinks_made_by,
-          notes,
-          shift_score,
-          points_delta,
-          points_summary,
-          status,
-          created_at
-        `)
-        .eq(
-          'location_id',
-          targetLocationId
-        )
-        .eq(
-          'closeout_date',
-          businessDate
-        )
-        .order(
-          'created_at',
-          {
-            ascending: true,
-          }
-        )
+      } = await query
 
       if (closeoutError) {
         throw closeoutError
@@ -687,11 +662,11 @@ export function CloseoutSummaryPage() {
 
       <div className="page-header">
         <p className="eyebrow">
-          MANAGEMENT
+          {isManager ? "MANAGEMENT" : "MY CLOSEOUTS"}
         </p>
 
         <h1>
-          Daily Closeout Summary
+          {isManager ? "Daily Closeout Summary" : "My Closeout Summary"}
         </h1>
 
         <p>
@@ -897,7 +872,7 @@ export function CloseoutSummaryPage() {
             ) && (
               <div className="summary-stat-card">
                 <span>
-                  Team Target
+                  {isManager ? "Team Target" : "My Target"}
                 </span>
 
                 <strong>
@@ -994,6 +969,7 @@ export function CloseoutSummaryPage() {
 
           </div>
 
+          {isManager && (
           <div className="card">
             <div
               style={{
@@ -1031,10 +1007,11 @@ export function CloseoutSummaryPage() {
               {recap}
             </p>
           </div>
+          )}
 
           <div className="card">
             <h2>
-              Employee Closeouts
+              {isManager ? "Employee Closeouts" : "My Closeouts"}
             </h2>
 
             {closeouts.length ===

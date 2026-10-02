@@ -7,11 +7,11 @@ import { loadLocationTeam } from '../lib/team'
 import type { TeamMember } from '../lib/team'
 import type { Config, Question, PointRule } from '../components/CloseoutConfig'
 import './ManagerCloseoutPage.css'
-export function CloseoutSettingsPage() {
+export function CloseoutSettingsPage({awardsOnly = false}: {awardsOnly?: boolean}) {
   const [locationId,setLocationId]=useState('')
   const [config,setConfig]=useState<Config|null>(null)
   const [team,setTeam]=useState<TeamMember[]>([])
-  const [tab,setTab]=useState<'staff'|'manager'|'points'|'award'>('staff')
+  const [tab,setTab]=useState<'staff'|'manager'|'points'|'award'>(awardsOnly ? 'award' : 'staff')
   const [busy,setBusy]=useState(false)
   const [dirty,setDirty]=useState(false)
   const [error,setError]=useState('')
@@ -26,9 +26,9 @@ export function CloseoutSettingsPage() {
     try {
       const tenant=await loadTenantData(); const loc=tenant.locations[0]
       if(!loc) throw new Error('No active location found.')
-      const permission=await supabase.rpc('mod_is_manager',{p_location_id:loc.id})
+      const permission=await supabase.rpc(awardsOnly ? 'mod_is_manager' : 'closeout_is_gm',{p_location_id:loc.id})
       if(permission.error) throw permission.error
-      if(!permission.data) throw new Error('Manager access required.')
+      if(!permission.data) throw new Error(awardsOnly ? 'Manager access required.' : 'General manager access required.')
       const response=await supabase.rpc('closeout_get_config',{p_location_id:loc.id})
       if(response.error) throw response.error
       const user=await supabase.auth.getUser(); if(user.error) throw user.error
@@ -48,14 +48,14 @@ export function CloseoutSettingsPage() {
   }catch(e){setError(String((e as {message?:string}).message??e))}finally{setBusy(false)}}
   async function award(){setBusy(true);setError('');setMessage('');requestId.current??=crypto.randomUUID();setAwardPending(true)
     try{const {error}=await supabase.rpc('closeout_award_points',{p_location_id:locationId,p_user_id:employee,p_rule_id:ruleId,p_note:note.trim(),p_request_id:requestId.current})
-      if(error){if(error.code){requestId.current=null;setAwardPending(false)}throw error};setMessage('Points awarded. The employee’s monthly total has been updated.');setNote('');requestId.current=null;setAwardPending(false)
+      if(error){if(error.code){requestId.current=null;setAwardPending(false)}throw error};setMessage('Point adjustment saved. The employee’s monthly total has been updated.');setNote('');requestId.current=null;setAwardPending(false)
     }catch(e){setError(String((e as {message?:string}).message??e))}finally{setBusy(false)}}
   const rule=config?.rules.find(r=>r.id===ruleId)
-  return <section className="mod-page"><Link to="/closeout">← Closeout</Link><h1>Form &amp; Points Settings</h1>
-    <p>Change question wording or add questions. Add manager-awarded categories and edit their reasons and values.</p>
+  return <section className="mod-page"><Link to="/closeout">← Closeout</Link><h1>{awardsOnly ? 'Award / Deduct Points' : 'Form & Points Settings'}</h1>
+    {!awardsOnly && <p>Change question wording or add questions. Add manager-awarded categories and edit their reasons and values.</p>}
     {error&&<p role="alert">{error}</p>}{message&&<p role="status">{message}</p>}
     {!config&&<p>{busy?'Loading settings…':'Settings unavailable.'}</p>}
-    {config&&<><div className="settings-tabs">{(['staff','manager','points','award'] as const).map(t=><button key={t} type="button" disabled={busy} aria-pressed={tab===t} onClick={()=>setTab(t)}>{({staff:'Staff Questions',manager:'Manager Questions',points:'Point Rules',award:'Award Points'})[t]}</button>)}</div>
+    {config&&<><div className="settings-tabs">{(awardsOnly ? ['award'] as const : ['staff','manager','points','award'] as const).map(t=><button key={t} type="button" disabled={busy} aria-pressed={tab===t} onClick={()=>setTab(t)}>{({staff:'Staff Questions',manager:'Manager Questions',points:'Point Rules',award:'Award Points'})[t]}</button>)}</div>
     {tab!=='award'&&<form onSubmit={e=>{e.preventDefault();void save()}}><fieldset disabled={busy}>
       {(tab==='staff'||tab==='manager')&&<><p>Operational fields keep their existing validation; you can change their wording. Added questions can be optional or archived.</p>
         {config.questions.filter(q=>q.audience===tab).map(q=><article className="mod-review" key={q.id}><label>Question<textarea required rows={2} maxLength={500} value={q.label} onChange={e=>updateQuestion(q.id,{label:e.target.value})}/></label>
@@ -81,7 +81,7 @@ export function CloseoutSettingsPage() {
         <label>Staff member<select required disabled={awardPending} value={employee} onChange={e=>setEmployee(e.target.value)}><option value="">Choose an employee</option>{team.map(m=><option key={m.user_id} value={m.user_id}>{m.profile?.preferred_name||m.profile?.full_name||'Team member'}</option>)}</select></label>
         <label>Category / reason<select required disabled={awardPending} value={ruleId} onChange={e=>setRuleId(e.target.value)}><option value="">Choose a reason</option>{config.rules.filter(r=>r.mode==='manual'&&r.active).map(r=><option key={r.id} value={r.id}>{r.category}: {r.reason} ({r.points>0?'+':''}{r.points})</option>)}</select></label>
         <label>Private explanation<textarea required disabled={awardPending} rows={3} maxLength={2000} value={note} onChange={e=>setNote(e.target.value)}/></label>
-      </div>{rule&&<p>{rule.points>0?'+':''}{rule.points} points will be applied.</p>}<button type="submit">{awardPending?'Retry Same Award':'Award Points'}</button></fieldset>
+      </div>{rule&&<p>{rule.points>0?'+':''}{rule.points} points will be applied.</p>}<button type="submit">{awardPending?'Retry Same Adjustment':'Apply Point Adjustment'}</button></fieldset>
       {dirty&&<p>Save your settings first.</p>}
     </form>}</>}
   </section>

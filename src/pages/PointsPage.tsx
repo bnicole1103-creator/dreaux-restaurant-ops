@@ -58,7 +58,7 @@ export function PointsPage() {
   return <section className="points-page">
     <div className="page-heading"><p className="eyebrow">LNX Systems</p><h1>Points & Leaderboard</h1>
       <p className="muted">Track your progress and celebrate the team.</p></div>
-    {manager && <p><Link to="/closeout/settings">Manage Point Rules &amp; Awards →</Link></p>}
+    {manager && <p><Link to="/closeout/awards">Award / Deduct Points →</Link></p>}
     <label>Month <input type="month" value={month} required onChange={e => { if (e.target.value) setMonth(e.target.value) }} /></label>
     <p className="muted">100 starting points each month. Winner: $100 + spotlight. Runner-up: $50 + first-cut pass.</p>
     <div className="points-switch" role="group" aria-label="Points views">
