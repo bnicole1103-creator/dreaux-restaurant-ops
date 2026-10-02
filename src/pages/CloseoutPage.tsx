@@ -1,3 +1,6 @@
+import { Link } from 'react-router-dom'
+import { CloseoutQuestions, useCloseoutConfig, checkAnswers, questionLabel } from '../components/CloseoutConfig'
+import type { Answers } from '../components/CloseoutConfig'
 import { useEffect, useMemo, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { loadTenantData } from '../lib/tenant'
@@ -314,6 +317,8 @@ function calculateShiftPoints({
 }
 
 export function CloseoutPage() {
+  const [answers, setAnswers] = useState<Answers>({})
+
   const [loading, setLoading] =
     useState(true)
 
@@ -325,6 +330,17 @@ export function CloseoutPage() {
 
   const [locationId, setLocationId] =
     useState('')
+
+  const { config, error: configError } = useCloseoutConfig(locationId)
+  function configuredShiftPoints(input: Parameters<typeof calculateShiftPoints>[0]) {
+    const original = calculateShiftPoints(input)
+    const adjustments = original.adjustments.map(a => {
+      const rule = config?.rules.find(r => r.id === a.code)
+      return rule ? {...a, points: rule.active ? rule.points : 0, description: rule.reason} : a
+    })
+    const pointsDelta = adjustments.reduce((n, a) => n + a.points, 0)
+    return {...original, adjustments, pointsDelta, shiftScore: original.startingScore + pointsDelta}
+  }
 
   const [locationName, setLocationName] =
     useState('')
@@ -720,7 +736,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
         return null
       }
 
-      return calculateShiftPoints({
+      return configuredShiftPoints({
         scheduledTime,
 
         clockInTime,
@@ -758,6 +774,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
       voidCount,
       voidValue,
       discountValue,
+      config,
     ])
 
   function toggleTable(
@@ -862,8 +879,9 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
         )
       }
 
+      const customAnswers = checkAnswers(config, 'staff', answers)
       const finalPoints =
-        calculateShiftPoints({
+        configuredShiftPoints({
           scheduledTime,
 
           clockInTime,
@@ -931,6 +949,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
           'daily_closeouts'
         )
         .insert({
+          custom_answers: customAnswers,
           organization_id:
             organizationId,
 
@@ -1197,6 +1216,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
       const submittedScore =
         finalPoints.shiftScore
 
+      setAnswers({})
       resetForm()
 
       let confirmation =
@@ -1307,6 +1327,10 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
         </div>
       )}
 
+      <p><Link to="/closeout">← Closeout</Link></p>
+      {configError && <p role="alert">{configError}</p>}
+      <fieldset disabled={saving}><CloseoutQuestions config={config} audience="staff" answers={answers} onChange={setAnswers} /></fieldset>
+
       <div className="card">
         <h2>
           Shift Information
@@ -1315,7 +1339,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
         <div className="form-grid">
 
           <label>
-            Scheduled Time
+            {questionLabel(config, 'staff_0', "Scheduled Time")}
 
             <input
               type="time"
@@ -1334,7 +1358,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
           </label>
 
           <label>
-            Actual Clock-In Time
+            {questionLabel(config, 'staff_1', "Actual Clock-In Time")}
 
             <input
               type="time"
@@ -1353,7 +1377,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
           </label>
 
           <label>
-            Shift
+            {questionLabel(config, 'staff_2', "Shift")}
 
             <select
               value={shiftType}
@@ -1376,7 +1400,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
         <div className="form-grid">
 
           <label>
-            Total Net Sales
+            {questionLabel(config, 'staff_3', "Total Net Sales")}
 
             <input
               type="number"
@@ -1397,7 +1421,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
           </label>
 
           <label>
-            Individual Sales Target
+            {questionLabel(config, 'staff_4', "Individual Sales Target")}
 
             <input
               type="number"
@@ -1436,7 +1460,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
             >
 
           <label>
-            Cash Deposit
+            {questionLabel(config, 'staff_5', "Cash Deposit")}
 
             <input
               type="number"
@@ -1457,7 +1481,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
 
 
           <label>
-            Total Value of Voids
+            {questionLabel(config, 'staff_6', "Total Value of Voids")}
 
             <input
               type="number"
@@ -1477,7 +1501,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
           </label>
 
           <label>
-            Total Value of Discounts
+            {questionLabel(config, 'staff_7', "Total Value of Discounts")}
 
             <input
               type="number"
@@ -1564,7 +1588,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
     <h2>Register Closeout</h2>
 
     <label>
-      Cash Left in Register
+      {questionLabel(config, 'staff_8', "Cash Left in Register")}
       <input
         type="number"
         step="0.01"
@@ -1582,7 +1606,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
       Number(registerCash) !== 200 && (
         <>
           <label>
-            Why is the register not at $200?
+            {questionLabel(config, 'staff_9', "Why is the register not at $200?")}
             <textarea
               value={registerImbalanceReason}
               onChange={(event) =>
@@ -1595,7 +1619,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
           </label>
 
           <label>
-            Who verified the imbalance?
+            {questionLabel(config, 'staff_10', "Who verified the imbalance?")}
             <select
               value={registerVerifiedBy}
               onChange={(event) =>
@@ -1722,7 +1746,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
 
         <div className="form-grid">
           <label>
-            Which team member contributed the most to a successful shift?
+            {questionLabel(config, 'staff_11', "Which team member contributed the most to a successful shift?")}
 
             <select
               value={peerVoteEmployeeId}
@@ -1744,7 +1768,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
           </label>
 
           <label>
-            Why are you recognizing them?
+            {questionLabel(config, 'staff_12', "Why are you recognizing them?")}
 
             <select
               value={peerVoteReason}
@@ -1770,7 +1794,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
 
           {peerVoteReason === 'Other' && (
             <label>
-              Tell us why you're recognizing them:
+              {questionLabel(config, 'staff_13', "Tell us why you're recognizing them:")}
 
               <input
                 type="text"
@@ -1793,7 +1817,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
         <div className="form-grid">
 
           <label>
-            Who did you turn your money in to?
+            {questionLabel(config, 'staff_14', "Who did you turn your money in to?")}
 
             <select
               value={
@@ -1832,7 +1856,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
           </label>
 
           <label>
-            Who made your drinks?
+            {questionLabel(config, 'staff_15', "Who made your drinks?")}
 
             <select
               value={

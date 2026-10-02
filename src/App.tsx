@@ -1,3 +1,5 @@
+import { CloseoutHub } from './pages/CloseoutHub'
+import { CloseoutSettingsPage } from './pages/CloseoutSettingsPage'
 import { ManagerCloseoutPage } from './pages/ManagerCloseoutPage'
 import { PointsPage } from './pages/PointsPage'
 import { ResetPasswordPage } from './pages/ResetPasswordPage'
@@ -119,11 +121,14 @@ export default function App() {
           element={<CashPage />}
         />
 
-        <Route path="/manager-closeout" element={<ManagerCloseoutPage />} />
+        <Route path="/manager-closeout" element={<Navigate to="/closeout/manager" replace />} />
+        <Route path="/closeout/manager" element={<ManagerCloseoutPage />} />
+        <Route path="/closeout/settings" element={<CloseoutSettingsPage />} />
+        <Route path="/closeout/staff" element={<CloseoutPage />} />
 
         <Route
           path="/closeout"
-          element={<CloseoutPage />}
+          element={<CloseoutHub />}
         />
 
         <Route

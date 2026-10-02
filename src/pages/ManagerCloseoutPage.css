@@ -12,3 +12,8 @@
 .mod-page [role=alert] { color: #fca5a5; }
 .mod-page [role=status] { color: #86efac; }
 @media(max-width: 600px) { .mod-controls, .mod-fields { grid-template-columns: 1fr; } }
+
+.settings-tabs,.settings-actions { display:flex; flex-wrap:wrap; gap:12px; margin:20px 0; }
+.settings-tabs button[aria-pressed="true"] { background:#d4b260; color:#0b1220; }
+.mod-page textarea,.mod-page input,.mod-page select { max-width:100%; box-sizing:border-box; }
+.mod-page fieldset { min-width:0; }

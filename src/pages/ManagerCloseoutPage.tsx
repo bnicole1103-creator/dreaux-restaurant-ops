@@ -1,3 +1,5 @@
+import { CloseoutQuestions, useCloseoutConfig, checkAnswers, questionLabel } from '../components/CloseoutConfig'
+import type { Answers, Question } from '../components/CloseoutConfig'
 import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
 import { Link } from 'react-router-dom'
@@ -9,7 +11,7 @@ import type { Shift } from '../lib/shifts'
 import './ManagerCloseoutPage.css'
 
 type Review = { user_id: string; rating: number; reason: string }
-type SavedCloseout = { submitted_by: string; updated_at: string; reviews: Review[] }
+type SavedCloseout = { submitted_by: string; updated_at: string; reviews: Review[]; cash_deposit: number | null; cash_left_at: string | null; register_balanced: boolean | null; register_difference: number | null; register_notes: string | null }
 function localDate() {
   const parts = new Intl.DateTimeFormat('en-US', { timeZone: 'America/Chicago',
     year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(new Date())
@@ -22,12 +24,20 @@ function errorMessage(error: unknown) {
 }
 export function ManagerCloseoutPage() {
   const [locationId, setLocationId] = useState('')
+  const { config, error: configError } = useCloseoutConfig(locationId)
+  const [answers, setAnswers] = useState<Answers>({})
+  const [savedQuestions, setSavedQuestions] = useState<Question[]>([])
   const [locationName, setLocationName] = useState('')
   const [team, setTeam] = useState<TeamMember[]>([])
   const [date, setDate] = useState(localDate)
   const [shifts, setShifts] = useState<Shift[]>([])
   const [shiftId, setShiftId] = useState('')
   const [reviews, setReviews] = useState<Review[]>([])
+  const [deposit, setDeposit] = useState('')
+  const [cashLeft, setCashLeft] = useState('')
+  const [balanced, setBalanced] = useState('')
+  const [difference, setDifference] = useState('')
+  const [cashNotes, setCashNotes] = useState('')
   const [confirmed, setConfirmed] = useState(false)
   const [loading, setLoading] = useState(true)
   const [shiftLoading, setShiftLoading] = useState(false)
@@ -73,6 +83,7 @@ export function ManagerCloseoutPage() {
     let active = true
     setShiftLoading(true); setShiftId(''); setShifts([]); setReviews([])
     setConfirmed(false); setMessage(''); setError('')
+    setAnswers({}); setSavedQuestions([]); setDeposit(''); setCashLeft(''); setBalanced(''); setDifference(''); setCashNotes('')
     void (async () => {
       try {
         const { data, error: queryError } = await supabase.from('shifts')
@@ -90,14 +101,24 @@ export function ManagerCloseoutPage() {
   useEffect(() => {
     if (!shiftId) return
     let active = true
+    setAnswers({}); setSavedQuestions([]); setDeposit(''); setCashLeft(''); setBalanced(''); setDifference(''); setCashNotes('')
     setReviewLoading(true); setReviews([]); setConfirmed(false); setMessage(''); setError('')
     void (async () => {
       try {
         const { data, error: queryError } = await supabase.rpc('mod_get_closeout', { p_shift_id: shiftId })
         if (queryError) throw queryError
+        const extra = await supabase.rpc('closeout_manager_answers', { p_shift_id: shiftId })
+        if (extra.error) throw extra.error
         const saved = data as SavedCloseout | null
         if (!active) return
+        setAnswers(extra.data?.answers ?? {})
+        setSavedQuestions(extra.data?.questions ?? [])
         setReviews(saved?.reviews ?? [])
+        setDeposit(saved?.cash_deposit != null ? String(saved.cash_deposit) : '')
+        setCashLeft(saved?.cash_left_at ?? '')
+        setBalanced(saved?.register_balanced == null ? '' : saved.register_balanced ? 'yes' : 'no')
+        setDifference(saved?.register_difference != null ? String(saved.register_difference) : '')
+        setCashNotes(saved?.register_notes ?? '')
         setCanEdit(!saved || saved.submitted_by === currentUser || elevated)
         if (saved) setMessage('Saved closeout loaded. Changes recalculate points without counting another rating.')
       } catch (e) { if (active) setError(errorMessage(e)) }
@@ -122,10 +143,21 @@ export function ManagerCloseoutPage() {
       setError('Select all staff who worked, rate each person, explain each rating, and confirm the roster.')
       return
     }
+    if (!deposit.trim() || !Number.isFinite(Number(deposit)) || Number(deposit) < 0 ||
+      !cashLeft.trim() || !balanced || (balanced === 'no' &&
+        (!difference.trim() || !Number.isFinite(Number(difference)) || Number(difference) === 0 || !cashNotes.trim()))) {
+      setError('Enter the cash deposit, where it was left, and whether the register balanced. Explain any shortage or overage.')
+      return
+    }
     setSaving(true)
     try {
+      const customAnswers = checkAnswers(config, 'manager', answers)
       const { error: saveError } = await supabase.rpc('mod_submit_closeout', {
-        p_shift_id: shiftId, p_reviews: reviews, p_roster_confirmed: confirmed,
+        p_answers: customAnswers, p_shift_id: shiftId, p_reviews: reviews, p_roster_confirmed: confirmed,
+        p_cash_deposit: Number(deposit), p_cash_left_at: cashLeft.trim(),
+        p_register_balanced: balanced === 'yes',
+        p_register_difference: balanced === 'yes' ? 0 : Number(difference),
+        p_register_notes: cashNotes.trim(),
       })
       if (saveError) throw saveError
       setMessage('Manager closeout saved. Performance points have been updated.')
@@ -134,15 +166,13 @@ export function ManagerCloseoutPage() {
   }
   if (loading) return <section className="page"><p>Loading manager closeout…</p></section>
   return <section className="mod-page">
-    <Link to="/rewards">← Points</Link>
+    <Link to="/closeout">← Closeout</Link>
     <p className="eyebrow">MANAGER ONLY</p><h1>Manager Closeout</h1>
     <p>{locationName} · Private shift performance review</p>
+    {configError && <p role="alert">{configError}</p>}
     {error && <p role="alert">{error}</p>}
     {message && <p role="status">{message}</p>}
     {allowed && <>
-      <p className="muted">1–2: −25 per shift · 3–4 twice in a Tuesday–Sunday week: −20 ·
-        5–7: meets expectations · 8 twice: +20 · 9–10: +25 per shift.
-        The same MOD may submit both ratings on separate shifts.</p>
       <form onSubmit={submit}>
         <fieldset disabled={saving} className="mod-controls">
           <label>Shift date<input type="date" required max={localDate()} value={date}
@@ -157,7 +187,30 @@ export function ManagerCloseoutPage() {
         {!shiftLoading && !shifts.length && <p>No shifts found for this date. Create the shift on the Floor page first.</p>}
         {reviewLoading && <p>Loading private reviews…</p>}
         {shiftId && !reviewLoading && <fieldset disabled={saving || !canEdit}>
-          <legend>Staff who worked this shift</legend>
+          <legend>Shift closeout</legend>
+          <h2>Cash deposit &amp; register</h2>
+          <div className="mod-fields">
+            <label>{questionLabel(config, 'deposit', "Cash deposit amount ($)")}<input required type="number" min="0" max="999999999.99" step="0.01"
+              value={deposit} onChange={e => setDeposit(e.target.value)} /></label>
+            <label>{questionLabel(config, 'cash_left', "Where was the cash left?")}<input required maxLength={500} value={cashLeft}
+              onChange={e => setCashLeft(e.target.value)} placeholder="Location and bag or envelope reference" /></label>
+            <label>{questionLabel(config, 'balanced', "Was the register balanced?")}<select required value={balanced}
+              onChange={e => { setBalanced(e.target.value); setDifference(''); setCashNotes('') }}>
+              <option value="">Select an answer</option><option value="yes">Yes</option><option value="no">No</option>
+            </select></label>
+            {balanced === 'no' && <>
+              <label>{questionLabel(config, 'difference', "Register difference ($)")}<input required type="number" step="0.01" min="-999999999.99" max="999999999.99"
+                value={difference} onChange={e => setDifference(e.target.value)} />
+                <small>Negative for a shortage; positive for an overage.</small></label>
+              <label>{questionLabel(config, 'cash_notes', "Explain the difference")}<textarea required rows={3} maxLength={2000} value={cashNotes}
+                onChange={e => setCashNotes(e.target.value)} /></label>
+            </>}
+          </div>
+          <CloseoutQuestions config={config} audience="manager" answers={answers} onChange={setAnswers} />
+          {savedQuestions.some(q => !config?.questions.some(current => current.id === q.id && current.active && current.label === q.label)) && <article className="mod-review"><h2>Archived answers from this closeout</h2>
+            {savedQuestions.filter(q => !config?.questions.some(current => current.id === q.id && current.active && current.label === q.label)).map(q => <p key={q.id}>{q.label}: {answers[q.id] || 'No answer'}</p>)}
+          </article>}
+          <h2>Staff who worked this shift</h2>
           <p>Select everyone you supervised. Your own rating is completed by another manager.</p>
           {Array.from(new Set([...team.map(m => m.user_id), ...reviews.map(r => r.user_id)])).map(id => {
             const member = team.find(m => m.user_id === id)
@@ -167,12 +220,12 @@ export function ManagerCloseoutPage() {
               <label className="mod-check"><input type="checkbox" checked={!!review}
                 onChange={() => toggle(id)} />{name}{member ? ` · ${member.role.replace(/_/g, ' ')}` : ''}</label>
               {review && <div className="mod-fields">
-                <label>Rating for {name}<select required value={review.rating || ''}
+                <label>{questionLabel(config, 'rating', 'Rating')} · {name}<select required value={review.rating || ''}
                   onChange={e => update(id, { rating: Number(e.target.value) })}>
                   <option value="">Select 1–10</option>
                   {Array.from({ length: 10 }, (_, i) => i + 1).map(n => <option key={n} value={n}>{n}</option>)}
                 </select></label>
-                <label>Why? (private)<textarea required maxLength={2000} rows={3} value={review.reason}
+                <label>{questionLabel(config, 'rating_reason', 'Why? (private)')}<textarea required maxLength={2000} rows={3} value={review.reason}
                   onChange={e => update(id, { reason: e.target.value })}
                   placeholder="Describe specific actions or examples from this shift." /></label>
               </div>}
