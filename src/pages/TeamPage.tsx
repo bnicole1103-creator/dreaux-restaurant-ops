@@ -53,6 +53,13 @@ function roleLabel(role: string) {
   )
 }
 
+function errorMessage(error: unknown, fallback: string) {
+  if (typeof error === 'object' && error !== null && 'message' in error) {
+    return String(error.message) || fallback
+  }
+  return fallback
+}
+
 export function TeamPage() {
   const [organizationId, setOrganizationId] = useState('')
   const [locationId, setLocationId] = useState('')
@@ -267,6 +274,8 @@ export function TeamPage() {
         .update({ role: nextRole })
         .eq('location_id', locationId)
         .eq('user_id', userId)
+        .select('user_id')
+        .single()
 
       if (updateError) {
         throw updateError
@@ -281,9 +290,7 @@ export function TeamPage() {
       )
     } catch (caughtError) {
       setError(
-        caughtError instanceof Error
-          ? caughtError.message
-          : 'Unable to update role.',
+        errorMessage(caughtError, 'Unable to update role.'),
       )
     }
   }
@@ -293,13 +300,15 @@ export function TeamPage() {
       setError('')
 
       const nextStatus =
-        member.status === 'active' ? 'inactive' : 'active'
+        member.status === 'active' ? 'suspended' : 'active'
 
       const { error: updateError } = await supabase
         .from('location_memberships')
         .update({ status: nextStatus })
         .eq('location_id', locationId)
         .eq('user_id', member.user_id)
+        .select('user_id')
+        .single()
 
       if (updateError) {
         throw updateError
@@ -314,9 +323,7 @@ export function TeamPage() {
       )
     } catch (caughtError) {
       setError(
-        caughtError instanceof Error
-          ? caughtError.message
-          : 'Unable to update team member.',
+        errorMessage(caughtError, 'Unable to update team member.'),
       )
     }
   }
