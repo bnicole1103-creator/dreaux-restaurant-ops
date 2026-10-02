@@ -10,7 +10,11 @@ import type { TeamMember } from '../lib/team'
 import type { Shift } from '../lib/shifts'
 import './ManagerCloseoutPage.css'
 
-type Review = { user_id: string; rating: number; reason: string }
+type Review = { user_id: string; rating: number; reason: string; category?: string }
+function splitReason(reason: string) {
+ const match = /^Category: ([^\n]+)(?:\n([\s\S]*))?$/.exec(reason)
+ return match ? {category: match[1], reason: match[2] ?? ''} : {category: '', reason}
+}
 type SavedCloseout = { submitted_by: string; updated_at: string; reviews: Review[]; cash_deposit: number | null; cash_left_at: string | null; register_balanced: boolean | null; register_difference: number | null; register_notes: string | null }
 function localDate() {
   const parts = new Intl.DateTimeFormat('en-US', { timeZone: 'America/Chicago',
@@ -34,6 +38,8 @@ export function ManagerCloseoutPage() {
   const [shiftId, setShiftId] = useState('')
   const [creatingShift, setCreatingShift] = useState(false)
   const [reviews, setReviews] = useState<Review[]>([])
+  const [shiftMvp, setShiftMvp] = useState('')
+  const categories = [...new Set([...(config?.rules.filter(r => r.active).map(r => r.category.trim().replace(/\s+/g, ' ')).filter(Boolean) ?? []), 'Other'])]
   const [deposit, setDeposit] = useState('')
   const [cashLeft, setCashLeft] = useState('')
   const [balanced, setBalanced] = useState('')
@@ -82,7 +88,7 @@ export function ManagerCloseoutPage() {
   useEffect(() => {
     if (!locationId) return
     let active = true
-    setShiftLoading(true); setShiftId(''); setShifts([]); setReviews([])
+    setShiftLoading(true); setShiftId(''); setShifts([]); setReviews([]); setShiftMvp('')
     setConfirmed(false); setMessage(''); setError('')
     setAnswers({}); setSavedQuestions([]); setDeposit(''); setCashLeft(''); setBalanced(''); setDifference(''); setCashNotes('')
     void (async () => {
@@ -103,7 +109,7 @@ export function ManagerCloseoutPage() {
     if (!shiftId) return
     let active = true
     setAnswers({}); setSavedQuestions([]); setDeposit(''); setCashLeft(''); setBalanced(''); setDifference(''); setCashNotes('')
-    setReviewLoading(true); setReviews([]); setConfirmed(false); setMessage(''); setError('')
+    setReviewLoading(true); setReviews([]); setShiftMvp(''); setConfirmed(false); setMessage(''); setError('')
     void (async () => {
       try {
         const { data, error: queryError } = await supabase.rpc('mod_get_closeout', { p_shift_id: shiftId })
@@ -114,7 +120,8 @@ export function ManagerCloseoutPage() {
         if (!active) return
         setAnswers(extra.data?.answers ?? {})
         setSavedQuestions(extra.data?.questions ?? [])
-        setReviews(saved?.reviews ?? [])
+        setReviews((saved?.reviews ?? []).map(r => ({...r, ...splitReason(r.reason)})))
+        setShiftMvp(extra.data?.shift_mvp ?? '')
         setDeposit(saved?.cash_deposit != null ? String(saved.cash_deposit) : '')
         setCashLeft(saved?.cash_left_at ?? '')
         setBalanced(saved?.register_balanced == null ? '' : saved.register_balanced ? 'yes' : 'no')
@@ -145,6 +152,7 @@ export function ManagerCloseoutPage() {
   }
   function toggle(id: string) {
     setConfirmed(false)
+    if (shiftMvp === id) setShiftMvp('')
     setReviews(rows => rows.some(r => r.user_id === id)
       ? rows.filter(r => r.user_id !== id) : [...rows, { user_id: id, rating: 0, reason: '' }])
   }
@@ -155,8 +163,8 @@ export function ManagerCloseoutPage() {
     event.preventDefault()
     if (saving) return
     setError(''); setMessage('')
-    if (!confirmed || !reviews.length || reviews.some(r => !r.rating || !r.reason.trim())) {
-      setError('Select all staff who worked, rate each person, explain each rating, and confirm the roster.')
+    if (!confirmed || !reviews.length || reviews.some(r => !r.rating || !r.category?.trim())) {
+      setError('Select all staff who worked, rate each person, choose a reason category, and confirm the roster.')
       return
     }
     if (!deposit.trim() || !Number.isFinite(Number(deposit)) || Number(deposit) < 0 ||
@@ -167,9 +175,11 @@ export function ManagerCloseoutPage() {
     }
     setSaving(true)
     try {
-      const customAnswers = checkAnswers(config, 'manager', answers)
+      const customAnswers = {...checkAnswers(config, 'manager', answers), _shift_mvp: shiftMvp}
+      const submittedReviews = reviews.map(r => ({user_id: r.user_id, rating: r.rating, reason: `Category: ${r.category}\n${r.reason.trim()}`}))
+      if (submittedReviews.some(r => r.reason.length > 2000)) throw new Error('Shorten the rating notes to fit 2,000 characters with the category.')
       const { error: saveError } = await supabase.rpc('mod_submit_closeout', {
-        p_answers: customAnswers, p_shift_id: shiftId, p_reviews: reviews, p_roster_confirmed: confirmed,
+        p_answers: customAnswers, p_shift_id: shiftId, p_reviews: submittedReviews, p_roster_confirmed: confirmed,
         p_cash_deposit: Number(deposit), p_cash_left_at: cashLeft.trim(),
         p_register_balanced: balanced === 'yes',
         p_register_difference: balanced === 'yes' ? 0 : Number(difference),
@@ -223,12 +233,24 @@ export function ManagerCloseoutPage() {
                   <option value="">Select 1–10</option>
                   {Array.from({ length: 10 }, (_, i) => i + 1).map(n => <option key={n} value={n}>{n}</option>)}
                 </select></label>
-                <label>{questionLabel(config, 'rating_reason', 'Why? (private)')}<textarea required maxLength={2000} rows={3} value={review.reason}
+                <label>{questionLabel(config, 'rating_reason', 'Why this rating?')}<select required value={review.category ?? ''}
+                  onChange={e => update(id, {category: e.target.value})}>
+                  <option value="">Choose a category</option>
+                  {review.category && !categories.includes(review.category) && <option value={review.category}>{review.category} (saved category)</option>}
+                  {categories.map(category => <option key={category} value={category}>{category}</option>)}
+                </select></label>
+                <label>Specific examples (optional, private)<textarea maxLength={1800} rows={3} value={review.reason}
                   onChange={e => update(id, { reason: e.target.value })}
-                  placeholder="Describe specific actions or examples from this shift." /></label>
+                  placeholder="Add context about this employee’s shift." /></label>
               </div>
             </article>
           })}
+          <article className="mod-review"><h2>Shift MVP</h2>
+            <label>Who stood out this shift? (optional)<select value={shiftMvp} onChange={e => setShiftMvp(e.target.value)}>
+              <option value="">No MVP selected</option>
+              {reviews.map(r => { const m = team.find(member => member.user_id === r.user_id); return <option key={r.user_id} value={r.user_id}>{m?.profile?.preferred_name || m?.profile?.full_name || 'Team member'}</option> })}
+            </select></label>
+          </article>
           <h2>Cash deposit &amp; register</h2>
           <div className="mod-fields">
             <label>{questionLabel(config, 'deposit', "Cash deposit amount ($)")}<input required type="number" min="0" max="999999999.99" step="0.01"
@@ -260,3 +282,4 @@ export function ManagerCloseoutPage() {
     </>}
   </section>
 }
+

@@ -57,11 +57,16 @@ export function CloseoutSettingsPage({awardsOnly = false}: {awardsOnly?: boolean
     {!config&&<p>{busy?'Loading settings…':'Settings unavailable.'}</p>}
     {config&&<><div className="settings-tabs">{(awardsOnly ? ['award'] as const : ['staff','manager','points','award'] as const).map(t=><button key={t} type="button" disabled={busy} aria-pressed={tab===t} onClick={()=>setTab(t)}>{({staff:'Staff Questions',manager:'Manager Questions',points:'Point Rules',award:'Award Points'})[t]}</button>)}</div>
     {tab!=='award'&&<form onSubmit={e=>{e.preventDefault();void save()}}><fieldset disabled={busy}>
-      {(tab==='staff'||tab==='manager')&&<><p>Operational fields keep their existing validation; you can change their wording. Added questions can be optional or archived.</p>
+      {(tab==='staff'||tab==='manager')&&<><p>Operational fields keep their existing validation; you can change their wording. Custom questions can be removed. Previously saved answers remain in their original closeouts.</p>
         {config.questions.filter(q=>q.audience===tab).map(q=><article className="mod-review" key={q.id}><label>Question<textarea required rows={2} maxLength={500} value={q.label} onChange={e=>updateQuestion(q.id,{label:e.target.value})}/></label>
           {!q.builtin&&<div className="mod-fields"><label>Answer type<select value={q.type} onChange={e=>updateQuestion(q.id,{type:e.target.value as Question['type']})}><option value="text">Written answer</option><option value="number">Number</option><option value="yesno">Yes / No</option></select></label>
           <label className="mod-check"><input type="checkbox" checked={q.required} onChange={e=>updateQuestion(q.id,{required:e.target.checked})}/>Required</label>
           <label className="mod-check"><input type="checkbox" checked={q.active} onChange={e=>updateQuestion(q.id,{active:e.target.checked})}/>Active</label></div>}
+          {!q.builtin && <button type="button" onClick={() => {
+            if (!window.confirm('Remove this question from future forms? Saved answers will remain available.')) return
+            setDirty(true); setMessage(''); setConfig(c => c && ({...c, questions: c.questions.filter(item => item.id !== q.id)}))
+          }}>Remove Question</button>}
+          {q.builtin && <small>Required operational field. Its wording can be edited.</small>}
         </article>)}
         <button type="button" disabled={config.questions.length>=100} onClick={()=>{setDirty(true);setConfig({...config,questions:[...config.questions,{id:crypto.randomUUID(),audience:tab,label:'',type:'text',required:true,active:true,builtin:false}]})}}>Add Question</button>
       </>}
@@ -86,3 +91,4 @@ export function CloseoutSettingsPage({awardsOnly = false}: {awardsOnly?: boolean
     </form>}</>}
   </section>
 }
+
