@@ -1,3 +1,4 @@
+import { ResetPasswordPage } from './pages/ResetPasswordPage'
 import { useEffect, useState } from 'react'
 import type { Session } from '@supabase/supabase-js'
 import {
@@ -19,6 +20,17 @@ import { CloseoutPage } from './pages/CloseoutPage'
 import { CloseoutSummaryPage } from './pages/CloseoutSummary'
 
 export default function App() {
+  const [recovering, setRecovering] = useState(() => {
+    const hash = new URLSearchParams(window.location.hash.slice(1))
+    const query = new URLSearchParams(window.location.search)
+    const recoveryLink =
+      hash.get('type') === 'recovery' ||
+      query.get('type') === 'recovery' ||
+      window.location.pathname === '/reset-password'
+    if (recoveryLink) sessionStorage.setItem('lnx-password-recovery', '1')
+    return recoveryLink || sessionStorage.getItem('lnx-password-recovery') === '1'
+  })
+
   const [session, setSession] =
     useState<Session | null>(null)
 
@@ -48,7 +60,11 @@ export default function App() {
     const {
       data: authListener,
     } = supabase.auth.onAuthStateChange(
-      (_event, nextSession) => {
+      (event, nextSession) => {
+        if (event === 'PASSWORD_RECOVERY') {
+          sessionStorage.setItem('lnx-password-recovery', '1')
+          setRecovering(true)
+        }
         setSession(nextSession)
         setLoading(false)
       }
@@ -65,6 +81,10 @@ export default function App() {
         Loading...
       </div>
     )
+  }
+
+  if (recovering) {
+    return <ResetPasswordPage hasSession={Boolean(session)} />
   }
 
   if (!session) {
