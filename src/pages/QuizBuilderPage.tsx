@@ -1,3 +1,4 @@
+import { QuizQuestionBank } from '../components/QuizQuestionBank'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
@@ -34,6 +35,7 @@ export function QuizBuilderPage() {
  <p>{published?'Published':'Draft'}{dirty?' · Unsaved changes':''}</p>
  {locked && <p>This quiz has submissions and is locked to preserve staff scores. Choose another date to build the next quiz.</p>}
  {error && <p role="alert">{error}</p>}{message && <p role="status">{message}</p>}{busy && <p>Loading…</p>}
+ <QuizQuestionBank location={location} disabled={busy || locked || !location} questions={questions} onAdd={items=>{setQuestions(v=>[...v,...items].slice(0,50));setDirty(true)}} />
  <fieldset disabled={busy || locked || !location} className="quiz-editor">
  <label>Title<input maxLength={200} value={title} onChange={e=>{setTitle(e.target.value);setDirty(true)}} /></label>
  <label>Instructions<textarea maxLength={4000} value={instructions} onChange={e=>{setInstructions(e.target.value);setDirty(true)}} /></label>
