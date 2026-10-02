@@ -1,5 +1,5 @@
-import { todayDate } from '../lib/shifts'
-import { useEffect, useMemo, useState } from 'react'
+import { serviceDay, serviceDateLabel, nextServiceBoundary } from '../lib/serviceDay'
+import { useEffect, useMemo, useState, useRef } from 'react'
 import { supabase } from '../lib/supabase'
 import { loadTenantData } from '../lib/tenant'
 
@@ -162,23 +162,14 @@ function roleLabel(role: string) {
   )
 }
 
-export function CloseoutSummaryPage() {
-  const today = todayDate()
-  const [isManager, setIsManager] = useState(false)
-
-  const [selectedDate, setSelectedDate] =
-    useState(today)
-
+function CloseoutDay({selectedDate,refresh,onDeleted,locationId,locationName,current}:{selectedDate:string;refresh:number;onDeleted:()=>void;locationId:string;locationName:string;current:boolean}) {
+  const [isManager,setIsManager]=useState(false)
+  const [deletingId,setDeletingId]=useState('')
+  const request=useRef(0)
   const [loading, setLoading] =
     useState(true)
 
   const [error, setError] =
-    useState('')
-
-  const [locationId, setLocationId] =
-    useState('')
-
-  const [locationName, setLocationName] =
     useState('')
 
   const [closeouts, setCloseouts] =
@@ -216,196 +207,31 @@ export function CloseoutSummaryPage() {
       }
     }
 
-    void initialize()
+
   }, [])
 
-  useEffect(() => {
-    if (!locationId) {
-      return
-    }
-
-    void loadSummary(
-      locationId,
-      selectedDate
-    )
-  }, [
-    locationId,
-    selectedDate,
-  ])
-
-  async function initialize() {
+  useEffect(()=>{void loadSummary(locationId,selectedDate);return()=>{request.current+=1}},[locationId,selectedDate,refresh])
+  async function loadSummary(targetLocationId:string,businessDate:string) {
+    const ticket=++request.current
+    setLoading(true);setError('');setCloseouts([]);setProfiles([]);setCloseoutTables([]);setIsManager(false)
     try {
-      setLoading(true)
-      setError('')
-
-      const tenant =
-        await loadTenantData()
-
-      const location =
-        tenant.locations?.[0]
-
-      if (!location?.id) {
-        throw new Error(
-          'Location could not be loaded.'
-        )
-      }
-
-      setLocationId(
-        location.id
-      )
-
-      setLocationName(
-        location.name ?? ''
-      )
-    } catch (caughtError) {
-      setError(
-        caughtError instanceof Error
-          ? caughtError.message
-          : 'Unable to load summary.'
-      )
-
-      setLoading(false)
-    }
+      const {data,error}=await supabase.rpc('closeout_summary_day',{p_location_id:targetLocationId,p_day:businessDate})
+      if(error)throw error
+      if(ticket!==request.current)return
+      setIsManager(!!data.manager);setCloseouts(data.closeouts ?? []);setProfiles(data.profiles ?? []);setCloseoutTables(data.tables ?? [])
+    } catch(e) {if(ticket===request.current)setError(String((e as {message?:string})?.message ?? e))}
+    finally {if(ticket===request.current)setLoading(false)}
   }
-
-  async function loadSummary(
-    targetLocationId: string,
-    businessDate: string
-  ) {
+  async function deleteCloseout(closeout:CloseoutRow) {
+    const name=displayName(profileMap.get(closeout.user_id))
+    if(!window.confirm('Delete '+name+'’s closeout from '+serviceDateLabel(selectedDate)+'? It will be removed from summaries and its linked points will no longer count.'))return
+    setDeletingId(closeout.id);setError('')
     try {
-      setLoading(true)
-      setError('')
-
-      setCloseouts([])
-      setProfiles([])
-      setCloseoutTables([])
-      setIsManager(false)
-      const {data: auth, error: authError} = await supabase.auth.getUser()
-      if(authError) throw authError
-      if(!auth.user) throw new Error("Please sign in again.")
-      const {data: manager, error: accessError} = await supabase.rpc("mod_is_manager", {p_location_id: targetLocationId})
-      if(accessError) throw accessError
-      setIsManager(!!manager)
-      let query = supabase.from("daily_closeouts").select(`id,user_id,closeout_date,scheduled_start,clock_in,job_role,net_sales,sales_target,cash_deposit,void_count,void_value,discount_value,money_turned_in_to,drinks_made_by,notes,shift_score,points_delta,points_summary,status,created_at`).eq("location_id",targetLocationId).eq("closeout_date",businessDate).order("created_at",{ascending:true})
-      if(!manager) query=query.eq("user_id",auth.user.id)
-      const {
-        data: closeoutRows,
-        error: closeoutError,
-      } = await query
-
-      if (closeoutError) {
-        throw closeoutError
-      }
-
-      const normalizedCloseouts =
-        (closeoutRows ?? []) as CloseoutRow[]
-
-      setCloseouts(
-        normalizedCloseouts
-      )
-
-      const relevantUserIds =
-        Array.from(
-          new Set(
-            normalizedCloseouts
-              .flatMap((row) => [
-                row.user_id,
-                row.money_turned_in_to,
-                row.drinks_made_by,
-              ])
-              .filter(
-                (
-                  value
-                ): value is string =>
-                  Boolean(value)
-              )
-          )
-        )
-
-      if (
-        relevantUserIds.length > 0
-      ) {
-        const {
-          data: profileRows,
-          error: profileError,
-        } = await supabase
-          .from('profiles')
-          .select(`
-            id,
-            full_name,
-            preferred_name
-          `)
-          .in(
-            'id',
-            relevantUserIds
-          )
-
-        if (profileError) {
-          throw profileError
-        }
-
-        setProfiles(
-          (profileRows ?? []) as ProfileOption[]
-        )
-      } else {
-        setProfiles([])
-      }
-
-      const closeoutIds =
-        normalizedCloseouts.map(
-          (row) => row.id
-        )
-
-      if (
-        closeoutIds.length > 0
-      ) {
-        const {
-          data: tableRows,
-          error: tableError,
-        } = await supabase
-          .from(
-            'daily_closeout_tables'
-          )
-          .select(`
-            closeout_id,
-            table_id,
-            table_name
-          `)
-          .in(
-            'closeout_id',
-            closeoutIds
-          )
-
-        if (tableError) {
-          console.error(
-            'Unable to load closeout tables:',
-            tableError
-          )
-
-          setCloseoutTables([])
-        } else {
-          setCloseoutTables(
-            (tableRows ??
-              []) as CloseoutTableRow[]
-          )
-        }
-      } else {
-        setCloseoutTables([])
-      }
-    } catch (caughtError) {
-      console.error(
-        'Closeout summary error:',
-        caughtError
-      )
-
-      setError(
-        caughtError instanceof Error
-          ? caughtError.message
-          : 'Unable to load closeout summary.'
-      )
-    } finally {
-      setLoading(false)
-    }
+      const {error}=await supabase.rpc('closeout_delete',{p_location_id:locationId,p_closeout_id:closeout.id})
+      if(error)throw error
+      setExpandedId(null);onDeleted()
+    } catch(e) {setError(String((e as {message?:string})?.message ?? e))}
+    finally {setDeletingId('')}
   }
 
   const profileMap =
@@ -552,7 +378,7 @@ export function CloseoutSummaryPage() {
               )
         ).length
 
-      return `${closeouts.length} closeouts submitted. Team net sales were ${money(
+      return `${serviceDateLabel(selectedDate)}: ${closeouts.length} closeouts submitted (${closeouts.map(c=>displayName(profileMap.get(c.user_id))).join(', ')}). Team net sales were ${money(
         totals.totalSales
       )} against a combined target of ${money(
         totals.totalTarget
@@ -579,6 +405,7 @@ export function CloseoutSummaryPage() {
       closeouts,
       selectedDate,
       totals,
+      profileMap,
     ])
 
   function tablesForCloseout(
@@ -666,11 +493,12 @@ export function CloseoutSummaryPage() {
         </p>
 
         <h1>
-          {isManager ? "Daily Closeout Summary" : "My Closeout Summary"}
+          {current ? (isManager ? "Daily Closeout Summary" : "My Closeout Summary") : "Archived Closeouts"}
         </h1>
 
         <p>
-          {locationName}
+          {locationName} · {serviceDateLabel(selectedDate)}
+          {current && <> · Service day resets at 4 a.m. New Orleans time.</>}
         </p>
       </div>
 
@@ -694,20 +522,7 @@ export function CloseoutSummaryPage() {
           >
             {isManager ? "Business Date" : "Closeout Date"}
 
-            <input
-              type="date"
-              value={
-                selectedDate
-              }
-              onChange={(
-                event
-              ) =>
-                setSelectedDate(
-                  event.target
-                    .value
-                )
-              }
-            />
+            <strong style={{display:'block'}}>{serviceDateLabel(selectedDate)}</strong>
           </label>
 
           <button
@@ -985,7 +800,7 @@ export function CloseoutSummaryPage() {
               }}
             >
               <h2>
-                Daily Manager Recap
+                {current ? "Today’s Manager Recap" : "Manager Recap"}
               </h2>
 
               <button
@@ -1153,6 +968,9 @@ export function CloseoutSummaryPage() {
                           </div>
                         </div>
                       </button>
+
+                      <p>Submitted {new Date(closeout.created_at).toLocaleString('en-US',{timeZone:'America/Chicago'})}</p>
+                      {isManager && <button type="button" disabled={!!deletingId || loading} onClick={()=>void deleteCloseout(closeout)}>{deletingId===closeout.id?'Deleting…':'Delete closeout'}</button>}
 
                       {isExpanded && (
                         <div className="closeout-summary-details">
@@ -1394,4 +1212,45 @@ export function CloseoutSummaryPage() {
 
     </section>
   )
+}
+
+type ArchiveDay={day:string;count:number}
+export function CloseoutSummaryPage() {
+ const [day,setDay]=useState(serviceDay)
+ const [refresh,setRefresh]=useState(0)
+ const [location,setLocation]=useState<{id:string;name:string}|null>(null)
+ const [history,setHistory]=useState<ArchiveDay[]>([])
+ const [archiveDate,setArchiveDate]=useState('')
+ const [error,setError]=useState('')
+ const [historyLoading,setHistoryLoading]=useState(false)
+ useEffect(()=>{let live=true;void loadTenantData().then(t=>{if(!t.locations[0])throw new Error('No active location.');if(live)setLocation({id:t.locations[0].id,name:t.locations[0].name ?? ''})}).catch(e=>{if(live)setError(String((e as {message?:string})?.message ?? e))});return()=>{live=false}},[])
+ useEffect(()=>{
+  let timer:ReturnType<typeof setTimeout>
+  function update(){setDay(serviceDay());setRefresh(v=>v+1);clearTimeout(timer);timer=setTimeout(update,Math.max(1,nextServiceBoundary()-Date.now()))}
+  const onVisible=()=>{if(document.visibilityState==='visible')update()}
+  update();window.addEventListener('focus',update);document.addEventListener('visibilitychange',onVisible)
+  const poll=setInterval(()=>{if(document.visibilityState==='visible'){setDay(serviceDay());setRefresh(v=>v+1)}},60000)
+  return()=>{clearTimeout(timer);clearInterval(poll);window.removeEventListener('focus',update);document.removeEventListener('visibilitychange',onVisible)}
+ },[])
+ useEffect(()=>{if(!location)return;let live=true;setHistoryLoading(true);setError('');void (async()=>{
+  try{const {data,error}=await supabase.rpc('closeout_summary_archive',{p_location_id:location.id,p_before:day});if(error)throw error;if(live)setHistory(data ?? [])}
+  catch(e){if(live){setError(String((e as {message?:string})?.message ?? e));setHistory([])}}finally{if(live)setHistoryLoading(false)}
+ })();return()=>{live=false}},[location,day,refresh])
+ const months=useMemo(()=>{
+  const groups=new Map<string,ArchiveDay[]>()
+  for(const entry of history){const key=entry.day.slice(0,7);groups.set(key,[...(groups.get(key) ?? []),entry])}
+  return [...groups.entries()]
+ },[history])
+ function reload(){setDay(serviceDay());setRefresh(v=>v+1)}
+ if(!location)return <section className="page"><p role={error?'alert':'status'}>{error || 'Loading summary…'}</p></section>
+ return <>
+  <div className="page"><button type="button" onClick={reload}>Refresh closeouts</button></div>
+  <CloseoutDay selectedDate={day} current refresh={refresh} locationId={location.id} locationName={location.name} onDeleted={reload} />
+  <section className="page"><article className="card"><h2>Previous closeouts</h2><p>Organized by month and service day, newest first.</p>
+   {error && <p role="alert">{error}</p>}{historyLoading && history.length===0 && <p role="status">Loading history…</p>}
+   {!error && !historyLoading && history.length===0 && <p>No previous closeouts.</p>}
+   {months.map(([month,entries])=><details key={month}><summary>{serviceDateLabel(month,true)} · {entries.reduce((n,e)=>n+e.count,0)} closeouts</summary><div style={{display:'grid',gap:8,margin:'12px 0'}}>{entries.map(e=><button type="button" key={e.day} aria-pressed={archiveDate===e.day} onClick={()=>setArchiveDate(v=>v===e.day?'':e.day)}>{serviceDateLabel(e.day)} · {e.count} closeout{e.count===1?'':'s'} · {archiveDate===e.day?'Hide':'View'}</button>)}</div></details>)}
+  </article></section>
+  {archiveDate && archiveDate<day && <CloseoutDay key={archiveDate} selectedDate={archiveDate} current={false} refresh={refresh} locationId={location.id} locationName={location.name} onDeleted={reload} />}
+ </>
 }
