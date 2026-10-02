@@ -692,7 +692,7 @@ export function CloseoutSummaryPage() {
               minWidth: 200,
             }}
           >
-            Business Date
+            {isManager ? "Business Date" : "Closeout Date"}
 
             <input
               type="date"
@@ -785,7 +785,7 @@ export function CloseoutSummaryPage() {
 
                     <span>
                       {
-                        card.label
+                        !isManager && card.key === "target" ? "My Target" : card.label
                       }
                     </span>
                   </label>
@@ -856,7 +856,7 @@ export function CloseoutSummaryPage() {
             ) && (
               <div className="summary-stat-card">
                 <span>
-                  Net Sales
+                  {isManager ? "Business Net Sales" : "My Net Sales"}
                 </span>
 
                 <strong>
@@ -904,7 +904,7 @@ export function CloseoutSummaryPage() {
             ) && (
               <div className="summary-stat-card">
                 <span>
-                  Cash Deposits
+                  {isManager ? "Business Cash Deposits" : "My Cash Deposits"}
                 </span>
 
                 <strong>

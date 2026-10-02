@@ -32,7 +32,6 @@ export function ManagerCloseoutPage() {
   const [date, setDate] = useState(localDate)
   const [shifts, setShifts] = useState<Shift[]>([])
   const [shiftId, setShiftId] = useState('')
-  const [newShiftName, setNewShiftName] = useState('Dinner')
   const [creatingShift, setCreatingShift] = useState(false)
   const [reviews, setReviews] = useState<Review[]>([])
   const [deposit, setDeposit] = useState('')
@@ -129,7 +128,7 @@ export function ManagerCloseoutPage() {
     return () => { active = false }
   }, [shiftId, currentUser, elevated])
 
-  async function addShift() {
+  async function addShift(newShiftName: string) {
     const requestedDate = date
     if(creatingShift || !newShiftName.trim()) return
     setCreatingShift(true); setError('')
@@ -195,46 +194,17 @@ export function ManagerCloseoutPage() {
           <label>Shift date<input type="date" required max={localDate()} value={date}
             onChange={e => setDate(e.target.value)} /></label>
           <label>Shift<select required value={shiftId} disabled={shiftLoading}
-            onChange={e => setShiftId(e.target.value)}>
+            onChange={e => { const value = e.target.value; if(value.startsWith("new:")) void addShift(value.slice(4)); else setShiftId(value) }}>
             <option value="">Select a shift</option>
-            {shifts.map(s => <option key={s.id} value={s.id}>{s.shift_name} ({s.status})</option>)}
+            {shifts.map(s => <option key={s.id} value={s.id}>{s.shift_name}</option>)}
+            {["Brunch", "Lunch", "Dinner", "Full Day"].filter(name => !shifts.some(s => s.shift_name.toLowerCase() === name.toLowerCase())).map(name => <option key={name} value={`new:${name}`}>{name} — create shift</option>)}
           </select></label>
         </fieldset>
         {shiftLoading && <p>Loading shifts…</p>}
-        {!shiftLoading && <div className="mod-review">
-          {!shifts.length && <p>No shifts have been created for this date. Create one here to start the closeout.</p>}
-          <fieldset disabled={saving || creatingShift} className="mod-fields">
-            <label>Create another shift<select value={newShiftName} onChange={e => setNewShiftName(e.target.value)}>
-              <option value="Brunch">Brunch</option><option value="Lunch">Lunch</option><option value="Dinner">Dinner</option><option value="Full Day">Full Day</option>
-            </select></label>
-            <button type="button" disabled={!newShiftName || date > localDate()} onClick={() => void addShift()}>{creatingShift ? 'Creating…' : 'Create / Select Shift'}</button>
-          </fieldset>
-        </div>}
+        {creatingShift && <p>Creating shift…</p>}
         {reviewLoading && <p>Loading private reviews…</p>}
         {shiftId && !reviewLoading && <fieldset disabled={saving || !canEdit}>
           <legend>Shift closeout</legend>
-          <h2>Cash deposit &amp; register</h2>
-          <div className="mod-fields">
-            <label>{questionLabel(config, 'deposit', "Cash deposit amount ($)")}<input required type="number" min="0" max="999999999.99" step="0.01"
-              value={deposit} onChange={e => setDeposit(e.target.value)} /></label>
-            <label>{questionLabel(config, 'cash_left', "Where was the cash left?")}<input required maxLength={500} value={cashLeft}
-              onChange={e => setCashLeft(e.target.value)} placeholder="Location and bag or envelope reference" /></label>
-            <label>{questionLabel(config, 'balanced', "Was the register balanced?")}<select required value={balanced}
-              onChange={e => { setBalanced(e.target.value); setDifference(''); setCashNotes('') }}>
-              <option value="">Select an answer</option><option value="yes">Yes</option><option value="no">No</option>
-            </select></label>
-            {balanced === 'no' && <>
-              <label>{questionLabel(config, 'difference', "Register difference ($)")}<input required type="number" step="0.01" min="-999999999.99" max="999999999.99"
-                value={difference} onChange={e => setDifference(e.target.value)} />
-                <small>Negative for a shortage; positive for an overage.</small></label>
-              <label>{questionLabel(config, 'cash_notes', "Explain the difference")}<textarea required rows={3} maxLength={2000} value={cashNotes}
-                onChange={e => setCashNotes(e.target.value)} /></label>
-            </>}
-          </div>
-          <CloseoutQuestions config={config} audience="manager" answers={answers} onChange={setAnswers} />
-          {savedQuestions.some(q => !config?.questions.some(current => current.id === q.id && current.active && current.label === q.label)) && <article className="mod-review"><h2>Archived answers from this closeout</h2>
-            {savedQuestions.filter(q => !config?.questions.some(current => current.id === q.id && current.active && current.label === q.label)).map(q => <p key={q.id}>{q.label}: {answers[q.id] || 'No answer'}</p>)}
-          </article>}
           <h2>Staff who worked this shift</h2>
           <p>Select everyone you supervised. Your own rating is completed by another manager.</p>
           <label>Add staff member<select value="" onChange={e => {if(e.target.value) toggle(e.target.value)}}>
@@ -259,6 +229,28 @@ export function ManagerCloseoutPage() {
               </div>
             </article>
           })}
+          <h2>Cash deposit &amp; register</h2>
+          <div className="mod-fields">
+            <label>{questionLabel(config, 'deposit', "Cash deposit amount ($)")}<input required type="number" min="0" max="999999999.99" step="0.01"
+              value={deposit} onChange={e => setDeposit(e.target.value)} /></label>
+            <label>{questionLabel(config, 'cash_left', "Where was the cash left?")}<input required maxLength={500} value={cashLeft}
+              onChange={e => setCashLeft(e.target.value)} placeholder="Location and bag or envelope reference" /></label>
+            <label>{questionLabel(config, 'balanced', "Was the register balanced?")}<select required value={balanced}
+              onChange={e => { setBalanced(e.target.value); setDifference(''); setCashNotes('') }}>
+              <option value="">Select an answer</option><option value="yes">Yes</option><option value="no">No</option>
+            </select></label>
+            {balanced === 'no' && <>
+              <label>{questionLabel(config, 'difference', "Register difference ($)")}<input required type="number" step="0.01" min="-999999999.99" max="999999999.99"
+                value={difference} onChange={e => setDifference(e.target.value)} />
+                <small>Negative for a shortage; positive for an overage.</small></label>
+              <label>{questionLabel(config, 'cash_notes', "Explain the difference")}<textarea required rows={3} maxLength={2000} value={cashNotes}
+                onChange={e => setCashNotes(e.target.value)} /></label>
+            </>}
+          </div>
+          <CloseoutQuestions config={config} audience="manager" answers={answers} onChange={setAnswers} />
+          {savedQuestions.some(q => !config?.questions.some(current => current.id === q.id && current.active && current.label === q.label)) && <article className="mod-review"><h2>Archived answers from this closeout</h2>
+            {savedQuestions.filter(q => !config?.questions.some(current => current.id === q.id && current.active && current.label === q.label)).map(q => <p key={q.id}>{q.label}: {answers[q.id] || 'No answer'}</p>)}
+          </article>}
           <label className="mod-check"><input type="checkbox" required checked={confirmed}
             onChange={e => setConfirmed(e.target.checked)} />I included everyone I supervised who worked this shift.</label>
           <button type="submit" disabled={!reviews.length || !confirmed}>{saving ? 'Saving…' : 'Submit Manager Closeout'}</button>
