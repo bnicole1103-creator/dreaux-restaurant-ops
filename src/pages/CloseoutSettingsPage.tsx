@@ -1,3 +1,4 @@
+import { SignedPoints } from '../components/SignedPoints'
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
@@ -68,7 +69,7 @@ export function CloseoutSettingsPage() {
         {config.rules.map(r=><article className="mod-review" key={r.id}><p>{r.mode==='automatic'?'Automatic':'Manager awarded'}</p><div className="mod-fields">
           <label>Category<input required maxLength={100} value={r.category} onChange={e=>updateRule(r.id,{category:e.target.value})}/></label>
           <label>Reason<input required maxLength={500} value={r.reason} onChange={e=>updateRule(r.id,{reason:e.target.value})}/></label>
-          <label>Points<input required type="number" min="-1000" max="1000" step="1" value={r.points} onChange={e=>updateRule(r.id,{points:Number(e.target.value)})}/></label>
+          <SignedPoints value={r.points} onChange={points=>updateRule(r.id,{points})} />
           <label className="mod-check"><input type="checkbox" checked={r.active} onChange={e=>updateRule(r.id,{active:e.target.checked})}/>Active</label>
         </div></article>)}
         <button type="button" disabled={config.rules.length>=200} onClick={()=>{setDirty(true);setConfig({...config,rules:[...config.rules,{id:crypto.randomUUID(),category:'',reason:'',points:0,active:true,mode:'manual'}]})}}>Add Point Category / Reason</button>
