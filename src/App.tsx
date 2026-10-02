@@ -112,7 +112,8 @@ export default function App() {
     <AppShell session={session}>
       <Routes>
         <Route path="/quizzes" element={<QuizzesPage />} />
-        <Route path="/quizzes/build" element={<ManagementOnly><QuizBuilderPage /></ManagementOnly>} />
+        <Route path="/quizzes/build" element={<ManagementOnly><QuizBuilderPage key="future" /></ManagementOnly>} />
+        <Route path="/quizzes/manage" element={<ManagementOnly><QuizBuilderPage key="published" publishedView /></ManagementOnly>} />
 
         <Route
           path="/"
