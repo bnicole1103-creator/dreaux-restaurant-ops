@@ -1,3 +1,4 @@
+import { QuizUpload } from '../components/QuizUpload'
 import { QuizRequiredStaff } from '../components/QuizRequiredStaff'
 import { submissionLabel } from '../lib/submissionTime'
 import { PublishedQuizzes } from '../components/PublishedQuizzes'
@@ -51,6 +52,7 @@ export function QuizBuilderPage({publishedView=false}:{publishedView?:boolean}) 
  <p>{published?(publishedView?'Published':'Scheduled'):'Draft'}{dirty?' · Unsaved changes':''}</p>
  {results.length>0 && <p>Existing scores and submitted answers are preserved. Edits apply to staff who have not submitted. Staff who already submitted cannot retake this quiz.</p>}
  {error && <p role="alert">{error}</p>}{message && <p role="status">{message}</p>}{busy && <p>Loading…</p>}
+ <QuizUpload disabled={busy || !location} date={date} onApply={(upload,append)=>{if(append && questions.length+upload.questions.length>50){setMessage('Choose fewer questions. A quiz can contain up to 50.');return false}if(!append && questions.length && !window.confirm('Replace the current questions? Saved submissions stay unchanged.'))return false;setQuestions(v=>append?[...v,...upload.questions]:upload.questions);if(!append){if(upload.title)setTitle(upload.title);if(upload.instructions)setInstructions(upload.instructions)}setDirty(true);setMessage('Questions loaded. Review and edit them below, then save or publish.');return true}} />
  {!publishedView && <QuizQuestionBank location={location} disabled={busy || !location} questions={questions} onAdd={items=>{setQuestions(v=>[...v,...items].slice(0,50));setDirty(true)}} />}
  <fieldset disabled={busy || !location} className="quiz-editor">
  <details className="quiz-settings"><summary>Quiz title and instructions</summary>
