@@ -1,4 +1,6 @@
-import { TonightsFloorCards } from '../components/TonightsFloorCards'
+import { floorRoomRatio, floorTableGeometry } from '../lib/floorPhotoLayout'
+import './FloorMap.css'
+import { recommendSections } from '../lib/smartSections'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { loadTenantData } from '../lib/tenant'
@@ -110,6 +112,7 @@ type RotationLogEntry = {
 }
 
 export function FloorPage() {
+  const [smartNotice,setSmartNotice]=useState('')
   const [floorNotice,setFloorNotice]=useState('')
   const [seatServerId,setSeatServerId]=useState('')
   const [organizationId, setOrganizationId] = useState('')
@@ -895,235 +898,41 @@ const [partySize, setPartySize] = useState(1)
     )
   }
 
-  async function handleSmartSection() {
-    if (selectedTableIds.length === 0) {
-      return
-    }
-
+  async function matchPhotoLayout(){
+     if(!locationId || saving)return
+     if(!window.confirm('Match the table positions and shapes to your photos? This updates the saved layout for all rooms. Section assignments and seated parties stay unchanged.'))return
+     setSaving(true);setError('');setFloorNotice('')
+     try{const r=await supabase.rpc('floor_apply_photo_layout',{p_location_id:locationId});if(r.error)throw r.error
+       setFloorNotice(`Photo layout saved for ${r.data.updated} tables. ${r.data.missing.length?"Photo labels not found: "+r.data.missing.join(', '):"All photo tables matched."}`)
+       const loaded=await supabase.from('floor_tables').select('id,location_id,room_id,table_name,seat_count,shape,position_x,position_y,width,height').eq('location_id',locationId).eq('is_active',true)
+       if(loaded.error)throw loaded.error;setTables((loaded.data??[]) as FloorTable[]);setArrangeMode(false)
+     }catch(e){setError(String((e as {message?:string}).message??e))}finally{setSaving(false)}
+   }
+   async function handleSmartSection() {
+    if (!selectedTableIds.length || smartLoading || saving || arrangeMode) return
+    setSmartLoading(true);setSmartNotice('');setSmartRecommendations([]);setShowSmartPanel(true)
+    const selected=[...selectedTableIds]
+    const candidates=team.filter(m=>['server','bartender','manager','assistant_manager','general_manager','owner'].includes(m.role)).map(m=>({id:m.user_id,name:memberName(m.user_id)}))
+    const loads:Record<string,number>={}
+    assignments.filter(a=>!selected.includes(a.table_id)).forEach(a=>{loads[a.server_id]=(loads[a.server_id]??0)+(tables.find(t=>t.id===a.table_id)?.seat_count??0)})
+    let rows:{employee_id:string;net_sales:number|null;sales_per_hour:number|null}[]=[];let exact=false
     try {
-      setSmartLoading(true)
-      setError('')
-
-      const selectedSorted = [...selectedTableIds].sort()
-
-      const { data: candidateLinks, error: candidateError } =
-        await supabase
-          .from('shift_section_tables')
-          .select('shift_section_id, table_id')
-          .in('table_id', selectedTableIds)
-
-      if (candidateError) {
-        throw candidateError
-      }
-
-      const candidateIds = Array.from(
-        new Set(
-          (candidateLinks ?? []).map(
-            (row) => row.shift_section_id,
-          ),
-        ),
-      )
-
-      let exactSectionIds: string[] = []
-
-      if (candidateIds.length > 0) {
-        const { data: allLinks, error: linksError } =
-          await supabase
-            .from('shift_section_tables')
-            .select('shift_section_id, table_id')
-            .in('shift_section_id', candidateIds)
-
-        if (linksError) {
-          throw linksError
-        }
-
-        const grouped = new Map<string, string[]>()
-
-        ;(allLinks ?? []).forEach((row) => {
-          const current =
-            grouped.get(row.shift_section_id) ?? []
-
-          current.push(row.table_id)
-          grouped.set(row.shift_section_id, current)
-        })
-
-        exactSectionIds = Array.from(grouped.entries())
-          .filter(([, tableIds]) => {
-            const historicalSorted = [...tableIds].sort()
-
-            return (
-              historicalSorted.length ===
-                selectedSorted.length &&
-              historicalSorted.every(
-                (tableId, index) =>
-                  tableId === selectedSorted[index],
-              )
-            )
-          })
-          .map(([sectionId]) => sectionId)
-      }
-
-      let performanceQuery = supabase
-        .from('section_performance')
-        .select(
-          'employee_id, net_sales, sales_per_hour, shift_section_id',
-        )
-        .eq('location_id', locationId)
-
-      if (exactSectionIds.length > 0) {
-        performanceQuery = performanceQuery.in(
-          'shift_section_id',
-          exactSectionIds,
-        )
-      }
-
-      const {
-        data: performanceRows,
-        error: performanceError,
-      } = await performanceQuery.limit(500)
-
-      if (performanceError) {
-        throw performanceError
-      }
-
-      const employeeStats = new Map<
-        string,
-        {
-          salesPerHour: number
-          netSales: number
-          count: number
-        }
-      >()
-
-      ;(performanceRows ?? []).forEach((row) => {
-        const current = employeeStats.get(row.employee_id) ?? {
-          salesPerHour: 0,
-          netSales: 0,
-          count: 0,
-        }
-
-        current.salesPerHour +=
-          Number(row.sales_per_hour) || 0
-        current.netSales += Number(row.net_sales) || 0
-        current.count += 1
-
-        employeeStats.set(row.employee_id, current)
-      })
-
-      const currentSeatLoad = new Map<string, number>()
-
-      assignments.forEach((assignment) => {
-        const table = tables.find(
-          (item) => item.id === assignment.table_id,
-        )
-
-        currentSeatLoad.set(
-          assignment.server_id,
-          (currentSeatLoad.get(assignment.server_id) ?? 0) +
-            (table?.seat_count ?? 0),
-        )
-      })
-
-      const eligibleTeam = team.filter((member) => {
-        const role = member.role.toLowerCase()
-
-        return (
-          role.includes('server') ||
-          role.includes('bartender') ||
-          role.includes('manager')
-        )
-      })
-
-      const candidates =
-        eligibleTeam.length > 0 ? eligibleTeam : team
-
-      const historicalAverages = candidates.map((member) => {
-        const stats = employeeStats.get(member.user_id)
-        const count = stats?.count ?? 0
-
-        return {
-          member,
-          avgSalesPerHour:
-            count > 0
-              ? (stats?.salesPerHour ?? 0) / count
-              : 0,
-          avgNetSales:
-            count > 0
-              ? (stats?.netSales ?? 0) / count
-              : 0,
-          uses: count,
-          currentSeats:
-            currentSeatLoad.get(member.user_id) ?? 0,
-        }
-      })
-
-      const maxSalesPerHour = Math.max(
-        1,
-        ...historicalAverages.map(
-          (item) => item.avgSalesPerHour,
-        ),
-      )
-
-      const maxSeatLoad = Math.max(
-        1,
-        ...historicalAverages.map(
-          (item) => item.currentSeats,
-        ),
-      )
-
-      const recommendations = historicalAverages
-        .map((item) => {
-          const performancePoints =
-            item.uses > 0
-              ? (item.avgSalesPerHour / maxSalesPerHour) * 70
-              : 35
-
-          const balancePoints =
-            30 *
-            (1 - item.currentSeats / maxSeatLoad)
-
-          const score = Math.round(
-            Math.min(
-              100,
-              Math.max(
-                0,
-                performancePoints + balancePoints,
-              ),
-            ),
-          )
-
-          const exactHistory = exactSectionIds.length > 0
-
-          return {
-            employeeId: item.member.user_id,
-            employeeName: memberName(item.member.user_id),
-            score,
-            avgSalesPerHour: item.avgSalesPerHour,
-            avgNetSales: item.avgNetSales,
-            historicalUses: item.uses,
-            currentSeats: item.currentSeats,
-            exactHistory,
-            reason:
-              item.uses > 0
-                ? exactHistory
-                  ? 'Historical performance on this exact table combination plus current section balance.'
-                  : 'Historical section performance plus current section balance.'
-                : 'No historical performance yet; recommendation is based mainly on current section balance.',
-          }
-        })
-        .sort((a, b) => b.score - a.score)
-        .slice(0, 5)
-
-      setSmartRecommendations(recommendations)
-      setShowSmartPanel(true)
-    } catch (caughtError) {
-      setError(
-        caughtError instanceof Error
-          ? caughtError.message
-          : 'Unable to calculate section recommendations.',
-      )
+      const links=await supabase.from('shift_section_tables').select('shift_section_id,table_id').in('table_id',selected)
+      if(links.error)throw links.error
+      const ids=[...new Set((links.data??[]).map(x=>x.shift_section_id))]
+      let exactIds:string[]=[]
+      if(ids.length){const all=await supabase.from('shift_section_tables').select('shift_section_id,table_id').in('shift_section_id',ids);if(all.error)throw all.error
+        const key=[...selected].sort().join('|');exactIds=ids.filter(id=>[...new Set((all.data??[]).filter(x=>x.shift_section_id===id).map(x=>x.table_id))].sort().join('|')===key)}
+      let query=supabase.from('section_performance').select('employee_id,net_sales,sales_per_hour').eq('location_id',locationId)
+      if(exactIds.length)query=query.in('shift_section_id',exactIds)
+      let history=await query.limit(500);if(history.error)throw history.error
+      if(exactIds.length && history.data?.length){exact=true}else if(exactIds.length){history=await supabase.from('section_performance').select('employee_id,net_sales,sales_per_hour').eq('location_id',locationId).limit(500);if(history.error)throw history.error}
+      rows=history.data??[]
+      if(!rows.length)setSmartNotice('No section sales history yet. Suggestions use the current table capacity assigned to each server.')
+    } catch {
+      setSmartNotice('Sales history is unavailable. You can still choose from capacity-based suggestions below.')
     } finally {
-      setSmartLoading(false)
+      setSmartRecommendations(recommendSections(candidates,rows,loads,exact));setSmartLoading(false)
     }
   }
 
@@ -2032,16 +1841,6 @@ const [partySize, setPartySize] = useState(1)
         </p>
       </div>
 
-            <TonightsFloorCards
-        tables={tables}
-        assignments={assignments}
-        teamMembers={team
-          .filter((member) => Boolean(member.user_id))
-          .map((member) => ({
-            user_id: member.user_id as string,
-          }))}
-        memberName={memberName}
-      />
 
       <div className="shift-toolbar">
         {shifts.length > 0 ? (
@@ -2178,11 +1977,14 @@ const [partySize, setPartySize] = useState(1)
       <section className="floor-section-tools" aria-label="Section assignment">
         <div><strong>Sections & tables</strong><p>Tap tables to select them. Switch rooms to include more tables.</p></div>
         <div className="floor-selection-list">{selectedTables.length?selectedTables.map(t=><button type="button" key={t.id} onClick={()=>toggleTable(t.id)}>{t.table_name} ×</button>):<span>No tables selected</span>}</div>
-        <div className="floor-selection-actions"><button type="button" disabled={!selectedTableIds.length || saving || arrangeMode} onClick={()=>setShowSectionPanel(true)}>Assign section</button><button type="button" disabled={!selectedTableIds.length || saving || arrangeMode} onClick={openSeating}>Seat selected tables</button><button type="button" disabled={!selectedTableIds.length} onClick={()=>setSelectedTableIds([])}>Clear selection</button></div>
-        {sectionCards.length>0 && <details><summary>Assigned sections ({sectionCards.length})</summary><div className="floor-selection-list">{sectionCards.map(c=><button type="button" key={c.id} onClick={()=>{setSelectedTableIds(c.tableIds);setSectionName(c.name);setSelectedServerId(c.employeeId)}}>{c.name} · {memberName(c.employeeId)} · {c.tableIds.length} tables</button>)}</div></details>}
+        <div className="floor-selection-actions"><button type="button" disabled={!selectedTableIds.length || smartLoading || saving || arrangeMode} onClick={()=>void handleSmartSection()}>{smartLoading?'Analyzing…':'✨ Smart Section'}</button><button type="button" disabled={!selectedTableIds.length || saving || arrangeMode} onClick={()=>setShowSectionPanel(true)}>Assign section</button><button type="button" disabled={!selectedTableIds.length || saving || arrangeMode} onClick={openSeating}>Seat selected tables</button><button type="button" disabled={!selectedTableIds.length} onClick={()=>setSelectedTableIds([])}>Clear selection</button></div>
+
         {floorNotice && <p role="status">{floorNotice}</p>}
       </section>
-      {/* LIVE FLOOR */}
+      <div className="floor-photo-controls"><button type="button" disabled={saving||!locationId} onClick={()=>void matchPhotoLayout()}>{saving?'Saving…':'Match photo layout'}</button><span className="floor-map-hint">Saves positions and shapes for Main Dining, Brut Bar, Courtyard and Great Room.</span></div>
+       <p className="floor-map-hint">Swipe sideways on the map to view the whole room. Tap multiple tables to select them.</p>
+       {/* LIVE FLOOR */}
+       <div className="floor-map-scroll">
       <div
         className="floor-canvas"
         ref={floorCanvasRef}
@@ -2190,10 +1992,11 @@ const [partySize, setPartySize] = useState(1)
           arrangeMode
             ? {
                 position: 'relative',
-                border: '1px dashed #f4b860',
+                border: '1px dashed var(--app-accent, #d7b795)',
+                aspectRatio: String(1/floorRoomRatio(rooms.find(r=>r.id===activeRoomId)?.name??'')),
                 touchAction: 'none',
               }
-            : { position: 'relative' }
+            : { position: 'relative',aspectRatio: String(1/floorRoomRatio(rooms.find(r=>r.id===activeRoomId)?.name??'')) }
         }
       >
         {activeTables.map((table) => {
@@ -2224,10 +2027,7 @@ const [partySize, setPartySize] = useState(1)
                 activeSession ? 'occupied' : ''
               }`}
               style={{
-                left: `${table.position_x}%`,
-                top: `${table.position_y}%`,
-                width: `${table.width}%`,
-                height: `${table.height}%`,
+                ...floorTableGeometry(table),
                 background: activeSession
                   ? statusColor(activeSession.status)
                   : undefined,
@@ -2235,7 +2035,7 @@ const [partySize, setPartySize] = useState(1)
                   ? '#ffffff'
                   : undefined,
                 border: selected
-                  ? '3px solid #f4b860'
+                  ? '3px solid var(--app-accent, #d7b795)'
                   : arrangeMode
                   ? '2px dashed var(--app-muted)'
                   : undefined,
@@ -2272,13 +2072,13 @@ const [partySize, setPartySize] = useState(1)
                 {table.table_name}
               </strong>
 
-              <span>
+              <span className="floor-table-caption">
                 {assignedServer ||
                   `${table.seat_count} seats`}
               </span>
 
               {!activeSession && upcomingReservation && (
-                <span
+                <span className="floor-table-status"
                   style={{
                     display: 'block',
                     marginTop: '4px',
@@ -2295,7 +2095,7 @@ const [partySize, setPartySize] = useState(1)
 
               {activeSession && (
                 <>
-                  <span
+                  <span className="floor-table-status"
                     style={{
                       display: 'block',
                       marginTop: '4px',
@@ -2306,7 +2106,7 @@ const [partySize, setPartySize] = useState(1)
                     {statusLabel(activeSession.status)}
                   </span>
 
-                  <span
+                  <span className="floor-table-status"
                     style={{
                       display: 'block',
                       marginTop: '2px',
@@ -2325,116 +2125,13 @@ const [partySize, setPartySize] = useState(1)
             </button>
           )
         })}
+        <p className="floor-map-room-name">{rooms.find(r=>r.id===activeRoomId)?.name}</p>
+      </div>
       </div>
 
-      {/* SECTION CARDS — BELOW FLOOR */}
-      {sectionCards.length > 0 && (
-        <div
-          style={{
-            marginTop: '24px',
-            marginBottom: '120px',
-          }}
-        >
-          <p className="eyebrow">
-            Tonight&apos;s Floor
-          </p>
-
-          <h2>Sections</h2>
-
-          <div
-            style={{
-              display: 'grid',
-              gap: '12px',
-              marginTop: '12px',
-            }}
-          >
-            {sectionCards.map(
-              (section) => {
-                const sectionTables =
-                  tables.filter((table) =>
-                    section.tableIds.includes(
-                      table.id,
-                    ),
-                  )
-
-                return (
-                  <button
-                    key={section.id}
-                    onClick={() =>
-                      setSelectedTableIds(
-                        section.tableIds,
-                      )
-                    }
-                    style={{
-                      textAlign: 'left',
-                      padding: '16px',
-                      borderRadius: '16px',
-                      border:
-                        '1px solid var(--app-border)',
-                      background: '#ffffff',
-                      color: 'var(--app-text)',
-                      cursor: 'pointer',
-                      width: '100%',
-                    }}
-                  >
-                    <strong
-                      style={{
-                        display: 'block',
-                        fontSize: '18px',
-                      }}
-                    >
-                      {section.name}
-                    </strong>
-
-                    <span
-                      style={{
-                        display: 'block',
-                        marginTop: '4px',
-                        color: '#f4b860',
-                      }}
-                    >
-                      {memberName(
-                        section.employeeId,
-                      )}
-                    </span>
-
-                    <span
-                      style={{
-                        display: 'block',
-                        marginTop: '10px',
-                      }}
-                    >
-                      {sectionTables
-                        .map(
-                          (table) =>
-                            table.table_name,
-                        )
-                        .join(', ')}
-                    </span>
-
-                    <span
-                      style={{
-                        display: 'block',
-                        marginTop: '6px',
-                        opacity: 0.7,
-                        fontSize: '13px',
-                      }}
-                    >
-                      {
-                        section.tableIds.length
-                      }{' '}
-                      tables ·{' '}
-                      {section.totalSeats} seats
-                    </span>
-                  </button>
-                )
-              },
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* TABLE ACTION BAR */}
+      {sectionCards.length>0 && <section className="floor-section-summary"><p className="eyebrow">Tonight’s Floor</p><h2>Assigned sections</h2><div>{sectionCards.map(c=><button key={c.id} onClick={()=>setSelectedTableIds(c.tableIds)}><strong>{c.name}</strong><span className="section-server">{memberName(c.employeeId)}</span><span>{tables.filter(t=>c.tableIds.includes(t.id)).map(t=>t.table_name).join(', ')}</span><span>{c.tableIds.length} tables · {c.totalSeats} seats</span></button>)}</div></section>}
+ 
+       {/* TABLE ACTION BAR */}
       {selectedTableIds.length > 0 && (
         <div className="floor-action-bar">
           <span>
@@ -2758,7 +2455,7 @@ const [partySize, setPartySize] = useState(1)
         <div className="modal-backdrop">
           <div className="modal-card">
             <p className="eyebrow">SectionIQ</p>
-            <h2>Smart Section</h2>
+            <h2>Smart Section</h2>{smartLoading&&<p role="status">Checking history and assigned capacity…</p>}{smartNotice&&<p role="status">{smartNotice}</p>}
 
             <div
               style={{
