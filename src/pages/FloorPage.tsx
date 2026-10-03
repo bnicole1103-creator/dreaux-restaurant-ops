@@ -1842,6 +1842,9 @@ const [partySize, setPartySize] = useState(1)
       </div>
 
 
+      {/* FLOOR SECTIONS AT TOP */}
+      {sectionCards.length>0 && <section className="floor-section-summary"><p className="eyebrow">Tonight’s Floor</p><h2>Assigned sections</h2><div>{sectionCards.map(c=><button key={c.id} onClick={()=>setSelectedTableIds(c.tableIds)}><strong>{c.name}</strong><span className="section-server">{memberName(c.employeeId)}</span><span>{tables.filter(t=>c.tableIds.includes(t.id)).map(t=>t.table_name).join(', ')}</span><span>{c.tableIds.length} tables · {c.totalSeats} seats</span></button>)}</div></section>}
+
       <div className="shift-toolbar">
         {shifts.length > 0 ? (
           <select
@@ -2129,8 +2132,6 @@ const [partySize, setPartySize] = useState(1)
       </div>
       </div>
 
-      {sectionCards.length>0 && <section className="floor-section-summary"><p className="eyebrow">Tonight’s Floor</p><h2>Assigned sections</h2><div>{sectionCards.map(c=><button key={c.id} onClick={()=>setSelectedTableIds(c.tableIds)}><strong>{c.name}</strong><span className="section-server">{memberName(c.employeeId)}</span><span>{tables.filter(t=>c.tableIds.includes(t.id)).map(t=>t.table_name).join(', ')}</span><span>{c.tableIds.length} tables · {c.totalSeats} seats</span></button>)}</div></section>}
- 
        {/* TABLE ACTION BAR */}
       {selectedTableIds.length > 0 && (
         <div className="floor-action-bar">
