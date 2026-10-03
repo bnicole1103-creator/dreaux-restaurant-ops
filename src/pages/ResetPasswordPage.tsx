@@ -47,8 +47,8 @@ export function ResetPasswordPage({ hasSession }: { hasSession: boolean }) {
   }
 
   return (
-    <main style={{ minHeight: '100vh', display: 'grid', placeItems: 'center', padding: 24, background: '#493024', color: '#fff' }}>
-      <section style={{ width: '100%', maxWidth: 420, padding: 28, borderRadius: 16, background: '#493024' }}>
+    <main style={{ minHeight: '100vh', display: 'grid', placeItems: 'center', padding: 24, background: 'var(--app-text)', color: '#fff' }}>
+      <section style={{ width: '100%', maxWidth: 420, padding: 28, borderRadius: 16, background: 'var(--app-text)' }}>
         <h1>Set New Password</h1>
         {saved ? (
           <>

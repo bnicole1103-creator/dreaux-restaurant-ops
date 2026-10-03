@@ -1,0 +1,9 @@
+import type { CSSProperties } from 'react'
+export const appFonts={system:{label:'Clean sans serif',css:'Inter, ui-sans-serif, system-ui, sans-serif'},serif:{label:'Classic serif',css:'Georgia, "Times New Roman", serif'},rounded:{label:'Rounded',css:'"Arial Rounded MT Bold", "Trebuchet MS", sans-serif'},mono:{label:'Monospace',css:'"Courier New", monospace'}} as const
+export type FontName=keyof typeof appFonts
+export type Appearance={background:string;card:string;text:string;muted:string;accent:string;accentText:string;border:string;font:FontName}
+export const defaultAppearance:Appearance={background:'#f7f1e9',card:'#ffffff',text:'#493024',muted:'#725e51',accent:'#d7b795',accentText:'#493024',border:'#d4c1b0',font:'system'}
+export const themePresets={Warm:defaultAppearance,Sage:{...defaultAppearance,background:'#eef3eb',text:'#233b2a',muted:'#46604e',accent:'#bfd0b4',accentText:'#233b2a',border:'#b9c8b2'},Rose:{...defaultAppearance,background:'#fbf0f1',text:'#542d3e',muted:'#795161',accent:'#edc6ce',accentText:'#542d3e',border:'#d9b5bf'},Midnight:{...defaultAppearance,background:'#111827',card:'#1f2937',text:'#f8fafc',muted:'#cbd5e1',accent:'#d7b795',accentText:'#493024',border:'#64748b'}}
+export function appearanceVars(a:Appearance):CSSProperties{return {'--app-background':a.background,'--app-card':a.card,'--app-text':a.text,'--app-muted':a.muted,'--app-accent':a.accent,'--app-accent-text':a.accentText,'--app-border':a.border,'--app-font':appFonts[a.font]?.css ?? appFonts.system.css} as CSSProperties}
+export function applyAppearance(a:Appearance){Object.entries(appearanceVars(a)).forEach(([key,value])=>document.documentElement.style.setProperty(key,String(value)))}
+export function clearAppearance(){Object.keys(appearanceVars(defaultAppearance)).forEach(key=>document.documentElement.style.removeProperty(key))}

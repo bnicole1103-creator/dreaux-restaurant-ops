@@ -1,3 +1,5 @@
+import { AppearancePage as LocationAppearancePage } from './pages/AppearancePage'
+import { ManagementOnly as AppearanceGuard } from './components/ManagementAccess'
 import { PreshiftFeedPage } from './pages/PreshiftFeedPage'
 import { QuizBuilderPage } from './pages/QuizBuilderPage'
 import { QuizzesPage } from './pages/QuizzesPage'
@@ -112,6 +114,7 @@ export default function App() {
     <SignupGate key={session.user.id} userId={session.user.id}>
     <AppShell session={session}>
       <Routes>
+        <Route path="/appearance" element={<AppearanceGuard gmOnly><LocationAppearancePage /></AppearanceGuard>} />
         <Route path="/preshift" element={<PreshiftFeedPage />} />
         <Route path="/quizzes" element={<QuizzesPage />} />
         <Route path="/quizzes/build" element={<ManagementOnly><QuizBuilderPage key="future" /></ManagementOnly>} />

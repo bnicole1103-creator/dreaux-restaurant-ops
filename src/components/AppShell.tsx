@@ -1,3 +1,4 @@
+import { AppearanceHeader } from './AppearanceHeader'
 import '../pages/WarmTheme.css'
 import type { PropsWithChildren } from 'react'
 import type { Session } from '@supabase/supabase-js'
@@ -88,6 +89,7 @@ export function AppShell({
     <div className="app-shell">
 
       <header className="app-header">
+        <AppearanceHeader />
 
         <div className="app-brand">
           <strong>
