@@ -1,3 +1,4 @@
+import { submissionLabel } from '../lib/submissionTime'
 import { CloseoutQuestions, useCloseoutConfig, checkAnswers, questionLabel } from '../components/CloseoutConfig'
 import type { Answers, Question } from '../components/CloseoutConfig'
 import { useEffect, useState } from 'react'
@@ -56,6 +57,7 @@ export function ManagerCloseoutPage() {
   const [elevated, setElevated] = useState(false)
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
+  const [stamp,setStamp]=useState<{submitted_at:string;updated_at:string}|null>(null)
 
   useEffect(() => {
     let active = true
@@ -88,7 +90,7 @@ export function ManagerCloseoutPage() {
   useEffect(() => {
     if (!locationId) return
     let active = true
-    setShiftLoading(true); setShiftId(''); setShifts([]); setReviews([]); setShiftMvp('')
+    setStamp(null); setShiftLoading(true); setShiftId(''); setShifts([]); setReviews([]); setShiftMvp('')
     setConfirmed(false); setMessage(''); setError('')
     setAnswers({}); setSavedQuestions([]); setDeposit(''); setCashLeft(''); setBalanced(''); setDifference(''); setCashNotes('')
     void (async () => {
@@ -109,15 +111,18 @@ export function ManagerCloseoutPage() {
     if (!shiftId) return
     let active = true
     setAnswers({}); setSavedQuestions([]); setDeposit(''); setCashLeft(''); setBalanced(''); setDifference(''); setCashNotes('')
-    setReviewLoading(true); setReviews([]); setShiftMvp(''); setConfirmed(false); setMessage(''); setError('')
+    setStamp(null); setReviewLoading(true); setReviews([]); setShiftMvp(''); setConfirmed(false); setMessage(''); setError('')
     void (async () => {
       try {
         const { data, error: queryError } = await supabase.rpc('mod_get_closeout', { p_shift_id: shiftId })
         if (queryError) throw queryError
         const extra = await supabase.rpc('closeout_manager_answers', { p_shift_id: shiftId })
         if (extra.error) throw extra.error
+        const timestamp=await supabase.rpc('closeout_manager_submission',{p_shift_id:shiftId})
+        if(timestamp.error)throw timestamp.error
         const saved = data as SavedCloseout | null
         if (!active) return
+        setStamp(timestamp.data)
         setAnswers(extra.data?.answers ?? {})
         setSavedQuestions(extra.data?.questions ?? [])
         setReviews((saved?.reviews ?? []).map(r => ({...r, ...splitReason(r.reason)})))
@@ -186,6 +191,9 @@ export function ManagerCloseoutPage() {
         p_register_notes: cashNotes.trim(),
       })
       if (saveError) throw saveError
+      const timestamp=await supabase.rpc('closeout_manager_submission',{p_shift_id:shiftId})
+      if(timestamp.error)throw timestamp.error
+      setStamp(timestamp.data)
       setMessage('Manager closeout saved. Performance points have been updated.')
     } catch (e) { setError(errorMessage(e)) }
     finally { setSaving(false) }
@@ -198,6 +206,7 @@ export function ManagerCloseoutPage() {
     {configError && <p role="alert">{configError}</p>}
     {error && <p role="alert">{error}</p>}
     {message && <p role="status">{message}</p>}
+    {stamp && <p>Submitted: {submissionLabel(stamp.submitted_at)}{stamp.updated_at!==stamp.submitted_at && <> · Last updated: {submissionLabel(stamp.updated_at)}</>}</p>}
     {allowed && <>
       <form onSubmit={submit}>
         <fieldset disabled={saving || creatingShift} className="mod-controls">
@@ -282,4 +291,5 @@ export function ManagerCloseoutPage() {
     </>}
   </section>
 }
+
 

@@ -1,3 +1,4 @@
+import { PointEntryEditor } from '../components/PointEntryEditor'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
@@ -17,6 +18,8 @@ export function PointsPage() {
   const [locationId, setLocationId] = useState('')
   const [userId, setUserId] = useState('')
   const [manager, setManager] = useState(false)
+  const [gm,setGm]=useState(false)
+  const [refresh,setRefresh]=useState(0)
   const [dashboard, setDashboard] = useState<Dashboard>({ standings: [], history: [] })
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -31,7 +34,9 @@ export function PointsPage() {
         if (userError) throw userError
         const permission = await supabase.rpc('mod_is_manager', { p_location_id: location.id })
         if (permission.error) throw permission.error
-        if (active) { setUserId(data.user?.id ?? ''); setManager(!!permission.data); setLocationId(location.id) }
+        const generalManager=await supabase.rpc('closeout_is_gm',{p_location_id:location.id})
+        if(generalManager.error)throw generalManager.error
+        if (active) { setUserId(data.user?.id ?? ''); setManager(!!permission.data); setGm(!!generalManager.data); setLocationId(location.id) }
       } catch (e) {
         if (active) { setError(String((e as { message?: string }).message ?? e)); setLoading(false) }
       }
@@ -53,7 +58,7 @@ export function PointsPage() {
       finally { if (active) setLoading(false) }
     })()
     return () => { active = false }
-  }, [locationId, month])
+  }, [locationId, month, refresh])
   const mine = dashboard.standings.find(s => s.user_id === userId)
   return <section className="points-page">
     <div className="page-heading"><p className="eyebrow">LNX Systems</p><h1>Points & Leaderboard</h1>
@@ -85,5 +90,7 @@ export function PointsPage() {
         <thead><tr><th>Rank</th><th>Team Member</th><th>Points</th></tr></thead>
         <tbody>{dashboard.standings.map(s => <tr key={s.user_id}><td>{s.rank}</td><td>{s.name}</td><td>{s.total}</td></tr>)}</tbody>
       </table></div></article>)}
+    {gm && <PointEntryEditor location={locationId} month={month} onChanged={()=>setRefresh(v=>v+1)} />}
   </section>
 }
+

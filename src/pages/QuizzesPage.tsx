@@ -1,3 +1,4 @@
+import { submissionLabel } from '../lib/submissionTime'
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
@@ -9,9 +10,9 @@ import './ManagerCloseoutPage.css'
 import './QuizzesPage.css'
 export type Question = {prompt:string;category:string;options:string[];correct:number;explanation:string}
 export type Quiz = {id:string;version:number;quiz_date:string;title:string;instructions:string;questions:Question[];published:boolean}
-export type QuizResult = {score:number;total:number;percent:number;questions:{prompt:string;category:string;selected:string;correct_answer:string;correct:boolean;explanation:string}[]}
-type Attempt={quiz_id:string;quiz_date:string;title:string;submitted_at:string;result:QuizResult;running_points:number}
-type Monthly={points:number;possible:number;completed:number;attempts:Attempt[]}
+export type QuizResult = {score:number;total:number;percent:number;reward_points?:number;questions:{prompt:string;category:string;selected:string;correct_answer:string;correct:boolean;explanation:string}[]}
+type Attempt={quiz_id:string;quiz_date:string;title:string;submitted_at:string;result:QuizResult;running_score:number;earned_points:number}
+type Monthly={points:number;correct:number;requirements:{quiz_id:string;due_at:string}[];penalties:{entry_key:string;business_date:string;points:number;description:string}[];possible:number;completed:number;attempts:Attempt[]}
 export function quizToday(){const p=new Intl.DateTimeFormat('en-US',{timeZone:'America/Chicago',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());const get=(t:string)=>p.find(x=>x.type===t)?.value;return `${get('year')}-${get('month')}-${get('day')}`}
 export function quizTomorrow(){const d=new Date(`${quizToday()}T12:00:00Z`);d.setUTCDate(d.getUTCDate()+1);return d.toISOString().slice(0,10)}
 export function quizDateLabel(day:string){return new Intl.DateTimeFormat('en-US',{timeZone:'UTC',month:'long',day:'numeric',year:'numeric'}).format(new Date(`${day}T12:00:00Z`))}
@@ -21,9 +22,9 @@ export function QuizResults({result}:{result:QuizResult}){
   {result.questions.map((q,i)=><article className="quiz-question" key={i}><h4>{i+1}. {q.prompt}</h4><p>{q.correct?'Correct':'Incorrect'} · Your answer: {q.selected}</p><p>Correct answer: {q.correct_answer}</p>{q.explanation && <p>{q.explanation}</p>}</article>)}
  </article>
 }
-function CompletedQuiz({title,date,result,running,monthly}:{title:string;date:string;result:QuizResult;running?:number;monthly?:number}){
+function CompletedQuiz({title,date,result,running,monthly,submittedAt,earned}:{title:string;date:string;result:QuizResult;running?:number;monthly?:number;submittedAt?:string;earned?:number}){
  return <details className="quiz-completed"><summary><span><strong>Pre-Shift Quiz · {quizDateLabel(date)}</strong><span className="quiz-card-title">{title}</span></span><span className="quiz-card-score">{result.score}/{result.total} · {result.percent}%<span className="quiz-card-title">View answers and quiz points</span></span></summary>
-  <p>Quiz points earned: <strong>+{result.score}</strong>{running!==undefined && <> · Monthly total through this quiz: <strong>{running}</strong></>}{monthly!==undefined && <> · Current total for this month: <strong>{monthly}</strong></>}</p>
+  <p>Submitted: {submissionLabel(submittedAt)}</p><p>Quiz points earned: <strong>{earned ?? result.reward_points ?? (result.score===result.total?5:result.score*5>=result.total*4?3:0)}</strong>{running!==undefined && <> · Running quiz score through this quiz: <strong>{running}</strong></>}{monthly!==undefined && <> · Monthly reward points: <strong>{monthly}</strong></>}</p>
   <QuizResults result={result} />
  </details>
 }
@@ -61,16 +62,19 @@ export function QuizzesPage(){
   <h2>Today · {quizDateLabel(date)}</h2>
   {error && <p role="alert">{error}</p>}{busy && <p role="status">Loading…</p>}
   {!busy && !quiz && !error && <article className="mod-review"><h3>No quiz published for today</h3><p>Your manager will publish today’s pre-shift quiz here.</p>{access.manager && <Link to={'/quizzes/manage?date='+date}>Create / Publish Today’s Quiz →</Link>}</article>}
-  {quiz && (result?<CompletedQuiz title={quiz.title} date={date} result={result} running={ownToday?.running_points} monthly={month===date.slice(0,7)?monthly?.points:undefined} />:<article className="mod-review"><h3>Pre-Shift Quiz · {quizDateLabel(date)}</h3><p>{quiz.title}</p>{quiz.instructions && <p className="quiz-instructions">{quiz.instructions}</p>}
+  {quiz && monthly?.requirements?.find(r=>r.quiz_id===quiz.id) && <p>This quiz is required for you. Deadline: {submissionLabel(monthly.requirements.find(r=>r.quiz_id===quiz.id)?.due_at)}.</p>}
+  {quiz && (result?<CompletedQuiz title={quiz.title} date={date} result={result} submittedAt={ownToday?.submitted_at} earned={ownToday?.earned_points} running={ownToday?.running_score} monthly={month===date.slice(0,7)?monthly?.points:undefined} />:<article className="mod-review"><h3>Pre-Shift Quiz · {quizDateLabel(date)}</h3><p>{quiz.title}</p>{quiz.instructions && <p className="quiz-instructions">{quiz.instructions}</p>}
    <form onSubmit={e=>{e.preventDefault();void submit()}}>{quiz.questions.map((q,i)=><fieldset className="quiz-question" key={i} disabled={busy}><legend>{i+1}. {q.prompt}</legend><p className="muted">{q.category}</p>{q.options.map((option,n)=><label className="quiz-choice" key={n}><input type="radio" name={'question-'+i} checked={answers[i]===n} required onChange={()=>setAnswers(v=>({...v,[i]:n}))} /><span>{option}</span></label>)}</fieldset>)}<button className="primary-button" disabled={busy || quiz.questions.some((_,i)=>answers[i]===undefined)}>Submit Quiz</button></form>
   </article>)}
-  <article className="mod-review"><h2>My Monthly Quiz Points</h2><label>Month<input type="month" value={month} max={date.slice(0,7)} onChange={e=>{if(e.target.value)setMonth(e.target.value)}} /></label>
+  <article className="mod-review"><h2>My Monthly Quiz Scores</h2><label>Month<input type="month" value={month} max={date.slice(0,7)} onChange={e=>{if(e.target.value)setMonth(e.target.value)}} /></label>
    {monthError && <p role="alert">{monthError}</p>}{monthBusy && <p role="status">Loading quiz points…</p>}
-   {monthly && <><p className="quiz-month-total"><strong>{monthly.points}</strong> quiz points</p><p>{monthly.completed} quizzes completed · {monthly.points}/{monthly.possible} correct answers</p></>}
-   <p>One point per correct answer. Your quiz total starts at zero each month.</p>
+   {monthly && <><p className="quiz-month-total"><strong>{monthly.correct} / {monthly.possible}</strong> correct answers</p><p>{monthly.completed} quizzes completed · {monthly.points} reward points</p></>}
+   <p>No points for submitting or per correct answer. Earn 5 points for 100%, or 3 for 80–99%. Missing a required quiz by 4 a.m. the next morning deducts 10 points. Quiz scores and reward points are tracked separately and start fresh each month.</p>
+   {monthly?.penalties.map(p=><p key={p.entry_key}>{p.business_date} · {p.description}: {p.points} points</p>)}
    <h3>Completed quizzes</h3>{monthly && otherAttempts.length===0 && <p>{ownToday && quiz && result?'Today’s completed quiz is shown above.':'No other quizzes completed this month.'}</p>}
-   {otherAttempts.map(a=><CompletedQuiz key={a.quiz_id} title={a.title} date={a.quiz_date} result={a.result} running={a.running_points} monthly={monthly?.points} />)}
+   {otherAttempts.map(a=><CompletedQuiz key={a.quiz_id} title={a.title} date={a.quiz_date} result={a.result} submittedAt={a.submitted_at} earned={a.earned_points} running={a.running_score} monthly={monthly?.points} />)}
   </article>
   {access.manager && <details><summary>Manage Published Quizzes / Team Scores</summary><PublishedQuizzes location={location} refresh={refresh} disabled={busy || !location} throughDate={date} onEdit={d=>navigate('/quizzes/manage?date='+d)} onRemove={remove} /></details>}
  </section>
 }
+

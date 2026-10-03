@@ -1,3 +1,5 @@
+import { QuizRequiredStaff } from '../components/QuizRequiredStaff'
+import { submissionLabel } from '../lib/submissionTime'
 import { PublishedQuizzes } from '../components/PublishedQuizzes'
 import type { PublishedQuiz } from '../components/PublishedQuizzes'
 import { QuizQuestionBank } from '../components/QuizQuestionBank'
@@ -18,6 +20,7 @@ export function QuizBuilderPage({publishedView=false}:{publishedView?:boolean}) 
  const [instructions,setInstructions]=useState('Read the pre-shift before answering. Choose one answer for each question.')
  const [questions,setQuestions]=useState<Question[]>([])
  const [version,setVersion]=useState(0)
+ const [quizId,setQuizId]=useState('')
  const [published,setPublished]=useState(false)
  const [results,setResults]=useState<Submission[]>([])
  const [busy,setBusy]=useState(true)
@@ -26,7 +29,7 @@ export function QuizBuilderPage({publishedView=false}:{publishedView?:boolean}) 
  const [message,setMessage]=useState('')
  const [listRefresh,setListRefresh]=useState(0)
  const [editorReload,setEditorReload]=useState(0)
- function apply(q:Quiz|null){setTitle(q?.title ?? 'Daily Pre-Shift Quiz');setInstructions(q?.instructions ?? 'Read the pre-shift before answering. Choose one answer for each question.');setQuestions(q?.questions ?? []);setVersion(q?.version ?? 0);setPublished(q?.published ?? false);setDirty(false)}
+ function apply(q:Quiz|null){setQuizId(q?.id ?? '');setTitle(q?.title ?? 'Daily Pre-Shift Quiz');setInstructions(q?.instructions ?? 'Read the pre-shift before answering. Choose one answer for each question.');setQuestions(q?.questions ?? []);setVersion(q?.version ?? 0);setPublished(q?.published ?? false);setDirty(false)}
  useEffect(()=>{let live=true;void loadTenantData().then(t=>{if(!t.locations[0])throw new Error('No active location.');if(live)setLocation(t.locations[0].id)}).catch(e=>{if(live){setError(quizError(e));setBusy(false)}});return()=>{live=false}},[])
  useEffect(()=>{if(!location)return;let live=true;setBusy(true);setError('');setMessage('');apply(null);setResults([]);void supabase.rpc('quiz_manager_load',{p_location_id:location,p_date:date}).then(({data,error})=>{if(!live)return;if(error)setError(error.message);else{apply(data.quiz);setResults(data.results)}setBusy(false)});return()=>{live=false}},[location,date,editorReload])
  function update(i:number,patch:Partial<Question>){setQuestions(q=>q.map((x,n)=>n===i?{...x,...patch}:x));setDirty(true)}
@@ -66,6 +69,8 @@ export function QuizBuilderPage({publishedView=false}:{publishedView?:boolean}) 
  <datalist id="quiz-categories">{['Guest service','Menu knowledge','Cocktails','Specials','Cash handling','Reservations','Teamwork','Policies'].map(c=><option value={c} key={c} />)}</datalist>
  <div className="quiz-actions"><button type="button" disabled={questions.length>=50} onClick={()=>{setQuestions(v=>[...v,emptyQuestion()]);setDirty(true)}}>Add question</button><button type="button" onClick={()=>void save(false)}>Save Draft{published?' / Unpublish':''}</button><button type="button" className="primary-button" onClick={()=>{if(window.confirm(results.length>0?'Publish these changes? Existing scores stay unchanged; staff who have not submitted will receive the updated quiz.':'Publish this quiz for staff?'))void save(true)}}>{publishedView?'Publish Changes':'Schedule Quiz'}</button></div>
  </fieldset>
- {publishedView && <article className="mod-review"><h2>Team scores ({results.length} submitted)</h2>{results.length===0?<p>No submissions yet.</p>:results.map(r=><details key={r.user_id}><summary>{r.name}: {r.result.score}/{r.result.total} ({r.result.percent}%)</summary><p>Submitted: {new Date(r.submitted_at).toLocaleString()}</p>{r.result.questions.map((q,i)=><p key={i}>{i+1}. {q.prompt} — {q.selected} ({q.correct?'correct':'incorrect'})</p>)}</details>)}</article>}
+ {published && quizId && <QuizRequiredStaff location={location} quizId={quizId} />}
+ {publishedView && <article className="mod-review"><h2>Team scores ({results.length} submitted)</h2>{results.length===0?<p>No submissions yet.</p>:results.map(r=><details key={r.user_id}><summary>{r.name}: {r.result.score}/{r.result.total} ({r.result.percent}%)</summary><p>Submitted: {submissionLabel(r.submitted_at)}</p>{r.result.questions.map((q,i)=><p key={i}>{i+1}. {q.prompt} — {q.selected} ({q.correct?'correct':'incorrect'})</p>)}</details>)}</article>}
  </section>
 }
+

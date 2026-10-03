@@ -1,3 +1,4 @@
+import { submissionLabel } from '../lib/submissionTime'
 import { Link } from 'react-router-dom'
 import { CloseoutQuestions, useCloseoutConfig, checkAnswers, questionLabel } from '../components/CloseoutConfig'
 import type { Answers } from '../components/CloseoutConfig'
@@ -1029,7 +1030,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
           points_summary:
             finalPoints.adjustments,
         })
-        .select('id')
+        .select('id,submitted_at')
         .single()
 
       if (closeoutError) {
@@ -1220,7 +1221,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
       resetForm()
 
       let confirmation =
-        `✓ Daily closeout submitted successfully. Shift score: ${submittedScore}.`
+        `✓ Daily closeout submitted ${submissionLabel(closeout.submitted_at)}. Shift score: ${submittedScore}.`
 
       if (
         warnings.length > 0

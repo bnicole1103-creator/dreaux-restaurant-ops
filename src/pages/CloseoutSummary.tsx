@@ -1,3 +1,4 @@
+import { submissionLabel, clockLabel } from '../lib/submissionTime'
 import { serviceDay, serviceDateLabel, nextServiceBoundary } from '../lib/serviceDay'
 import { useEffect, useMemo, useState, useRef } from 'react'
 import { supabase } from '../lib/supabase'
@@ -46,6 +47,7 @@ type CloseoutRow = {
 
   status: string
   created_at: string
+  submitted_at: string | null
 }
 
 type CloseoutTableRow = {
@@ -969,7 +971,7 @@ function CloseoutDay({selectedDate,refresh,onDeleted,locationId,locationName,cur
                         </div>
                       </button>
 
-                      <p>Submitted {new Date(closeout.created_at).toLocaleString('en-US',{timeZone:'America/Chicago'})}</p>
+                      <p>Submitted {submissionLabel(closeout.submitted_at ?? closeout.created_at)}</p>
                       {isManager && <button type="button" disabled={!!deletingId || loading} onClick={()=>void deleteCloseout(closeout)}>{deletingId===closeout.id?'Deleting…':'Delete closeout'}</button>}
 
                       {isExpanded && (
@@ -982,8 +984,7 @@ function CloseoutDay({selectedDate,refresh,onDeleted,locationId,locationName,cur
 
                             <strong>
                               {
-                                closeout.scheduled_start ??
-                                '—'
+                                clockLabel(closeout.scheduled_start)
                               }
                             </strong>
                           </div>
@@ -995,8 +996,7 @@ function CloseoutDay({selectedDate,refresh,onDeleted,locationId,locationName,cur
 
                             <strong>
                               {
-                                closeout.clock_in ??
-                                '—'
+                                clockLabel(closeout.clock_in)
                               }
                             </strong>
                           </div>
