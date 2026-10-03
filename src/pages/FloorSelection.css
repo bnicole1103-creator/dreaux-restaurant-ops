@@ -1,0 +1,11 @@
+.floor-section-tools{padding:14px;background:#fff;border:1px solid #d4c1b0;border-radius:14px;margin:14px 0;color:#493024}
+.floor-section-tools p{font-size:.9rem;line-height:1.45;margin:6px 0;color:#725e51}
+.floor-selection-list,.floor-selection-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.floor-selection-list button{background:#f5eadc;padding:6px 10px;min-height:36px}
+.floor-selection-actions button{min-height:44px}
+.floor-table[aria-pressed=true]{outline:3px solid #795232;outline-offset:3px}
+.floor-action-bar{position:sticky;bottom:190px;z-index:25;display:flex;flex-wrap:wrap;gap:8px;background:#fff;color:#493024;padding:12px;border:1px solid #d4c1b0;border-radius:12px;margin:12px 0}
+.modal-backdrop{position:fixed;inset:0;z-index:2500;background:#49302488;display:flex;align-items:center;justify-content:center;padding:12px}
+.modal-card{background:#fff;color:#493024;border:1px solid #d4c1b0;border-radius:16px;padding:20px;max-height:85dvh;overflow:auto;width:min(520px,100%)}
+.modal-card label{display:grid;gap:6px;margin-top:12px}.modal-card input,.modal-card select{width:100%;min-height:44px}
+@media(max-width:600px){.floor-selection-actions{display:grid;grid-template-columns:1fr 1fr}.floor-action-bar{bottom:190px}.modal-card{padding:16px}}

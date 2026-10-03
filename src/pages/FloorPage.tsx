@@ -1,5 +1,4 @@
 import { TonightsFloorCards } from '../components/TonightsFloorCards'
-import { TableDetailsModal } from '../components/TableDetailsModal'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { loadTenantData } from '../lib/tenant'
@@ -9,9 +8,9 @@ import {
 } from '../lib/team'
 import {
   createShift,
-  loadTodayShifts,
   type Shift,
 } from '../lib/shifts'
+import './FloorSelection.css'
 
 type Room = {
   id: string
@@ -111,6 +110,8 @@ type RotationLogEntry = {
 }
 
 export function FloorPage() {
+  const [floorNotice,setFloorNotice]=useState('')
+  const [seatServerId,setSeatServerId]=useState('')
   const [organizationId, setOrganizationId] = useState('')
   const [locationId, setLocationId] = useState('')
   const [locationName, setLocationName] = useState('')
@@ -259,7 +260,7 @@ const [partySize, setPartySize] = useState(1)
 
           loadLocationTeam(location.id),
 
-          loadTodayShifts(location.id),
+          loadFloorShifts(location.id),
         ])
 
         if (roomResult.error) throw roomResult.error
@@ -319,6 +320,20 @@ const [partySize, setPartySize] = useState(1)
     }
   }, [activeShiftId, locationId])
 
+  async function loadFloorShifts(loc: string): Promise<Shift[]> {
+    const parts=new Intl.DateTimeFormat('en-CA',{timeZone:'America/Chicago',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date())
+    const get=(key:string)=>parts.find(p=>p.type===key)?.value
+    const date=`${get('year')}-${get('month')}-${get('day')}`
+    const r=await supabase.from('shifts').select('id,organization_id,location_id,shift_date,shift_name,status').eq('location_id',loc).eq('shift_date',date).in('status',['scheduled','open','closed']).order('created_at')
+    if(r.error)throw r.error
+    return ((r.data ?? []) as Shift[]).sort((a,b)=>({open:0,scheduled:1,closed:2,cancelled:3}[a.status]-{open:0,scheduled:1,closed:2,cancelled:3}[b.status]))
+  }
+  function openSeating() {
+    if(activeShift?.status!=='open'){setError('Open the shift before seating guests. You can assign sections while it is scheduled or closed.');return}
+    const servers=[...new Set(selectedTableIds.map(id=>assignments.find(a=>a.table_id===id)?.server_id).filter(Boolean))]
+    setSeatServerId(servers.length===1?servers[0] ?? '':'')
+    setShowSeatPanel(true)
+  }
   async function loadAssignments(shiftId: string) {
     const { data, error: assignmentError } =
       await supabase
@@ -409,8 +424,7 @@ const [partySize, setPartySize] = useState(1)
               ).map((row) => row.table_id),
 
               totalSeats:
-                configurationResult.data.total_seats ??
-                0,
+                (tableResult.data ?? []).reduce((sum,row)=>sum+(tables.find(t=>t.id===row.table_id)?.seat_count ?? 0),0),
             }
           },
         ),
@@ -1887,17 +1901,14 @@ const [partySize, setPartySize] = useState(1)
       setSaving(true)
       setError('')
 
-      const shift = await createShift({
-        organizationId,
-        locationId,
-        shiftName: newShiftName,
-      })
-
-      setShifts((current) => [
-        ...current,
-        shift,
-      ])
-
+      let shift:Shift
+      if(activeShift?.status==='scheduled'){
+        const u=await supabase.auth.getUser();if(u.error)throw u.error
+        const r=await supabase.from('shifts').update({status:'open',opened_by:u.data.user?.id,opened_at:new Date().toISOString()}).eq('id',activeShift.id).eq('location_id',locationId).eq('status','scheduled').select('id,organization_id,location_id,shift_date,shift_name,status').single()
+        if(r.error)throw r.error
+        shift=r.data as Shift
+      }else shift=await createShift({organizationId,locationId,shiftName:newShiftName})
+      setShifts(await loadFloorShifts(locationId))
       setActiveShiftId(shift.id)
       setShowShiftPanel(false)
     } catch (caughtError) {
@@ -1912,13 +1923,6 @@ const [partySize, setPartySize] = useState(1)
   }
 
   async function handleCreateSection() {
-    if (!activeShiftId) {
-      setError(
-        'Open or select a shift first.',
-      )
-      return
-    }
-
     if (
       !selectedServerId ||
       selectedTableIds.length === 0
@@ -1936,123 +1940,15 @@ const [partySize, setPartySize] = useState(1)
       setSaving(true)
       setError('')
 
-      const {
-        data: { user },
-        error: userError,
-      } = await supabase.auth.getUser()
-
-      if (userError) throw userError
-
-      if (!user) {
-        throw new Error(
-          'You must be signed in.',
-        )
-      }
-
-      const {
-        data: configuration,
-        error: configurationError,
-      } = await supabase
-        .from('section_configurations')
-        .insert({
-          organization_id: organizationId,
-          location_id: locationId,
-          name: finalSectionName,
-          total_seats: selectedSeatCount,
-          is_saved_template: false,
-          created_by: user.id,
-        })
-        .select('id')
-        .single()
-
-      if (configurationError) {
-        throw configurationError
-      }
-
-      const configurationTables =
-        selectedTableIds.map((tableId) => ({
-          section_configuration_id:
-            configuration.id,
-          table_id: tableId,
-        }))
-
-      const {
-        error: configurationTablesError,
-      } = await supabase
-        .from('section_configuration_tables')
-        .insert(configurationTables)
-
-      if (configurationTablesError) {
-        throw configurationTablesError
-      }
-
-      const {
-        data: shiftSection,
-        error: shiftSectionError,
-      } = await supabase
-        .from('shift_sections')
-        .insert({
-          organization_id: organizationId,
-          location_id: locationId,
-          shift_id: activeShiftId,
-          section_configuration_id:
-            configuration.id,
-          employee_id: selectedServerId,
-          assigned_by: user.id,
-          assignment_status: 'active',
-        })
-        .select('id')
-        .single()
-
-      if (shiftSectionError) {
-        throw shiftSectionError
-      }
-
-      const shiftTables =
-        selectedTableIds.map((tableId) => ({
-          shift_section_id:
-            shiftSection.id,
-          table_id: tableId,
-        }))
-
-      const { error: shiftTablesError } =
-        await supabase
-          .from('shift_section_tables')
-          .insert(shiftTables)
-
-      if (shiftTablesError) {
-        throw shiftTablesError
-      }
-
-      const assignmentRows =
-        selectedTableIds.map((tableId) => ({
-          organization_id: organizationId,
-          location_id: locationId,
-          shift_id: activeShiftId,
-          table_id: tableId,
-          server_id: selectedServerId,
-          assigned_by: user.id,
-          assigned_at:
-            new Date().toISOString(),
-        }))
-
-      const { error: assignmentError } =
-        await supabase
-          .from('server_assignments')
-          .upsert(assignmentRows, {
-            onConflict:
-              'shift_id,table_id',
-          })
-
-      if (assignmentError) {
-        throw assignmentError
-      }
-
-      await Promise.all([
-        loadAssignments(activeShiftId),
-        loadSections(activeShiftId),
-      ])
-
+      const r=await supabase.rpc('floor_assign_section',{
+        p_location_id:locationId,p_shift_id:activeShiftId || null,p_shift_name:newShiftName,
+        p_name:finalSectionName,p_server_id:selectedServerId,p_table_ids:selectedTableIds,
+      })
+      if(r.error)throw r.error
+      const shiftId=String(r.data.shift_id)
+      setShifts(await loadFloorShifts(locationId));setActiveShiftId(shiftId)
+      await Promise.all([loadAssignments(shiftId),loadSections(shiftId)])
+      setFloorNotice('Section assigned. '+(r.data.status==='scheduled'?'Shift is scheduled; service has not opened.':''))
       setSelectedTableIds([])
       setSelectedServerId('')
       setSectionName('')
@@ -2076,7 +1972,7 @@ const [partySize, setPartySize] = useState(1)
     )
   }
   async function handleSeatGuests() {
-    if (selectedTableIds.length === 0 || !activeShiftId) {
+    if (selectedTableIds.length === 0 || activeShift?.status!=='open') {
       setError('Select at least one table and open a shift first.')
       return
     }
@@ -2085,50 +1981,12 @@ const [partySize, setPartySize] = useState(1)
       setSaving(true)
       setError('')
 
-      const primaryTableId = selectedTableIds[0]
-
-      const assignedServer = assignments.find(
-        (item) => item.table_id === primaryTableId,
-      )
-
-      const {
-        data: session,
-        error: sessionError,
-      } = await supabase
-        .from('table_sessions')
-        .insert({
-          organization_id: organizationId,
-          location_id: locationId,
-          shift_id: activeShiftId,
-          table_id: primaryTableId,
-          server_id: assignedServer?.server_id ?? null,
-          guest_name: guestName.trim() || null,
-          guest_phone: guestPhone.trim() || null,
-          guest_email: guestEmail.trim() || null,
-          party_size: partySize,
-          status: 'seated',
-          seated_at: new Date().toISOString(),
-        })
-        .select('id')
-        .single()
-
-      if (sessionError) {
-        throw sessionError
-      }
-
-      const sessionTables = selectedTableIds.map((tableId) => ({
-        table_session_id: session.id,
-        table_id: tableId,
-      }))
-
-      const { error: tableLinkError } = await supabase
-        .from('table_session_tables')
-        .insert(sessionTables)
-
-      if (tableLinkError) {
-        throw tableLinkError
-      }
-
+      const r=await supabase.rpc('floor_seat_party',{
+        p_location_id:locationId,p_shift_id:activeShiftId,p_table_ids:selectedTableIds,
+        p_server_id:seatServerId || null,p_guest_name:guestName,p_guest_phone:guestPhone,
+        p_guest_email:guestEmail,p_party_size:partySize,
+      })
+      if(r.error)throw r.error
       await loadTableSessions(activeShiftId)
 
       setGuestName('')
@@ -2206,7 +2064,7 @@ const [partySize, setPartySize] = useState(1)
             ))}
           </select>
         ) : (
-          <span>No open shift</span>
+          <span>No shift selected · sections can be planned now</span>
         )}
 
         <button
@@ -2310,7 +2168,6 @@ const [partySize, setPartySize] = useState(1)
             }
             onClick={() => {
               setActiveRoomId(room.id)
-              setSelectedTableIds([])
             }}
           >
             {room.name}
@@ -2318,6 +2175,13 @@ const [partySize, setPartySize] = useState(1)
         ))}
       </div>
 
+      <section className="floor-section-tools" aria-label="Section assignment">
+        <div><strong>Sections & tables</strong><p>Tap tables to select them. Switch rooms to include more tables.</p></div>
+        <div className="floor-selection-list">{selectedTables.length?selectedTables.map(t=><button type="button" key={t.id} onClick={()=>toggleTable(t.id)}>{t.table_name} ×</button>):<span>No tables selected</span>}</div>
+        <div className="floor-selection-actions"><button type="button" disabled={!selectedTableIds.length || saving || arrangeMode} onClick={()=>setShowSectionPanel(true)}>Assign section</button><button type="button" disabled={!selectedTableIds.length || saving || arrangeMode} onClick={openSeating}>Seat selected tables</button><button type="button" disabled={!selectedTableIds.length} onClick={()=>setSelectedTableIds([])}>Clear selection</button></div>
+        {sectionCards.length>0 && <details><summary>Assigned sections ({sectionCards.length})</summary><div className="floor-selection-list">{sectionCards.map(c=><button type="button" key={c.id} onClick={()=>{setSelectedTableIds(c.tableIds);setSectionName(c.name);setSelectedServerId(c.employeeId)}}>{c.name} · {memberName(c.employeeId)} · {c.tableIds.length} tables</button>)}</div></details>}
+        {floorNotice && <p role="status">{floorNotice}</p>}
+      </section>
       {/* LIVE FLOOR */}
       <div
         className="floor-canvas"
@@ -2350,6 +2214,8 @@ const [partySize, setPartySize] = useState(1)
           return (
             <button
               key={table.id}
+              aria-pressed={selected}
+              aria-label={`${table.table_name}, ${table.seat_count} seats${selected ? ", selected" : ""}`}
               className={`floor-table ${
                 table.shape
               } ${
@@ -2568,32 +2434,6 @@ const [partySize, setPartySize] = useState(1)
         </div>
       )}
 
-            {selectedTableIds.length === 1 &&
-        !showSeatPanel && (
-          <TableDetailsModal
-            selectedTableIds={selectedTableIds}
-            tables={tables}
-            assignments={assignments}
-            reservations={reservations}
-            teamMembers={team
-              .filter((member) => Boolean(member.user_id))
-              .map((member) => ({
-                user_id: member.user_id as string,
-              }))}
-            memberName={memberName}
-            selectedServerId={selectedServerId ?? ''}
-            onServerChange={(serverId) =>
-              setSelectedServerId(serverId)
-            }
-            onClose={() =>
-              setSelectedTableIds([])
-            }
-            onSeat={() =>
-              setShowSeatPanel(true)
-            }
-          />
-        )}
-
       {/* TABLE ACTION BAR */}
       {selectedTableIds.length > 0 && (
         <div className="floor-action-bar">
@@ -2624,17 +2464,10 @@ const [partySize, setPartySize] = useState(1)
 
           <button
             onClick={() => {
-              if (!activeShift) {
-                setError(
-                  'Open or select a shift before creating a section.',
-                )
-                return
-              }
-
               setShowSectionPanel(true)
             }}
           >
-            Create Section
+            Assign Section
           </button>
 
 
@@ -2648,7 +2481,7 @@ const [partySize, setPartySize] = useState(1)
           <button
             disabled={selectedTableIds.length === 0}
             onClick={() => {
-              setShowSeatPanel(true)
+              openSeating()
             }}
           >
             Seat
@@ -2665,13 +2498,13 @@ const [partySize, setPartySize] = useState(1)
         <div className="modal-backdrop">
           <div className="modal-card">
             <h2>
-              Open today&apos;s shift
+              {activeShift?.status==='scheduled'?`Open ${activeShift.shift_name}`:'Open today’s shift'}
             </h2>
 
             <label>
               Shift
 
-              <select
+              <select disabled={activeShift?.status==='scheduled'}
                 value={newShiftName}
                 onChange={(event) =>
                   setNewShiftName(
@@ -2715,7 +2548,9 @@ const [partySize, setPartySize] = useState(1)
       {showSectionPanel && (
         <div className="modal-backdrop">
           <div className="modal-card">
-            <h2>Create section</h2>
+            <h2>Assign section</h2>{error && <p role="alert">{error}</p>}
+            {!activeShiftId && <label>Plan for shift<select value={newShiftName} onChange={e=>setNewShiftName(e.target.value)}>{['Dinner','Lunch','Brunch','Private Event'].map(n=><option key={n}>{n}</option>)}</select></label>}
+            <p>{activeShift?`${activeShift.shift_name} · ${activeShift.status}`:'Saving creates a scheduled shift without opening service.'}</p>
 
             <label>
               Section name
@@ -2822,13 +2657,13 @@ const [partySize, setPartySize] = useState(1)
                   handleCreateSection
                 }
                 disabled={
-                  !selectedServerId ||
+                  !selectedServerId || !selectedTableIds.length ||
                   saving
                 }
               >
                 {saving
                   ? 'Creating…'
-                  : 'Create section'}
+                  : 'Save section'}
               </button>
             </div>
           </div>
@@ -3852,7 +3687,7 @@ const [partySize, setPartySize] = useState(1)
                 className="primary-button"
                 onClick={() => {
                   setShowTablePanel(false)
-                  setShowSeatPanel(true)
+                  openSeating()
                 }}
               >
                 Seat Guests
@@ -3977,7 +3812,7 @@ const [partySize, setPartySize] = useState(1)
       {showSeatPanel && selectedTableIds.length > 0 && (
         <div className="modal-backdrop">
           <div className="modal-card">
-            <p className="eyebrow">Seat Guests</p>
+            <p className="eyebrow">Seat Guests</p>{error && <p role="alert">{error}</p>}
 
             <h2>
               {selectedTableIds.length === 1
@@ -3997,6 +3832,8 @@ const [partySize, setPartySize] = useState(1)
                 .join(', ')}
             </div>
 
+            <label>Server<select value={seatServerId} onChange={e=>setSeatServerId(e.target.value)}><option value="">Choose server</option>{team.map(m=><option key={m.user_id} value={m.user_id}>{memberName(m.user_id)}</option>)}</select></label>
+            <p>One party will occupy all selected tables. Choose the server responsible for the party.</p>
             <label>
               Guest name
               <input
@@ -4066,7 +3903,7 @@ const [partySize, setPartySize] = useState(1)
                 onClick={handleSeatGuests}
                 disabled={saving}
               >
-                {saving ? 'Seating…' : 'Seat Table'}
+                {saving ? 'Seating…' : 'Seat selected tables'}
               </button>
             </div>
           </div>
@@ -4075,3 +3912,4 @@ const [partySize, setPartySize] = useState(1)
     </section>
   )
 }
+
