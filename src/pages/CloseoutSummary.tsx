@@ -1,3 +1,6 @@
+import './CloseoutMobile.css'
+import { CloseoutCorrectionEditor } from '../components/CloseoutCorrectionEditor'
+import type { Question } from '../components/CloseoutConfig'
 import { submissionLabel, clockLabel } from '../lib/submissionTime'
 import { serviceDay, serviceDateLabel, nextServiceBoundary } from '../lib/serviceDay'
 import { useEffect, useMemo, useState, useRef } from 'react'
@@ -17,6 +20,15 @@ type PointSummaryItem = {
 }
 
 type CloseoutRow = {
+  edit_version?: number
+  shift_type?: string | null
+  custom_answers?: Record<string,string>
+  question_snapshot?: Question[]
+  zero_sales_confirmed?: boolean
+  zero_sales_reason?: string | null
+  completion_points_withheld?: boolean
+  correction_note?: string | null
+  corrected_at?: string | null
   id: string
   user_id: string
   closeout_date: string
@@ -167,6 +179,7 @@ function roleLabel(role: string) {
 function CloseoutDay({selectedDate,refresh,onDeleted,locationId,locationName,current}:{selectedDate:string;refresh:number;onDeleted:()=>void;locationId:string;locationName:string;current:boolean}) {
   const [isManager,setIsManager]=useState(false)
   const [deletingId,setDeletingId]=useState('')
+  const [editingId,setEditingId]=useState('')
   const request=useRef(0)
   const [loading, setLoading] =
     useState(true)
@@ -487,7 +500,7 @@ function CloseoutDay({selectedDate,refresh,onDeleted,locationId,locationName,cur
   }
 
   return (
-    <section className="page">
+    <section className="page closeout-summary-mobile">
 
       <div className="page-header">
         <p className="eyebrow">
@@ -972,7 +985,11 @@ function CloseoutDay({selectedDate,refresh,onDeleted,locationId,locationName,cur
                       </button>
 
                       <p>Submitted {submissionLabel(closeout.submitted_at ?? closeout.created_at)}</p>
-                      {isManager && <button type="button" disabled={!!deletingId || loading} onClick={()=>void deleteCloseout(closeout)}>{deletingId===closeout.id?'Deleting…':'Delete closeout'}</button>}
+                      {closeout.net_sales===0 && <p className="closeout-warning">{closeout.zero_sales_confirmed?'Zero sales confirmed: '+(closeout.zero_sales_reason ?? ''):'$0 sales — needs manager verification.'}</p>}
+                      {closeout.completion_points_withheld && <p>Completion bonus withheld: inaccurate original submission.</p>}
+                      {closeout.corrected_at && <p>Corrected {submissionLabel(closeout.corrected_at)} · {closeout.correction_note}</p>}
+                      {isManager && <div className="closeout-actions"><button type="button" disabled={!!deletingId || loading} onClick={()=>setEditingId(closeout.id)}>Edit / Review</button><button type="button" disabled={!!deletingId || loading} onClick={()=>void deleteCloseout(closeout)}>{deletingId===closeout.id?'Deleting…':'Delete closeout'}</button></div>}
+                      {isManager && editingId===closeout.id && <CloseoutCorrectionEditor key={closeout.id+':'+(closeout.edit_version ?? 1)} closeout={closeout} locationId={locationId} name={employee} onCancel={()=>setEditingId('')} onSaved={()=>{setEditingId('');onDeleted()}} />}
 
                       {isExpanded && (
                         <div className="closeout-summary-details">
@@ -1242,11 +1259,11 @@ export function CloseoutSummaryPage() {
   return [...groups.entries()]
  },[history])
  function reload(){setDay(serviceDay());setRefresh(v=>v+1)}
- if(!location)return <section className="page"><p role={error?'alert':'status'}>{error || 'Loading summary…'}</p></section>
+ if(!location)return <section className="page closeout-summary-mobile"><p role={error?'alert':'status'}>{error || 'Loading summary…'}</p></section>
  return <>
   <div className="page"><button type="button" onClick={reload}>Refresh closeouts</button></div>
   <CloseoutDay selectedDate={day} current refresh={refresh} locationId={location.id} locationName={location.name} onDeleted={reload} />
-  <section className="page"><article className="card"><h2>Previous closeouts</h2><p>Organized by month and service day, newest first.</p>
+  <section className="page closeout-summary-mobile"><article className="card"><h2>Previous closeouts</h2><p>Organized by month and service day, newest first.</p>
    {error && <p role="alert">{error}</p>}{historyLoading && history.length===0 && <p role="status">Loading history…</p>}
    {!error && !historyLoading && history.length===0 && <p>No previous closeouts.</p>}
    {months.map(([month,entries])=><details key={month}><summary>{serviceDateLabel(month,true)} · {entries.reduce((n,e)=>n+e.count,0)} closeouts</summary><div style={{display:'grid',gap:8,margin:'12px 0'}}>{entries.map(e=><button type="button" key={e.day} aria-pressed={archiveDate===e.day} onClick={()=>setArchiveDate(v=>v===e.day?'':e.day)}>{serviceDateLabel(e.day)} · {e.count} closeout{e.count===1?'':'s'} · {archiveDate===e.day?'Hide':'View'}</button>)}</div></details>)}

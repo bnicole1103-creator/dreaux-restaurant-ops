@@ -1,3 +1,4 @@
+import './CloseoutMobile.css'
 import { submissionLabel } from '../lib/submissionTime'
 import { Link } from 'react-router-dom'
 import { CloseoutQuestions, useCloseoutConfig, checkAnswers, questionLabel } from '../components/CloseoutConfig'
@@ -363,8 +364,12 @@ export function CloseoutPage() {
   const [clockInTime, setClockInTime] =
     useState('')
 
+  const [zeroSalesConfirmed, setZeroSalesConfirmed] = useState(false)
+  const [zeroSalesReason, setZeroSalesReason] = useState('')
   const [netSales, setNetSales] =
     useState('')
+
+  useEffect(() => { setZeroSalesConfirmed(false); setZeroSalesReason('') }, [netSales])
 
   const [salesTarget, setSalesTarget] =
     useState('')
@@ -880,6 +885,12 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
         )
       }
 
+      for (const [label, raw] of [['Net sales', netSales], ['Sales target', salesTarget], ['Cash deposit', cashDeposit], ['Voids', voidValue], ['Discounts', discountValue]]) {
+        if (!raw.trim() || !/^\d+(\.\d{1,2})?$/.test(raw.trim()) || !Number.isFinite(Number(raw)) || Number(raw)>100000000) throw new Error(`Enter ${label.toLowerCase()} as a valid amount. Enter 0 only when it is accurate.`)
+      }
+      if (!shiftType) throw new Error('Select the shift you worked.')
+      if (voidCount && (!/^\d+$/.test(voidCount) || Number(voidCount)>100000)) throw new Error('Void count must be a nonnegative whole number.')
+      if (Number(netSales)===0 && (!zeroSalesConfirmed || zeroSalesReason.trim().length<3)) throw new Error('Confirm that $0 sales is accurate and explain why.')
       const customAnswers = checkAnswers(config, 'staff', answers)
       const finalPoints =
         configuredShiftPoints({
@@ -950,6 +961,9 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
           'daily_closeouts'
         )
         .insert({
+          zero_sales_confirmed: Number(netSales)===0 && zeroSalesConfirmed,
+          zero_sales_reason: Number(netSales)===0 ? zeroSalesReason.trim() : null,
+          shift_type: shiftType,
           custom_answers: customAnswers,
           organization_id:
             organizationId,
@@ -1030,7 +1044,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
           points_summary:
             finalPoints.adjustments,
         })
-        .select('id,submitted_at')
+        .select('id,submitted_at,shift_score')
         .single()
 
       if (closeoutError) {
@@ -1088,73 +1102,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
         }
       }
 
-      /*
-       * Save point transaction history.
-       */
-
-      if (
-        closeout?.id &&
-        finalPoints.adjustments
-          .length > 0
-      ) {
-        const pointRows =
-          finalPoints.adjustments.map(
-            (adjustment) => ({
-              organization_id:
-                organizationId,
-
-              location_id:
-                locationId,
-
-              user_id:
-                user.id,
-
-              closeout_id:
-                closeout.id,
-
-              business_date:
-                new Date()
-                  .toISOString()
-                  .slice(
-                    0,
-                    10
-                  ),
-
-              action_code:
-                adjustment.code,
-
-              description:
-                adjustment.description,
-
-              points:
-                adjustment.points,
-            })
-          )
-
-        const {
-          error:
-            pointSaveError,
-        } = await supabase
-          .from(
-            'reward_point_transactions'
-          )
-          .insert(
-            pointRows
-          )
-
-        if (
-          pointSaveError
-        ) {
-          console.error(
-            'Point save error:',
-            pointSaveError
-          )
-
-          warnings.push(
-            'points history needs review'
-          )
-        }
-      }
+      // Automatic closeout points are saved atomically by the database.
 
       // Save Peer Recognition award separately.
       // This awards +2 to the selected teammate without
@@ -1215,7 +1163,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
       }
 
       const submittedScore =
-        finalPoints.shiftScore
+        closeout.shift_score
 
       setAnswers({})
       resetForm()
@@ -1265,7 +1213,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
 
   if (loading) {
     return (
-      <section className="page">
+      <section className="page closeout-mobile">
         <h1>
           Daily Closeout
         </h1>
@@ -1278,7 +1226,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
   }
 
   return (
-    <section className="page">
+    <section className="page closeout-mobile">
 
       <div className="page-header">
         <p className="eyebrow">
@@ -1330,7 +1278,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
 
       <p><Link to="/closeout">← Closeout</Link></p>
       {configError && <p role="alert">{configError}</p>}
-      <fieldset disabled={saving}><CloseoutQuestions config={config} audience="staff" answers={answers} onChange={setAnswers} /></fieldset>
+      
 
       <div className="card">
         <h2>
@@ -1444,6 +1392,8 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
 
         </div>
       </div>
+
+      {netSales.trim()!=='' && Number(netSales)===0 && <div className="closeout-warning"><h3>Check your sales</h3><p>You entered $0. Check your Toast report before continuing.</p><label className="closeout-check"><input type="checkbox" checked={zeroSalesConfirmed} onChange={e=>setZeroSalesConfirmed(e.target.checked)} /><span>I checked my report and $0 sales is accurate.</span></label><label>Why were sales zero?<textarea rows={2} maxLength={2000} value={zeroSalesReason} onChange={e=>setZeroSalesReason(e.target.value)} placeholder="Explain why this shift had no sales." /></label></div>}
 
       <div className="card">
         <h2>
@@ -1989,6 +1939,8 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
         )}
       </div>
 
+      <fieldset disabled={saving}><CloseoutQuestions config={config} audience="staff" answers={answers} onChange={setAnswers} /></fieldset>
+
       <div className="card">
         <h2>
           Certification
@@ -2033,6 +1985,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
         <h2>
           Review & Submit
         </h2>
+        <div className="closeout-review"><p>Net sales: <strong>${netSales || 'Not entered'}</strong></p><p>Sales target: <strong>${salesTarget || 'Not entered'}</strong></p><p>Cash deposit: <strong>${cashDeposit || 'Not entered'}</strong></p><p>Review these amounts against your Toast report. An inaccurate submission does not earn the completion bonus.</p></div>
 
         {pointResult && (
           <p>
