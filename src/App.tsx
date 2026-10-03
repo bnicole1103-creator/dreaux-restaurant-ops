@@ -1,3 +1,4 @@
+import { PreshiftFeedPage } from './pages/PreshiftFeedPage'
 import { QuizBuilderPage } from './pages/QuizBuilderPage'
 import { QuizzesPage } from './pages/QuizzesPage'
 import { SignupGate } from './components/SignupGate'
@@ -111,6 +112,7 @@ export default function App() {
     <SignupGate key={session.user.id} userId={session.user.id}>
     <AppShell session={session}>
       <Routes>
+        <Route path="/preshift" element={<PreshiftFeedPage />} />
         <Route path="/quizzes" element={<QuizzesPage />} />
         <Route path="/quizzes/build" element={<ManagementOnly><QuizBuilderPage key="future" /></ManagementOnly>} />
         <Route path="/quizzes/manage" element={<ManagementOnly><QuizBuilderPage key="published" publishedView /></ManagementOnly>} />

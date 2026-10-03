@@ -2,6 +2,7 @@ import type { PropsWithChildren } from 'react'
 import type { Session } from '@supabase/supabase-js'
 
 import {
+  Newspaper,
   BookOpen,
   Banknote,
   BarChart3,
@@ -62,6 +63,7 @@ const links = [
     label: 'Team',
     icon: Users,
   },
+  { to: '/preshift', label: 'Pre-Shift', icon: Newspaper },
   { to: '/quizzes', label: 'Quizzes', icon: BookOpen },
 ]
 
