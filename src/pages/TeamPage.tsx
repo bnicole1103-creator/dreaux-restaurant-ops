@@ -404,8 +404,8 @@ export function TeamPage() {
             style={{
               padding: '14px',
               borderRadius: '14px',
-              background: '#111827',
-              border: '1px solid #334155',
+              background: '#ffffff',
+              border: '1px solid #d4c1b0',
               opacity:
                 member.status === 'active' ? 1 : 0.6,
             }}

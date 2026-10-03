@@ -1,0 +1,17 @@
+.quiz-workspace{max-width:960px;margin:auto;padding:24px 16px 40px}
+.quiz-workspace .quiz-settings,.quiz-workspace .quiz-bank{background:#fff;border:1px solid #d4c1b0;border-radius:14px;padding:16px;margin:18px 0}
+.quiz-workspace .quiz-list-heading{margin:24px 0 16px}
+.quiz-workspace .quiz-list-heading h2{margin-bottom:6px}
+.quiz-workspace .quiz-list-heading p{color:#725e51;line-height:1.5}
+.quiz-workspace .quiz-edit-card{background:#fff;border:1px solid #d4c1b0;border-radius:14px;padding:18px;margin:14px 0;min-width:0}
+.quiz-edit-card h3{font-size:1rem;color:#725e51;margin:0 0 12px}
+.quiz-workspace .quiz-edit-card>label:first-of-type{margin:8px 0;font-size:.85rem}
+.quiz-workspace .quiz-edit-card>label:first-of-type input{padding:8px 10px;min-height:40px}
+.quiz-workspace .quiz-answer-panel{background:#faf5ef;border-radius:10px;padding:12px;border:1px solid #e0d2c6;margin-top:12px}
+.quiz-answer-panel summary{font-weight:600;overflow-wrap:anywhere;line-height:1.5}
+.quiz-workspace .quiz-question-tools{margin-bottom:0}
+.quiz-workspace .quiz-question-tools button{font-size:.85rem;padding:9px 12px}
+.quiz-workspace .quiz-empty{padding:24px;border:1px dashed #b99a80;border-radius:14px}
+.quiz-workspace .quiz-bank-add-bar{position:sticky;top:8px;z-index:3;background:#fff;padding:8px 0;border-bottom:1px solid #e0d2c6}
+.quiz-workspace .quiz-bank-add-bar button{background:#614432;color:white}
+@media(max-width:600px){.quiz-workspace{padding:18px 10px 32px}.quiz-workspace .quiz-edit-card{padding:14px}.quiz-workspace button{min-height:44px}.quiz-workspace .quiz-actions{gap:8px}}

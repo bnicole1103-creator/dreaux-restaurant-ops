@@ -1,19 +1,19 @@
 .mod-page { max-width: 1000px; margin: 0 auto; padding-bottom: 180px; }
-.mod-page fieldset { border: 1px solid #334155; border-radius: 16px; padding: 20px; margin: 20px 0; min-width: 0; }
+.mod-page fieldset { border: 1px solid #d4c1b0; border-radius: 16px; padding: 20px; margin: 20px 0; min-width: 0; }
 .mod-page label { display: block; }
-.mod-page input:not([type=checkbox]), .mod-page select, .mod-page textarea { display: block; width: 100%; box-sizing: border-box; margin-top: 8px; background: #111827; color: #f8fafc; border: 1px solid #64748b; border-radius: 8px; padding: 12px; font: inherit; }
+.mod-page input:not([type=checkbox]), .mod-page select, .mod-page textarea { display: block; width: 100%; box-sizing: border-box; margin-top: 8px; background: #ffffff; color: #493024; border: 1px solid #725e51; border-radius: 8px; padding: 12px; font: inherit; }
 .mod-controls, .mod-fields { display: grid; grid-template-columns: 1fr 2fr; gap: 16px; }
-.mod-review { padding: 18px 0; border-bottom: 1px solid #334155; }
+.mod-review { padding: 18px 0; border-bottom: 1px solid #d4c1b0; }
 .mod-page .mod-check { display: flex; align-items: center; gap: 12px; margin: 16px 0; }
 .mod-check input { width: 22px; height: 22px; flex-shrink: 0; }
-.mod-page button { background: #d4b263; color: #111827; border: 0; border-radius: 10px; padding: 14px 22px; font: inherit; font-weight: 700; }
+.mod-page button { background: #d7b795; color: #ffffff; border: 0; border-radius: 10px; padding: 14px 22px; font: inherit; font-weight: 700; }
 .mod-page button:disabled { opacity: .55; }
 .mod-page :focus-visible { outline: 3px solid white; outline-offset: 3px; }
-.mod-page [role=alert] { color: #fca5a5; }
-.mod-page [role=status] { color: #86efac; }
+.mod-page [role=alert] { color: #a32121; }
+.mod-page [role=status] { color: #28603c; }
 @media(max-width: 600px) { .mod-controls, .mod-fields { grid-template-columns: 1fr; } }
 
 .settings-tabs,.settings-actions { display:flex; flex-wrap:wrap; gap:12px; margin:20px 0; }
-.settings-tabs button[aria-pressed="true"] { background:#d4b260; color:#0b1220; }
+.settings-tabs button[aria-pressed="true"] { background:#d7b795; color:#f7f1e9; }
 .mod-page textarea,.mod-page input,.mod-page select { max-width:100%; box-sizing:border-box; }
 .mod-page fieldset { min-width:0; }

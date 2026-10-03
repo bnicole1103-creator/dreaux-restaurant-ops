@@ -1647,7 +1647,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
                           selected
                             ? {
                                 backgroundColor: '#d9b45b',
-                                color: '#111827',
+                                color: '#ffffff',
                                 borderColor: '#d9b45b',
                                 boxShadow: '0 0 0 2px rgba(217, 180, 91, 0.35)',
                                 fontWeight: 700,

@@ -1,7 +1,7 @@
-.quiz-bank { border: 1px solid #334155; border-radius: 14px; padding: 18px; margin: 20px 0; }
+.quiz-bank { border: 1px solid #d4c1b0; border-radius: 14px; padding: 18px; margin: 20px 0; }
 .quiz-bank-controls { border: 0; padding: 0; margin: 0; min-width: 0; }
 .quiz-bank-filters { display: grid; grid-template-columns: repeat(auto-fit,minmax(200px,1fr)); gap: 16px; }
-.quiz-bank select { width: 100%; background: #111827; color: #f8fafc; padding: 12px; border: 1px solid #536278; border-radius: 10px; font: inherit; }
-.quiz-bank-item { border-top: 1px solid #334155; padding: 12px 0; overflow-wrap: anywhere; }
-.quiz-page .quiz-bank input[type=checkbox] { width: 20px; height: 20px; padding: 0; flex: 0 0 auto; accent-color: #d6b267; }
+.quiz-bank select { width: 100%; background: #ffffff; color: #493024; padding: 12px; border: 1px solid #b99a80; border-radius: 10px; font: inherit; }
+.quiz-bank-item { border-top: 1px solid #d4c1b0; padding: 12px 0; overflow-wrap: anywhere; }
+.quiz-page .quiz-bank input[type=checkbox] { width: 20px; height: 20px; padding: 0; flex: 0 0 auto; accent-color: #d7b795; }
 .quiz-bank .muted { font-size: .9rem; }

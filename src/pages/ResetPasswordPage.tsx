@@ -47,8 +47,8 @@ export function ResetPasswordPage({ hasSession }: { hasSession: boolean }) {
   }
 
   return (
-    <main style={{ minHeight: '100vh', display: 'grid', placeItems: 'center', padding: 24, background: '#101827', color: '#fff' }}>
-      <section style={{ width: '100%', maxWidth: 420, padding: 28, borderRadius: 16, background: '#1e293b' }}>
+    <main style={{ minHeight: '100vh', display: 'grid', placeItems: 'center', padding: 24, background: '#493024', color: '#fff' }}>
+      <section style={{ width: '100%', maxWidth: 420, padding: 28, borderRadius: 16, background: '#493024' }}>
         <h1>Set New Password</h1>
         {saved ? (
           <>
@@ -82,7 +82,7 @@ export function ResetPasswordPage({ hasSession }: { hasSession: boolean }) {
             </button>
           </form>
         )}
-        {error && <p role="alert" style={{ color: '#fca5a5' }}>{error}</p>}
+        {error && <p role="alert" style={{ color: '#a32121' }}>{error}</p>}
       </section>
     </main>
   )

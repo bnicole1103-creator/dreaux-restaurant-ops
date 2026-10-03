@@ -2226,10 +2226,10 @@ const [partySize, setPartySize] = useState(1)
         <label
           style={{
             padding: '10px 12px',
-            border: '1px solid #334155',
+            border: '1px solid #d4c1b0',
             borderRadius: '11px',
-            background: '#111b2d',
-            color: '#f8fafc',
+            background: '#ffffff',
+            color: '#493024',
             cursor: 'pointer',
             whiteSpace: 'nowrap',
           }}
@@ -2260,7 +2260,7 @@ const [partySize, setPartySize] = useState(1)
             arrangeMode
               ? {
                   background: '#f4b860',
-                  color: '#111827',
+                  color: '#ffffff',
                   fontWeight: 700,
                 }
               : undefined
@@ -2289,7 +2289,7 @@ const [partySize, setPartySize] = useState(1)
             padding: '10px 14px',
             margin: '10px 0',
             borderRadius: '10px',
-            background: '#111b2d',
+            background: '#ffffff',
             border: '1px dashed #f4b860',
             color: '#f4b860',
             fontSize: '13px',
@@ -2371,7 +2371,7 @@ const [partySize, setPartySize] = useState(1)
                 border: selected
                   ? '3px solid #f4b860'
                   : arrangeMode
-                  ? '2px dashed #94a3b8'
+                  ? '2px dashed #725e51'
                   : undefined,
                 cursor: arrangeMode
                   ? 'grab'
@@ -2504,9 +2504,9 @@ const [partySize, setPartySize] = useState(1)
                       padding: '16px',
                       borderRadius: '16px',
                       border:
-                        '1px solid #334155',
-                      background: '#111827',
-                      color: '#f8fafc',
+                        '1px solid #d4c1b0',
+                      background: '#ffffff',
+                      color: '#493024',
                       cursor: 'pointer',
                       width: '100%',
                     }}
@@ -2771,7 +2771,7 @@ const [partySize, setPartySize] = useState(1)
               style={{
                 padding: '12px',
                 borderRadius: '12px',
-                background: '#0f172a',
+                background: '#ffffff',
                 marginTop: '14px',
               }}
             >
@@ -2847,7 +2847,7 @@ const [partySize, setPartySize] = useState(1)
                   padding: '10px 12px',
                   marginBottom: '12px',
                   borderRadius: '10px',
-                  background: '#0f172a',
+                  background: '#ffffff',
                 }}
               >
                 {reservationUploadMessage}
@@ -2873,8 +2873,8 @@ const [partySize, setPartySize] = useState(1)
                     style={{
                       padding: '12px',
                       borderRadius: '12px',
-                      background: '#0f172a',
-                      border: '1px solid #334155',
+                      background: '#ffffff',
+                      border: '1px solid #d4c1b0',
                     }}
                   >
                     <strong>
@@ -2929,7 +2929,7 @@ const [partySize, setPartySize] = useState(1)
               style={{
                 padding: '12px',
                 borderRadius: '12px',
-                background: '#0f172a',
+                background: '#ffffff',
                 marginBottom: '14px',
               }}
             >
@@ -2964,9 +2964,9 @@ const [partySize, setPartySize] = useState(1)
                     style={{
                       padding: '14px',
                       borderRadius: '14px',
-                      border: '1px solid #334155',
+                      border: '1px solid #d4c1b0',
                       background:
-                        index === 0 ? '#172033' : '#0f172a',
+                        index === 0 ? '#172033' : '#ffffff',
                     }}
                   >
                     <div
@@ -3104,8 +3104,8 @@ const [partySize, setPartySize] = useState(1)
                         style={{
                           padding: '12px',
                           borderRadius: '12px',
-                          background: '#0f172a',
-                          border: '1px solid #334155',
+                          background: '#ffffff',
+                          border: '1px solid #d4c1b0',
                         }}
                       >
                         <strong>Server {index + 1}</strong>
@@ -3223,8 +3223,8 @@ const [partySize, setPartySize] = useState(1)
                     padding: '12px',
                     marginBottom: '12px',
                     borderRadius: '12px',
-                    background: '#0f172a',
-                    border: '1px solid #334155',
+                    background: '#ffffff',
+                    border: '1px solid #d4c1b0',
                   }}
                 >
                   <div
@@ -3287,10 +3287,10 @@ const [partySize, setPartySize] = useState(1)
                           style={{
                             padding: '12px',
                             borderRadius: '12px',
-                            background: '#0f172a',
+                            background: '#ffffff',
                             border: nextUp
                               ? '2px solid #f4b860'
-                              : '1px solid #334155',
+                              : '1px solid #d4c1b0',
                           }}
                         >
                           {nextUp && (
@@ -3529,8 +3529,8 @@ const [partySize, setPartySize] = useState(1)
                   style={{
                     padding: '10px 12px',
                     borderRadius: '10px',
-                    background: '#0f172a',
-                    border: '1px solid #334155',
+                    background: '#ffffff',
+                    border: '1px solid #d4c1b0',
                     display: 'grid',
                     gridTemplateColumns: 'auto 1fr auto',
                     gap: '10px',

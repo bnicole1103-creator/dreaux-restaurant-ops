@@ -1,0 +1,21 @@
+:root{color-scheme:light;--warm-ink:#493024;--warm-muted:#725e51;--warm-bg:#f7f1e9;--warm-card:#fff;--warm-tan:#d7b795;--warm-border:#d4c1b0;color:var(--warm-ink);background:var(--warm-bg)}
+body{color:var(--warm-ink);background:var(--warm-bg)}
+.app-header{display:flex;justify-content:space-between;align-items:center;gap:12px;background:#fff;border-bottom:1px solid var(--warm-border);padding:12px 16px}
+.app-brand{display:grid;gap:4px}.app-brand span{font-size:.8rem;color:var(--warm-muted);overflow-wrap:anywhere}
+.logout-button{display:grid;place-items:center;background:#fff;border:1px solid var(--warm-border);border-radius:10px;color:var(--warm-ink);min-width:44px;min-height:44px}
+.app-content{max-width:1080px;margin:auto;padding-left:12px;padding-right:12px}
+.bottom-nav{background:#fff;border-color:var(--warm-border);box-shadow:0 -3px 16px #4930240d}
+.bottom-nav a{color:var(--warm-muted)}.bottom-nav a.active{background:var(--warm-tan);color:var(--warm-ink);font-weight:700}
+input,select,textarea{font:inherit;color:var(--warm-ink);background:#fff;border:1px solid var(--warm-border);border-radius:10px;padding:10px 12px;max-width:100%;min-width:0}
+input[type=checkbox],input[type=radio]{accent-color:#795232}
+button{font:inherit;min-height:40px;border:1px solid var(--warm-border);border-radius:10px;background:#fff;color:var(--warm-ink);padding:9px 14px}
+button:disabled{opacity:.55}.primary-button{background:var(--warm-tan);color:var(--warm-ink)}
+.muted,.feed-meta{color:var(--warm-muted)}.eyebrow{color:#795232}
+:is(button,input,textarea,select,a,summary):focus-visible{outline:3px solid #795232;outline-offset:3px}
+.preshift-feed .feed-card{color:var(--warm-ink)}
+.post-color-tools{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.post-color-tools label{min-width:0}.post-color-tools select{width:100%;min-height:44px}
+.emoji-tools{display:flex;flex-wrap:wrap;gap:6px}.emoji-tools button{font-size:1.3rem;min-width:44px;min-height:44px;padding:6px;background:#fff}
+.post-preview summary{cursor:pointer;padding:12px 0;font-weight:600}
+.post-preview .feed-card{margin:8px 0}.preshift-feed [role=alert]{color:#a32121}
+@media(max-width:600px){.post-color-tools{grid-template-columns:1fr}.post-color-tools label{margin:6px 0}.app-brand span{max-width:260px}.bottom-nav a{padding:8px 2px}}
