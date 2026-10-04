@@ -81,7 +81,6 @@ type SmartRecommendation = {
   employeeId: string
   employeeName: string
   score: number
-  avgSalesPerHour: number
   avgNetSales: number
   historicalUses: number
   currentSeats: number
@@ -915,24 +914,16 @@ const [partySize, setPartySize] = useState(1)
     const candidates=team.filter(m=>['server','bartender','manager','assistant_manager','general_manager','owner'].includes(m.role)).map(m=>({id:m.user_id,name:memberName(m.user_id)}))
     const loads:Record<string,number>={}
     assignments.filter(a=>!selected.includes(a.table_id)).forEach(a=>{loads[a.server_id]=(loads[a.server_id]??0)+(tables.find(t=>t.id===a.table_id)?.seat_count??0)})
-    let rows:{employee_id:string;net_sales:number|null;sales_per_hour:number|null}[]=[];let exact=false
+    let rows:{employee_id:string;net_sales:number|null;table_match:boolean}[]=[]
     try {
-      const links=await supabase.from('shift_section_tables').select('shift_section_id,table_id').in('table_id',selected)
-      if(links.error)throw links.error
-      const ids=[...new Set((links.data??[]).map(x=>x.shift_section_id))]
-      let exactIds:string[]=[]
-      if(ids.length){const all=await supabase.from('shift_section_tables').select('shift_section_id,table_id').in('shift_section_id',ids);if(all.error)throw all.error
-        const key=[...selected].sort().join('|');exactIds=ids.filter(id=>[...new Set((all.data??[]).filter(x=>x.shift_section_id===id).map(x=>x.table_id))].sort().join('|')===key)}
-      let query=supabase.from('section_performance').select('employee_id,net_sales,sales_per_hour').eq('location_id',locationId)
-      if(exactIds.length)query=query.in('shift_section_id',exactIds)
-      let history=await query.limit(500);if(history.error)throw history.error
-      if(exactIds.length && history.data?.length){exact=true}else if(exactIds.length){history=await supabase.from('section_performance').select('employee_id,net_sales,sales_per_hour').eq('location_id',locationId).limit(500);if(history.error)throw history.error}
+      const history=await supabase.rpc('floor_closeout_history',{p_location_id:locationId,p_table_ids:selected})
+      if(history.error)throw history.error
       rows=history.data??[]
-      if(!rows.length)setSmartNotice('No section sales history yet. Suggestions use the current table capacity assigned to each server.')
-    } catch {
-      setSmartNotice('Sales history is unavailable. You can still choose from capacity-based suggestions below.')
+      setSmartNotice('Uses up to 30 positive-sales server closeouts per person from the last 90 days. Matching table combinations are preferred when available. Average net sales is per closeout, not per hour. Current table capacity also affects suggestions.')
+    } catch (e) {
+      setSmartNotice(`Closeout sales history could not load: ${String((e as {message?:string}).message??e)}. Suggestions below use current assigned capacity.`)
     } finally {
-      setSmartRecommendations(recommendSections(candidates,rows,loads,exact));setSmartLoading(false)
+      setSmartRecommendations(recommendSections(candidates,rows,loads));setSmartLoading(false)
     }
   }
 
@@ -2528,9 +2519,9 @@ const [partySize, setPartySize] = useState(1)
                       }}
                     >
                       {recommendation.historicalUses > 0
-                        ? `${recommendation.historicalUses} historical uses · $${recommendation.avgSalesPerHour.toFixed(
+                        ? `${recommendation.historicalUses} closeouts · $${recommendation.avgNetSales.toFixed(
                             0,
-                          )}/hr avg`
+                          )}/closeout avg`
                         : 'No historical sales data yet'}
                     </div>
 
@@ -3610,4 +3601,5 @@ const [partySize, setPartySize] = useState(1)
     </section>
   )
 }
+
 
