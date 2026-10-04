@@ -69,7 +69,7 @@ export function QuizzesPage(){
   <article className="mod-review"><h2>My Monthly Quiz Scores</h2><label>Month<input type="month" value={month} max={date.slice(0,7)} onChange={e=>{if(e.target.value)setMonth(e.target.value)}} /></label>
    {monthError && <p role="alert">{monthError}</p>}{monthBusy && <p role="status">Loading quiz points…</p>}
    {monthly && <><p className="quiz-month-total"><strong>{monthly.correct} / {monthly.possible}</strong> correct answers</p><p>{monthly.completed} quizzes completed · {monthly.points} reward points</p></>}
-   <p>No points for submitting or per correct answer. Earn 5 points for 100%, or 3 for 80–99%. Missing a required quiz by 4 a.m. the next morning deducts 10 points. Quiz scores and reward points are tracked separately and start fresh each month.</p>
+   
    {monthly?.penalties.map(p=><p key={p.entry_key}>{p.business_date} · {p.description}: {p.points} points</p>)}
    <h3>Completed quizzes</h3>{monthly && otherAttempts.length===0 && <p>{ownToday && quiz && result?'Today’s completed quiz is shown above.':'No other quizzes completed this month.'}</p>}
    {otherAttempts.map(a=><CompletedQuiz key={a.quiz_id} title={a.title} date={a.quiz_date} result={a.result} submittedAt={a.submitted_at} earned={a.earned_points} running={a.running_score} monthly={monthly?.points} />)}
@@ -77,4 +77,5 @@ export function QuizzesPage(){
   {access.manager && <details><summary>Manage Published Quizzes / Team Scores</summary><PublishedQuizzes location={location} refresh={refresh} disabled={busy || !location} throughDate={date} onEdit={d=>navigate('/quizzes/manage?date='+d)} onRemove={remove} /></details>}
  </section>
 }
+
 

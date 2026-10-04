@@ -913,16 +913,6 @@ const [partySize, setPartySize] = useState(1)
     )
   }
 
-  async function matchPhotoLayout(){
-     if(!locationId || saving)return
-     if(!window.confirm('Match the table positions and shapes to your photos? This updates the saved layout for all rooms. Section assignments and seated parties stay unchanged.'))return
-     setSaving(true);setError('');setFloorNotice('')
-     try{const r=await supabase.rpc('floor_apply_photo_layout',{p_location_id:locationId});if(r.error)throw r.error
-       setFloorNotice(`Photo layout saved for ${r.data.updated} tables. ${r.data.missing.length?"Photo labels not found: "+r.data.missing.join(', '):"All photo tables matched."}`)
-       const loaded=await supabase.from('floor_tables').select('id,location_id,room_id,table_name,seat_count,shape,position_x,position_y,width,height').eq('location_id',locationId).eq('is_active',true)
-       if(loaded.error)throw loaded.error;setTables((loaded.data??[]) as FloorTable[]);setArrangeMode(false)
-     }catch(e){setError(String((e as {message?:string}).message??e))}finally{setSaving(false)}
-   }
    async function handleSmartSection() {
     if (!selectedTableIds.length || smartLoading || saving || arrangeMode) return
     setSmartLoading(true);setSmartNotice('');setSmartRecommendations([]);setShowSmartPanel(true)
@@ -1995,7 +1985,7 @@ const [partySize, setPartySize] = useState(1)
 
         {floorNotice && <p role="status">{floorNotice}</p>}
       </section>
-      <div className="floor-photo-controls"><button type="button" disabled={saving||!locationId} onClick={()=>void matchPhotoLayout()}>{saving?'Saving…':'Match photo layout'}</button><span className="floor-map-hint">Saves positions and shapes for Main Dining, Brut Bar, Courtyard and Great Room.</span></div>
+      
        <p className="floor-map-hint">Swipe sideways on the map to view the whole room. Tap multiple tables to select them.</p>
        {/* LIVE FLOOR */}
        <div className="floor-map-scroll">
@@ -3622,5 +3612,6 @@ const [partySize, setPartySize] = useState(1)
     </section>
   )
 }
+
 
 
