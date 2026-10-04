@@ -1,3 +1,4 @@
+import { SectionSchedule, type SectionPlan } from '../components/SectionSchedule'
 import { floorRoomRatio, floorTableGeometry } from '../lib/floorPhotoLayout'
 import './FloorMap.css'
 import { recommendSections } from '../lib/smartSections'
@@ -126,10 +127,10 @@ export function FloorPage() {
   const [shifts, setShifts] = useState<Shift[]>([])
   const [activeShiftId, setActiveShiftId] = useState('')
 
-  const [assignments, setAssignments] =
+  const [baseAssignments, setAssignments] =
     useState<ServerAssignment[]>([])
 
-  const [sectionCards, setSectionCards] =
+  const [baseSectionCards, setSectionCards] =
     useState<ShiftSectionCard[]>([])
 
   const [activeSessions, setActiveSessions] =
@@ -182,6 +183,19 @@ export function FloorPage() {
 
 
   const [clockTick, setClockTick] = useState(Date.now())
+
+  const [sectionPlans,setSectionPlans]=useState<SectionPlan[]>([])
+  const [serverClockOffset,setServerClockOffset]=useState(0)
+  const activePlans=useMemo(()=>sectionPlans.filter(p=>p.assignable && new Date(p.starts_at).getTime()<=clockTick+serverClockOffset && clockTick+serverClockOffset<new Date(p.ends_at).getTime()),[sectionPlans,clockTick,serverClockOffset])
+  const plannedTables=useMemo(()=>new Set(activePlans.flatMap(p=>p.table_ids)),[activePlans])
+  const assignments=useMemo(()=>[
+    ...baseAssignments.filter(a=>!plannedTables.has(a.table_id)),
+    ...activePlans.flatMap(p=>p.table_ids.map(id=>({id:`${p.id}:${id}`,table_id:id,server_id:p.employee_id})))
+  ],[baseAssignments,activePlans,plannedTables])
+  const sectionCards=useMemo(()=>[
+    ...baseSectionCards.map(c=>({...c,tableIds:c.tableIds.filter(id=>!plannedTables.has(id)),totalSeats:c.tableIds.filter(id=>!plannedTables.has(id)).reduce((sum,id)=>sum+(tables.find(t=>t.id===id)?.seat_count??0),0)})).filter(c=>c.tableIds.length),
+    ...activePlans.map(p=>({id:p.id,configurationId:p.id,name:`${p.name} (scheduled)`,employeeId:p.employee_id,tableIds:p.table_ids,totalSeats:p.table_ids.reduce((sum,id)=>sum+(tables.find(t=>t.id===id)?.seat_count??0),0)}))
+  ],[baseSectionCards,activePlans,plannedTables,tables])
 
   const [activeRoomId, setActiveRoomId] = useState('')
 
@@ -1077,6 +1091,9 @@ const [partySize, setPartySize] = useState(1)
   }
 
   function tableServer(tableId: string) {
+    const seated=activeSessions.find(session=>session.tableIds.includes(tableId)||session.primaryTableId===tableId)
+    if(seated?.serverId)return memberName(seated.serverId)
+
     const assignment = assignments.find(
       (item) =>
         item.table_id === tableId,
@@ -1836,7 +1853,8 @@ const [partySize, setPartySize] = useState(1)
 
 
       {/* FLOOR SECTIONS AT TOP */}
-      {sectionCards.length>0 && <section className="floor-section-summary"><p className="eyebrow">Tonight’s Floor</p><h2>Assigned sections</h2><div>{sectionCards.map(c=><button key={c.id} onClick={()=>setSelectedTableIds(c.tableIds)}><strong>{c.name}</strong><span className="section-server">{memberName(c.employeeId)}</span><span>{tables.filter(t=>c.tableIds.includes(t.id)).map(t=>t.table_name).join(', ')}</span><span>{c.tableIds.length} tables · {c.totalSeats} seats</span></button>)}</div></section>}
+      <SectionSchedule locationId={locationId} selectedTableIds={selectedTableIds} tables={tables} employees={team.map(m=>({id:m.user_id,name:memberName(m.user_id)}))} onLoaded={(plans,offset)=>{setSectionPlans(plans);setServerClockOffset(offset)}} onSelect={setSelectedTableIds} />
+      {sectionCards.length>0 && <section className="floor-section-summary"><p className="eyebrow">Current Floor</p><h2>Assigned sections</h2><div>{sectionCards.map(c=><button key={c.id} onClick={()=>setSelectedTableIds(c.tableIds)}><strong>{c.name}</strong><span className="section-server">{memberName(c.employeeId)}</span><span>{tables.filter(t=>c.tableIds.includes(t.id)).map(t=>t.table_name).join(', ')}</span><span>{c.tableIds.length} tables · {c.totalSeats} seats</span></button>)}</div></section>}
 
       <div className="shift-toolbar">
         {shifts.length > 0 ? (
