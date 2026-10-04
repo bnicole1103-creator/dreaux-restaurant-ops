@@ -186,7 +186,7 @@ export function FloorPage() {
 
   const [sectionPlans,setSectionPlans]=useState<SectionPlan[]>([])
   const [serverClockOffset,setServerClockOffset]=useState(0)
-  const activePlans=useMemo(()=>sectionPlans.filter(p=>p.assignable && new Date(p.starts_at).getTime()<=clockTick+serverClockOffset && clockTick+serverClockOffset<new Date(p.ends_at).getTime()),[sectionPlans,clockTick,serverClockOffset])
+  const activePlans=useMemo(()=>sectionPlans.filter(p=>p.published_at && p.assignable && new Date(p.starts_at).getTime()<=clockTick+serverClockOffset && clockTick+serverClockOffset<new Date(p.ends_at).getTime()),[sectionPlans,clockTick,serverClockOffset])
   const plannedTables=useMemo(()=>new Set(activePlans.flatMap(p=>p.table_ids)),[activePlans])
   const assignments=useMemo(()=>[
     ...baseAssignments.filter(a=>!plannedTables.has(a.table_id)),

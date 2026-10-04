@@ -1,0 +1,9 @@
+import { useEffect, useState } from 'react'
+import { supabase } from '../lib/supabase'
+import { sectionTime, type DaySection } from './MySections'
+export function PreshiftSections({location,date,disabled,onInsert}:{location:string;date:string;disabled:boolean;onInsert:(text:string)=>void}){
+ const [text,setText]=useState(''),[error,setError]=useState(''),[busy,setBusy]=useState(false),[loadedDate,setLoadedDate]=useState('')
+ useEffect(()=>{setText('');setLoadedDate('');setError('')},[location,date])
+ async function pull(){setBusy(true);setError('');try{const r=await supabase.rpc('floor_sections_for_day',{p_location_id:location,p_date:date,p_only_me:false});if(r.error)throw r.error;const rows=(r.data??[]) as DaySection[];if(!rows.length)throw Error('No published sections for this date. Publish assignments on Floor first.');setText('Sections\n'+rows.map(s=>s.name+' · '+s.employee+'\nTables: '+s.tables+(s.starts_at&&s.ends_at?'\n'+sectionTime(s.starts_at)+' – '+sectionTime(s.ends_at)+' CT':' · Regular shift')).join('\n\n'));setLoadedDate(date)}catch(e){setError(String((e as {message?:string}).message??e))}finally{setBusy(false)}}
+ return <fieldset disabled={disabled||busy}><legend>Sections from Floor</legend><p>Copy published assignments for this date, then edit the wording for this post. Post edits do not change floor assignments.</p><button type="button" onClick={()=>void pull()}>Pull sections from Floor</button>{error&&<p role="alert">{error}</p>}{text&&<><label>Sections for this pre-shift<textarea rows={6} maxLength={12000} value={text} onChange={e=>setText(e.target.value)}/></label><button type="button" disabled={!text.trim()||loadedDate!==date} onClick={()=>{try{onInsert(text);setText('')}catch(e){setError(String((e as Error).message))}}}>Insert sections into post</button></>}</fieldset>
+}

@@ -1,3 +1,5 @@
+import { PreshiftSections } from '../components/PreshiftSections'
+import { PreshiftArchive } from '../components/PreshiftArchive'
 import { PreshiftPresetBuilder } from '../components/PreshiftPresetBuilder'
 import { appFonts, type FontName } from '../lib/appearance'
 import { PostMedia, type MediaAsset } from '../components/PostMedia'
@@ -15,7 +17,7 @@ const stamp=(value:string)=>new Intl.DateTimeFormat('en-US',{timeZone:'America/C
 const day=(value:string)=>new Intl.DateTimeFormat('en-US',{timeZone:'UTC',month:'long',day:'numeric',year:'numeric'}).format(new Date(value+'T12:00:00Z'))
 const message=(e:unknown)=>String((e as {message?:string})?.message ?? e)
 export function PreshiftFeedPage(){
- const access=useManagementAccess();const [location,setLocation]=useState('');const [posts,setPosts]=useState<Post[]>([]);const [total,setTotal]=useState(0)
+ const [archive,setArchive]=useState(false);const access=useManagementAccess();const [location,setLocation]=useState('');const [posts,setPosts]=useState<Post[]>([]);const [total,setTotal]=useState(0)
  const [limit,setLimit]=useState(50);const [refresh,setRefresh]=useState(0);const [loading,setLoading]=useState(true);const [saving,setSaving]=useState(false)
  const [error,setError]=useState('');const [formError,setFormError]=useState('');const [notice,setNotice]=useState('');const [editing,setEditing]=useState<Post|null>(null)
  const [builderKey,setBuilderKey]=useState(0)
@@ -45,6 +47,7 @@ export function PreshiftFeedPage(){
    <div className="post-color-tools">{([['Title color',titleColor,setTitleColor],['Text color',textColor,setTextColor],['Card accent',accentColor,setAccentColor]] as const).map(([label,value,setter])=><label key={label}>{label}<select value={value} disabled={saving||uploading} onChange={e=>setter(e.target.value as PostColor)}>{Object.entries(postColors).map(([key,c])=><option key={key} value={key}>{c.label}</option>)}</select></label>)}</div>
    <div className="post-color-tools">{([['Title font',titleFont,setTitleFont],['Post font',textFont,setTextFont]] as const).map(([label,value,setter])=><label key={label}>{label}<select value={value} disabled={saving||uploading} onChange={e=>setter(e.target.value as FontName)}>{Object.entries(appFonts).map(([key,font])=><option key={key} value={key}>{font.label}</option>)}</select></label>)}</div>
    <div className="emoji-tools" aria-label="Add an emoji to the post">{['✨','🍸','🥂','🍽️','🔥','🎉','💋','✅','🚨','🤝','⏰','📣','🦞','🌮'].map(emoji=><button type="button" key={emoji} disabled={saving||uploading} aria-label={'Insert '+emoji} onClick={()=>{const input=bodyInput.current;const start=input?.selectionStart ?? body.length;const end=input?.selectionEnd ?? start;setBody(v=>(v.slice(0,start)+emoji+v.slice(end)).slice(0,12000));requestAnimationFrame(()=>{input?.focus();input?.setSelectionRange(start+emoji.length,start+emoji.length)})}}>{emoji}</button>)}</div>
+   <PreshiftSections location={location} date={date} disabled={saving||uploading} onInsert={text=>{const next=[body.trim(),text.trim()].filter(Boolean).join('\n\n');if(next.length>12000)throw Error('Post is too long. Shorten it before inserting sections.');setBody(next)}}/>
    <label>Post<textarea ref={bodyInput} required maxLength={12000} rows={8} value={body} disabled={saving||uploading} onChange={e=>setBody(e.target.value)} placeholder="Today’s specials, service priorities, menu notes, and team reminders…" /></label>
    <label>Photos and videos<input type="file" multiple accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/quicktime,video/webm" disabled={saving||uploading||media.length>=6} onChange={e=>{if(e.target.files)void upload(Array.from(e.target.files));e.target.value=''}} /></label><p>Up to 6 attachments · 50 MB each. Videos play when staff tap Play.</p>{uploading&&<p role="status">Uploading attachment…</p>}
    {media.map(a=><div className="media-edit-row" key={a.path}><span>{a.name}</span><label>Caption<input value={a.caption} maxLength={500} disabled={saving||uploading} onChange={e=>setMedia(v=>v.map(x=>x.path===a.path?{...x,caption:e.target.value}:x))} /></label><button type="button" disabled={saving||uploading} onClick={()=>setMedia(v=>v.filter(x=>x.path!==a.path))}>Remove attachment</button></div>)}<PostMedia assets={media} />
@@ -52,12 +55,16 @@ export function PreshiftFeedPage(){
    <label className="feed-check"><input type="checkbox" checked={pinned} disabled={saving||uploading} onChange={e=>setPinned(e.target.checked)} />Pin to the top</label>
    {formError && <p role="alert">{formError}</p>}<div className="feed-actions"><button className="primary-button" disabled={saving || uploading || !title.trim() || !body.trim()}>{saving?'Saving…':editing?'Save changes':'Publish post'}</button><button type="button" disabled={saving||uploading} onClick={()=>{void discardUploads();setCompose(false)}}>Cancel</button></div>
   </form>}
+  <button type="button" onClick={()=>setArchive(v=>!v)}>{archive?'Back to feed':'Search past pre-shifts'}</button>
+  {archive&&<PreshiftArchive location={location}/>}
+  {!archive&&<>
   {loading && <p role="status">Loading feed…</p>}{!loading && !error && posts.length===0 && <p>No pre-shift posts yet.</p>}
   {posts.map(post=><article className="feed-card" key={post.id} style={postStyle(post.presentation)}>{post.pinned && <p className="eyebrow">Pinned</p>}<p className="feed-meta">Pre-Shift · {day(post.shift_date)}</p><h2 style={{color:postColors[post.presentation?.title ?? "brown"]?.ink,fontFamily:appFonts[post.presentation?.titleFont??"system"]?.css}}>{post.title}</h2><p className="feed-body" style={{color:postColors[post.presentation?.text ?? "brown"]?.ink,fontFamily:appFonts[post.presentation?.textFont??"system"]?.css}}>{post.body}</p><PostMedia assets={post.media??[]} /><div className="feed-actions"><Link className="primary-button" to="/quizzes">Take the pre-shift quiz →</Link></div><p className="feed-meta">Posted by {post.author} · {stamp(post.created_at)} CT{post.version>1 && <> · Edited {stamp(post.updated_at)} CT</>}</p>
    {access.manager && <div className="feed-actions"><button disabled={saving||uploading} onClick={()=>void start(post)}>Edit post</button><button disabled={saving||uploading} onClick={()=>void remove(post)}>Remove post</button></div>}
   </article>)}
   {total>posts.length && limit<1000 && <button onClick={()=>setLimit(v=>Math.min(1000,v+50))}>Load older posts</button>}{limit>=1000 && total>1000 && <p>Showing the latest 1,000 posts.</p>}
   {updated && <p className="feed-meta">Updated {updated} CT · Checks for new posts every 15 seconds while this page is open.</p>}
+ </>}
  </section>
 }
 
