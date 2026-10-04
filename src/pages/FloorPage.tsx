@@ -81,6 +81,8 @@ type SmartRecommendation = {
   employeeId: string
   employeeName: string
   score: number
+  avgSalesPerHour: number | null
+  timedUses: number
   avgNetSales: number
   historicalUses: number
   currentSeats: number
@@ -914,12 +916,12 @@ const [partySize, setPartySize] = useState(1)
     const candidates=team.filter(m=>['server','bartender','manager','assistant_manager','general_manager','owner'].includes(m.role)).map(m=>({id:m.user_id,name:memberName(m.user_id)}))
     const loads:Record<string,number>={}
     assignments.filter(a=>!selected.includes(a.table_id)).forEach(a=>{loads[a.server_id]=(loads[a.server_id]??0)+(tables.find(t=>t.id===a.table_id)?.seat_count??0)})
-    let rows:{employee_id:string;net_sales:number|null;table_match:boolean}[]=[]
+    let rows:{employee_id:string;net_sales:number|null;table_match:boolean;hours_worked:number|null}[]=[]
     try {
       const history=await supabase.rpc('floor_closeout_history',{p_location_id:locationId,p_table_ids:selected})
       if(history.error)throw history.error
       rows=history.data??[]
-      setSmartNotice('Uses up to 30 positive-sales server closeouts per person from the last 90 days. Matching table combinations are preferred when available. Average net sales is per closeout, not per hour. Current table capacity also affects suggestions.')
+      setSmartNotice('Uses up to 30 positive-sales server closeouts per person from the last 90 days. Matching table combinations are preferred when available. Recorded clock-in and clock-out enable hourly comparisons. Older forms still contribute net sales history. Current table capacity also affects suggestions.')
     } catch (e) {
       setSmartNotice(`Closeout sales history could not load: ${String((e as {message?:string}).message??e)}. Suggestions below use current assigned capacity.`)
     } finally {
@@ -2523,6 +2525,7 @@ const [partySize, setPartySize] = useState(1)
                             0,
                           )}/closeout avg`
                         : 'No historical sales data yet'}
+                      {recommendation.avgSalesPerHour!==null && <div>${recommendation.avgSalesPerHour.toFixed(0)}/hr average · {recommendation.timedUses} timed closeouts</div>}
                     </div>
 
                     <div

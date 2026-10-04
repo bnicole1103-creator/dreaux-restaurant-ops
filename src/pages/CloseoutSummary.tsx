@@ -34,6 +34,7 @@ type CloseoutRow = {
   closeout_date: string
 
   scheduled_start: string | null
+  clock_out?: string | null
   clock_in: string | null
 
   job_role: string
@@ -1017,6 +1018,7 @@ function CloseoutDay({selectedDate,refresh,onDeleted,locationId,locationName,cur
                               }
                             </strong>
                           </div>
+                          <div><strong>Clock-Out</strong><p>{clockLabel(closeout.clock_out ?? null)}</p></div>
 
                           <div>
                             <span>
@@ -1271,3 +1273,4 @@ export function CloseoutSummaryPage() {
   {archiveDate && archiveDate<day && <CloseoutDay key={archiveDate} selectedDate={archiveDate} current={false} refresh={refresh} locationId={location.id} locationName={location.name} onDeleted={reload} />}
  </>
 }
+

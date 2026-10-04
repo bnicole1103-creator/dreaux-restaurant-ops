@@ -1,3 +1,5 @@
+import { ClockTime } from '../components/ClockTime'
+import { closeoutHours } from '../lib/closeoutHours'
 import './CloseoutMobile.css'
 import { submissionLabel } from '../lib/submissionTime'
 import { Link } from 'react-router-dom'
@@ -364,6 +366,7 @@ export function CloseoutPage() {
   const [clockInTime, setClockInTime] =
     useState('')
 
+  const [clockOutTime, setClockOutTime] = useState('')
   const [zeroSalesConfirmed, setZeroSalesConfirmed] = useState(false)
   const [zeroSalesReason, setZeroSalesReason] = useState('')
   const [netSales, setNetSales] =
@@ -806,6 +809,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
   function resetForm() {
     setScheduledTime('')
     setClockInTime('')
+    setClockOutTime('')
 
     setNetSales('')
     setSalesTarget('')
@@ -872,6 +876,8 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
           'Enter your actual clock-in time.'
         )
       }
+
+      if (closeoutHours(clockInTime, clockOutTime) === null) throw new Error('Enter your clock-out time. Shift length must be greater than zero and no more than 18 hours. A clock-out earlier than clock-in means the next day.')
 
       if (!moneyTurnedInTo) {
         throw new Error(
@@ -984,6 +990,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
 
           clock_in:
             clockInTime,
+          clock_out: clockOutTime,
 
           job_role:
             jobRole,
@@ -1290,40 +1297,20 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
           <label>
             {questionLabel(config, 'staff_0', "Scheduled Time")}
 
-            <input
-              type="time"
-              value={
-                scheduledTime
-              }
-              onChange={(
-                event
-              ) =>
-                setScheduledTime(
-                  event.target
-                    .value
-                )
-              }
-            />
+            <ClockTime required label="Scheduled time" value={scheduledTime} onChange={setScheduledTime} />
           </label>
 
           <label>
             {questionLabel(config, 'staff_1', "Actual Clock-In Time")}
 
-            <input
-              type="time"
-              value={
-                clockInTime
-              }
-              onChange={(
-                event
-              ) =>
-                setClockInTime(
-                  event.target
-                    .value
-                )
-              }
-            />
+            <ClockTime required label="Clock-in time" value={clockInTime} onChange={setClockInTime} />
           </label>
+
+          <label>Actual Clock-Out Time
+            <ClockTime required label="Clock-out time" value={clockOutTime} onChange={setClockOutTime} />
+            <small>Use your actual end time. After-midnight clock-out is treated as the next day.</small>
+          </label>
+          {closeoutHours(clockInTime,clockOutTime)!==null && <p>Shift length: {closeoutHours(clockInTime,clockOutTime)!.toFixed(2)} hours</p>}
 
           <label>
             {questionLabel(config, 'staff_2', "Shift")}
@@ -2024,3 +2011,4 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
     </section>
   )
 }
+
