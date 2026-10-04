@@ -1,3 +1,4 @@
+import { SalesTargetsPage } from './pages/SalesTargetsPage'
 import { TasksPage } from './pages/TasksPage'
 import { SettingsPage } from './pages/SettingsPage'
 import { SummaryPage } from './pages/SummaryPage'
@@ -115,6 +116,7 @@ export default function App() {
     <SignupGate key={session.user.id} userId={session.user.id}>
     <AppShell session={session}>
       <Routes>
+        <Route path="/settings/sales-targets" element={<ManagementOnly gmOnly><SalesTargetsPage /></ManagementOnly>} />
         <Route path="/settings" element={<ManagementOnly gmOnly><SettingsPage /></ManagementOnly>} />
         <Route path="/settings/point-rules" element={<ManagementOnly gmOnly><CloseoutSettingsPage key="point-rules" initialTab="points" /></ManagementOnly>} />
         <Route path="/closeout-summary/cash" element={<SummaryPage cash />} />

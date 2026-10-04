@@ -46,11 +46,11 @@ export function SignupApprovals({location}: {location: string}) {
   {!busy && requests.length===0 && <p>No pending requests.</p>}
   {requests.map(r=>{const d=drafts[r.id] ?? {role:'employee',access:'staff'};return <article className="mod-review" key={r.id}>
    <h3>{r.name}</h3><p>{r.email}</p>
-   <label>Job role<select value={d.role} disabled={busy} onChange={e=>setDrafts(v=>({...v,[r.id]:{...d,role:e.target.value}}))}>
-    {['employee','host','server','bartender','busser','kitchen','assistant_manager','manager','general_manager'].map(role=><option key={role} value={role}>{role.replace(/_/g,' ')}</option>)}
+   <label>Job role<select value={d.role} disabled={busy} onChange={e=>setDrafts(v=>({...v,[r.id]:{...d,role:e.target.value,access:e.target.value==='owner'?'owner':d.access}}))}>
+    {['employee','host','server','bartender','busser','kitchen','assistant_manager','manager','general_manager','owner'].map(role=><option key={role} value={role}>{role.replace(/_/g,' ')}</option>)}
    </select></label>
    <label>Closeout and points access<select value={d.access} disabled={busy} onChange={e=>setDrafts(v=>({...v,[r.id]:{...d,access:e.target.value}}))}>
-    <option value="staff">Staff</option><option value="manager">Manager</option><option value="general_manager">General Manager</option>
+    <option value="staff">Staff</option><option value="manager">Manager</option><option value="general_manager">General Manager</option><option value="owner">Owner</option>
    </select></label>
    <button disabled={busy} onClick={()=>void decide(r,true)}>Approve</button> <button disabled={busy} onClick={()=>void decide(r,false)}>Decline</button>
   </article>})}

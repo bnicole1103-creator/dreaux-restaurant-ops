@@ -1,0 +1,6 @@
+.preset-editor-modal { color: inherit; background: var(--app-card,#fff); width: min(560px,calc(100% - 32px)); max-height: 85dvh; overflow-y: auto; box-sizing: border-box; border: 1px solid #d6c5b5; border-radius: 18px; padding: 22px; }
+.preset-editor-modal::backdrop { background: rgb(0 0 0 / .5); }
+.preset-editor-modal label { display: grid; gap: 6px; margin: 12px 0; }
+.preset-editor-modal input,.preset-editor-modal select,.preset-editor-modal textarea { width: 100%; box-sizing: border-box; min-width: 0; }
+.preset-editor-close { float: right; min-width: 44px; min-height: 44px; font-size: 1.4rem; }
+.preset-editor-modal fieldset { border: 0; padding: 0; margin: 0; }
