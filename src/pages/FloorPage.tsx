@@ -1,3 +1,4 @@
+import { SectionEmployeePicker } from '../components/SectionEmployeePicker'
 import { SectionSchedule, type SectionPlan } from '../components/SectionSchedule'
 import { floorRoomRatio, floorTableGeometry } from '../lib/floorPhotoLayout'
 import './FloorMap.css'
@@ -38,14 +39,16 @@ type FloorTable = {
 type ServerAssignment = {
   id: string
   table_id: string
-  server_id: string
+  server_id: string | null
+  guest_name?: string | null
 }
 
 type ShiftSectionCard = {
   id: string
   configurationId: string
   name: string
-  employeeId: string
+  employeeId: string | null
+  guestName?: string | null
   tableIds: string[]
   totalSeats: number
 }
@@ -184,17 +187,18 @@ export function FloorPage() {
 
   const [clockTick, setClockTick] = useState(Date.now())
 
+  const [scheduleRefresh,setScheduleRefresh]=useState(0)
   const [sectionPlans,setSectionPlans]=useState<SectionPlan[]>([])
   const [serverClockOffset,setServerClockOffset]=useState(0)
   const activePlans=useMemo(()=>sectionPlans.filter(p=>p.published_at && p.assignable && new Date(p.starts_at).getTime()<=clockTick+serverClockOffset && clockTick+serverClockOffset<new Date(p.ends_at).getTime()),[sectionPlans,clockTick,serverClockOffset])
   const plannedTables=useMemo(()=>new Set(activePlans.flatMap(p=>p.table_ids)),[activePlans])
   const assignments=useMemo(()=>[
     ...baseAssignments.filter(a=>!plannedTables.has(a.table_id)),
-    ...activePlans.flatMap(p=>p.table_ids.map(id=>({id:`${p.id}:${id}`,table_id:id,server_id:p.employee_id})))
+    ...activePlans.flatMap(p=>p.table_ids.map(id=>({id:`${p.id}:${id}`,table_id:id,server_id:p.employee_id,guest_name:p.guest_name})))
   ],[baseAssignments,activePlans,plannedTables])
   const sectionCards=useMemo(()=>[
     ...baseSectionCards.map(c=>({...c,tableIds:c.tableIds.filter(id=>!plannedTables.has(id)),totalSeats:c.tableIds.filter(id=>!plannedTables.has(id)).reduce((sum,id)=>sum+(tables.find(t=>t.id===id)?.seat_count??0),0)})).filter(c=>c.tableIds.length),
-    ...activePlans.map(p=>({id:p.id,configurationId:p.id,name:`${p.name} (scheduled)`,employeeId:p.employee_id,tableIds:p.table_ids,totalSeats:p.table_ids.reduce((sum,id)=>sum+(tables.find(t=>t.id===id)?.seat_count??0),0)}))
+    ...activePlans.map(p=>({id:p.id,configurationId:p.id,name:`${p.name} (scheduled)`,employeeId:p.employee_id,guestName:p.guest_name,tableIds:p.table_ids,totalSeats:p.table_ids.reduce((sum,id)=>sum+(tables.find(t=>t.id===id)?.seat_count??0),0)}))
   ],[baseSectionCards,activePlans,plannedTables,tables])
 
   const [activeRoomId, setActiveRoomId] = useState('')
@@ -218,6 +222,7 @@ const [partySize, setPartySize] = useState(1)
 
   const [sectionName, setSectionName] = useState('')
 
+  const [sectionGuestName,setSectionGuestName]=useState('')
   const [selectedServerId, setSelectedServerId] =
     useState('')
 
@@ -356,7 +361,7 @@ const [partySize, setPartySize] = useState(1)
     const { data, error: assignmentError } =
       await supabase
         .from('server_assignments')
-        .select('id, table_id, server_id')
+        .select('id, table_id, server_id, guest_name')
         .eq('shift_id', shiftId)
 
     if (assignmentError) {
@@ -379,6 +384,7 @@ const [partySize, setPartySize] = useState(1)
         id,
         section_configuration_id,
         employee_id,
+        guest_name,
         assignment_status
       `)
       .eq('shift_id', shiftId)
@@ -436,6 +442,7 @@ const [partySize, setPartySize] = useState(1)
                 'Section',
 
               employeeId: section.employee_id,
+              guestName: section.guest_name,
 
               tableIds: (
                 tableResult.data ?? []
@@ -919,7 +926,7 @@ const [partySize, setPartySize] = useState(1)
     const selected=[...selectedTableIds]
     const candidates=team.filter(m=>['server','bartender','manager','assistant_manager','general_manager','owner'].includes(m.role)).map(m=>({id:m.user_id,name:memberName(m.user_id)}))
     const loads:Record<string,number>={}
-    assignments.filter(a=>!selected.includes(a.table_id)).forEach(a=>{loads[a.server_id]=(loads[a.server_id]??0)+(tables.find(t=>t.id===a.table_id)?.seat_count??0)})
+    assignments.filter(a=>!selected.includes(a.table_id)).forEach(a=>{if(a.server_id)loads[a.server_id]=(loads[a.server_id]??0)+(tables.find(t=>t.id===a.table_id)?.seat_count??0)})
     let rows:{employee_id:string;net_sales:number|null;table_match:boolean;hours_worked:number|null}[]=[]
     try {
       const history=await supabase.rpc('floor_closeout_history',{p_location_id:locationId,p_table_ids:selected})
@@ -1067,7 +1074,7 @@ const [partySize, setPartySize] = useState(1)
     }
   }
 
-  function memberName(userId: string) {
+  function memberName(userId: string | null) {
     const member = team.find(
       (teamMember) =>
         teamMember.user_id === userId,
@@ -1090,7 +1097,7 @@ const [partySize, setPartySize] = useState(1)
     )
 
     return assignment
-      ? memberName(assignment.server_id)
+      ? assignment.guest_name || memberName(assignment.server_id)
       : ''
   }
 
@@ -1731,9 +1738,19 @@ const [partySize, setPartySize] = useState(1)
     }
   }
 
+  async function clearSectionAssignments(all=false){
+    if(saving)return
+    if(!window.confirm(all?'Clear all section assignments for this shift and active timed sections? Seated parties keep their server. Future plans are kept.':'Clear section assignments for the selected tables? Seated parties keep their server.'))return
+    setSaving(true);setError('')
+    try{const r=await supabase.rpc('floor_clear_section_assignments',{p_location_id:locationId,p_shift_id:activeShiftId||null,p_table_ids:all?null:selectedTableIds});if(r.error)throw r.error
+      const planned=await supabase.rpc('floor_schedule_list',{p_location_id:locationId});if(planned.error)throw planned.error;setSectionPlans(planned.data.plans??[]);setScheduleRefresh(v=>v+1)
+      if(activeShiftId)await Promise.all([loadAssignments(activeShiftId),loadSections(activeShiftId)])
+      setSelectedTableIds([]);setFloorNotice(all?'Section assignments cleared. Select tables to build new sections.':'Selected table assignments cleared.')
+    }catch(e){setError(String((e as {message?:string}).message??e))}finally{setSaving(false)}
+  }
   async function handleCreateSection() {
     if (
-      !selectedServerId ||
+      (!selectedServerId || (selectedServerId==='__name__'&&!sectionGuestName.trim())) ||
       selectedTableIds.length === 0
     ) {
       return
@@ -1749,9 +1766,9 @@ const [partySize, setPartySize] = useState(1)
       setSaving(true)
       setError('')
 
-      const r=await supabase.rpc('floor_assign_section',{
+      const r=await supabase.rpc('floor_assign_section_person',{
         p_location_id:locationId,p_shift_id:activeShiftId || null,p_shift_name:newShiftName,
-        p_name:finalSectionName,p_server_id:selectedServerId,p_table_ids:selectedTableIds,
+        p_name:finalSectionName,p_server_id:selectedServerId==='__name__'?null:selectedServerId,p_guest_name:selectedServerId==='__name__'?sectionGuestName.trim():null,p_table_ids:selectedTableIds,
       })
       if(r.error)throw r.error
       const shiftId=String(r.data.shift_id)
@@ -1759,7 +1776,7 @@ const [partySize, setPartySize] = useState(1)
       await Promise.all([loadAssignments(shiftId),loadSections(shiftId)])
       setFloorNotice('Section assigned. '+(r.data.status==='scheduled'?'Shift is scheduled; service has not opened.':''))
       setSelectedTableIds([])
-      setSelectedServerId('')
+      setSelectedServerId('');setSectionGuestName('')
       setSectionName('')
       setShowSectionPanel(false)
     } catch (caughtError) {
@@ -1843,8 +1860,8 @@ const [partySize, setPartySize] = useState(1)
 
 
       {/* FLOOR SECTIONS AT TOP */}
-      <SectionSchedule locationId={locationId} selectedTableIds={selectedTableIds} tables={tables} employees={team.map(m=>({id:m.user_id,name:memberName(m.user_id)}))} onLoaded={(plans,offset)=>{setSectionPlans(plans);setServerClockOffset(offset)}} onSelect={setSelectedTableIds} />
-      {sectionCards.length>0 && <section className="floor-section-summary"><p className="eyebrow">Current Floor</p><h2>Assigned sections</h2><div>{sectionCards.map(c=><button key={c.id} onClick={()=>setSelectedTableIds(c.tableIds)}><strong>{c.name}</strong><span className="section-server">{memberName(c.employeeId)}</span><span>{tables.filter(t=>c.tableIds.includes(t.id)).map(t=>t.table_name).join(', ')}</span><span>{c.tableIds.length} tables · {c.totalSeats} seats</span></button>)}</div></section>}
+      <SectionSchedule refreshKey={scheduleRefresh} locationId={locationId} selectedTableIds={selectedTableIds} tables={tables} employees={team.map(m=>({id:m.user_id,name:memberName(m.user_id)}))} onLoaded={(plans,offset)=>{setSectionPlans(plans);setServerClockOffset(offset)}} onSelect={setSelectedTableIds} />
+      {sectionCards.length>0 && <section className="floor-section-summary"><p className="eyebrow">Current Floor</p><h2>Assigned sections</h2><button type="button" disabled={saving||arrangeMode} onClick={()=>void clearSectionAssignments(true)}>Clear all sections</button><div>{sectionCards.map(c=><button key={c.id} onClick={()=>setSelectedTableIds(c.tableIds)}><strong>{c.name}</strong><span className="section-server">{c.guestName || memberName(c.employeeId)}</span><span>{tables.filter(t=>c.tableIds.includes(t.id)).map(t=>t.table_name).join(', ')}</span><span>{c.tableIds.length} tables · {c.totalSeats} seats</span></button>)}</div></section>}
 
       <div className="shift-toolbar">
         {shifts.length > 0 ? (
@@ -1981,7 +1998,7 @@ const [partySize, setPartySize] = useState(1)
       <section className="floor-section-tools" aria-label="Section assignment">
         <div><strong>Sections & tables</strong><p>Tap tables to select them. Switch rooms to include more tables.</p></div>
         <div className="floor-selection-list">{selectedTables.length?selectedTables.map(t=><button type="button" key={t.id} onClick={()=>toggleTable(t.id)}>{t.table_name} ×</button>):<span>No tables selected</span>}</div>
-        <div className="floor-selection-actions"><button type="button" disabled={!selectedTableIds.length || smartLoading || saving || arrangeMode} onClick={()=>void handleSmartSection()}>{smartLoading?'Analyzing…':'✨ Smart Section'}</button><button type="button" disabled={!selectedTableIds.length || saving || arrangeMode} onClick={()=>setShowSectionPanel(true)}>Assign section</button><button type="button" disabled={!selectedTableIds.length || saving || arrangeMode} onClick={openSeating}>Seat selected tables</button><button type="button" disabled={!selectedTableIds.length} onClick={()=>setSelectedTableIds([])}>Clear selection</button></div>
+        <div className="floor-selection-actions"><button type="button" disabled={!selectedTableIds.length || smartLoading || saving || arrangeMode} onClick={()=>void handleSmartSection()}>{smartLoading?'Analyzing…':'✨ Smart Section'}</button><button type="button" disabled={!selectedTableIds.length || saving || arrangeMode} onClick={()=>setShowSectionPanel(true)}>Assign section</button><button type="button" disabled={!selectedTableIds.length || saving || arrangeMode} onClick={openSeating}>Seat selected tables</button><button type="button" disabled={!selectedTableIds.length} onClick={()=>setSelectedTableIds([])}>Clear selection</button><button type="button" disabled={!selectedTableIds.length||saving||arrangeMode} onClick={()=>void clearSectionAssignments()}>Clear assignments</button></div>
 
         {floorNotice && <p role="status">{floorNotice}</p>}
       </section>
@@ -2149,7 +2166,7 @@ const [partySize, setPartySize] = useState(1)
               setSelectedTableIds([])
             }
           >
-            Clear
+            Clear selection
           </button>
           {selectedTable && (
   <button
@@ -2265,41 +2282,7 @@ const [partySize, setPartySize] = useState(1)
               />
             </label>
 
-            <label
-              style={{
-                marginTop: '14px',
-              }}
-            >
-              Server
-
-              <select
-                value={selectedServerId}
-                onChange={(event) =>
-                  setSelectedServerId(
-                    event.target.value,
-                  )
-                }
-              >
-                <option value="">
-                  Choose an employee
-                </option>
-
-                {team.map((member) => (
-                  <option
-                    key={member.user_id}
-                    value={member.user_id}
-                  >
-                    {memberName(
-                      member.user_id,
-                    )}{' '}
-                    ·{' '}
-                    {member.role
-                      .split('_')
-                      .join(' ')}
-                  </option>
-                ))}
-              </select>
-            </label>
+            <SectionEmployeePicker employees={team.map(m=>({id:m.user_id,name:memberName(m.user_id)}))} employeeId={selectedServerId==='__name__'?null:selectedServerId} guestName={sectionGuestName} disabled={saving} onChange={(id,name)=>{setSelectedServerId(id===null?'__name__':id);setSectionGuestName(name)}}/>
 
             <div
               style={{
@@ -2356,7 +2339,7 @@ const [partySize, setPartySize] = useState(1)
                   handleCreateSection
                 }
                 disabled={
-                  !selectedServerId || !selectedTableIds.length ||
+                  (!selectedServerId || (selectedServerId==='__name__'&&!sectionGuestName.trim())) || !selectedTableIds.length ||
                   saving
                 }
               >
@@ -3612,6 +3595,3 @@ const [partySize, setPartySize] = useState(1)
     </section>
   )
 }
-
-
-
