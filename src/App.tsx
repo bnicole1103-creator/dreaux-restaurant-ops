@@ -1,3 +1,4 @@
+import { TasksPage } from './pages/TasksPage'
 import { SettingsPage } from './pages/SettingsPage'
 import { SummaryPage } from './pages/SummaryPage'
 import { AppearancePage as LocationAppearancePage } from './pages/AppearancePage'
@@ -163,7 +164,7 @@ export default function App() {
         <Route
           path="/tasks"
           element={
-            <PlaceholderPage title="Tasks" />
+            <TasksPage />
           }
         />
 
