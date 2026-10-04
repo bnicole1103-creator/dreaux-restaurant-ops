@@ -6,7 +6,6 @@ import type { Session } from '@supabase/supabase-js'
 import {
   Newspaper,
   BookOpen,
-  Banknote,
   BarChart3,
   ClipboardCheck,
   ClipboardList,
@@ -34,11 +33,6 @@ const links = [
     to: '/floor',
     label: 'Floor',
     icon: LayoutGrid,
-  },
-  {
-    to: '/cash',
-    label: 'Cash',
-    icon: Banknote,
   },
   {
     to: '/closeout',

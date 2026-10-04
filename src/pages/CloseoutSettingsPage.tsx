@@ -7,11 +7,11 @@ import { loadLocationTeam } from '../lib/team'
 import type { TeamMember } from '../lib/team'
 import type { Config, Question, PointRule } from '../components/CloseoutConfig'
 import './ManagerCloseoutPage.css'
-export function CloseoutSettingsPage({awardsOnly = false}: {awardsOnly?: boolean}) {
+export function CloseoutSettingsPage({awardsOnly = false, initialTab = 'staff'}: {awardsOnly?: boolean; initialTab?: 'staff'|'manager'|'points'|'award'}) {
   const [locationId,setLocationId]=useState('')
   const [config,setConfig]=useState<Config|null>(null)
   const [team,setTeam]=useState<TeamMember[]>([])
-  const [tab,setTab]=useState<'staff'|'manager'|'points'|'award'>(awardsOnly ? 'award' : 'staff')
+  const [tab,setTab]=useState<'staff'|'manager'|'points'|'award'>(awardsOnly ? 'award' : initialTab)
   const [busy,setBusy]=useState(false)
   const [dirty,setDirty]=useState(false)
   const [error,setError]=useState('')

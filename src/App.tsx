@@ -1,3 +1,5 @@
+import { SettingsPage } from './pages/SettingsPage'
+import { SummaryPage } from './pages/SummaryPage'
 import { AppearancePage as LocationAppearancePage } from './pages/AppearancePage'
 import { ManagementOnly as AppearanceGuard } from './components/ManagementAccess'
 import { PreshiftFeedPage } from './pages/PreshiftFeedPage'
@@ -25,11 +27,9 @@ import { AppShell } from './components/AppShell'
 import { LoginPage } from './pages/LoginPage'
 import { DashboardPage } from './pages/DashboardPage'
 import { FloorPage } from './pages/FloorPage'
-import { CashPage } from './pages/CashPage'
 import { PlaceholderPage } from './pages/PlaceholderPage'
 import { TeamPage } from './pages/TeamPage'
 import { CloseoutPage } from './pages/CloseoutPage'
-import { CloseoutSummaryPage } from './pages/CloseoutSummary'
 
 export default function App() {
   const [recovering, setRecovering] = useState(() => {
@@ -114,6 +114,9 @@ export default function App() {
     <SignupGate key={session.user.id} userId={session.user.id}>
     <AppShell session={session}>
       <Routes>
+        <Route path="/settings" element={<ManagementOnly gmOnly><SettingsPage /></ManagementOnly>} />
+        <Route path="/settings/point-rules" element={<ManagementOnly gmOnly><CloseoutSettingsPage key="point-rules" initialTab="points" /></ManagementOnly>} />
+        <Route path="/closeout-summary/cash" element={<SummaryPage cash />} />
         <Route path="/appearance" element={<AppearanceGuard gmOnly><LocationAppearancePage /></AppearanceGuard>} />
         <Route path="/preshift" element={<PreshiftFeedPage />} />
         <Route path="/quizzes" element={<QuizzesPage />} />
@@ -132,7 +135,7 @@ export default function App() {
 
         <Route
           path="/cash"
-          element={<CashPage />}
+          element={<Navigate to="/closeout-summary/cash" replace />}
         />
 
         <Route path="/manager-closeout" element={<Navigate to="/closeout/manager" replace />} />
@@ -149,7 +152,7 @@ export default function App() {
 
         <Route
           path="/closeout-summary"
-          element={<CloseoutSummaryPage />}
+          element={<SummaryPage />}
         />
 
         <Route
