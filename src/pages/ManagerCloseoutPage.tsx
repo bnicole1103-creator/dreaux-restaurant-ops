@@ -191,10 +191,29 @@ export function ManagerCloseoutPage() {
         p_register_notes: cashNotes.trim(),
       })
       if (saveError) throw saveError
-      const timestamp=await supabase.rpc('closeout_manager_submission',{p_shift_id:shiftId})
-      if(timestamp.error)throw timestamp.error
-      setStamp(timestamp.data)
-      setMessage('Manager closeout saved. Performance points have been updated.')
+      // The save succeeded. Clear the form before loading the optional receipt.
+      setShiftId('')
+      setReviews([])
+      setShiftMvp('')
+      setAnswers({})
+      setSavedQuestions([])
+      setDeposit('')
+      setCashLeft('')
+      setBalanced('')
+      setDifference('')
+      setCashNotes('')
+      setConfirmed(false)
+      setCanEdit(true)
+      setStamp(null)
+      setMessage('Manager closeout saved. Performance points have been updated. Select a shift to start another closeout or reopen a saved one.')
+      try {
+        const timestamp=await supabase.rpc('closeout_manager_submission',{p_shift_id:shiftId})
+        if (!timestamp.error && timestamp.data?.submitted_at) {
+          setMessage(`Manager closeout saved. Submitted: ${submissionLabel(timestamp.data.submitted_at)}. Performance points have been updated. Select a shift to start another closeout or reopen a saved one.`)
+        }
+      } catch {
+        // A receipt lookup failure must not turn a successful save into an error.
+      }
     } catch (e) { setError(errorMessage(e)) }
     finally { setSaving(false) }
   }
