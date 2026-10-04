@@ -1,0 +1,40 @@
+.home-reservation-disclosure > summary {
+  cursor: pointer;
+  padding: 10px 0;
+  font-size: 0.9rem;
+}
+.home-reservation-disclosure > summary > span {
+  margin-left: 10px;
+  opacity: 0.7;
+}
+.home-reservation-scroll {
+  max-height: 300px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  margin-top: 8px;
+}
+.home-reservation-row {
+  border-top: 1px solid currentColor;
+  border-color: color-mix(in srgb, currentColor 18%, transparent);
+}
+.home-reservation-row > summary {
+  display: grid;
+  grid-template-columns: 78px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 8px 2px;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+.home-reservation-row > summary > strong { overflow-wrap: anywhere; }
+.home-reservation-row > summary > span { white-space: nowrap; }
+.home-reservation-detail { padding: 0 8px 10px 88px; font-size: 0.85rem; }
+.home-reservation-detail p { margin: 4px 0 0; }
+.home-reservation-row > summary:focus-visible,
+.home-reservation-disclosure > summary:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
+@media (max-width: 380px) {
+  .home-reservation-row > summary { grid-template-columns: 68px minmax(0, 1fr); }
+  .home-reservation-row > summary > span { grid-column: 2; }
+  .home-reservation-detail { padding-left: 78px; }
+}
