@@ -31,6 +31,7 @@ const roleOptions: Array<{
   value: LocationRole
   label: string
 }> = [
+  { value: 'owner', label: 'Owner' },
   { value: 'general_manager', label: 'General Manager' },
   { value: 'manager', label: 'Manager' },
   { value: 'assistant_manager', label: 'Assistant Manager' },
@@ -490,9 +491,7 @@ export function TeamPage() {
                   )
                 }
               >
-                {member.role === 'owner' && (
-                  <option value="owner">Owner</option>
-                )}
+                
 
                 {roleOptions.map((option) => (
                   <option
