@@ -1,3 +1,5 @@
+import { TrainingPage } from './pages/TrainingPage'
+import { CocktailTrainingPage } from './pages/CocktailTrainingPage'
 import { InventoryPage } from './pages/InventoryPage'
 import { SalesTargetsPage } from './pages/SalesTargetsPage'
 import { TasksPage } from './pages/TasksPage'
@@ -118,6 +120,8 @@ export default function App() {
     <AppShell session={session}>
       <Routes>
         <Route path="/inventory" element={<InventoryPage />} />
+        <Route path="/training" element={<TrainingPage />} />
+        <Route path="/training/cocktails" element={<CocktailTrainingPage />} />
         <Route path="/settings/sales-targets" element={<ManagementOnly gmOnly><SalesTargetsPage /></ManagementOnly>} />
         <Route path="/settings" element={<ManagementOnly gmOnly><SettingsPage /></ManagementOnly>} />
         <Route path="/settings/point-rules" element={<ManagementOnly gmOnly><CloseoutSettingsPage key="point-rules" initialTab="points" /></ManagementOnly>} />

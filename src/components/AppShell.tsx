@@ -5,6 +5,7 @@ import type { Session } from '@supabase/supabase-js'
 
 import {
   Package,
+  GraduationCap,
   Newspaper,
   BookOpen,
   BarChart3,
@@ -62,6 +63,7 @@ const links = [
   },
   { to: '/preshift', label: 'Pre-Shift', icon: Newspaper },
   { to: '/quizzes', label: 'Quizzes', icon: BookOpen },
+  { to: '/training', label: 'Training', icon: GraduationCap },
   { to: '/inventory', label: 'Inventory', icon: Package },
 ]
 
@@ -108,7 +110,7 @@ export function AppShell({
 
       </header>
 
-      <main className="app-content">
+      <main className="app-content" style={{paddingBottom: 'calc(300px + env(safe-area-inset-bottom))'}}>
         {children}
       </main>
 
