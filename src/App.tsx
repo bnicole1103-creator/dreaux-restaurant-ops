@@ -1,6 +1,8 @@
 import { TrainingPage } from './pages/TrainingPage'
 import { CocktailTrainingPage } from './pages/CocktailTrainingPage'
 import { InventoryPage } from './pages/InventoryPage'
+import { WalkInPage } from './pages/WalkInPage'
+import { useLocation } from 'react-router-dom'
 import { SalesTargetsPage } from './pages/SalesTargetsPage'
 import { TasksPage } from './pages/TasksPage'
 import { SettingsPage } from './pages/SettingsPage'
@@ -37,6 +39,7 @@ import { TeamPage } from './pages/TeamPage'
 import { CloseoutPage } from './pages/CloseoutPage'
 
 export default function App() {
+  const walkinPath=useLocation().pathname
   const [recovering, setRecovering] = useState(() => {
     const hash = new URLSearchParams(window.location.hash.slice(1))
     const query = new URLSearchParams(window.location.search)
@@ -91,6 +94,8 @@ export default function App() {
       authListener.subscription.unsubscribe()
     }
   }, [])
+
+  if (walkinPath.startsWith('/walk-in/')) return <WalkInPage key={walkinPath} publicKey={walkinPath.slice('/walk-in/'.length)} />
 
   if (loading) {
     return (

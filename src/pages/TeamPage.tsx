@@ -1,3 +1,5 @@
+import { EmployeeProfile } from '../components/EmployeeProfile'
+import { useManagementAccess } from '../components/ManagementAccess'
 import { useEffect, useMemo, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { loadTenantData } from '../lib/tenant'
@@ -61,6 +63,10 @@ function errorMessage(error: unknown, fallback: string) {
 }
 
 export function TeamPage() {
+  const [profileUser,setProfileUser]=useState('')
+  const [viewerId,setViewerId]=useState('')
+  const profileAccess=useManagementAccess()
+  useEffect(()=>{let live=true;void supabase.auth.getUser().then(r=>{if(live)setViewerId(r.data.user?.id??'')});return()=>{live=false}},[])
   const [organizationId, setOrganizationId] = useState('')
   const [locationId, setLocationId] = useState('')
   const [locationName, setLocationName] = useState('')
@@ -466,6 +472,7 @@ export function TeamPage() {
               </div>
             </div>
 
+            {(profileAccess.manager||viewerId===member.user_id)&&<button type="button" className="wt-profile-link" onClick={()=>setProfileUser(member.user_id)}>View employee profile</button>}
             <div
               style={{
                 display: 'grid',
@@ -521,6 +528,7 @@ export function TeamPage() {
         )}
       </div>
 
+      {profileUser&&<EmployeeProfile key={profileUser} locationId={locationId} userId={profileUser} onClose={()=>setProfileUser('')} />}
       {showInvite && (
         <div className="modal-backdrop">
           <div className="modal-card">

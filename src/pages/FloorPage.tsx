@@ -1,3 +1,4 @@
+import { WalkinPanel, type Walkin } from '../components/WalkinPanel'
 import { SectionEmployeePicker } from '../components/SectionEmployeePicker'
 import { SectionSchedule, type SectionPlan } from '../components/SectionSchedule'
 import { floorRoomRatio, floorTableGeometry } from '../lib/floorPhotoLayout'
@@ -117,6 +118,8 @@ type RotationLogEntry = {
 }
 
 export function FloorPage() {
+  const [pendingWalkin,setPendingWalkin]=useState<Walkin|null>(null)
+  const [walkinRefresh,setWalkinRefresh]=useState(0)
   const [smartNotice,setSmartNotice]=useState('')
   const [floorNotice,setFloorNotice]=useState('')
   const [seatServerId,setSeatServerId]=useState('')
@@ -1807,12 +1810,15 @@ const [partySize, setPartySize] = useState(1)
       setSaving(true)
       setError('')
 
-      const r=await supabase.rpc('floor_seat_party',{
+      const r=await supabase.rpc(pendingWalkin?'floor_seat_walkin':'floor_seat_party',{
+        ...(pendingWalkin?{p_walkin_id:pendingWalkin.id,p_version:pendingWalkin.version}:{}),
         p_location_id:locationId,p_shift_id:activeShiftId,p_table_ids:selectedTableIds,
         p_server_id:seatServerId || null,p_guest_name:guestName,p_guest_phone:guestPhone,
         p_guest_email:guestEmail,p_party_size:partySize,
       })
       if(r.error)throw r.error
+      setPendingWalkin(null)
+      setWalkinRefresh(v=>v+1)
       await loadTableSessions(activeShiftId)
 
       setGuestName('')
@@ -1858,6 +1864,9 @@ const [partySize, setPartySize] = useState(1)
         </p>
       </div>
 
+
+      <WalkinPanel locationId={locationId} refreshKey={walkinRefresh} onSeat={row=>{setPendingWalkin(row);setGuestName(row.guest_name);setGuestPhone(row.phone);setGuestEmail(row.email);setPartySize(row.party_size);if(selectedTableIds.length)openSeating()}} />
+      {pendingWalkin&&<div className="wt-card" role="status"><strong>Seating {pendingWalkin.guest_name} · party of {pendingWalkin.party_size}</strong><p>Select their tables, then press Seat. Their check-in is marked seated when seating succeeds.</p><button type="button" disabled={saving} onClick={()=>{setPendingWalkin(null);setGuestName('');setGuestPhone('');setGuestEmail('');setPartySize(1)}}>Cancel walk-in selection</button></div>}
 
       {/* FLOOR SECTIONS AT TOP */}
       <SectionSchedule refreshKey={scheduleRefresh} locationId={locationId} selectedTableIds={selectedTableIds} tables={tables} employees={team.map(m=>({id:m.user_id,name:memberName(m.user_id)}))} onLoaded={(plans,offset)=>{setSectionPlans(plans);setServerClockOffset(offset)}} onSelect={setSelectedTableIds} />
