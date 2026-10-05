@@ -1,3 +1,4 @@
+import { useSearchParams } from 'react-router-dom'
 import { ScreenText } from "../components/ScreenText"
 import './CloseoutMobile.css'
 import { CloseoutCorrectionEditor } from '../components/CloseoutCorrectionEditor'
@@ -178,7 +179,7 @@ function roleLabel(role: string) {
   )
 }
 
-function CloseoutDay({selectedDate,refresh,onDeleted,locationId,locationName,current}:{selectedDate:string;refresh:number;onDeleted:()=>void;locationId:string;locationName:string;current:boolean}) {
+function CloseoutDay({selectedDate,refresh,onDeleted,locationId,locationName,current,focusId=''}:{selectedDate:string;refresh:number;onDeleted:()=>void;locationId:string;locationName:string;current:boolean;focusId?:string}) {
   const [isManager,setIsManager]=useState(false)
   const [deletingId,setDeletingId]=useState('')
   const [editingId,setEditingId]=useState('')
@@ -239,6 +240,7 @@ function CloseoutDay({selectedDate,refresh,onDeleted,locationId,locationName,cur
     } catch(e) {if(ticket===request.current)setError(String((e as {message?:string})?.message ?? e))}
     finally {if(ticket===request.current)setLoading(false)}
   }
+  useEffect(()=>{if(!focusId||loading||!closeouts.some(c=>c.id===focusId))return;setExpandedId(focusId);document.getElementById('closeout-'+focusId)?.scrollIntoView({block:'center'});},[focusId,loading,closeouts])
   async function deleteCloseout(closeout:CloseoutRow) {
     const name=displayName(profileMap.get(closeout.user_id))
     if(!window.confirm('Delete '+name+'’s closeout from '+serviceDateLabel(selectedDate)+'? It will be removed from summaries and its linked points will no longer count.'))return
@@ -929,6 +931,7 @@ function CloseoutDay({selectedDate,refresh,onDeleted,locationId,locationName,cur
                       key={
                         closeout.id
                       }
+                      id={'closeout-'+closeout.id}
                       className="closeout-summary-row"
                     >
                       <button
@@ -1236,11 +1239,14 @@ function CloseoutDay({selectedDate,refresh,onDeleted,locationId,locationName,cur
 
 type ArchiveDay={day:string;count:number}
 export function CloseoutSummaryPage() {
+ const [params]=useSearchParams(),requested=params.get('date')??'',focusId=params.get('closeout')??''
+ const linkedDate=/^\d{4}-\d{2}-\d{2}$/.test(requested)&&requested<=serviceDay()?requested:''
  const [day,setDay]=useState(serviceDay)
  const [refresh,setRefresh]=useState(0)
  const [location,setLocation]=useState<{id:string;name:string}|null>(null)
  const [history,setHistory]=useState<ArchiveDay[]>([])
- const [archiveDate,setArchiveDate]=useState('')
+ const [archiveDate,setArchiveDate]=useState(linkedDate)
+ useEffect(()=>{if(linkedDate)setArchiveDate(linkedDate)},[linkedDate])
  const [error,setError]=useState('')
  const [historyLoading,setHistoryLoading]=useState(false)
  useEffect(()=>{let live=true;void loadTenantData().then(t=>{if(!t.locations[0])throw new Error('No active location.');if(live)setLocation({id:t.locations[0].id,name:t.locations[0].name ?? ''})}).catch(e=>{if(live)setError(String((e as {message?:string})?.message ?? e))});return()=>{live=false}},[])
@@ -1265,13 +1271,14 @@ export function CloseoutSummaryPage() {
  if(!location)return <section className="page closeout-summary-mobile"><p role={error?'alert':'status'}>{error || 'Loading summary…'}</p></section>
  return <>
   <div className="page"><button type="button" onClick={reload}><ScreenText id="CloseoutSummary.f4bbc18b0dbe1711">Refresh closeouts</ScreenText></button></div>
-  <CloseoutDay selectedDate={day} current refresh={refresh} locationId={location.id} locationName={location.name} onDeleted={reload} />
+  <CloseoutDay focusId={linkedDate===day?focusId:''} selectedDate={day} current refresh={refresh} locationId={location.id} locationName={location.name} onDeleted={reload} />
   <section className="page closeout-summary-mobile"><article className="card"><h2><ScreenText id="CloseoutSummary.643cd94130e638aa">Previous closeouts</ScreenText></h2><p><ScreenText id="CloseoutSummary.cc09234f89870176">Organized by month and service day, newest first.</ScreenText></p>
    {error && <p role="alert">{error}</p>}{historyLoading && history.length===0 && <p role="status"><ScreenText id="CloseoutSummary.5c3f475acefcfa5d">Loading history…</ScreenText></p>}
    {!error && !historyLoading && history.length===0 && <p><ScreenText id="CloseoutSummary.acbc70394af59cae">No previous closeouts.</ScreenText></p>}
    {months.map(([month,entries])=><details key={month}><summary>{serviceDateLabel(month,true)} · {entries.reduce((n,e)=>n+e.count,0)}<ScreenText id="CloseoutSummary.c5b235886695e308"> closeouts</ScreenText></summary><div style={{display:'grid',gap:8,margin:'12px 0'}}>{entries.map(e=><button type="button" key={e.day} aria-pressed={archiveDate===e.day} onClick={()=>setArchiveDate(v=>v===e.day?'':e.day)}>{serviceDateLabel(e.day)} · {e.count}<ScreenText id="CloseoutSummary.ce9ee2502f65fa17"> closeout</ScreenText>{e.count===1?'':'s'} · {archiveDate===e.day?'Hide':'View'}</button>)}</div></details>)}
   </article></section>
-  {archiveDate && archiveDate<day && <CloseoutDay key={archiveDate} selectedDate={archiveDate} current={false} refresh={refresh} locationId={location.id} locationName={location.name} onDeleted={reload} />}
+  {archiveDate && archiveDate<day && <CloseoutDay focusId={linkedDate===archiveDate?focusId:''} key={archiveDate} selectedDate={archiveDate} current={false} refresh={refresh} locationId={location.id} locationName={location.name} onDeleted={reload} />}
  </>
 }
+
 
