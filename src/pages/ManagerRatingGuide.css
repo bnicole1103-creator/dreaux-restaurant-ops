@@ -1,0 +1,7 @@
+.mod-rating-guide { border: 1px solid currentColor; border-color: color-mix(in srgb, currentColor 20%, transparent); border-radius: 12px; padding: 14px; margin-bottom: 18px; }
+.mod-rating-guide h2 { margin: 0 0 10px; font-size: 1.05rem; }
+.mod-rating-guide dl { margin: 0; }
+.mod-rating-guide dl > div { display: grid; grid-template-columns: 52px minmax(0, 1fr); gap: 8px; padding: 5px 0; }
+.mod-rating-guide dt { font-weight: 700; }
+.mod-rating-guide dd { margin: 0; }
+.mod-rating-guide p { margin: 10px 0 0; font-size: .85rem; opacity: .8; }
