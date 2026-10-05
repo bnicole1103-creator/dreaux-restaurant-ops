@@ -1,3 +1,4 @@
+import { ScreenText } from "./ScreenText"
 type FloorTable = {
   id?: string | null
   table_name?: string | null
@@ -140,18 +141,18 @@ export function TonightsFloorCards({
       <section className="tonights-floor-panel">
         <div className="tonights-floor-heading">
           <div>
-            <p className="eyebrow">
+            <p className="eyebrow"><ScreenText id="TonightsFloorCards.6f61093d8beda6b9">
               TONIGHT&apos;S FLOOR
-            </p>
+            </ScreenText></p>
 
-            <h2>Server Assignments</h2>
+            <h2><ScreenText id="TonightsFloorCards.ea0bc2ad9e59292b">Server Assignments</ScreenText></h2>
           </div>
         </div>
 
         <div className="tonights-floor-card">
-          <span className="muted">
+          <span className="muted"><ScreenText id="TonightsFloorCards.3a1e1f15cf911d13">
             No server assignments yet.
-          </span>
+          </ScreenText></span>
         </div>
       </section>
     )
@@ -161,11 +162,11 @@ export function TonightsFloorCards({
     <section className="tonights-floor-panel">
       <div className="tonights-floor-heading">
         <div>
-          <p className="eyebrow">
+          <p className="eyebrow"><ScreenText id="TonightsFloorCards.a9507a1ecffee18f">
             TONIGHT&apos;S FLOOR
-          </p>
+          </ScreenText></p>
 
-          <h2>Server Assignments</h2>
+          <h2><ScreenText id="TonightsFloorCards.3b714a37b8a31eac">Server Assignments</ScreenText></h2>
         </div>
       </div>
 
@@ -270,9 +271,9 @@ export function TonightsFloorCards({
 
               <div className="tonights-floor-card-metrics">
                 <div>
-                  <span>
+                  <span><ScreenText id="TonightsFloorCards.19cc9990a67a83f9">
                     Assigned Covers
-                  </span>
+                  </ScreenText></span>
 
                   <strong>
                     {assignedCovers}
@@ -280,7 +281,7 @@ export function TonightsFloorCards({
                 </div>
 
                 <div>
-                  <span>Tables</span>
+                  <span><ScreenText id="TonightsFloorCards.cd89c0514744da7b">Tables</ScreenText></span>
 
                   <strong>
                     {serverTables.length}
@@ -303,9 +304,9 @@ export function TonightsFloorCards({
                     )
                   )
                 ) : (
-                  <span>
+                  <span><ScreenText id="TonightsFloorCards.7eeb80ddf32f22ed">
                     No tables assigned
-                  </span>
+                  </ScreenText></span>
                 )}
               </div>
             </button>

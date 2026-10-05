@@ -1,3 +1,4 @@
+import { ScreenText } from "./ScreenText"
 type FloorTable = {
   id: string
   table_name?: string | null | null
@@ -201,17 +202,17 @@ export function TableDetailsModal({
       <section className="table-details-modal">
         <header className="table-details-header">
           <div>
-            <p className="eyebrow">
+            <p className="eyebrow"><ScreenText id="TableDetailsModal.92b6ec5c49039726">
               TABLE DETAILS
-            </p>
+            </ScreenText></p>
 
             <h2>
               {tableNames.join(' + ')}
             </h2>
 
             <p className="muted">
-              {totalSeats} seats
-            </p>
+              {totalSeats}<ScreenText id="TableDetailsModal.5705dc7e0621a37c"> seats
+            </ScreenText></p>
           </div>
 
           <button
@@ -224,9 +225,9 @@ export function TableDetailsModal({
         </header>
 
         <div className="table-details-section">
-          <span className="table-details-label">
+          <span className="table-details-label"><ScreenText id="TableDetailsModal.8dc215a2e38b9732">
             ASSIGNED SERVER
-          </span>
+          </ScreenText></span>
 
           {assignedServerIds.length ? (
             assignedServerIds.map(
@@ -237,22 +238,22 @@ export function TableDetailsModal({
               ),
             )
           ) : (
-            <strong>
+            <strong><ScreenText id="TableDetailsModal.7fa25123d80d4719">
               Not assigned
-            </strong>
+            </ScreenText></strong>
           )}
 
-          <label>
+          <label><ScreenText id="TableDetailsModal.b867679892edbcd6">
             Change Server
-            <select
+            </ScreenText><select
               value={selectedServerId}
               onChange={(event) =>
                 onServerChange(event.target.value)
               }
             >
-              <option value="">
+              <option value=""><ScreenText id="TableDetailsModal.869045c7738be5f4">
                 Select server
-              </option>
+              </ScreenText></option>
 
               {teamMembers.map((member) => (
                 <option
@@ -267,16 +268,16 @@ export function TableDetailsModal({
         </div>
 
         <div className="table-details-section">
-          <span className="table-details-label">
+          <span className="table-details-label"><ScreenText id="TableDetailsModal.5b079e9eda148a97">
             UPCOMING RESERVATIONS
-          </span>
+          </ScreenText></span>
 
           {matchingReservations.length ===
           0 ? (
-            <p className="muted">
+            <p className="muted"><ScreenText id="TableDetailsModal.75608b12bee704e1">
               No upcoming reservations
               assigned to this table.
-            </p>
+            </ScreenText></p>
           ) : (
             matchingReservations.map(
               (reservation) => (
@@ -301,9 +302,9 @@ export function TableDetailsModal({
                   <strong>
                     {getReservationCovers(
                       reservation,
-                    )}{' '}
+                    )}{' '}<ScreenText id="TableDetailsModal.3bed51a91b97f853">
                     covers
-                  </strong>
+                  </ScreenText></strong>
                 </article>
               ),
             )
@@ -314,17 +315,17 @@ export function TableDetailsModal({
           <button
             type="button"
             onClick={onClose}
-          >
+          ><ScreenText id="TableDetailsModal.2d9eb989bfec08cd">
             Close
-          </button>
+          </ScreenText></button>
 
           <button
             type="button"
             className="primary-button"
             onClick={onSeat}
-          >
+          ><ScreenText id="TableDetailsModal.05e249339dd7924c">
             Seat Walk-In
-          </button>
+          </ScreenText></button>
         </div>
       </section>
     </div>

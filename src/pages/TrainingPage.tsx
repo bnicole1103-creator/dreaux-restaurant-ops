@@ -1,3 +1,4 @@
+import { ScreenText } from "../components/ScreenText"
 import { Link } from 'react-router-dom'
 import './TrainingPage.css'
-export function TrainingPage(){return <section className="page training-page"><p className="eyebrow">Training</p><h1>Training guides</h1><p>Your library of recipes, builds and training materials.</p><Link className="training-link" to="/training/cocktails"><strong>Cocktails</strong><span>Browse recipes and builds by category or search by name.</span></Link></section>}
+export function TrainingPage(){return <section className="page training-page"><p className="eyebrow"><ScreenText id="TrainingPage.0efd716f11d69211">Training</ScreenText></p><h1><ScreenText id="TrainingPage.374dababea1c733e">Training guides</ScreenText></h1><p><ScreenText id="TrainingPage.41ae148a616d87c3">Your library of recipes, builds and training materials.</ScreenText></p><Link className="training-link" to="/training/cocktails"><strong><ScreenText id="TrainingPage.fe36bab043706cc1">Cocktails</ScreenText></strong><span><ScreenText id="TrainingPage.23ce3ad6752b2e30">Browse recipes and builds by category or search by name.</ScreenText></span></Link></section>}

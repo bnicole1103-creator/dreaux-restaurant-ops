@@ -1,3 +1,4 @@
+import { ScreenText } from "../components/ScreenText"
 import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { supabase } from '../lib/supabase'
@@ -49,30 +50,30 @@ export function ResetPasswordPage({ hasSession }: { hasSession: boolean }) {
   return (
     <main style={{ minHeight: '100vh', display: 'grid', placeItems: 'center', padding: 24, background: 'var(--app-text)', color: '#fff' }}>
       <section style={{ width: '100%', maxWidth: 420, padding: 28, borderRadius: 16, background: 'var(--app-text)' }}>
-        <h1>Set New Password</h1>
+        <h1><ScreenText id="ResetPasswordPage.1977ef6b7e4b5136">Set New Password</ScreenText></h1>
         {saved ? (
           <>
-            <p role="status">Your password has been updated.</p>
+            <p role="status"><ScreenText id="ResetPasswordPage.fc77ca8d593536f3">Your password has been updated.</ScreenText></p>
             <button type="button" disabled={busy} onClick={() => void returnToLogin()}>
               {busy ? 'Please wait...' : 'Return to Login'}
             </button>
           </>
         ) : !hasSession ? (
           <>
-            <p>This recovery link could not establish a session. Request a fresh recovery email and open its newest link.</p>
-            <button type="button" disabled={busy} onClick={() => void returnToLogin()}>
+            <p><ScreenText id="ResetPasswordPage.1031abc00c092a13">This recovery link could not establish a session. Request a fresh recovery email and open its newest link.</ScreenText></p>
+            <button type="button" disabled={busy} onClick={() => void returnToLogin()}><ScreenText id="ResetPasswordPage.193b9ba1376f0cb5">
               Return to Login
-            </button>
+            </ScreenText></button>
           </>
         ) : (
           <form onSubmit={savePassword} style={{ display: 'grid', gap: 16 }}>
-            <p>Enter and confirm your new password.</p>
-            <label htmlFor="new-password">New password</label>
+            <p><ScreenText id="ResetPasswordPage.b65d157e02c7ac2a">Enter and confirm your new password.</ScreenText></p>
+            <label htmlFor="new-password"><ScreenText id="ResetPasswordPage.85c79db2447a2702">New password</ScreenText></label>
             <input id="new-password" type="password" autoComplete="new-password"
               required minLength={8} value={password} disabled={busy}
               onChange={event => setPassword(event.target.value)}
               style={{ padding: 12, borderRadius: 8 }} />
-            <label htmlFor="confirm-password">Confirm new password</label>
+            <label htmlFor="confirm-password"><ScreenText id="ResetPasswordPage.c1cbf2e591dad8b4">Confirm new password</ScreenText></label>
             <input id="confirm-password" type="password" autoComplete="new-password"
               required minLength={8} value={confirm} disabled={busy}
               onChange={event => setConfirm(event.target.value)}

@@ -1,3 +1,4 @@
+import { ScreenText } from "../components/ScreenText"
 import { registrationToken } from '../components/SignupGate'
 import { FormEvent, useState } from 'react'
 import { supabase } from '../lib/supabase'
@@ -35,23 +36,23 @@ export function LoginPage() {
   return (
     <div className="auth-page">
       <form className="auth-card" onSubmit={submit}>
-        <p className="eyebrow">LNX Systems</p>
-        <h1>Restaurant Operations</h1>
-        <p className="muted">Floor, cash, tasks, rewards, and reporting.</p>
+        <p className="eyebrow"><ScreenText id="LoginPage.262da4df982b420d">LNX Systems</ScreenText></p>
+        <h1><ScreenText id="LoginPage.3148730a11c9bc5a">Restaurant Operations</ScreenText></h1>
+        <p className="muted"><ScreenText id="LoginPage.52160d77f0dfc05a">Floor, cash, tasks, rewards, and reporting.</ScreenText></p>
 
-        {mode === 'signup' && <p>Your GM must approve location access after signup.</p>}
+        {mode === 'signup' && <p><ScreenText id="LoginPage.aa65239e06fea8f7">Your GM must approve location access after signup.</ScreenText></p>}
         {mode === 'signup' && (
-          <label>Full name
-            <input value={fullName} onChange={(e) => setFullName(e.target.value)} required />
+          <label><ScreenText id="LoginPage.cd3c2c8d0734931c">Full name
+            </ScreenText><input value={fullName} onChange={(e) => setFullName(e.target.value)} required />
           </label>
         )}
 
-        <label>Email
-          <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+        <label><ScreenText id="LoginPage.8289cea56ff0acd8">Email
+          </ScreenText><input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
         </label>
 
-        <label>Password
-          <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} minLength={8} required />
+        <label><ScreenText id="LoginPage.09ac59f7c65f1dec">Password
+          </ScreenText><input type="password" value={password} onChange={(e) => setPassword(e.target.value)} minLength={8} required />
         </label>
 
         <button className="primary-button" disabled={submitting}>

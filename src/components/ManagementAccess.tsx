@@ -1,3 +1,4 @@
+import { ScreenText } from "./ScreenText"
 import { useEffect, useState } from 'react'
 import type { PropsWithChildren } from 'react'
 import { Link } from 'react-router-dom'
@@ -30,8 +31,8 @@ export function useManagementAccess(userId?: string) {
 }
 export function ManagementOnly({gmOnly = false, children}: PropsWithChildren<{gmOnly?: boolean}>) {
   const access = useManagementAccess()
-  if (access.loading) return <section className="page"><p>Checking access…</p></section>
+  if (access.loading) return <section className="page"><p><ScreenText id="ManagementAccess.80409edadbb53ccf">Checking access…</ScreenText></p></section>
   if (access.error) return <section className="page"><p role="alert">{access.error}</p></section>
-  if (!(gmOnly ? access.gm : access.manager)) return <section className="page"><h1>Access restricted</h1><p>{gmOnly ? 'General manager access is required.' : 'Manager access is required.'}</p><Link to="/closeout">Return to Closeout</Link></section>
+  if (!(gmOnly ? access.gm : access.manager)) return <section className="page"><h1><ScreenText id="ManagementAccess.66253c5629fe2863">Access restricted</ScreenText></h1><p>{gmOnly ? 'General manager access is required.' : 'Manager access is required.'}</p><Link to="/closeout"><ScreenText id="ManagementAccess.5bf2843cf474120a">Return to Closeout</ScreenText></Link></section>
   return <>{children}</>
 }

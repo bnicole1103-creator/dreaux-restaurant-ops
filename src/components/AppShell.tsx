@@ -1,3 +1,4 @@
+import { ScreenText } from "./ScreenText"
 import { AppearanceHeader } from './AppearanceHeader'
 import '../pages/WarmTheme.css'
 import type { PropsWithChildren } from 'react'
@@ -90,9 +91,9 @@ export function AppShell({
         <AppearanceHeader />
 
         <div className="app-brand">
-          <strong>
+          <strong><ScreenText id="AppShell.262da4df982b420d">
             LNX Systems
-          </strong>
+          </ScreenText></strong>
 
           <span>
             {session.user.email}

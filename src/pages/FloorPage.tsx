@@ -1,3 +1,4 @@
+import { ScreenText } from "../components/ScreenText"
 import { WalkinPanel, type Walkin } from '../components/WalkinPanel'
 import { SectionEmployeePicker } from '../components/SectionEmployeePicker'
 import { SectionSchedule, type SectionPlan } from '../components/SectionSchedule'
@@ -1795,9 +1796,9 @@ const [partySize, setPartySize] = useState(1)
 
   if (loading) {
     return (
-      <div className="empty-state">
+      <div className="empty-state"><ScreenText id="FloorPage.6bd3823f78ebe444">
         Loading floor plan…
-      </div>
+      </ScreenText></div>
     )
   }
   async function handleSeatGuests() {
@@ -1841,9 +1842,9 @@ const [partySize, setPartySize] = useState(1)
   if (error && rooms.length === 0) {
     return (
       <div className="empty-state">
-        <strong>
+        <strong><ScreenText id="FloorPage.9affe661a5cddb9c">
           We could not load FloorFlow.
-        </strong>
+        </ScreenText></strong>
 
         <span>{error}</span>
       </div>
@@ -1853,11 +1854,11 @@ const [partySize, setPartySize] = useState(1)
   return (
     <section>
       <div className="page-heading">
-        <p className="eyebrow">
+        <p className="eyebrow"><ScreenText id="FloorPage.5e1b43a1ec471952">
           FloorFlow
-        </p>
+        </ScreenText></p>
 
-        <h1>Live floor</h1>
+        <h1><ScreenText id="FloorPage.6cd9d194a59b8361">Live floor</ScreenText></h1>
 
         <p className="muted">
           {locationName}
@@ -1866,11 +1867,11 @@ const [partySize, setPartySize] = useState(1)
 
 
       <WalkinPanel locationId={locationId} refreshKey={walkinRefresh} onSeat={row=>{setPendingWalkin(row);setGuestName(row.guest_name);setGuestPhone(row.phone);setGuestEmail(row.email);setPartySize(row.party_size);if(selectedTableIds.length)openSeating()}} />
-      {pendingWalkin&&<div className="wt-card" role="status"><strong>Seating {pendingWalkin.guest_name} · party of {pendingWalkin.party_size}</strong><p>Select their tables, then press Seat. Their check-in is marked seated when seating succeeds.</p><button type="button" disabled={saving} onClick={()=>{setPendingWalkin(null);setGuestName('');setGuestPhone('');setGuestEmail('');setPartySize(1)}}>Cancel walk-in selection</button></div>}
+      {pendingWalkin&&<div className="wt-card" role="status"><strong><ScreenText id="FloorPage.72ad81f5e33ac981">Seating </ScreenText>{pendingWalkin.guest_name}<ScreenText id="FloorPage.0e1b1fe85997c7d1"> · party of </ScreenText>{pendingWalkin.party_size}</strong><p><ScreenText id="FloorPage.aaf48aa3abcc020d">Select their tables, then press Seat. Their check-in is marked seated when seating succeeds.</ScreenText></p><button type="button" disabled={saving} onClick={()=>{setPendingWalkin(null);setGuestName('');setGuestPhone('');setGuestEmail('');setPartySize(1)}}><ScreenText id="FloorPage.a3bf126804af00d4">Cancel walk-in selection</ScreenText></button></div>}
 
       {/* FLOOR SECTIONS AT TOP */}
       <SectionSchedule refreshKey={scheduleRefresh} locationId={locationId} selectedTableIds={selectedTableIds} tables={tables} employees={team.map(m=>({id:m.user_id,name:memberName(m.user_id)}))} onLoaded={(plans,offset)=>{setSectionPlans(plans);setServerClockOffset(offset)}} onSelect={setSelectedTableIds} />
-      {sectionCards.length>0 && <section className="floor-section-summary"><p className="eyebrow">Current Floor</p><h2>Assigned sections</h2><button type="button" disabled={saving||arrangeMode} onClick={()=>void clearSectionAssignments(true)}>Clear all sections</button><div>{sectionCards.map(c=><button key={c.id} onClick={()=>setSelectedTableIds(c.tableIds)}><strong>{c.name}</strong><span className="section-server">{c.guestName || memberName(c.employeeId)}</span><span>{tables.filter(t=>c.tableIds.includes(t.id)).map(t=>t.table_name).join(', ')}</span><span>{c.tableIds.length} tables · {c.totalSeats} seats</span></button>)}</div></section>}
+      {sectionCards.length>0 && <section className="floor-section-summary"><p className="eyebrow"><ScreenText id="FloorPage.2e081cd59ce390e4">Current Floor</ScreenText></p><h2><ScreenText id="FloorPage.773db4a763e3d6a3">Assigned sections</ScreenText></h2><button type="button" disabled={saving||arrangeMode} onClick={()=>void clearSectionAssignments(true)}><ScreenText id="FloorPage.abe16c2c033d7292">Clear all sections</ScreenText></button><div>{sectionCards.map(c=><button key={c.id} onClick={()=>setSelectedTableIds(c.tableIds)}><strong>{c.name}</strong><span className="section-server">{c.guestName || memberName(c.employeeId)}</span><span>{tables.filter(t=>c.tableIds.includes(t.id)).map(t=>t.table_name).join(', ')}</span><span>{c.tableIds.length}<ScreenText id="FloorPage.7b01d68c1fbd4367"> tables · </ScreenText>{c.totalSeats}<ScreenText id="FloorPage.5a8f27d4d02c6b32"> seats</ScreenText></span></button>)}</div></section>}
 
       <div className="shift-toolbar">
         {shifts.length > 0 ? (
@@ -1893,21 +1894,21 @@ const [partySize, setPartySize] = useState(1)
             ))}
           </select>
         ) : (
-          <span>No shift selected · sections can be planned now</span>
+          <span><ScreenText id="FloorPage.edbbd1c1ad3bf9bc">No shift selected · sections can be planned now</ScreenText></span>
         )}
 
         <button
           onClick={() =>
             setShowShiftPanel(true)
           }
-        >
+        ><ScreenText id="FloorPage.546456d48459c5bd">
           Open shift
-        </button>
+        </ScreenText></button>
 
         <button
           onClick={() => setShowReservationsPanel(true)}
-        >
-          Reservations ({reservations.length})
+        ><ScreenText id="FloorPage.c8c2e54ac7c982eb">
+          Reservations (</ScreenText>{reservations.length})
         </button>
 
         <label
@@ -1920,9 +1921,9 @@ const [partySize, setPartySize] = useState(1)
             cursor: 'pointer',
             whiteSpace: 'nowrap',
           }}
-        >
+        ><ScreenText id="FloorPage.346926535ae5abe0">
           Upload CSV
-          <input
+          </ScreenText><input
             type="file"
             accept=".csv,text/csv"
             onChange={handleReservationUpload}
@@ -1933,9 +1934,9 @@ const [partySize, setPartySize] = useState(1)
         <button
           onClick={() => setShowAddTablePanel(true)}
           disabled={!activeRoomId}
-        >
+        ><ScreenText id="FloorPage.c4b9828f0770442f">
           + Add Table
-        </button>
+        </ScreenText></button>
 
         <button
           onClick={() => {
@@ -1959,9 +1960,9 @@ const [partySize, setPartySize] = useState(1)
         <button
           onClick={() => setShowRotationPanel(true)}
           disabled={!activeShiftId}
-        >
+        ><ScreenText id="FloorPage.b15408ef8847a3b6">
           Rotation
-        </button>
+        </ScreenText></button>
       </div>
 
       {error && (
@@ -1981,9 +1982,9 @@ const [partySize, setPartySize] = useState(1)
             color: '#f4b860',
             fontSize: '13px',
           }}
-        >
+        ><ScreenText id="FloorPage.e2482425827e283f">
           Drag any table to match your real floor layout. Positions save automatically when you let go.
-        </div>
+        </ScreenText></div>
       )}
 
       <div className="room-tabs">
@@ -2005,14 +2006,14 @@ const [partySize, setPartySize] = useState(1)
       </div>
 
       <section className="floor-section-tools" aria-label="Section assignment">
-        <div><strong>Sections & tables</strong><p>Tap tables to select them. Switch rooms to include more tables.</p></div>
-        <div className="floor-selection-list">{selectedTables.length?selectedTables.map(t=><button type="button" key={t.id} onClick={()=>toggleTable(t.id)}>{t.table_name} ×</button>):<span>No tables selected</span>}</div>
-        <div className="floor-selection-actions"><button type="button" disabled={!selectedTableIds.length || smartLoading || saving || arrangeMode} onClick={()=>void handleSmartSection()}>{smartLoading?'Analyzing…':'✨ Smart Section'}</button><button type="button" disabled={!selectedTableIds.length || saving || arrangeMode} onClick={()=>setShowSectionPanel(true)}>Assign section</button><button type="button" disabled={!selectedTableIds.length || saving || arrangeMode} onClick={openSeating}>Seat selected tables</button><button type="button" disabled={!selectedTableIds.length} onClick={()=>setSelectedTableIds([])}>Clear selection</button><button type="button" disabled={!selectedTableIds.length||saving||arrangeMode} onClick={()=>void clearSectionAssignments()}>Clear assignments</button></div>
+        <div><strong><ScreenText id="FloorPage.7ae0af4dfe409f5d">Sections & tables</ScreenText></strong><p><ScreenText id="FloorPage.4ac45f2a6bb70ad0">Tap tables to select them. Switch rooms to include more tables.</ScreenText></p></div>
+        <div className="floor-selection-list">{selectedTables.length?selectedTables.map(t=><button type="button" key={t.id} onClick={()=>toggleTable(t.id)}>{t.table_name} ×</button>):<span><ScreenText id="FloorPage.f8add3ec5d2c9bb7">No tables selected</ScreenText></span>}</div>
+        <div className="floor-selection-actions"><button type="button" disabled={!selectedTableIds.length || smartLoading || saving || arrangeMode} onClick={()=>void handleSmartSection()}>{smartLoading?'Analyzing…':'✨ Smart Section'}</button><button type="button" disabled={!selectedTableIds.length || saving || arrangeMode} onClick={()=>setShowSectionPanel(true)}><ScreenText id="FloorPage.3df282d311f231b2">Assign section</ScreenText></button><button type="button" disabled={!selectedTableIds.length || saving || arrangeMode} onClick={openSeating}><ScreenText id="FloorPage.ec891dc9c52cf729">Seat selected tables</ScreenText></button><button type="button" disabled={!selectedTableIds.length} onClick={()=>setSelectedTableIds([])}><ScreenText id="FloorPage.2a943581190c3312">Clear selection</ScreenText></button><button type="button" disabled={!selectedTableIds.length||saving||arrangeMode} onClick={()=>void clearSectionAssignments()}><ScreenText id="FloorPage.310acd98ecea24b1">Clear assignments</ScreenText></button></div>
 
         {floorNotice && <p role="status">{floorNotice}</p>}
       </section>
       
-       <p className="floor-map-hint">Swipe sideways on the map to view the whole room. Tap multiple tables to select them.</p>
+       <p className="floor-map-hint"><ScreenText id="FloorPage.f3780ffe48f2e882">Swipe sideways on the map to view the whole room. Tap multiple tables to select them.</ScreenText></p>
        {/* LIVE FLOOR */}
        <div className="floor-map-scroll">
       <div
@@ -2144,12 +2145,12 @@ const [partySize, setPartySize] = useState(1)
                       fontWeight: 700,
                     }}
                   >
-                    {activeSession.partySize} guests ·{' '}
+                    {activeSession.partySize}<ScreenText id="FloorPage.157d0929048b90c2"> guests ·</ScreenText>{' '}
                     {elapsedMinutes(
                       activeSession.seatedAt,
-                    )}
+                    )}<ScreenText id="FloorPage.0f0cfbadeed9a791">
                     m
-                  </span>
+                  </ScreenText></span>
                 </>
               )}
             </button>
@@ -2167,33 +2168,33 @@ const [partySize, setPartySize] = useState(1)
             {selectedTableIds.length === 1
               ? 'table'
               : 'tables'}{' '}
-            · {selectedSeatCount} seats
-          </span>
+            · {selectedSeatCount}<ScreenText id="FloorPage.3da2884b5dc69618"> seats
+          </ScreenText></span>
 
           <button
             onClick={() =>
               setSelectedTableIds([])
             }
-          >
+          ><ScreenText id="FloorPage.7c1a046c38f0618b">
             Clear selection
-          </button>
+          </ScreenText></button>
           {selectedTable && (
   <button
     onClick={() =>
       setShowTablePanel(true)
     }
-  >
+  ><ScreenText id="FloorPage.9b2f77700fe7077c">
     Details
-  </button>
+  </ScreenText></button>
 )}
 
           <button
             onClick={() => {
               setShowSectionPanel(true)
             }}
-          >
+          ><ScreenText id="FloorPage.c2a5b2c20b98da29">
             Assign Section
-          </button>
+          </ScreenText></button>
 
 
           <button
@@ -2208,13 +2209,13 @@ const [partySize, setPartySize] = useState(1)
             onClick={() => {
               openSeating()
             }}
-          >
+          ><ScreenText id="FloorPage.abad2549f07a8373">
             Seat
-          </button>
+          </ScreenText></button>
 
-          <button disabled>
+          <button disabled><ScreenText id="FloorPage.bcb4cdbb6790706c">
             Status
-          </button>
+          </ScreenText></button>
         </div>
       )}
 
@@ -2226,10 +2227,10 @@ const [partySize, setPartySize] = useState(1)
               {activeShift?.status==='scheduled'?`Open ${activeShift.shift_name}`:'Open today’s shift'}
             </h2>
 
-            <label>
+            <label><ScreenText id="FloorPage.72315bf916b430e1">
               Shift
 
-              <select disabled={activeShift?.status==='scheduled'}
+              </ScreenText><select disabled={activeShift?.status==='scheduled'}
                 value={newShiftName}
                 onChange={(event) =>
                   setNewShiftName(
@@ -2237,12 +2238,12 @@ const [partySize, setPartySize] = useState(1)
                   )
                 }
               >
-                <option>Dinner</option>
-                <option>Lunch</option>
-                <option>Brunch</option>
-                <option>
+                <option><ScreenText id="FloorPage.644f79249f780284">Dinner</ScreenText></option>
+                <option><ScreenText id="FloorPage.5a58428e7ba03821">Lunch</ScreenText></option>
+                <option><ScreenText id="FloorPage.d61e76a805bdb17f">Brunch</ScreenText></option>
+                <option><ScreenText id="FloorPage.de40e31eea0cffd5">
                   Private Event
-                </option>
+                </ScreenText></option>
               </select>
             </label>
 
@@ -2251,9 +2252,9 @@ const [partySize, setPartySize] = useState(1)
                 onClick={() =>
                   setShowShiftPanel(false)
                 }
-              >
+              ><ScreenText id="FloorPage.35b3af9424bcbf32">
                 Cancel
-              </button>
+              </ScreenText></button>
 
               <button
                 className="primary-button"
@@ -2273,14 +2274,14 @@ const [partySize, setPartySize] = useState(1)
       {showSectionPanel && (
         <div className="modal-backdrop">
           <div className="modal-card">
-            <h2>Assign section</h2>{error && <p role="alert">{error}</p>}
-            {!activeShiftId && <label>Plan for shift<select value={newShiftName} onChange={e=>setNewShiftName(e.target.value)}>{['Dinner','Lunch','Brunch','Private Event'].map(n=><option key={n}>{n}</option>)}</select></label>}
+            <h2><ScreenText id="FloorPage.9a4fc2a1500f6947">Assign section</ScreenText></h2>{error && <p role="alert">{error}</p>}
+            {!activeShiftId && <label><ScreenText id="FloorPage.faa027d1375e76e3">Plan for shift</ScreenText><select value={newShiftName} onChange={e=>setNewShiftName(e.target.value)}>{['Dinner','Lunch','Brunch','Private Event'].map(n=><option key={n}>{n}</option>)}</select></label>}
             <p>{activeShift?`${activeShift.shift_name} · ${activeShift.status}`:'Saving creates a scheduled shift without opening service.'}</p>
 
-            <label>
+            <label><ScreenText id="FloorPage.210fa5dbf4d02111">
               Section name
 
-              <input
+              </ScreenText><input
                 value={sectionName}
                 onChange={(event) =>
                   setSectionName(
@@ -2327,8 +2328,8 @@ const [partySize, setPartySize] = useState(1)
                   opacity: 0.75,
                 }}
               >
-                {selectedSeatCount} seats
-              </div>
+                {selectedSeatCount}<ScreenText id="FloorPage.fa8697cfed39b3b2"> seats
+              </ScreenText></div>
             </div>
 
             <div className="modal-actions">
@@ -2338,9 +2339,9 @@ const [partySize, setPartySize] = useState(1)
                   setSectionName('')
                   setSelectedServerId('')
                 }}
-              >
+              ><ScreenText id="FloorPage.972ac17323d8046d">
                 Cancel
-              </button>
+              </ScreenText></button>
 
               <button
                 className="primary-button"
@@ -2364,8 +2365,8 @@ const [partySize, setPartySize] = useState(1)
       {showReservationsPanel && (
         <div className="modal-backdrop">
           <div className="modal-card">
-            <p className="eyebrow">Reservations</p>
-            <h2>Today's Reservations</h2>
+            <p className="eyebrow"><ScreenText id="FloorPage.58f3288ba914ecb7">Reservations</ScreenText></p>
+            <h2><ScreenText id="FloorPage.def1336055c8be14">Today's Reservations</ScreenText></h2>
 
             {reservationUploadMessage && (
               <div
@@ -2389,9 +2390,9 @@ const [partySize, setPartySize] = useState(1)
               }}
             >
               {reservations.length === 0 ? (
-                <div className="empty-state">
+                <div className="empty-state"><ScreenText id="FloorPage.8cdc268eec105d05">
                   No reservations uploaded for this shift.
-                </div>
+                </ScreenText></div>
               ) : (
                 reservations.map((reservation) => (
                   <div
@@ -2409,8 +2410,8 @@ const [partySize, setPartySize] = useState(1)
                     </strong>
 
                     <div style={{ marginTop: '4px' }}>
-                      {reservation.party_size} guests
-                      {reservation.table_name
+                      {reservation.party_size}<ScreenText id="FloorPage.bc0b2dc8673deba3"> guests
+                      </ScreenText>{reservation.table_name
                         ? ` · ${reservation.table_name}`
                         : ' · Unassigned table'}
                     </div>
@@ -2438,9 +2439,9 @@ const [partySize, setPartySize] = useState(1)
                 padding: '12px',
               }}
               onClick={() => setShowReservationsPanel(false)}
-            >
+            ><ScreenText id="FloorPage.8d3f00a24cc68549">
               Close
-            </button>
+            </ScreenText></button>
           </div>
         </div>
       )}
@@ -2448,8 +2449,8 @@ const [partySize, setPartySize] = useState(1)
       {showSmartPanel && (
         <div className="modal-backdrop">
           <div className="modal-card">
-            <p className="eyebrow">SectionIQ</p>
-            <h2>Smart Section</h2>{smartLoading&&<p role="status">Checking history and assigned capacity…</p>}{smartNotice&&<p role="status">{smartNotice}</p>}
+            <p className="eyebrow"><ScreenText id="FloorPage.0c90f34dd45cb5c2">SectionIQ</ScreenText></p>
+            <h2><ScreenText id="FloorPage.a17e164e8984911a">Smart Section</ScreenText></h2>{smartLoading&&<p role="status"><ScreenText id="FloorPage.3cc5f5f9eee5793a">Checking history and assigned capacity…</ScreenText></p>}{smartNotice&&<p role="status">{smartNotice}</p>}
 
             <div
               style={{
@@ -2466,7 +2467,7 @@ const [partySize, setPartySize] = useState(1)
               </strong>
 
               <div style={{ marginTop: '5px', opacity: 0.75 }}>
-                {selectedSeatCount} seats ·{' '}
+                {selectedSeatCount}<ScreenText id="FloorPage.1e21c88bc28cc5d3"> seats ·</ScreenText>{' '}
                 {reservations
                   .filter((reservation) =>
                     selectedTableIds.includes(
@@ -2477,9 +2478,9 @@ const [partySize, setPartySize] = useState(1)
                     (total, reservation) =>
                       total + reservation.party_size,
                     0,
-                  )}{' '}
+                  )}{' '}<ScreenText id="FloorPage.f0a2d26707228fe6">
                 upcoming reserved covers
-              </div>
+              </ScreenText></div>
             </div>
 
             <div style={{ display: 'grid', gap: '10px' }}>
@@ -2525,7 +2526,7 @@ const [partySize, setPartySize] = useState(1)
                             0,
                           )}/closeout avg`
                         : 'No historical sales data yet'}
-                      {recommendation.avgSalesPerHour!==null && <div>${recommendation.avgSalesPerHour.toFixed(0)}/hr average · {recommendation.timedUses} timed closeouts</div>}
+                      {recommendation.avgSalesPerHour!==null && <div>${recommendation.avgSalesPerHour.toFixed(0)}<ScreenText id="FloorPage.f99c8033c61d6f17">/hr average · </ScreenText>{recommendation.timedUses}<ScreenText id="FloorPage.24a6edb170727de9"> timed closeouts</ScreenText></div>}
                     </div>
 
                     <div
@@ -2534,10 +2535,10 @@ const [partySize, setPartySize] = useState(1)
                         fontSize: '13px',
                         opacity: 0.8,
                       }}
-                    >
-                      Current assigned capacity:{' '}
-                      {recommendation.currentSeats} seats
-                    </div>
+                    ><ScreenText id="FloorPage.14863dce1469a07a">
+                      Current assigned capacity:</ScreenText>{' '}
+                      {recommendation.currentSeats}<ScreenText id="FloorPage.2c216c77f3f8764e"> seats
+                    </ScreenText></div>
 
                     <div
                       style={{
@@ -2561,17 +2562,17 @@ const [partySize, setPartySize] = useState(1)
                         setShowSmartPanel(false)
                         setShowSectionPanel(true)
                       }}
-                    >
+                    ><ScreenText id="FloorPage.2e430a58775b49a6">
                       Use This Server
-                    </button>
+                    </ScreenText></button>
                   </div>
                 ),
               )}
 
               {smartRecommendations.length === 0 && (
-                <div className="empty-state">
+                <div className="empty-state"><ScreenText id="FloorPage.eda10a0961fcbc53">
                   No eligible employees were found.
-                </div>
+                </ScreenText></div>
               )}
             </div>
 
@@ -2582,9 +2583,9 @@ const [partySize, setPartySize] = useState(1)
                 padding: '12px',
               }}
               onClick={() => setShowSmartPanel(false)}
-            >
+            ><ScreenText id="FloorPage.80e029a009b73576">
               Close
-            </button>
+            </ScreenText></button>
           </div>
         </div>
       )}
@@ -2594,14 +2595,14 @@ const [partySize, setPartySize] = useState(1)
       {showRotationPanel && (
         <div className="modal-backdrop">
           <div className="modal-card">
-            <p className="eyebrow">Quick Rotation</p>
-            <h2>Cover Counter</h2>
+            <p className="eyebrow"><ScreenText id="FloorPage.36533d646910fe8a">Quick Rotation</ScreenText></p>
+            <h2><ScreenText id="FloorPage.4bbc2c8e9674777f">Cover Counter</ScreenText></h2>
 
             {rotationServers.length === 0 ? (
               <>
-                <label>
+                <label><ScreenText id="FloorPage.e90fea599ed4cb12">
                   Number of servers
-                  <input
+                  </ScreenText><input
                     type="number"
                     min="1"
                     max="20"
@@ -2635,7 +2636,7 @@ const [partySize, setPartySize] = useState(1)
                           border: '1px solid var(--app-border)',
                         }}
                       >
-                        <strong>Server {index + 1}</strong>
+                        <strong><ScreenText id="FloorPage.a4aeb5371f4daacc">Server </ScreenText>{index + 1}</strong>
 
                         <select
                           style={{ marginTop: '8px' }}
@@ -2668,9 +2669,9 @@ const [partySize, setPartySize] = useState(1)
                             }
                           }}
                         >
-                          <option value="">
+                          <option value=""><ScreenText id="FloorPage.6348abf845e59969">
                             Choose from team
-                          </option>
+                          </ScreenText></option>
 
                           {eligibleRotationTeam().map(
                             (member) => (
@@ -2691,9 +2692,9 @@ const [partySize, setPartySize] = useState(1)
                             opacity: 0.65,
                             fontSize: '12px',
                           }}
-                        >
+                        ><ScreenText id="FloorPage.a5c8af2403b757c3">
                           OR
-                        </div>
+                        </ScreenText></div>
 
                         <input
                           value={
@@ -2763,16 +2764,16 @@ const [partySize, setPartySize] = useState(1)
                     }}
                   >
                     <div>
-                      <strong>Running Cover Count</strong>
+                      <strong><ScreenText id="FloorPage.078ec7cd050cb122">Running Cover Count</ScreenText></strong>
                       <div
                         style={{
                           marginTop: '2px',
                           opacity: 0.7,
                           fontSize: '12px',
                         }}
-                      >
+                      ><ScreenText id="FloorPage.ea7da507308a74cf">
                         Select a table, enter covers, then record the seating.
-                      </div>
+                      </ScreenText></div>
                     </div>
 
                     <div
@@ -2830,9 +2831,9 @@ const [partySize, setPartySize] = useState(1)
                                 textTransform: 'uppercase',
                                 letterSpacing: '0.08em',
                               }}
-                            >
+                            ><ScreenText id="FloorPage.1ab02bc87a372fbf">
                               Next Up
-                            </div>
+                            </ScreenText></div>
                           )}
 
                           <div
@@ -2858,9 +2859,9 @@ const [partySize, setPartySize] = useState(1)
                             </strong>
                           </div>
 
-                          <label style={{ marginTop: '10px' }}>
+                          <label style={{ marginTop: '10px' }}><ScreenText id="FloorPage.dbce12e1285071b6">
                             Table
-                            <select
+                            </ScreenText><select
                               value={
                                 rotationTableByServer[server.id] ?? ''
                               }
@@ -2884,9 +2885,9 @@ const [partySize, setPartySize] = useState(1)
                                 }
                               }}
                             >
-                              <option value="">
+                              <option value=""><ScreenText id="FloorPage.62553bd52e34f7ed">
                                 Choose table
-                              </option>
+                              </ScreenText></option>
 
                               {[...tables]
                                 .sort((a, b) =>
@@ -2901,16 +2902,16 @@ const [partySize, setPartySize] = useState(1)
                                     key={table.id}
                                     value={table.id}
                                   >
-                                    {table.table_name} · {table.seat_count}{' '}
+                                    {table.table_name} · {table.seat_count}{' '}<ScreenText id="FloorPage.25f8ad0dd7eaaa08">
                                     seats
-                                  </option>
+                                  </ScreenText></option>
                                 ))}
                             </select>
                           </label>
 
-                          <label style={{ marginTop: '10px' }}>
+                          <label style={{ marginTop: '10px' }}><ScreenText id="FloorPage.58ade1e6aa4b11b6">
                             Covers
-                            <input
+                            </ScreenText><input
                               type="number"
                               min="1"
                               max="50"
@@ -2970,9 +2971,9 @@ const [partySize, setPartySize] = useState(1)
                               saving ||
                               !rotationTableByServer[server.id]
                             }
-                          >
+                          ><ScreenText id="FloorPage.b7a81351b2a65fc5">
                             Record Seating
-                          </button>
+                          </ScreenText></button>
 
                           <button
                             style={{
@@ -2983,9 +2984,9 @@ const [partySize, setPartySize] = useState(1)
                               correctRotationCover(server.id)
                             }
                             disabled={saving}
-                          >
+                          ><ScreenText id="FloorPage.4be8115d05aa0496">
                             −1 Cover Correction
-                          </button>
+                          </ScreenText></button>
                         </div>
                       )
                     })}
@@ -2997,17 +2998,17 @@ const [partySize, setPartySize] = useState(1)
                       await loadRotationLog(activeShiftId)
                       setShowRotationLogPanel(true)
                     }}
-                  >
+                  ><ScreenText id="FloorPage.4926bb8bf7347b08">
                     View Log
-                  </button>
+                  </ScreenText></button>
 
-                  <button onClick={resetRotation}>
+                  <button onClick={resetRotation}><ScreenText id="FloorPage.ac6cec9ed256d135">
                     Reset Counts
-                  </button>
+                  </ScreenText></button>
 
-                  <button onClick={clearRotation}>
+                  <button onClick={clearRotation}><ScreenText id="FloorPage.0c59baac33d1d2d7">
                     Change Servers
-                  </button>
+                  </ScreenText></button>
                 </div>
               </>
             )}
@@ -3019,9 +3020,9 @@ const [partySize, setPartySize] = useState(1)
                 padding: '12px',
               }}
               onClick={() => setShowRotationPanel(false)}
-            >
+            ><ScreenText id="FloorPage.0178fa9eedc6fab6">
               Close
-            </button>
+            </ScreenText></button>
           </div>
         </div>
       )}
@@ -3029,8 +3030,8 @@ const [partySize, setPartySize] = useState(1)
       {showRotationLogPanel && (
         <div className="modal-backdrop">
           <div className="modal-card">
-            <p className="eyebrow">Rotation Log</p>
-            <h2>Seating History</h2>
+            <p className="eyebrow"><ScreenText id="FloorPage.2b12726504638ada">Rotation Log</ScreenText></p>
+            <h2><ScreenText id="FloorPage.e53bc7ea45411714">Seating History</ScreenText></h2>
 
             <div
               style={{
@@ -3038,9 +3039,9 @@ const [partySize, setPartySize] = useState(1)
                 opacity: 0.75,
                 fontSize: '13px',
               }}
-            >
+            ><ScreenText id="FloorPage.8c3a59721fc2c5d0">
               Every recorded rotation seating for this shift.
-            </div>
+            </ScreenText></div>
 
             <div
               style={{
@@ -3110,9 +3111,9 @@ const [partySize, setPartySize] = useState(1)
               ))}
 
               {rotationLog.length === 0 && (
-                <div className="empty-state">
+                <div className="empty-state"><ScreenText id="FloorPage.450555d426340623">
                   No rotation activity has been recorded yet.
-                </div>
+                </ScreenText></div>
               )}
             </div>
 
@@ -3123,9 +3124,9 @@ const [partySize, setPartySize] = useState(1)
                 padding: '12px',
               }}
               onClick={() => setShowRotationLogPanel(false)}
-            >
+            ><ScreenText id="FloorPage.b0a9402496a5997a">
               Close Log
-            </button>
+            </ScreenText></button>
           </div>
         </div>
       )}
@@ -3133,12 +3134,12 @@ const [partySize, setPartySize] = useState(1)
       {showTableEditor && (
         <div className="modal-backdrop">
           <div className="modal-card">
-            <p className="eyebrow">Floor Setup</p>
-            <h2>Edit Table</h2>
+            <p className="eyebrow"><ScreenText id="FloorPage.38a8cd80580a8ade">Floor Setup</ScreenText></p>
+            <h2><ScreenText id="FloorPage.3400468575b918d6">Edit Table</ScreenText></h2>
 
-            <label>
+            <label><ScreenText id="FloorPage.d5b819eda57f40e2">
               Table name
-              <input
+              </ScreenText><input
                 value={editTableName}
                 onChange={(event) =>
                   setEditTableName(event.target.value)
@@ -3147,9 +3148,9 @@ const [partySize, setPartySize] = useState(1)
               />
             </label>
 
-            <label style={{ marginTop: '12px' }}>
+            <label style={{ marginTop: '12px' }}><ScreenText id="FloorPage.dbde6abf70229975">
               Number of seats
-              <input
+              </ScreenText><input
                 type="number"
                 min="1"
                 max="50"
@@ -3179,25 +3180,25 @@ const [partySize, setPartySize] = useState(1)
                     Math.max(1, current - 1),
                   )
                 }
-              >
+              ><ScreenText id="FloorPage.7df20441dc99277c">
                 − Seat
-              </button>
+              </ScreenText></button>
 
               <button
                 onClick={() =>
                   setEditSeatCount((current) => current + 1)
                 }
-              >
+              ><ScreenText id="FloorPage.56d4bb2b594a79fe">
                 + Seat
-              </button>
+              </ScreenText></button>
             </div>
 
             <div className="modal-actions">
               <button
                 onClick={() => setShowTableEditor(false)}
-              >
+              ><ScreenText id="FloorPage.1f6078b10fb33539">
                 Cancel
-              </button>
+              </ScreenText></button>
 
               <button
                 className="primary-button"
@@ -3214,23 +3215,23 @@ const [partySize, setPartySize] = useState(1)
       {showAddTablePanel && (
         <div className="modal-backdrop">
           <div className="modal-card">
-            <p className="eyebrow">Floor Setup</p>
-            <h2>Add Table</h2>
+            <p className="eyebrow"><ScreenText id="FloorPage.346033551ea3dce7">Floor Setup</ScreenText></p>
+            <h2><ScreenText id="FloorPage.562edf163d27ecd6">Add Table</ScreenText></h2>
 
             <div
               style={{
                 marginBottom: '12px',
                 opacity: 0.75,
               }}
-            >
-              Adding to:{' '}
+            ><ScreenText id="FloorPage.6f6020f550b3c4fe">
+              Adding to:</ScreenText>{' '}
               {rooms.find((room) => room.id === activeRoomId)
                 ?.name || 'Current room'}
             </div>
 
-            <label>
+            <label><ScreenText id="FloorPage.99f2b354b41dd831">
               Table name
-              <input
+              </ScreenText><input
                 value={newTableName}
                 onChange={(event) =>
                   setNewTableName(event.target.value)
@@ -3239,9 +3240,9 @@ const [partySize, setPartySize] = useState(1)
               />
             </label>
 
-            <label style={{ marginTop: '12px' }}>
+            <label style={{ marginTop: '12px' }}><ScreenText id="FloorPage.bbb3a9965c19a24a">
               Seats
-              <input
+              </ScreenText><input
                 type="number"
                 min="1"
                 max="50"
@@ -3257,9 +3258,9 @@ const [partySize, setPartySize] = useState(1)
               />
             </label>
 
-            <label style={{ marginTop: '12px' }}>
+            <label style={{ marginTop: '12px' }}><ScreenText id="FloorPage.dcfaa96bfcf2cec6">
               Shape
-              <select
+              </ScreenText><select
                 value={newTableShape}
                 onChange={(event) =>
                   setNewTableShape(
@@ -3270,20 +3271,20 @@ const [partySize, setPartySize] = useState(1)
                   )
                 }
               >
-                <option value="round">Round</option>
-                <option value="square">Square</option>
-                <option value="rectangle">
+                <option value="round"><ScreenText id="FloorPage.8500ea567aa4bd25">Round</ScreenText></option>
+                <option value="square"><ScreenText id="FloorPage.291495e00a793806">Square</ScreenText></option>
+                <option value="rectangle"><ScreenText id="FloorPage.3af2249adffcf41a">
                   Rectangle
-                </option>
+                </ScreenText></option>
               </select>
             </label>
 
             <div className="modal-actions">
               <button
                 onClick={() => setShowAddTablePanel(false)}
-              >
+              ><ScreenText id="FloorPage.91d61fc9637665bf">
                 Cancel
-              </button>
+              </ScreenText></button>
 
               <button
                 className="primary-button"
@@ -3300,7 +3301,7 @@ const [partySize, setPartySize] = useState(1)
       {showTablePanel && selectedTable && (
         <div className="modal-backdrop">
           <div className="modal-card">
-            <p className="eyebrow">Table Details</p>
+            <p className="eyebrow"><ScreenText id="FloorPage.4ec46a48d32a4de1">Table Details</ScreenText></p>
 
             <h2>{selectedTable.table_name}</h2>
 
@@ -3313,19 +3314,19 @@ const [partySize, setPartySize] = useState(1)
               }}
             >
               <div>
-                <strong>Seats</strong>
+                <strong><ScreenText id="FloorPage.198e75feb878e9db">Seats</ScreenText></strong>
                 <div>{selectedTable.seat_count}</div>
               </div>
 
               <div>
-                <strong>Server</strong>
+                <strong><ScreenText id="FloorPage.7a591ebeaee5ae1c">Server</ScreenText></strong>
                 <div>
                   {tableServer(selectedTable.id) || 'Unassigned'}
                 </div>
               </div>
 
               <div>
-                <strong>Status</strong>
+                <strong><ScreenText id="FloorPage.06501eeecca19ad5">Status</ScreenText></strong>
                 <div>
                   {tableSession(selectedTable.id)
                     ? statusLabel(
@@ -3338,7 +3339,7 @@ const [partySize, setPartySize] = useState(1)
               {tableSession(selectedTable.id) && (
                 <>
                   <div>
-                    <strong>Party</strong>
+                    <strong><ScreenText id="FloorPage.a4d07ddfcdfe7d97">Party</ScreenText></strong>
                     <div>
                       {tableSession(selectedTable.id)
                         ?.guestName || 'Walk-in'}
@@ -3346,7 +3347,7 @@ const [partySize, setPartySize] = useState(1)
                   </div>
 
                   <div>
-                    <strong>Guests</strong>
+                    <strong><ScreenText id="FloorPage.524c23465d32c375">Guests</ScreenText></strong>
                     <div>
                       {
                         tableSession(selectedTable.id)
@@ -3356,14 +3357,14 @@ const [partySize, setPartySize] = useState(1)
                   </div>
 
                   <div>
-                    <strong>Time Seated</strong>
+                    <strong><ScreenText id="FloorPage.1abd80f51855397e">Time Seated</ScreenText></strong>
                     <div>
                       {elapsedMinutes(
                         tableSession(selectedTable.id)!
                           .seatedAt,
-                      )}{' '}
+                      )}{' '}<ScreenText id="FloorPage.7900dcf374573b5f">
                       min
-                    </div>
+                    </ScreenText></div>
                   </div>
                 </>
               )}
@@ -3381,9 +3382,9 @@ const [partySize, setPartySize] = useState(1)
                   setShowTablePanel(false)
                   openSeating()
                 }}
-              >
+              ><ScreenText id="FloorPage.a04a646c889f8fe4">
                 Seat Guests
-              </button>
+              </ScreenText></button>
 
               {tableSession(selectedTable.id) ? (
                 <>
@@ -3395,9 +3396,9 @@ const [partySize, setPartySize] = useState(1)
                       )
                     }
                     disabled={saving}
-                  >
+                  ><ScreenText id="FloorPage.093ec970131d5b82">
                     🔵 Seated
-                  </button>
+                  </ScreenText></button>
 
                   <button
                     onClick={() =>
@@ -3407,9 +3408,9 @@ const [partySize, setPartySize] = useState(1)
                       )
                     }
                     disabled={saving}
-                  >
+                  ><ScreenText id="FloorPage.1d19103e786ec74f">
                     🟡 Drinks
-                  </button>
+                  </ScreenText></button>
 
                   <button
                     onClick={() =>
@@ -3419,9 +3420,9 @@ const [partySize, setPartySize] = useState(1)
                       )
                     }
                     disabled={saving}
-                  >
+                  ><ScreenText id="FloorPage.8353242e893ef598">
                     🟠 Food
-                  </button>
+                  </ScreenText></button>
 
                   <button
                     onClick={() =>
@@ -3431,9 +3432,9 @@ const [partySize, setPartySize] = useState(1)
                       )
                     }
                     disabled={saving}
-                  >
+                  ><ScreenText id="FloorPage.9b188c58096a18aa">
                     🟣 Check
-                  </button>
+                  </ScreenText></button>
 
                   <button
                     onClick={() =>
@@ -3443,9 +3444,9 @@ const [partySize, setPartySize] = useState(1)
                       )
                     }
                     disabled={saving}
-                  >
+                  ><ScreenText id="FloorPage.ceb815d3af266d20">
                     ⚫ Dirty / Needs Busser
-                  </button>
+                  </ScreenText></button>
 
                   <button
                     onClick={() =>
@@ -3455,9 +3456,9 @@ const [partySize, setPartySize] = useState(1)
                       )
                     }
                     disabled={saving}
-                  >
+                  ><ScreenText id="FloorPage.26c57cd297d801b5">
                     🔴 Manager Assist
-                  </button>
+                  </ScreenText></button>
 
                   <button
                     className="primary-button"
@@ -3468,34 +3469,34 @@ const [partySize, setPartySize] = useState(1)
                       )
                     }
                     disabled={saving}
-                  >
+                  ><ScreenText id="FloorPage.19c6834d7471e913">
                     🟢 Mark Ready / Close Table
-                  </button>
+                  </ScreenText></button>
                 </>
               ) : (
-                <button disabled>
+                <button disabled><ScreenText id="FloorPage.51023ef8ef67b615">
                   No active table session
-                </button>
+                </ScreenText></button>
               )}
 
-              <button disabled>
+              <button disabled><ScreenText id="FloorPage.a9fccabe13d95591">
                 Transfer Table
-              </button>
+              </ScreenText></button>
 
               <button
                 onClick={() => {
                   setShowTablePanel(false)
                   openTableEditor(selectedTable)
                 }}
-              >
+              ><ScreenText id="FloorPage.281d6ce601d5bdda">
                 Edit Table
-              </button>
+              </ScreenText></button>
 
               <button
                 onClick={() => setShowTablePanel(false)}
-              >
+              ><ScreenText id="FloorPage.b26f7c26db4411a3">
                 Close
-              </button>
+              </ScreenText></button>
             </div>
           </div>
         </div>
@@ -3504,7 +3505,7 @@ const [partySize, setPartySize] = useState(1)
       {showSeatPanel && selectedTableIds.length > 0 && (
         <div className="modal-backdrop">
           <div className="modal-card">
-            <p className="eyebrow">Seat Guests</p>{error && <p role="alert">{error}</p>}
+            <p className="eyebrow"><ScreenText id="FloorPage.7699845ffa5f9e0f">Seat Guests</ScreenText></p>{error && <p role="alert">{error}</p>}
 
             <h2>
               {selectedTableIds.length === 1
@@ -3524,11 +3525,11 @@ const [partySize, setPartySize] = useState(1)
                 .join(', ')}
             </div>
 
-            <label>Server<select value={seatServerId} onChange={e=>setSeatServerId(e.target.value)}><option value="">Choose server</option>{team.map(m=><option key={m.user_id} value={m.user_id}>{memberName(m.user_id)}</option>)}</select></label>
-            <p>One party will occupy all selected tables. Choose the server responsible for the party.</p>
-            <label>
+            <label><ScreenText id="FloorPage.e3fc8c139dc34fa7">Server</ScreenText><select value={seatServerId} onChange={e=>setSeatServerId(e.target.value)}><option value=""><ScreenText id="FloorPage.384d6bb051c367b8">Choose server</ScreenText></option>{team.map(m=><option key={m.user_id} value={m.user_id}>{memberName(m.user_id)}</option>)}</select></label>
+            <p><ScreenText id="FloorPage.531998f4645e3d0d">One party will occupy all selected tables. Choose the server responsible for the party.</ScreenText></p>
+            <label><ScreenText id="FloorPage.e44aeebd7e732765">
               Guest name
-              <input
+              </ScreenText><input
                 value={guestName}
                 onChange={(event) =>
                   setGuestName(event.target.value)
@@ -3537,9 +3538,9 @@ const [partySize, setPartySize] = useState(1)
               />
             </label>
 
-            <label style={{ marginTop: '12px' }}>
+            <label style={{ marginTop: '12px' }}><ScreenText id="FloorPage.e50cc9012f7e103e">
               Phone number
-              <input
+              </ScreenText><input
                 value={guestPhone}
                 onChange={(event) =>
                   setGuestPhone(event.target.value)
@@ -3548,9 +3549,9 @@ const [partySize, setPartySize] = useState(1)
               />
             </label>
 
-            <label style={{ marginTop: '12px' }}>
+            <label style={{ marginTop: '12px' }}><ScreenText id="FloorPage.f2dddedb7989ec42">
               Email
-              <input
+              </ScreenText><input
                 type="email"
                 value={guestEmail}
                 onChange={(event) =>
@@ -3560,9 +3561,9 @@ const [partySize, setPartySize] = useState(1)
               />
             </label>
 
-            <label style={{ marginTop: '12px' }}>
+            <label style={{ marginTop: '12px' }}><ScreenText id="FloorPage.6f52ad3b8af5273e">
               Party size
-              <input
+              </ScreenText><input
                 type="number"
                 min="1"
                 value={partySize}
@@ -3586,9 +3587,9 @@ const [partySize, setPartySize] = useState(1)
                   setGuestEmail('')
                   setPartySize(1)
                 }}
-              >
+              ><ScreenText id="FloorPage.8017a93cf20f7eca">
                 Cancel
-              </button>
+              </ScreenText></button>
 
               <button
                 className="primary-button"

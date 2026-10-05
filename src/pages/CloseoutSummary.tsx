@@ -1,3 +1,4 @@
+import { ScreenText } from "../components/ScreenText"
 import './CloseoutMobile.css'
 import { CloseoutCorrectionEditor } from '../components/CloseoutCorrectionEditor'
 import type { Question } from '../components/CloseoutConfig'
@@ -514,7 +515,7 @@ function CloseoutDay({selectedDate,refresh,onDeleted,locationId,locationName,cur
 
         <p>
           {locationName} · {serviceDateLabel(selectedDate)}
-          {current && <> · Service day resets at 4 a.m. New Orleans time.</>}
+          {current && <><ScreenText id="CloseoutSummary.b6126f0911b1fda7"> · Service day resets at 4 a.m. New Orleans time.</ScreenText></>}
         </p>
       </div>
 
@@ -549,9 +550,9 @@ function CloseoutDay({selectedDate,refresh,onDeleted,locationId,locationName,cur
                   !current
               )
             }
-          >
+          ><ScreenText id="CloseoutSummary.e6794e03699dd0cb">
             Customize Summary
-          </button>
+          </ScreenText></button>
         </div>
 
         {showCustomize && (
@@ -563,15 +564,15 @@ function CloseoutDay({selectedDate,refresh,onDeleted,locationId,locationName,cur
                 '1px solid rgba(255,255,255,.1)',
             }}
           >
-            <h3>
+            <h3><ScreenText id="CloseoutSummary.3834920b758c6faa">
               Summary Cards
-            </h3>
+            </ScreenText></h3>
 
-            <p>
+            <p><ScreenText id="CloseoutSummary.0b8f21150f7751f4">
               Choose which numbers
               appear at the top of
               the daily summary.
-            </p>
+            </ScreenText></p>
 
             <div
               style={{
@@ -633,9 +634,9 @@ function CloseoutDay({selectedDate,refresh,onDeleted,locationId,locationName,cur
               onClick={
                 resetCards
               }
-            >
+            ><ScreenText id="CloseoutSummary.e8b5fa869724043d">
               Reset Default Cards
-            </button>
+            </ScreenText></button>
           </div>
         )}
       </div>
@@ -657,9 +658,9 @@ function CloseoutDay({selectedDate,refresh,onDeleted,locationId,locationName,cur
       )}
 
       {loading ? (
-        <div className="card">
+        <div className="card"><ScreenText id="CloseoutSummary.1eed37a7be178e26">
           Loading summary...
-        </div>
+        </ScreenText></div>
       ) : (
         <>
           <div
@@ -670,9 +671,9 @@ function CloseoutDay({selectedDate,refresh,onDeleted,locationId,locationName,cur
               'closeouts'
             ) && (
               <div className="summary-stat-card">
-                <span>
+                <span><ScreenText id="CloseoutSummary.3cb32cb0ffde0ba5">
                   Closeouts
-                </span>
+                </ScreenText></span>
 
                 <strong>
                   {
@@ -718,9 +719,9 @@ function CloseoutDay({selectedDate,refresh,onDeleted,locationId,locationName,cur
               'targetPercent'
             ) && (
               <div className="summary-stat-card">
-                <span>
+                <span><ScreenText id="CloseoutSummary.275a794e224cc427">
                   Target %
-                </span>
+                </ScreenText></span>
 
                 <strong>
                   {percent(
@@ -750,9 +751,9 @@ function CloseoutDay({selectedDate,refresh,onDeleted,locationId,locationName,cur
               'voids'
             ) && (
               <div className="summary-stat-card">
-                <span>
+                <span><ScreenText id="CloseoutSummary.c594bb9f996f7cf5">
                   Voids
-                </span>
+                </ScreenText></span>
 
                 <strong>
                   {
@@ -770,9 +771,9 @@ function CloseoutDay({selectedDate,refresh,onDeleted,locationId,locationName,cur
               'discounts'
             ) && (
               <div className="summary-stat-card">
-                <span>
+                <span><ScreenText id="CloseoutSummary.28384f41a3ad7d09">
                   Discounts
-                </span>
+                </ScreenText></span>
 
                 <strong>
                   {money(
@@ -786,9 +787,9 @@ function CloseoutDay({selectedDate,refresh,onDeleted,locationId,locationName,cur
               'score'
             ) && (
               <div className="summary-stat-card">
-                <span>
+                <span><ScreenText id="CloseoutSummary.caea4383a2e56490">
                   Avg Shift Score
-                </span>
+                </ScreenText></span>
 
                 <strong>
                   {totals.averageScore.toFixed(
@@ -824,9 +825,9 @@ function CloseoutDay({selectedDate,refresh,onDeleted,locationId,locationName,cur
                 onClick={
                   copyRecap
                 }
-              >
+              ><ScreenText id="CloseoutSummary.2f68c5951f51442a">
                 Copy Recap
-              </button>
+              </ScreenText></button>
             </div>
 
             <p
@@ -847,11 +848,11 @@ function CloseoutDay({selectedDate,refresh,onDeleted,locationId,locationName,cur
 
             {closeouts.length ===
               0 && (
-              <p>
+              <p><ScreenText id="CloseoutSummary.7fcd44933386a74f">
                 No closeouts
                 submitted for this
                 date.
-              </p>
+              </ScreenText></p>
             )}
 
             <div
@@ -970,8 +971,8 @@ function CloseoutDay({selectedDate,refresh,onDeleted,locationId,locationName,cur
                         </div>
 
                         <div>
-                          <strong>
-                            Score{' '}
+                          <strong><ScreenText id="CloseoutSummary.9463f6d51eea3870">
+                            Score</ScreenText>{' '}
                             {
                               closeout.shift_score
                             }
@@ -985,20 +986,20 @@ function CloseoutDay({selectedDate,refresh,onDeleted,locationId,locationName,cur
                         </div>
                       </button>
 
-                      <p>Submitted {submissionLabel(closeout.submitted_at ?? closeout.created_at)}</p>
+                      <p><ScreenText id="CloseoutSummary.4a8b61e30f851cb7">Submitted </ScreenText>{submissionLabel(closeout.submitted_at ?? closeout.created_at)}</p>
                       {closeout.net_sales===0 && <p className="closeout-warning">{closeout.zero_sales_confirmed?'Zero sales confirmed: '+(closeout.zero_sales_reason ?? ''):'$0 sales — needs manager verification.'}</p>}
-                      {closeout.completion_points_withheld && <p>Completion bonus withheld: inaccurate original submission.</p>}
-                      {closeout.corrected_at && <p>Corrected {submissionLabel(closeout.corrected_at)} · {closeout.correction_note}</p>}
-                      {isManager && <div className="closeout-actions"><button type="button" disabled={!!deletingId || loading} onClick={()=>setEditingId(closeout.id)}>Edit / Review</button><button type="button" disabled={!!deletingId || loading} onClick={()=>void deleteCloseout(closeout)}>{deletingId===closeout.id?'Deleting…':'Delete closeout'}</button></div>}
+                      {closeout.completion_points_withheld && <p><ScreenText id="CloseoutSummary.05797e4202820fc7">Completion bonus withheld: inaccurate original submission.</ScreenText></p>}
+                      {closeout.corrected_at && <p><ScreenText id="CloseoutSummary.f16b17e629341098">Corrected </ScreenText>{submissionLabel(closeout.corrected_at)} · {closeout.correction_note}</p>}
+                      {isManager && <div className="closeout-actions"><button type="button" disabled={!!deletingId || loading} onClick={()=>setEditingId(closeout.id)}><ScreenText id="CloseoutSummary.438a24486ad401e8">Edit / Review</ScreenText></button><button type="button" disabled={!!deletingId || loading} onClick={()=>void deleteCloseout(closeout)}>{deletingId===closeout.id?'Deleting…':'Delete closeout'}</button></div>}
                       {isManager && editingId===closeout.id && <CloseoutCorrectionEditor key={closeout.id+':'+(closeout.edit_version ?? 1)} closeout={closeout} locationId={locationId} name={employee} onCancel={()=>setEditingId('')} onSaved={()=>{setEditingId('');onDeleted()}} />}
 
                       {isExpanded && (
                         <div className="closeout-summary-details">
 
                           <div>
-                            <span>
+                            <span><ScreenText id="CloseoutSummary.2737ef54a26551da">
                               Scheduled
-                            </span>
+                            </ScreenText></span>
 
                             <strong>
                               {
@@ -1008,9 +1009,9 @@ function CloseoutDay({selectedDate,refresh,onDeleted,locationId,locationName,cur
                           </div>
 
                           <div>
-                            <span>
+                            <span><ScreenText id="CloseoutSummary.a4c12661a9aa458e">
                               Clock In
-                            </span>
+                            </ScreenText></span>
 
                             <strong>
                               {
@@ -1018,12 +1019,12 @@ function CloseoutDay({selectedDate,refresh,onDeleted,locationId,locationName,cur
                               }
                             </strong>
                           </div>
-                          <div><strong>Clock-Out</strong><p>{clockLabel(closeout.clock_out ?? null)}</p></div>
+                          <div><strong><ScreenText id="CloseoutSummary.9fdd0492ef80753d">Clock-Out</ScreenText></strong><p>{clockLabel(closeout.clock_out ?? null)}</p></div>
 
                           <div>
-                            <span>
+                            <span><ScreenText id="CloseoutSummary.084dc9bf092dbb34">
                               Net Sales
-                            </span>
+                            </ScreenText></span>
 
                             <strong>
                               {money(
@@ -1033,9 +1034,9 @@ function CloseoutDay({selectedDate,refresh,onDeleted,locationId,locationName,cur
                           </div>
 
                           <div>
-                            <span>
+                            <span><ScreenText id="CloseoutSummary.0c7881f8acf1cb50">
                               Target
-                            </span>
+                            </ScreenText></span>
 
                             <strong>
                               {money(
@@ -1045,9 +1046,9 @@ function CloseoutDay({selectedDate,refresh,onDeleted,locationId,locationName,cur
                           </div>
 
                           <div>
-                            <span>
+                            <span><ScreenText id="CloseoutSummary.4f25e5f00f24fcf6">
                               Cash Deposit
-                            </span>
+                            </ScreenText></span>
 
                             <strong>
                               {money(
@@ -1057,9 +1058,9 @@ function CloseoutDay({selectedDate,refresh,onDeleted,locationId,locationName,cur
                           </div>
 
                           <div>
-                            <span>
+                            <span><ScreenText id="CloseoutSummary.4e5a3f70a4b1b467">
                               Voids
-                            </span>
+                            </ScreenText></span>
 
                             <strong>
                               {
@@ -1073,9 +1074,9 @@ function CloseoutDay({selectedDate,refresh,onDeleted,locationId,locationName,cur
                           </div>
 
                           <div>
-                            <span>
+                            <span><ScreenText id="CloseoutSummary.8119eb0a1f901753">
                               Discounts
-                            </span>
+                            </ScreenText></span>
 
                             <strong>
                               {money(
@@ -1085,9 +1086,9 @@ function CloseoutDay({selectedDate,refresh,onDeleted,locationId,locationName,cur
                           </div>
 
                           <div>
-                            <span>
+                            <span><ScreenText id="CloseoutSummary.f545e5be80b1ec21">
                               Tables
-                            </span>
+                            </ScreenText></span>
 
                             <strong>
                               {tables.length >
@@ -1100,9 +1101,9 @@ function CloseoutDay({selectedDate,refresh,onDeleted,locationId,locationName,cur
                           </div>
 
                           <div>
-                            <span>
+                            <span><ScreenText id="CloseoutSummary.36f1000b204c3520">
                               Money Turned In To
-                            </span>
+                            </ScreenText></span>
 
                             <strong>
                               {
@@ -1112,9 +1113,9 @@ function CloseoutDay({selectedDate,refresh,onDeleted,locationId,locationName,cur
                           </div>
 
                           <div>
-                            <span>
+                            <span><ScreenText id="CloseoutSummary.9a00296cedc3b600">
                               Drinks Made By
-                            </span>
+                            </ScreenText></span>
 
                             <strong>
                               {
@@ -1124,9 +1125,9 @@ function CloseoutDay({selectedDate,refresh,onDeleted,locationId,locationName,cur
                           </div>
 
                           <div>
-                            <span>
+                            <span><ScreenText id="CloseoutSummary.99cf3d781916602a">
                               Point Adjustment
-                            </span>
+                            </ScreenText></span>
 
                             <strong>
                               {closeout.points_delta >
@@ -1145,9 +1146,9 @@ function CloseoutDay({selectedDate,refresh,onDeleted,locationId,locationName,cur
                                   '1 / -1',
                               }}
                             >
-                              <span>
+                              <span><ScreenText id="CloseoutSummary.c1897c9d53914584">
                                 Score Details
-                              </span>
+                              </ScreenText></span>
 
                               <div
                                 style={{
@@ -1200,9 +1201,9 @@ function CloseoutDay({selectedDate,refresh,onDeleted,locationId,locationName,cur
                                   '1 / -1',
                               }}
                             >
-                              <span>
+                              <span><ScreenText id="CloseoutSummary.17a81ded0d3fa833">
                                 Notes
-                              </span>
+                              </ScreenText></span>
 
                               <strong>
                                 {
@@ -1263,12 +1264,12 @@ export function CloseoutSummaryPage() {
  function reload(){setDay(serviceDay());setRefresh(v=>v+1)}
  if(!location)return <section className="page closeout-summary-mobile"><p role={error?'alert':'status'}>{error || 'Loading summary…'}</p></section>
  return <>
-  <div className="page"><button type="button" onClick={reload}>Refresh closeouts</button></div>
+  <div className="page"><button type="button" onClick={reload}><ScreenText id="CloseoutSummary.f4bbc18b0dbe1711">Refresh closeouts</ScreenText></button></div>
   <CloseoutDay selectedDate={day} current refresh={refresh} locationId={location.id} locationName={location.name} onDeleted={reload} />
-  <section className="page closeout-summary-mobile"><article className="card"><h2>Previous closeouts</h2><p>Organized by month and service day, newest first.</p>
-   {error && <p role="alert">{error}</p>}{historyLoading && history.length===0 && <p role="status">Loading history…</p>}
-   {!error && !historyLoading && history.length===0 && <p>No previous closeouts.</p>}
-   {months.map(([month,entries])=><details key={month}><summary>{serviceDateLabel(month,true)} · {entries.reduce((n,e)=>n+e.count,0)} closeouts</summary><div style={{display:'grid',gap:8,margin:'12px 0'}}>{entries.map(e=><button type="button" key={e.day} aria-pressed={archiveDate===e.day} onClick={()=>setArchiveDate(v=>v===e.day?'':e.day)}>{serviceDateLabel(e.day)} · {e.count} closeout{e.count===1?'':'s'} · {archiveDate===e.day?'Hide':'View'}</button>)}</div></details>)}
+  <section className="page closeout-summary-mobile"><article className="card"><h2><ScreenText id="CloseoutSummary.643cd94130e638aa">Previous closeouts</ScreenText></h2><p><ScreenText id="CloseoutSummary.cc09234f89870176">Organized by month and service day, newest first.</ScreenText></p>
+   {error && <p role="alert">{error}</p>}{historyLoading && history.length===0 && <p role="status"><ScreenText id="CloseoutSummary.5c3f475acefcfa5d">Loading history…</ScreenText></p>}
+   {!error && !historyLoading && history.length===0 && <p><ScreenText id="CloseoutSummary.acbc70394af59cae">No previous closeouts.</ScreenText></p>}
+   {months.map(([month,entries])=><details key={month}><summary>{serviceDateLabel(month,true)} · {entries.reduce((n,e)=>n+e.count,0)}<ScreenText id="CloseoutSummary.c5b235886695e308"> closeouts</ScreenText></summary><div style={{display:'grid',gap:8,margin:'12px 0'}}>{entries.map(e=><button type="button" key={e.day} aria-pressed={archiveDate===e.day} onClick={()=>setArchiveDate(v=>v===e.day?'':e.day)}>{serviceDateLabel(e.day)} · {e.count}<ScreenText id="CloseoutSummary.ce9ee2502f65fa17"> closeout</ScreenText>{e.count===1?'':'s'} · {archiveDate===e.day?'Hide':'View'}</button>)}</div></details>)}
   </article></section>
   {archiveDate && archiveDate<day && <CloseoutDay key={archiveDate} selectedDate={archiveDate} current={false} refresh={refresh} locationId={location.id} locationName={location.name} onDeleted={reload} />}
  </>

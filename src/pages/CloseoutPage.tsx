@@ -1,3 +1,4 @@
+import { ScreenText } from "../components/ScreenText"
 import { ClockTime } from '../components/ClockTime'
 import { closeoutHours } from '../lib/closeoutHours'
 import './CloseoutMobile.css'
@@ -1221,13 +1222,13 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
   if (loading) {
     return (
       <section className="page closeout-mobile">
-        <h1>
+        <h1><ScreenText id="CloseoutPage.19b404e3d4da3b09">
           Daily Closeout
-        </h1>
+        </ScreenText></h1>
 
-        <p>
+        <p><ScreenText id="CloseoutPage.341b29a41c67c361">
           Loading...
-        </p>
+        </ScreenText></p>
       </section>
     )
   }
@@ -1236,13 +1237,13 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
     <section className="page closeout-mobile">
 
       <div className="page-header">
-        <p className="eyebrow">
+        <p className="eyebrow"><ScreenText id="CloseoutPage.07a01084df9fad3a">
           SHIFT ACCOUNTABILITY
-        </p>
+        </ScreenText></p>
 
-        <h1>
+        <h1><ScreenText id="CloseoutPage.78176397e4f5311f">
           Daily Closeout
-        </h1>
+        </ScreenText></h1>
 
         <p>
           {locationName}
@@ -1283,14 +1284,14 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
         </div>
       )}
 
-      <p><Link to="/closeout">← Closeout</Link></p>
+      <p><Link to="/closeout"><ScreenText id="CloseoutPage.0ce3457f5ccec1c4">← Closeout</ScreenText></Link></p>
       {configError && <p role="alert">{configError}</p>}
       
 
       <div className="card">
-        <h2>
+        <h2><ScreenText id="CloseoutPage.dfb5350d0897214f">
           Shift Information
-        </h2>
+        </ScreenText></h2>
 
         <div className="form-grid">
 
@@ -1306,11 +1307,11 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
             <ClockTime required label="Clock-in time" value={clockInTime} onChange={setClockInTime} />
           </label>
 
-          <label>Actual Clock-Out Time
-            <ClockTime required label="Clock-out time" value={clockOutTime} onChange={setClockOutTime} />
-            <small>Use your actual end time. After-midnight clock-out is treated as the next day.</small>
+          <label><ScreenText id="CloseoutPage.a803ddaf64e382d1">Actual Clock-Out Time
+            </ScreenText><ClockTime required label="Clock-out time" value={clockOutTime} onChange={setClockOutTime} />
+            <small><ScreenText id="CloseoutPage.0cb264d4769f0e13">Use your actual end time. After-midnight clock-out is treated as the next day.</ScreenText></small>
           </label>
-          {closeoutHours(clockInTime,clockOutTime)!==null && <p>Shift length: {closeoutHours(clockInTime,clockOutTime)!.toFixed(2)} hours</p>}
+          {closeoutHours(clockInTime,clockOutTime)!==null && <p><ScreenText id="CloseoutPage.ecbf49a3335e8ec7">Shift length: </ScreenText>{closeoutHours(clockInTime,clockOutTime)!.toFixed(2)}<ScreenText id="CloseoutPage.9b614fcd90489a0d"> hours</ScreenText></p>}
 
           <label>
             {questionLabel(config, 'staff_2', "Shift")}
@@ -1319,19 +1320,19 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
               value={shiftType}
               onChange={(event) => setShiftType(event.target.value)}
             >
-              <option value="">Select Shift</option>
-              <option value="AM">AM</option>
-              <option value="PM">PM</option>
-              <option value="TO_VOLUME">To Volume</option>
+              <option value=""><ScreenText id="CloseoutPage.48e9a699102a192e">Select Shift</ScreenText></option>
+              <option value="AM"><ScreenText id="CloseoutPage.6350660034efc36b">AM</ScreenText></option>
+              <option value="PM"><ScreenText id="CloseoutPage.1c0f4170d0704b8b">PM</ScreenText></option>
+              <option value="TO_VOLUME"><ScreenText id="CloseoutPage.77baab9ee40baaa4">To Volume</ScreenText></option>
             </select>
           </label>
         </div>
       </div>
 
       <div className="card">
-        <h2>
+        <h2><ScreenText id="CloseoutPage.e97932f94c4d02e8">
           Sales
-        </h2>
+        </ScreenText></h2>
 
         <div className="form-grid">
 
@@ -1380,12 +1381,12 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
         </div>
       </div>
 
-      {netSales.trim()!=='' && Number(netSales)===0 && <div className="closeout-warning"><h3>Check your sales</h3><p>You entered $0. Check your Toast report before continuing.</p><label className="closeout-check"><input type="checkbox" checked={zeroSalesConfirmed} onChange={e=>setZeroSalesConfirmed(e.target.checked)} /><span>I checked my report and $0 sales is accurate.</span></label><label>Why were sales zero?<textarea rows={2} maxLength={2000} value={zeroSalesReason} onChange={e=>setZeroSalesReason(e.target.value)} placeholder="Explain why this shift had no sales." /></label></div>}
+      {netSales.trim()!=='' && Number(netSales)===0 && <div className="closeout-warning"><h3><ScreenText id="CloseoutPage.08bbbe6dfa02693c">Check your sales</ScreenText></h3><p><ScreenText id="CloseoutPage.b8864cc8785a4b68">You entered $0. Check your Toast report before continuing.</ScreenText></p><label className="closeout-check"><input type="checkbox" checked={zeroSalesConfirmed} onChange={e=>setZeroSalesConfirmed(e.target.checked)} /><span><ScreenText id="CloseoutPage.21209f4ceb62d671">I checked my report and $0 sales is accurate.</ScreenText></span></label><label><ScreenText id="CloseoutPage.0c8ea3df31e4441b">Why were sales zero?</ScreenText><textarea rows={2} maxLength={2000} value={zeroSalesReason} onChange={e=>setZeroSalesReason(e.target.value)} placeholder="Explain why this shift had no sales." /></label></div>}
 
       <div className="card">
-        <h2>
+        <h2><ScreenText id="CloseoutPage.fa54c9aa63aa0de5">
           Cash & Adjustments
-        </h2>
+        </ScreenText></h2>
 
         <div className="form-grid"
               style={{
@@ -1462,9 +1463,9 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
       </div>
 
       <div className="card">
-        <h2>
+        <h2><ScreenText id="CloseoutPage.ef596096378905dc">
           Role Worked
-        </h2>
+        </ScreenText></h2>
 
         <select
           value={
@@ -1523,7 +1524,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
       </div>
 {jobRole === 'main_bartender' && (
   <div className="card">
-    <h2>Register Closeout</h2>
+    <h2><ScreenText id="CloseoutPage.0a257811571b1959">Register Closeout</ScreenText></h2>
 
     <label>
       {questionLabel(config, 'staff_8', "Cash Left in Register")}
@@ -1567,9 +1568,9 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
               }
               required
             >
-              <option value="">
+              <option value=""><ScreenText id="CloseoutPage.109949a6b786df90">
                 Select verifier
-              </option>
+              </ScreenText></option>
 
               {employees.map((employee) => (
                 <option
@@ -1586,9 +1587,9 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
   </div>
       )}
       <div className="card">
-        <h2>
+        <h2><ScreenText id="CloseoutPage.168812ccfe0a7259">
           Tables Worked
-        </h2>
+        </ScreenText></h2>
 
         {Object.entries(
           groupedTables
@@ -1662,9 +1663,9 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
         )}
 
         <p>
-          <strong>
+          <strong><ScreenText id="CloseoutPage.fcad3a28960326e6">
             Selected:
-          </strong>{' '}
+          </ScreenText></strong>{' '}
 
           {selectedTables.length >
           0
@@ -1680,7 +1681,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
 
 
       <div className="card">
-        <h2>⭐ Peer Recognition — +5 Points</h2>
+        <h2><ScreenText id="CloseoutPage.4064ac585c437950">⭐ Peer Recognition — +5 Points</ScreenText></h2>
 
         <div className="form-grid">
           <label>
@@ -1690,7 +1691,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
               value={peerVoteEmployeeId}
               onChange={(e) => setPeerVoteEmployeeId(e.target.value)}
             >
-              <option value="">Select a teammate</option>
+              <option value=""><ScreenText id="CloseoutPage.30eeb3cde10686c0">Select a teammate</ScreenText></option>
 
               {employees.map((employee) => (
                 <option
@@ -1712,21 +1713,21 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
               value={peerVoteReason}
               onChange={(e) => setPeerVoteReason(e.target.value)}
             >
-              <option value="">Select a reason</option>
-              <option value="Teamwork">Teamwork</option>
-              <option value="Positive Attitude / Motivation">
+              <option value=""><ScreenText id="CloseoutPage.4c67cd90a32ac4a9">Select a reason</ScreenText></option>
+              <option value="Teamwork"><ScreenText id="CloseoutPage.9c39771c2c349c41">Teamwork</ScreenText></option>
+              <option value="Positive Attitude / Motivation"><ScreenText id="CloseoutPage.ac38f5f03e1b83fb">
                 Positive Attitude / Motivation
-              </option>
-              <option value="Helped During a Rush">
+              </ScreenText></option>
+              <option value="Helped During a Rush"><ScreenText id="CloseoutPage.7341dc289f28176f">
                 Helped During a Rush
-              </option>
-              <option value="Guest Support">Guest Support</option>
-              <option value="Leadership">Leadership</option>
-              <option value="Communication">Communication</option>
-              <option value="Went Above & Beyond">
+              </ScreenText></option>
+              <option value="Guest Support"><ScreenText id="CloseoutPage.b22073e733572be6">Guest Support</ScreenText></option>
+              <option value="Leadership"><ScreenText id="CloseoutPage.cc4feffede8ae163">Leadership</ScreenText></option>
+              <option value="Communication"><ScreenText id="CloseoutPage.307271de7146778c">Communication</ScreenText></option>
+              <option value="Went Above & Beyond"><ScreenText id="CloseoutPage.d07f19ce73f71580">
                 Went Above &amp; Beyond
-              </option>
-              <option value="Other">Other</option>
+              </ScreenText></option>
+              <option value="Other"><ScreenText id="CloseoutPage.4284cb61f89adb7f">Other</ScreenText></option>
             </select>
           </label>
 
@@ -1748,9 +1749,9 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
       </div>
 
       <div className="card">
-        <h2>
+        <h2><ScreenText id="CloseoutPage.6425a625f082028a">
           Shift Accountability
-        </h2>
+        </ScreenText></h2>
 
         <div className="form-grid">
 
@@ -1770,9 +1771,9 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
                 )
               }
             >
-              <option value="">
+              <option value=""><ScreenText id="CloseoutPage.4abe602200d57d86">
                 Select employee
-              </option>
+              </ScreenText></option>
 
               {employees.map(
                 (employee) => (
@@ -1809,9 +1810,9 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
                 )
               }
             >
-              <option value="">
+              <option value=""><ScreenText id="CloseoutPage.34be05437c660577">
                 Not applicable
-              </option>
+              </ScreenText></option>
 
               {employees.map(
                 (employee) => (
@@ -1836,9 +1837,9 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
       </div>
 
       <div className="card">
-        <h2>
+        <h2><ScreenText id="CloseoutPage.e0f8109cb9cd8aa4">
           Notes
-        </h2>
+        </ScreenText></h2>
 
         <textarea
           rows={4}
@@ -1858,17 +1859,17 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
       </div>
 
       <div className="card">
-        <h2>
+        <h2><ScreenText id="CloseoutPage.371d2d55a7237afc">
           Shift Score
-        </h2>
+        </ScreenText></h2>
 
         {!pointResult ? (
-          <p>
+          <p><ScreenText id="CloseoutPage.44540397f70e496a">
             Enter scheduled
             and actual
             clock-in times
             to calculate.
-          </p>
+          </ScreenText></p>
         ) : (
           <>
             <div className="shift-score-number">
@@ -1877,9 +1878,9 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
               }
             </div>
 
-            <p>
+            <p><ScreenText id="CloseoutPage.0e2a4f8a7539964b">
               Starting score:
-              {' '}100
+              </ScreenText>{' '}100
             </p>
 
             <div className="point-adjustment-list">
@@ -1911,9 +1912,9 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
             </div>
 
             <div className="point-total">
-              <span>
+              <span><ScreenText id="CloseoutPage.33f40dc823dadbd0">
                 Net Adjustment
-              </span>
+              </ScreenText></span>
 
               <strong>
                 {pointResult.pointsDelta >
@@ -1929,9 +1930,9 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
       <fieldset disabled={saving}><CloseoutQuestions config={config} audience="staff" answers={answers} onChange={setAnswers} /></fieldset>
 
       <div className="card">
-        <h2>
+        <h2><ScreenText id="CloseoutPage.7c5ffc958d77a5c3">
           Certification
-        </h2>
+        </ScreenText></h2>
 
         <label
           style={{
@@ -1959,26 +1960,26 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
             }
           />
 
-          <span>
+          <span><ScreenText id="CloseoutPage.a48fce357dd33e37">
             I confirm that
             the information
             in this closeout
             is accurate.
-          </span>
+          </ScreenText></span>
         </label>
       </div>
 
       <div className="card">
-        <h2>
+        <h2><ScreenText id="CloseoutPage.e13d79760a892b77">
           Review & Submit
-        </h2>
-        <div className="closeout-review"><p>Net sales: <strong>${netSales || 'Not entered'}</strong></p><p>Sales target: <strong>${salesTarget || 'Not entered'}</strong></p><p>Cash deposit: <strong>${cashDeposit || 'Not entered'}</strong></p><p>Review these amounts against your Toast report. An inaccurate submission does not earn the completion bonus.</p></div>
+        </ScreenText></h2>
+        <div className="closeout-review"><p><ScreenText id="CloseoutPage.bc9bdc4ef1b422cf">Net sales: </ScreenText><strong>${netSales || 'Not entered'}</strong></p><p><ScreenText id="CloseoutPage.a8c21bd2c5567414">Sales target: </ScreenText><strong>${salesTarget || 'Not entered'}</strong></p><p><ScreenText id="CloseoutPage.0ca82121e91cc413">Cash deposit: </ScreenText><strong>${cashDeposit || 'Not entered'}</strong></p><p><ScreenText id="CloseoutPage.898ca3b88156a4c9">Review these amounts against your Toast report. An inaccurate submission does not earn the completion bonus.</ScreenText></p></div>
 
         {pointResult && (
           <p>
-            <strong>
+            <strong><ScreenText id="CloseoutPage.8bbb98bfd2fc2d4e">
               Shift Score:
-            </strong>{' '}
+            </ScreenText></strong>{' '}
 
             {
               pointResult.shiftScore

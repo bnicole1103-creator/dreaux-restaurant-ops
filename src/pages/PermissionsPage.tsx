@@ -1,3 +1,4 @@
+import { ScreenText } from "../components/ScreenText"
 import { SignupApprovals } from '../components/SignupApprovals'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
@@ -34,15 +35,15 @@ export function PermissionsPage() {
   } catch(e){setError(String((e as {message?:string}).message??e))}
   finally{setSaving('')}
  }
- return <section className="mod-page"><Link to="/closeout">← Closeout</Link><h1>Permissions</h1>
- <p>Choose access for each employee at this location. Their job role stays the same.</p>
- <article className="mod-review"><p><strong>Staff:</strong> own closeout summary.</p><p><strong>Manager:</strong> all staff summaries, team recap, manager closeout, and point adjustments.</p><p><strong>General Manager:</strong> manager access plus form settings, point rules, and permissions.</p><p><strong>Owner:</strong> general manager administrative access, including private manager reviews and sales target settings.</p></article>
+ return <section className="mod-page"><Link to="/closeout"><ScreenText id="PermissionsPage.89412119744c72b5">← Closeout</ScreenText></Link><h1><ScreenText id="PermissionsPage.eba4c32dd13c83d3">Permissions</ScreenText></h1>
+ <p><ScreenText id="PermissionsPage.d12d88b97232e821">Choose access for each employee at this location. Their job role stays the same.</ScreenText></p>
+ <article className="mod-review"><p><strong><ScreenText id="PermissionsPage.56fcfaa54ccb7d09">Staff:</ScreenText></strong><ScreenText id="PermissionsPage.681d3b871530589d"> own closeout summary.</ScreenText></p><p><strong><ScreenText id="PermissionsPage.88900bc321bb8122">Manager:</ScreenText></strong><ScreenText id="PermissionsPage.6191742eab1e9efb"> all staff summaries, team recap, manager closeout, and point adjustments.</ScreenText></p><p><strong><ScreenText id="PermissionsPage.5bc58a6ada2e921f">General Manager:</ScreenText></strong><ScreenText id="PermissionsPage.f06c082707c73f84"> manager access plus form settings, point rules, and permissions.</ScreenText></p><p><strong><ScreenText id="PermissionsPage.02d0a9e3451617bf">Owner:</ScreenText></strong><ScreenText id="PermissionsPage.3deac9dec36bd1fc"> general manager administrative access, including private manager reviews and sales target settings.</ScreenText></p></article>
  {error && <p role="alert">{error}</p>}{message && <p role="status">{message}</p>}
  {location && <SignupApprovals location={location} />}
- {loading ? <p>Loading permissions…</p> : members.map(m=><article className="mod-review" key={m.user_id}>
- <h2>{m.name}</h2><p>Job role: {m.job_role.replace(/_/g,' ')}</p>
- <label>Access<select disabled={!!saving} value={drafts[m.user_id] ?? m.access_level} onChange={e=>setDrafts(d=>({...d,[m.user_id]:e.target.value as Access}))}>
- <option value="staff">Staff</option><option value="manager">Manager</option><option value="general_manager">General Manager</option><option value="owner">Owner</option></select></label>
+ {loading ? <p><ScreenText id="PermissionsPage.6663fb06ab55cf4f">Loading permissions…</ScreenText></p> : members.map(m=><article className="mod-review" key={m.user_id}>
+ <h2>{m.name}</h2><p><ScreenText id="PermissionsPage.d3d9fc4260ebd42e">Job role: </ScreenText>{m.job_role.replace(/_/g,' ')}</p>
+ <label><ScreenText id="PermissionsPage.b2d9b93ee36796d9">Access</ScreenText><select disabled={!!saving} value={drafts[m.user_id] ?? m.access_level} onChange={e=>setDrafts(d=>({...d,[m.user_id]:e.target.value as Access}))}>
+ <option value="staff"><ScreenText id="PermissionsPage.175d78737a59a4d4">Staff</ScreenText></option><option value="manager"><ScreenText id="PermissionsPage.937330689bcbced3">Manager</ScreenText></option><option value="general_manager"><ScreenText id="PermissionsPage.9c4a744e3bd4548e">General Manager</ScreenText></option><option value="owner"><ScreenText id="PermissionsPage.7d46bc1460e96051">Owner</ScreenText></option></select></label>
  <button disabled={!!saving || drafts[m.user_id]===m.access_level} onClick={()=>void save(m)}>{saving===m.user_id?'Saving…':'Save Access'}</button></article>)}
  </section>
 }

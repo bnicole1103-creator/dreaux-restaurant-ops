@@ -1,0 +1,4857 @@
+[
+  {
+    "id": "AppearancePage.89412119744c72b5",
+    "page": "AppearancePage",
+    "text": "← Closeout"
+  },
+  {
+    "id": "AppearancePage.1e4bd93d88a48f32",
+    "page": "AppearancePage",
+    "text": "General manager only"
+  },
+  {
+    "id": "AppearancePage.c690e5e8a4cfcb60",
+    "page": "AppearancePage",
+    "text": "App Appearance"
+  },
+  {
+    "id": "AppearancePage.54f37cceeacf18ab",
+    "page": "AppearancePage",
+    "text": "Choose your location’s colors and font. Preview below before saving."
+  },
+  {
+    "id": "AppearancePage.08f96f13013e39cf",
+    "page": "AppearancePage",
+    "text": "Theme"
+  },
+  {
+    "id": "AppearancePage.532f6e8b9b0615c6",
+    "page": "AppearancePage",
+    "text": "App font"
+  },
+  {
+    "id": "AppearancePage.c9f28a730f834a65",
+    "page": "AppearancePage",
+    "text": "Today’s pre-shift"
+  },
+  {
+    "id": "AppearancePage.8921d28a100b7379",
+    "page": "AppearancePage",
+    "text": "Ready for service ✨"
+  },
+  {
+    "id": "AppearancePage.d8d35c13c9717996",
+    "page": "AppearancePage",
+    "text": "White cards, clear text, and colors that match your team."
+  },
+  {
+    "id": "AppearancePage.3c01dd19dac9e467",
+    "page": "AppearancePage",
+    "text": "Preview of secondary text"
+  },
+  {
+    "id": "AppearancePage.e060ed19992ad5d6",
+    "page": "AppearancePage",
+    "text": "Take the quiz"
+  },
+  {
+    "id": "CashPage.9bfcb5f85e32c4ba",
+    "page": "CashPage",
+    "text": "CashFlow"
+  },
+  {
+    "id": "CashPage.785ff2920771b63d",
+    "page": "CashPage",
+    "text": "Cash controls"
+  },
+  {
+    "id": "CashPage.19713b20a40dacc8",
+    "page": "CashPage",
+    "text": "Next: drawer sessions, deposits, voids, comps, receipt uploads, and manager cashout."
+  },
+  {
+    "id": "CashPage.a86dd3e9dd5b40a3",
+    "page": "CashPage",
+    "text": "Cash module foundation ready"
+  },
+  {
+    "id": "CloseoutHub.150b399557d01236",
+    "page": "CloseoutHub",
+    "text": "Closeout"
+  },
+  {
+    "id": "CloseoutHub.fe9d0dce579ca5c9",
+    "page": "CloseoutHub",
+    "text": "Choose the form for your shift."
+  },
+  {
+    "id": "CloseoutHub.09b2f0ed3310116a",
+    "page": "CloseoutHub",
+    "text": "Staff Closeout"
+  },
+  {
+    "id": "CloseoutHub.679f9fd98658d2fc",
+    "page": "CloseoutHub",
+    "text": "Complete your sales, cash, tips, and shift questions."
+  },
+  {
+    "id": "CloseoutHub.3d3d6a8ac79389ec",
+    "page": "CloseoutHub",
+    "text": "Open Staff Closeout →"
+  },
+  {
+    "id": "CloseoutHub.c5974b145fd52498",
+    "page": "CloseoutHub",
+    "text": "Closeout Summary"
+  },
+  {
+    "id": "CloseoutHub.8b80a7ed4ed96752",
+    "page": "CloseoutHub",
+    "text": "Open Summary →"
+  },
+  {
+    "id": "CloseoutHub.5a0c7948f9a8e57c",
+    "page": "CloseoutHub",
+    "text": "Manager Closeout"
+  },
+  {
+    "id": "CloseoutHub.e4ed0ffa117d3cc0",
+    "page": "CloseoutHub",
+    "text": "Complete the cash deposit, register check, and private staff reviews."
+  },
+  {
+    "id": "CloseoutHub.b5f151a95a328e5b",
+    "page": "CloseoutHub",
+    "text": "Open Manager Closeout →"
+  },
+  {
+    "id": "CloseoutHub.c042e14cd0556c31",
+    "page": "CloseoutHub",
+    "text": "Award / Deduct Points"
+  },
+  {
+    "id": "CloseoutHub.959e6e6e1fe511ff",
+    "page": "CloseoutHub",
+    "text": "Apply an existing point category to an employee."
+  },
+  {
+    "id": "CloseoutHub.2af52bb3240d25cb",
+    "page": "CloseoutHub",
+    "text": "Open Points Adjustments →"
+  },
+  {
+    "id": "CloseoutHub.8f31c04b843d0986",
+    "page": "CloseoutHub",
+    "text": "Form &amp; Points Settings"
+  },
+  {
+    "id": "CloseoutHub.695b65a48cac8641",
+    "page": "CloseoutHub",
+    "text": "Edit questions, categories, reasons, and point values."
+  },
+  {
+    "id": "CloseoutHub.42f17c4540c0b8d3",
+    "page": "CloseoutHub",
+    "text": "Open Settings →"
+  },
+  {
+    "id": "CloseoutHub.763e8ef414fa8e22",
+    "page": "CloseoutHub",
+    "text": "Permissions"
+  },
+  {
+    "id": "CloseoutHub.1e3940c66064d609",
+    "page": "CloseoutHub",
+    "text": "Choose staff, manager, or general manager access."
+  },
+  {
+    "id": "CloseoutHub.bf2e1b7855d92a89",
+    "page": "CloseoutHub",
+    "text": "Manage Permissions →"
+  },
+  {
+    "id": "CloseoutPage.19b404e3d4da3b09",
+    "page": "CloseoutPage",
+    "text": "Daily Closeout"
+  },
+  {
+    "id": "CloseoutPage.341b29a41c67c361",
+    "page": "CloseoutPage",
+    "text": "Loading..."
+  },
+  {
+    "id": "CloseoutPage.07a01084df9fad3a",
+    "page": "CloseoutPage",
+    "text": "SHIFT ACCOUNTABILITY"
+  },
+  {
+    "id": "CloseoutPage.78176397e4f5311f",
+    "page": "CloseoutPage",
+    "text": "Daily Closeout"
+  },
+  {
+    "id": "CloseoutPage.0ce3457f5ccec1c4",
+    "page": "CloseoutPage",
+    "text": "← Closeout"
+  },
+  {
+    "id": "CloseoutPage.dfb5350d0897214f",
+    "page": "CloseoutPage",
+    "text": "Shift Information"
+  },
+  {
+    "id": "CloseoutPage.a803ddaf64e382d1",
+    "page": "CloseoutPage",
+    "text": "Actual Clock-Out Time"
+  },
+  {
+    "id": "CloseoutPage.0cb264d4769f0e13",
+    "page": "CloseoutPage",
+    "text": "Use your actual end time. After-midnight clock-out is treated as the next day."
+  },
+  {
+    "id": "CloseoutPage.ecbf49a3335e8ec7",
+    "page": "CloseoutPage",
+    "text": "Shift length: "
+  },
+  {
+    "id": "CloseoutPage.9b614fcd90489a0d",
+    "page": "CloseoutPage",
+    "text": " hours"
+  },
+  {
+    "id": "CloseoutPage.48e9a699102a192e",
+    "page": "CloseoutPage",
+    "text": "Select Shift"
+  },
+  {
+    "id": "CloseoutPage.6350660034efc36b",
+    "page": "CloseoutPage",
+    "text": "AM"
+  },
+  {
+    "id": "CloseoutPage.1c0f4170d0704b8b",
+    "page": "CloseoutPage",
+    "text": "PM"
+  },
+  {
+    "id": "CloseoutPage.77baab9ee40baaa4",
+    "page": "CloseoutPage",
+    "text": "To Volume"
+  },
+  {
+    "id": "CloseoutPage.e97932f94c4d02e8",
+    "page": "CloseoutPage",
+    "text": "Sales"
+  },
+  {
+    "id": "CloseoutPage.08bbbe6dfa02693c",
+    "page": "CloseoutPage",
+    "text": "Check your sales"
+  },
+  {
+    "id": "CloseoutPage.b8864cc8785a4b68",
+    "page": "CloseoutPage",
+    "text": "You entered $0. Check your Toast report before continuing."
+  },
+  {
+    "id": "CloseoutPage.21209f4ceb62d671",
+    "page": "CloseoutPage",
+    "text": "I checked my report and $0 sales is accurate."
+  },
+  {
+    "id": "CloseoutPage.0c8ea3df31e4441b",
+    "page": "CloseoutPage",
+    "text": "Why were sales zero?"
+  },
+  {
+    "id": "CloseoutPage.fa54c9aa63aa0de5",
+    "page": "CloseoutPage",
+    "text": "Cash & Adjustments"
+  },
+  {
+    "id": "CloseoutPage.ef596096378905dc",
+    "page": "CloseoutPage",
+    "text": "Role Worked"
+  },
+  {
+    "id": "CloseoutPage.0a257811571b1959",
+    "page": "CloseoutPage",
+    "text": "Register Closeout"
+  },
+  {
+    "id": "CloseoutPage.109949a6b786df90",
+    "page": "CloseoutPage",
+    "text": "Select verifier"
+  },
+  {
+    "id": "CloseoutPage.168812ccfe0a7259",
+    "page": "CloseoutPage",
+    "text": "Tables Worked"
+  },
+  {
+    "id": "CloseoutPage.fcad3a28960326e6",
+    "page": "CloseoutPage",
+    "text": "Selected:"
+  },
+  {
+    "id": "CloseoutPage.4064ac585c437950",
+    "page": "CloseoutPage",
+    "text": "⭐ Peer Recognition — +5 Points"
+  },
+  {
+    "id": "CloseoutPage.30eeb3cde10686c0",
+    "page": "CloseoutPage",
+    "text": "Select a teammate"
+  },
+  {
+    "id": "CloseoutPage.4c67cd90a32ac4a9",
+    "page": "CloseoutPage",
+    "text": "Select a reason"
+  },
+  {
+    "id": "CloseoutPage.9c39771c2c349c41",
+    "page": "CloseoutPage",
+    "text": "Teamwork"
+  },
+  {
+    "id": "CloseoutPage.ac38f5f03e1b83fb",
+    "page": "CloseoutPage",
+    "text": "Positive Attitude / Motivation"
+  },
+  {
+    "id": "CloseoutPage.7341dc289f28176f",
+    "page": "CloseoutPage",
+    "text": "Helped During a Rush"
+  },
+  {
+    "id": "CloseoutPage.b22073e733572be6",
+    "page": "CloseoutPage",
+    "text": "Guest Support"
+  },
+  {
+    "id": "CloseoutPage.cc4feffede8ae163",
+    "page": "CloseoutPage",
+    "text": "Leadership"
+  },
+  {
+    "id": "CloseoutPage.307271de7146778c",
+    "page": "CloseoutPage",
+    "text": "Communication"
+  },
+  {
+    "id": "CloseoutPage.d07f19ce73f71580",
+    "page": "CloseoutPage",
+    "text": "Went Above &amp; Beyond"
+  },
+  {
+    "id": "CloseoutPage.4284cb61f89adb7f",
+    "page": "CloseoutPage",
+    "text": "Other"
+  },
+  {
+    "id": "CloseoutPage.6425a625f082028a",
+    "page": "CloseoutPage",
+    "text": "Shift Accountability"
+  },
+  {
+    "id": "CloseoutPage.4abe602200d57d86",
+    "page": "CloseoutPage",
+    "text": "Select employee"
+  },
+  {
+    "id": "CloseoutPage.34be05437c660577",
+    "page": "CloseoutPage",
+    "text": "Not applicable"
+  },
+  {
+    "id": "CloseoutPage.e0f8109cb9cd8aa4",
+    "page": "CloseoutPage",
+    "text": "Notes"
+  },
+  {
+    "id": "CloseoutPage.371d2d55a7237afc",
+    "page": "CloseoutPage",
+    "text": "Shift Score"
+  },
+  {
+    "id": "CloseoutPage.44540397f70e496a",
+    "page": "CloseoutPage",
+    "text": "Enter scheduled and actual clock-in times to calculate."
+  },
+  {
+    "id": "CloseoutPage.0e2a4f8a7539964b",
+    "page": "CloseoutPage",
+    "text": "Starting score:"
+  },
+  {
+    "id": "CloseoutPage.33f40dc823dadbd0",
+    "page": "CloseoutPage",
+    "text": "Net Adjustment"
+  },
+  {
+    "id": "CloseoutPage.7c5ffc958d77a5c3",
+    "page": "CloseoutPage",
+    "text": "Certification"
+  },
+  {
+    "id": "CloseoutPage.a48fce357dd33e37",
+    "page": "CloseoutPage",
+    "text": "I confirm that the information in this closeout is accurate."
+  },
+  {
+    "id": "CloseoutPage.e13d79760a892b77",
+    "page": "CloseoutPage",
+    "text": "Review & Submit"
+  },
+  {
+    "id": "CloseoutPage.bc9bdc4ef1b422cf",
+    "page": "CloseoutPage",
+    "text": "Net sales: "
+  },
+  {
+    "id": "CloseoutPage.a8c21bd2c5567414",
+    "page": "CloseoutPage",
+    "text": "Sales target: "
+  },
+  {
+    "id": "CloseoutPage.0ca82121e91cc413",
+    "page": "CloseoutPage",
+    "text": "Cash deposit: "
+  },
+  {
+    "id": "CloseoutPage.898ca3b88156a4c9",
+    "page": "CloseoutPage",
+    "text": "Review these amounts against your Toast report. An inaccurate submission does not earn the completion bonus."
+  },
+  {
+    "id": "CloseoutPage.8bbb98bfd2fc2d4e",
+    "page": "CloseoutPage",
+    "text": "Shift Score:"
+  },
+  {
+    "id": "CloseoutSettingsPage.89412119744c72b5",
+    "page": "CloseoutSettingsPage",
+    "text": "← Closeout"
+  },
+  {
+    "id": "CloseoutSettingsPage.6987a743a4e1d65b",
+    "page": "CloseoutSettingsPage",
+    "text": "Change question wording or add questions. Add manager-awarded categories and edit their reasons and values."
+  },
+  {
+    "id": "CloseoutSettingsPage.ea06472db1ca16d2",
+    "page": "CloseoutSettingsPage",
+    "text": "Operational fields keep their existing validation; you can change their wording. Custom questions can be removed. Previously saved answers remain in their original closeouts."
+  },
+  {
+    "id": "CloseoutSettingsPage.b45379e8eccb5aad",
+    "page": "CloseoutSettingsPage",
+    "text": "Question"
+  },
+  {
+    "id": "CloseoutSettingsPage.01164c368bd99fd0",
+    "page": "CloseoutSettingsPage",
+    "text": "Answer type"
+  },
+  {
+    "id": "CloseoutSettingsPage.6b3ace26a361ac6c",
+    "page": "CloseoutSettingsPage",
+    "text": "Written answer"
+  },
+  {
+    "id": "CloseoutSettingsPage.c7527ecfa76fa775",
+    "page": "CloseoutSettingsPage",
+    "text": "Number"
+  },
+  {
+    "id": "CloseoutSettingsPage.bcaa86591c49ccd9",
+    "page": "CloseoutSettingsPage",
+    "text": "Yes / No"
+  },
+  {
+    "id": "CloseoutSettingsPage.eac1c0b6f8b1d338",
+    "page": "CloseoutSettingsPage",
+    "text": "Required"
+  },
+  {
+    "id": "CloseoutSettingsPage.4a5b2cbbdcf6d2e2",
+    "page": "CloseoutSettingsPage",
+    "text": "Active"
+  },
+  {
+    "id": "CloseoutSettingsPage.75e6832d204f3149",
+    "page": "CloseoutSettingsPage",
+    "text": "Remove Question"
+  },
+  {
+    "id": "CloseoutSettingsPage.43cb8c506629acf0",
+    "page": "CloseoutSettingsPage",
+    "text": "Required operational field. Its wording can be edited."
+  },
+  {
+    "id": "CloseoutSettingsPage.fa61b25ed7f306ce",
+    "page": "CloseoutSettingsPage",
+    "text": "Add Question"
+  },
+  {
+    "id": "CloseoutSettingsPage.0f526e8e187ed139",
+    "page": "CloseoutSettingsPage",
+    "text": "Saved awards keep their values. Manager rating policies are fixed for an already-started Tuesday–Sunday week. Automatic rules retain their existing triggers; new rules are awarded by a manager."
+  },
+  {
+    "id": "CloseoutSettingsPage.783f5ba78c270aac",
+    "page": "CloseoutSettingsPage",
+    "text": "Category"
+  },
+  {
+    "id": "CloseoutSettingsPage.f7f3f1b8e74f69f9",
+    "page": "CloseoutSettingsPage",
+    "text": "Reason"
+  },
+  {
+    "id": "CloseoutSettingsPage.4cb33a274253f8a6",
+    "page": "CloseoutSettingsPage",
+    "text": "Active"
+  },
+  {
+    "id": "CloseoutSettingsPage.15c182586a1c067a",
+    "page": "CloseoutSettingsPage",
+    "text": "Add Point Category / Reason"
+  },
+  {
+    "id": "CloseoutSettingsPage.b22ebcdb8a593632",
+    "page": "CloseoutSettingsPage",
+    "text": "Reload Saved Settings"
+  },
+  {
+    "id": "CloseoutSettingsPage.1119c48727c8e47e",
+    "page": "CloseoutSettingsPage",
+    "text": "Save point rules before awarding. Your note stays private; staff see the category reason and point value."
+  },
+  {
+    "id": "CloseoutSettingsPage.639847409938b2d0",
+    "page": "CloseoutSettingsPage",
+    "text": "Staff member"
+  },
+  {
+    "id": "CloseoutSettingsPage.c0227cc5dd9cc90c",
+    "page": "CloseoutSettingsPage",
+    "text": "Choose an employee"
+  },
+  {
+    "id": "CloseoutSettingsPage.d943487cbd19d8b7",
+    "page": "CloseoutSettingsPage",
+    "text": "Category / reason"
+  },
+  {
+    "id": "CloseoutSettingsPage.6f9be7687a0dc330",
+    "page": "CloseoutSettingsPage",
+    "text": "Choose a reason"
+  },
+  {
+    "id": "CloseoutSettingsPage.b25562e5720de193",
+    "page": "CloseoutSettingsPage",
+    "text": "Private explanation"
+  },
+  {
+    "id": "CloseoutSettingsPage.9c11b80a43f8816b",
+    "page": "CloseoutSettingsPage",
+    "text": " points will be applied."
+  },
+  {
+    "id": "CloseoutSettingsPage.22c9d1c31b0df769",
+    "page": "CloseoutSettingsPage",
+    "text": "Save your settings first."
+  },
+  {
+    "id": "CloseoutSummary.b6126f0911b1fda7",
+    "page": "CloseoutSummary",
+    "text": " · Service day resets at 4 a.m. New Orleans time."
+  },
+  {
+    "id": "CloseoutSummary.e6794e03699dd0cb",
+    "page": "CloseoutSummary",
+    "text": "Customize Summary"
+  },
+  {
+    "id": "CloseoutSummary.3834920b758c6faa",
+    "page": "CloseoutSummary",
+    "text": "Summary Cards"
+  },
+  {
+    "id": "CloseoutSummary.0b8f21150f7751f4",
+    "page": "CloseoutSummary",
+    "text": "Choose which numbers appear at the top of the daily summary."
+  },
+  {
+    "id": "CloseoutSummary.e8b5fa869724043d",
+    "page": "CloseoutSummary",
+    "text": "Reset Default Cards"
+  },
+  {
+    "id": "CloseoutSummary.1eed37a7be178e26",
+    "page": "CloseoutSummary",
+    "text": "Loading summary..."
+  },
+  {
+    "id": "CloseoutSummary.3cb32cb0ffde0ba5",
+    "page": "CloseoutSummary",
+    "text": "Closeouts"
+  },
+  {
+    "id": "CloseoutSummary.275a794e224cc427",
+    "page": "CloseoutSummary",
+    "text": "Target %"
+  },
+  {
+    "id": "CloseoutSummary.c594bb9f996f7cf5",
+    "page": "CloseoutSummary",
+    "text": "Voids"
+  },
+  {
+    "id": "CloseoutSummary.28384f41a3ad7d09",
+    "page": "CloseoutSummary",
+    "text": "Discounts"
+  },
+  {
+    "id": "CloseoutSummary.caea4383a2e56490",
+    "page": "CloseoutSummary",
+    "text": "Avg Shift Score"
+  },
+  {
+    "id": "CloseoutSummary.2f68c5951f51442a",
+    "page": "CloseoutSummary",
+    "text": "Copy Recap"
+  },
+  {
+    "id": "CloseoutSummary.7fcd44933386a74f",
+    "page": "CloseoutSummary",
+    "text": "No closeouts submitted for this date."
+  },
+  {
+    "id": "CloseoutSummary.9463f6d51eea3870",
+    "page": "CloseoutSummary",
+    "text": "Score"
+  },
+  {
+    "id": "CloseoutSummary.4a8b61e30f851cb7",
+    "page": "CloseoutSummary",
+    "text": "Submitted "
+  },
+  {
+    "id": "CloseoutSummary.05797e4202820fc7",
+    "page": "CloseoutSummary",
+    "text": "Completion bonus withheld: inaccurate original submission."
+  },
+  {
+    "id": "CloseoutSummary.f16b17e629341098",
+    "page": "CloseoutSummary",
+    "text": "Corrected "
+  },
+  {
+    "id": "CloseoutSummary.438a24486ad401e8",
+    "page": "CloseoutSummary",
+    "text": "Edit / Review"
+  },
+  {
+    "id": "CloseoutSummary.2737ef54a26551da",
+    "page": "CloseoutSummary",
+    "text": "Scheduled"
+  },
+  {
+    "id": "CloseoutSummary.a4c12661a9aa458e",
+    "page": "CloseoutSummary",
+    "text": "Clock In"
+  },
+  {
+    "id": "CloseoutSummary.9fdd0492ef80753d",
+    "page": "CloseoutSummary",
+    "text": "Clock-Out"
+  },
+  {
+    "id": "CloseoutSummary.084dc9bf092dbb34",
+    "page": "CloseoutSummary",
+    "text": "Net Sales"
+  },
+  {
+    "id": "CloseoutSummary.0c7881f8acf1cb50",
+    "page": "CloseoutSummary",
+    "text": "Target"
+  },
+  {
+    "id": "CloseoutSummary.4f25e5f00f24fcf6",
+    "page": "CloseoutSummary",
+    "text": "Cash Deposit"
+  },
+  {
+    "id": "CloseoutSummary.4e5a3f70a4b1b467",
+    "page": "CloseoutSummary",
+    "text": "Voids"
+  },
+  {
+    "id": "CloseoutSummary.8119eb0a1f901753",
+    "page": "CloseoutSummary",
+    "text": "Discounts"
+  },
+  {
+    "id": "CloseoutSummary.f545e5be80b1ec21",
+    "page": "CloseoutSummary",
+    "text": "Tables"
+  },
+  {
+    "id": "CloseoutSummary.36f1000b204c3520",
+    "page": "CloseoutSummary",
+    "text": "Money Turned In To"
+  },
+  {
+    "id": "CloseoutSummary.9a00296cedc3b600",
+    "page": "CloseoutSummary",
+    "text": "Drinks Made By"
+  },
+  {
+    "id": "CloseoutSummary.99cf3d781916602a",
+    "page": "CloseoutSummary",
+    "text": "Point Adjustment"
+  },
+  {
+    "id": "CloseoutSummary.c1897c9d53914584",
+    "page": "CloseoutSummary",
+    "text": "Score Details"
+  },
+  {
+    "id": "CloseoutSummary.17a81ded0d3fa833",
+    "page": "CloseoutSummary",
+    "text": "Notes"
+  },
+  {
+    "id": "CloseoutSummary.f4bbc18b0dbe1711",
+    "page": "CloseoutSummary",
+    "text": "Refresh closeouts"
+  },
+  {
+    "id": "CloseoutSummary.643cd94130e638aa",
+    "page": "CloseoutSummary",
+    "text": "Previous closeouts"
+  },
+  {
+    "id": "CloseoutSummary.cc09234f89870176",
+    "page": "CloseoutSummary",
+    "text": "Organized by month and service day, newest first."
+  },
+  {
+    "id": "CloseoutSummary.5c3f475acefcfa5d",
+    "page": "CloseoutSummary",
+    "text": "Loading history…"
+  },
+  {
+    "id": "CloseoutSummary.acbc70394af59cae",
+    "page": "CloseoutSummary",
+    "text": "No previous closeouts."
+  },
+  {
+    "id": "CloseoutSummary.c5b235886695e308",
+    "page": "CloseoutSummary",
+    "text": " closeouts"
+  },
+  {
+    "id": "CloseoutSummary.ce9ee2502f65fa17",
+    "page": "CloseoutSummary",
+    "text": " closeout"
+  },
+  {
+    "id": "CocktailTrainingPage.954aa1ceafa5e440",
+    "page": "CocktailTrainingPage",
+    "text": "Cocktail name"
+  },
+  {
+    "id": "CocktailTrainingPage.ec91ec64e56c47d3",
+    "page": "CocktailTrainingPage",
+    "text": "Category"
+  },
+  {
+    "id": "CocktailTrainingPage.9961ffcf77724e8c",
+    "page": "CocktailTrainingPage",
+    "text": "← Training guides"
+  },
+  {
+    "id": "CocktailTrainingPage.fe36bab043706cc1",
+    "page": "CocktailTrainingPage",
+    "text": "Cocktails"
+  },
+  {
+    "id": "CocktailTrainingPage.f4bcc08158decc22",
+    "page": "CocktailTrainingPage",
+    "text": "Recipes and builds"
+  },
+  {
+    "id": "CocktailTrainingPage.d66fe1289f7128be",
+    "page": "CocktailTrainingPage",
+    "text": "Loading recipes…"
+  },
+  {
+    "id": "CocktailTrainingPage.64dc003d5e5dd579",
+    "page": "CocktailTrainingPage",
+    "text": "Add cocktail"
+  },
+  {
+    "id": "CocktailTrainingPage.ab3da913221ff8f0",
+    "page": "CocktailTrainingPage",
+    "text": "Paste recipes"
+  },
+  {
+    "id": "CocktailTrainingPage.2a9b39a80601fed7",
+    "page": "CocktailTrainingPage",
+    "text": "Refresh recipes"
+  },
+  {
+    "id": "CocktailTrainingPage.9fa3ce0fbc67fdea",
+    "page": "CocktailTrainingPage",
+    "text": "Search cocktail name"
+  },
+  {
+    "id": "CocktailTrainingPage.d389c2c62835d060",
+    "page": "CocktailTrainingPage",
+    "text": "No cocktails found in this category."
+  },
+  {
+    "id": "CocktailTrainingPage.a5b31cce7888b438",
+    "page": "CocktailTrainingPage",
+    "text": "Measurements not yet entered"
+  },
+  {
+    "id": "CocktailTrainingPage.0d2ae959b04d52a5",
+    "page": "CocktailTrainingPage",
+    "text": "Edit recipe"
+  },
+  {
+    "id": "CocktailTrainingPage.d1981becc69fc2ed",
+    "page": "CocktailTrainingPage",
+    "text": "Paste cocktail recipes"
+  },
+  {
+    "id": "CocktailTrainingPage.f9211cd1e012ff6f",
+    "page": "CocktailTrainingPage",
+    "text": "Start each recipe with Name: or separate recipes with --- on its own line. Include Ingredients:, Method:, Glassware:, Garnish: and optional Notes:. Review and edit the preview before saving."
+  },
+  {
+    "id": "CocktailTrainingPage.78213954a1ec84f7",
+    "page": "CocktailTrainingPage",
+    "text": "See paste format"
+  },
+  {
+    "id": "CocktailTrainingPage.7d9fecb17b338274",
+    "page": "CocktailTrainingPage",
+    "text": "Default category"
+  },
+  {
+    "id": "CocktailTrainingPage.eb810ed6ae653881",
+    "page": "CocktailTrainingPage",
+    "text": "Paste recipes"
+  },
+  {
+    "id": "CocktailTrainingPage.303cf347409ef820",
+    "page": "CocktailTrainingPage",
+    "text": "Preview recipes"
+  },
+  {
+    "id": "CocktailTrainingPage.95967a9d9903820f",
+    "page": "CocktailTrainingPage",
+    "text": " recipes to add"
+  },
+  {
+    "id": "CocktailTrainingPage.3f9a032b5a6fb886",
+    "page": "CocktailTrainingPage",
+    "text": "Remove from import"
+  },
+  {
+    "id": "DashboardPage.bc6d13d141d31c9c",
+    "page": "DashboardPage",
+    "text": "Your shift starts here"
+  },
+  {
+    "id": "DashboardPage.a1d1c867053fcd8f",
+    "page": "DashboardPage",
+    "text": "Loading your restaurant…"
+  },
+  {
+    "id": "DashboardPage.fa3c874b7ec2f04f",
+    "page": "DashboardPage",
+    "text": "Today’s Pre-Shift"
+  },
+  {
+    "id": "DashboardPage.438fb1924659b005",
+    "page": "DashboardPage",
+    "text": "Open feed →"
+  },
+  {
+    "id": "DashboardPage.5899d053d78dbc90",
+    "page": "DashboardPage",
+    "text": "Loading today’s posts…"
+  },
+  {
+    "id": "DashboardPage.7d5117c94d1c7c83",
+    "page": "DashboardPage",
+    "text": "No pre-shift published for today."
+  },
+  {
+    "id": "DashboardPage.b9bdfa05f2a58e58",
+    "page": "DashboardPage",
+    "text": "Read pre-shift · "
+  },
+  {
+    "id": "DashboardPage.05c55bb281e731f2",
+    "page": "DashboardPage",
+    "text": "Today’s Quiz"
+  },
+  {
+    "id": "DashboardPage.ad20f179d16eca06",
+    "page": "DashboardPage",
+    "text": "Quiz history →"
+  },
+  {
+    "id": "DashboardPage.f6d279821b18fae7",
+    "page": "DashboardPage",
+    "text": "Loading quiz…"
+  },
+  {
+    "id": "DashboardPage.8e884be7d9d9f347",
+    "page": "DashboardPage",
+    "text": "Pre-shift quiz · "
+  },
+  {
+    "id": "DashboardPage.9700412bbfc801f1",
+    "page": "DashboardPage",
+    "text": "Submitted · "
+  },
+  {
+    "id": "DashboardPage.a0295d2dc9305b4a",
+    "page": "DashboardPage",
+    "text": "Quiz points: "
+  },
+  {
+    "id": "DashboardPage.80608ce5299ec4c7",
+    "page": "DashboardPage",
+    "text": "View my results"
+  },
+  {
+    "id": "DashboardPage.c52440f9c488fc63",
+    "page": "DashboardPage",
+    "text": " questions · Not submitted yet"
+  },
+  {
+    "id": "DashboardPage.80d4c0570ae8d48f",
+    "page": "DashboardPage",
+    "text": "Take today’s quiz"
+  },
+  {
+    "id": "DashboardPage.51fc46349f9e7a35",
+    "page": "DashboardPage",
+    "text": "No quiz published for today."
+  },
+  {
+    "id": "DashboardPage.983f4f14a77a4ee8",
+    "page": "DashboardPage",
+    "text": "My Task Lists"
+  },
+  {
+    "id": "DashboardPage.5bd7afd0d47d85c7",
+    "page": "DashboardPage",
+    "text": "All lists / Assign tasks →"
+  },
+  {
+    "id": "DashboardPage.eab2baa316a5794f",
+    "page": "DashboardPage",
+    "text": "Service day: "
+  },
+  {
+    "id": "FloorPage.6bd3823f78ebe444",
+    "page": "FloorPage",
+    "text": "Loading floor plan…"
+  },
+  {
+    "id": "FloorPage.9affe661a5cddb9c",
+    "page": "FloorPage",
+    "text": "We could not load FloorFlow."
+  },
+  {
+    "id": "FloorPage.5e1b43a1ec471952",
+    "page": "FloorPage",
+    "text": "FloorFlow"
+  },
+  {
+    "id": "FloorPage.6cd9d194a59b8361",
+    "page": "FloorPage",
+    "text": "Live floor"
+  },
+  {
+    "id": "FloorPage.72ad81f5e33ac981",
+    "page": "FloorPage",
+    "text": "Seating "
+  },
+  {
+    "id": "FloorPage.0e1b1fe85997c7d1",
+    "page": "FloorPage",
+    "text": " · party of "
+  },
+  {
+    "id": "FloorPage.aaf48aa3abcc020d",
+    "page": "FloorPage",
+    "text": "Select their tables, then press Seat. Their check-in is marked seated when seating succeeds."
+  },
+  {
+    "id": "FloorPage.a3bf126804af00d4",
+    "page": "FloorPage",
+    "text": "Cancel walk-in selection"
+  },
+  {
+    "id": "FloorPage.2e081cd59ce390e4",
+    "page": "FloorPage",
+    "text": "Current Floor"
+  },
+  {
+    "id": "FloorPage.773db4a763e3d6a3",
+    "page": "FloorPage",
+    "text": "Assigned sections"
+  },
+  {
+    "id": "FloorPage.abe16c2c033d7292",
+    "page": "FloorPage",
+    "text": "Clear all sections"
+  },
+  {
+    "id": "FloorPage.7b01d68c1fbd4367",
+    "page": "FloorPage",
+    "text": " tables · "
+  },
+  {
+    "id": "FloorPage.5a8f27d4d02c6b32",
+    "page": "FloorPage",
+    "text": " seats"
+  },
+  {
+    "id": "FloorPage.edbbd1c1ad3bf9bc",
+    "page": "FloorPage",
+    "text": "No shift selected · sections can be planned now"
+  },
+  {
+    "id": "FloorPage.546456d48459c5bd",
+    "page": "FloorPage",
+    "text": "Open shift"
+  },
+  {
+    "id": "FloorPage.c8c2e54ac7c982eb",
+    "page": "FloorPage",
+    "text": "Reservations ("
+  },
+  {
+    "id": "FloorPage.346926535ae5abe0",
+    "page": "FloorPage",
+    "text": "Upload CSV"
+  },
+  {
+    "id": "FloorPage.c4b9828f0770442f",
+    "page": "FloorPage",
+    "text": "+ Add Table"
+  },
+  {
+    "id": "FloorPage.b15408ef8847a3b6",
+    "page": "FloorPage",
+    "text": "Rotation"
+  },
+  {
+    "id": "FloorPage.e2482425827e283f",
+    "page": "FloorPage",
+    "text": "Drag any table to match your real floor layout. Positions save automatically when you let go."
+  },
+  {
+    "id": "FloorPage.7ae0af4dfe409f5d",
+    "page": "FloorPage",
+    "text": "Sections & tables"
+  },
+  {
+    "id": "FloorPage.4ac45f2a6bb70ad0",
+    "page": "FloorPage",
+    "text": "Tap tables to select them. Switch rooms to include more tables."
+  },
+  {
+    "id": "FloorPage.f8add3ec5d2c9bb7",
+    "page": "FloorPage",
+    "text": "No tables selected"
+  },
+  {
+    "id": "FloorPage.3df282d311f231b2",
+    "page": "FloorPage",
+    "text": "Assign section"
+  },
+  {
+    "id": "FloorPage.ec891dc9c52cf729",
+    "page": "FloorPage",
+    "text": "Seat selected tables"
+  },
+  {
+    "id": "FloorPage.2a943581190c3312",
+    "page": "FloorPage",
+    "text": "Clear selection"
+  },
+  {
+    "id": "FloorPage.310acd98ecea24b1",
+    "page": "FloorPage",
+    "text": "Clear assignments"
+  },
+  {
+    "id": "FloorPage.f3780ffe48f2e882",
+    "page": "FloorPage",
+    "text": "Swipe sideways on the map to view the whole room. Tap multiple tables to select them."
+  },
+  {
+    "id": "FloorPage.157d0929048b90c2",
+    "page": "FloorPage",
+    "text": " guests ·"
+  },
+  {
+    "id": "FloorPage.0f0cfbadeed9a791",
+    "page": "FloorPage",
+    "text": "m"
+  },
+  {
+    "id": "FloorPage.3da2884b5dc69618",
+    "page": "FloorPage",
+    "text": " seats"
+  },
+  {
+    "id": "FloorPage.7c1a046c38f0618b",
+    "page": "FloorPage",
+    "text": "Clear selection"
+  },
+  {
+    "id": "FloorPage.9b2f77700fe7077c",
+    "page": "FloorPage",
+    "text": "Details"
+  },
+  {
+    "id": "FloorPage.c2a5b2c20b98da29",
+    "page": "FloorPage",
+    "text": "Assign Section"
+  },
+  {
+    "id": "FloorPage.abad2549f07a8373",
+    "page": "FloorPage",
+    "text": "Seat"
+  },
+  {
+    "id": "FloorPage.bcb4cdbb6790706c",
+    "page": "FloorPage",
+    "text": "Status"
+  },
+  {
+    "id": "FloorPage.72315bf916b430e1",
+    "page": "FloorPage",
+    "text": "Shift"
+  },
+  {
+    "id": "FloorPage.644f79249f780284",
+    "page": "FloorPage",
+    "text": "Dinner"
+  },
+  {
+    "id": "FloorPage.5a58428e7ba03821",
+    "page": "FloorPage",
+    "text": "Lunch"
+  },
+  {
+    "id": "FloorPage.d61e76a805bdb17f",
+    "page": "FloorPage",
+    "text": "Brunch"
+  },
+  {
+    "id": "FloorPage.de40e31eea0cffd5",
+    "page": "FloorPage",
+    "text": "Private Event"
+  },
+  {
+    "id": "FloorPage.35b3af9424bcbf32",
+    "page": "FloorPage",
+    "text": "Cancel"
+  },
+  {
+    "id": "FloorPage.9a4fc2a1500f6947",
+    "page": "FloorPage",
+    "text": "Assign section"
+  },
+  {
+    "id": "FloorPage.faa027d1375e76e3",
+    "page": "FloorPage",
+    "text": "Plan for shift"
+  },
+  {
+    "id": "FloorPage.210fa5dbf4d02111",
+    "page": "FloorPage",
+    "text": "Section name"
+  },
+  {
+    "id": "FloorPage.fa8697cfed39b3b2",
+    "page": "FloorPage",
+    "text": " seats"
+  },
+  {
+    "id": "FloorPage.972ac17323d8046d",
+    "page": "FloorPage",
+    "text": "Cancel"
+  },
+  {
+    "id": "FloorPage.58f3288ba914ecb7",
+    "page": "FloorPage",
+    "text": "Reservations"
+  },
+  {
+    "id": "FloorPage.def1336055c8be14",
+    "page": "FloorPage",
+    "text": "Today's Reservations"
+  },
+  {
+    "id": "FloorPage.8cdc268eec105d05",
+    "page": "FloorPage",
+    "text": "No reservations uploaded for this shift."
+  },
+  {
+    "id": "FloorPage.bc0b2dc8673deba3",
+    "page": "FloorPage",
+    "text": " guests"
+  },
+  {
+    "id": "FloorPage.8d3f00a24cc68549",
+    "page": "FloorPage",
+    "text": "Close"
+  },
+  {
+    "id": "FloorPage.0c90f34dd45cb5c2",
+    "page": "FloorPage",
+    "text": "SectionIQ"
+  },
+  {
+    "id": "FloorPage.a17e164e8984911a",
+    "page": "FloorPage",
+    "text": "Smart Section"
+  },
+  {
+    "id": "FloorPage.3cc5f5f9eee5793a",
+    "page": "FloorPage",
+    "text": "Checking history and assigned capacity…"
+  },
+  {
+    "id": "FloorPage.1e21c88bc28cc5d3",
+    "page": "FloorPage",
+    "text": " seats ·"
+  },
+  {
+    "id": "FloorPage.f0a2d26707228fe6",
+    "page": "FloorPage",
+    "text": "upcoming reserved covers"
+  },
+  {
+    "id": "FloorPage.f99c8033c61d6f17",
+    "page": "FloorPage",
+    "text": "/hr average · "
+  },
+  {
+    "id": "FloorPage.24a6edb170727de9",
+    "page": "FloorPage",
+    "text": " timed closeouts"
+  },
+  {
+    "id": "FloorPage.14863dce1469a07a",
+    "page": "FloorPage",
+    "text": "Current assigned capacity:"
+  },
+  {
+    "id": "FloorPage.2c216c77f3f8764e",
+    "page": "FloorPage",
+    "text": " seats"
+  },
+  {
+    "id": "FloorPage.2e430a58775b49a6",
+    "page": "FloorPage",
+    "text": "Use This Server"
+  },
+  {
+    "id": "FloorPage.eda10a0961fcbc53",
+    "page": "FloorPage",
+    "text": "No eligible employees were found."
+  },
+  {
+    "id": "FloorPage.80e029a009b73576",
+    "page": "FloorPage",
+    "text": "Close"
+  },
+  {
+    "id": "FloorPage.36533d646910fe8a",
+    "page": "FloorPage",
+    "text": "Quick Rotation"
+  },
+  {
+    "id": "FloorPage.4bbc2c8e9674777f",
+    "page": "FloorPage",
+    "text": "Cover Counter"
+  },
+  {
+    "id": "FloorPage.e90fea599ed4cb12",
+    "page": "FloorPage",
+    "text": "Number of servers"
+  },
+  {
+    "id": "FloorPage.a4aeb5371f4daacc",
+    "page": "FloorPage",
+    "text": "Server "
+  },
+  {
+    "id": "FloorPage.6348abf845e59969",
+    "page": "FloorPage",
+    "text": "Choose from team"
+  },
+  {
+    "id": "FloorPage.a5c8af2403b757c3",
+    "page": "FloorPage",
+    "text": "OR"
+  },
+  {
+    "id": "FloorPage.078ec7cd050cb122",
+    "page": "FloorPage",
+    "text": "Running Cover Count"
+  },
+  {
+    "id": "FloorPage.ea7da507308a74cf",
+    "page": "FloorPage",
+    "text": "Select a table, enter covers, then record the seating."
+  },
+  {
+    "id": "FloorPage.1ab02bc87a372fbf",
+    "page": "FloorPage",
+    "text": "Next Up"
+  },
+  {
+    "id": "FloorPage.dbce12e1285071b6",
+    "page": "FloorPage",
+    "text": "Table"
+  },
+  {
+    "id": "FloorPage.62553bd52e34f7ed",
+    "page": "FloorPage",
+    "text": "Choose table"
+  },
+  {
+    "id": "FloorPage.25f8ad0dd7eaaa08",
+    "page": "FloorPage",
+    "text": "seats"
+  },
+  {
+    "id": "FloorPage.58ade1e6aa4b11b6",
+    "page": "FloorPage",
+    "text": "Covers"
+  },
+  {
+    "id": "FloorPage.b7a81351b2a65fc5",
+    "page": "FloorPage",
+    "text": "Record Seating"
+  },
+  {
+    "id": "FloorPage.4be8115d05aa0496",
+    "page": "FloorPage",
+    "text": "−1 Cover Correction"
+  },
+  {
+    "id": "FloorPage.4926bb8bf7347b08",
+    "page": "FloorPage",
+    "text": "View Log"
+  },
+  {
+    "id": "FloorPage.ac6cec9ed256d135",
+    "page": "FloorPage",
+    "text": "Reset Counts"
+  },
+  {
+    "id": "FloorPage.0c59baac33d1d2d7",
+    "page": "FloorPage",
+    "text": "Change Servers"
+  },
+  {
+    "id": "FloorPage.0178fa9eedc6fab6",
+    "page": "FloorPage",
+    "text": "Close"
+  },
+  {
+    "id": "FloorPage.2b12726504638ada",
+    "page": "FloorPage",
+    "text": "Rotation Log"
+  },
+  {
+    "id": "FloorPage.e53bc7ea45411714",
+    "page": "FloorPage",
+    "text": "Seating History"
+  },
+  {
+    "id": "FloorPage.8c3a59721fc2c5d0",
+    "page": "FloorPage",
+    "text": "Every recorded rotation seating for this shift."
+  },
+  {
+    "id": "FloorPage.450555d426340623",
+    "page": "FloorPage",
+    "text": "No rotation activity has been recorded yet."
+  },
+  {
+    "id": "FloorPage.b0a9402496a5997a",
+    "page": "FloorPage",
+    "text": "Close Log"
+  },
+  {
+    "id": "FloorPage.38a8cd80580a8ade",
+    "page": "FloorPage",
+    "text": "Floor Setup"
+  },
+  {
+    "id": "FloorPage.3400468575b918d6",
+    "page": "FloorPage",
+    "text": "Edit Table"
+  },
+  {
+    "id": "FloorPage.d5b819eda57f40e2",
+    "page": "FloorPage",
+    "text": "Table name"
+  },
+  {
+    "id": "FloorPage.dbde6abf70229975",
+    "page": "FloorPage",
+    "text": "Number of seats"
+  },
+  {
+    "id": "FloorPage.7df20441dc99277c",
+    "page": "FloorPage",
+    "text": "− Seat"
+  },
+  {
+    "id": "FloorPage.56d4bb2b594a79fe",
+    "page": "FloorPage",
+    "text": "+ Seat"
+  },
+  {
+    "id": "FloorPage.1f6078b10fb33539",
+    "page": "FloorPage",
+    "text": "Cancel"
+  },
+  {
+    "id": "FloorPage.346033551ea3dce7",
+    "page": "FloorPage",
+    "text": "Floor Setup"
+  },
+  {
+    "id": "FloorPage.562edf163d27ecd6",
+    "page": "FloorPage",
+    "text": "Add Table"
+  },
+  {
+    "id": "FloorPage.6f6020f550b3c4fe",
+    "page": "FloorPage",
+    "text": "Adding to:"
+  },
+  {
+    "id": "FloorPage.99f2b354b41dd831",
+    "page": "FloorPage",
+    "text": "Table name"
+  },
+  {
+    "id": "FloorPage.bbb3a9965c19a24a",
+    "page": "FloorPage",
+    "text": "Seats"
+  },
+  {
+    "id": "FloorPage.dcfaa96bfcf2cec6",
+    "page": "FloorPage",
+    "text": "Shape"
+  },
+  {
+    "id": "FloorPage.8500ea567aa4bd25",
+    "page": "FloorPage",
+    "text": "Round"
+  },
+  {
+    "id": "FloorPage.291495e00a793806",
+    "page": "FloorPage",
+    "text": "Square"
+  },
+  {
+    "id": "FloorPage.3af2249adffcf41a",
+    "page": "FloorPage",
+    "text": "Rectangle"
+  },
+  {
+    "id": "FloorPage.91d61fc9637665bf",
+    "page": "FloorPage",
+    "text": "Cancel"
+  },
+  {
+    "id": "FloorPage.4ec46a48d32a4de1",
+    "page": "FloorPage",
+    "text": "Table Details"
+  },
+  {
+    "id": "FloorPage.198e75feb878e9db",
+    "page": "FloorPage",
+    "text": "Seats"
+  },
+  {
+    "id": "FloorPage.7a591ebeaee5ae1c",
+    "page": "FloorPage",
+    "text": "Server"
+  },
+  {
+    "id": "FloorPage.06501eeecca19ad5",
+    "page": "FloorPage",
+    "text": "Status"
+  },
+  {
+    "id": "FloorPage.a4d07ddfcdfe7d97",
+    "page": "FloorPage",
+    "text": "Party"
+  },
+  {
+    "id": "FloorPage.524c23465d32c375",
+    "page": "FloorPage",
+    "text": "Guests"
+  },
+  {
+    "id": "FloorPage.1abd80f51855397e",
+    "page": "FloorPage",
+    "text": "Time Seated"
+  },
+  {
+    "id": "FloorPage.7900dcf374573b5f",
+    "page": "FloorPage",
+    "text": "min"
+  },
+  {
+    "id": "FloorPage.a04a646c889f8fe4",
+    "page": "FloorPage",
+    "text": "Seat Guests"
+  },
+  {
+    "id": "FloorPage.093ec970131d5b82",
+    "page": "FloorPage",
+    "text": "🔵 Seated"
+  },
+  {
+    "id": "FloorPage.1d19103e786ec74f",
+    "page": "FloorPage",
+    "text": "🟡 Drinks"
+  },
+  {
+    "id": "FloorPage.8353242e893ef598",
+    "page": "FloorPage",
+    "text": "🟠 Food"
+  },
+  {
+    "id": "FloorPage.9b188c58096a18aa",
+    "page": "FloorPage",
+    "text": "🟣 Check"
+  },
+  {
+    "id": "FloorPage.ceb815d3af266d20",
+    "page": "FloorPage",
+    "text": "⚫ Dirty / Needs Busser"
+  },
+  {
+    "id": "FloorPage.26c57cd297d801b5",
+    "page": "FloorPage",
+    "text": "🔴 Manager Assist"
+  },
+  {
+    "id": "FloorPage.19c6834d7471e913",
+    "page": "FloorPage",
+    "text": "🟢 Mark Ready / Close Table"
+  },
+  {
+    "id": "FloorPage.51023ef8ef67b615",
+    "page": "FloorPage",
+    "text": "No active table session"
+  },
+  {
+    "id": "FloorPage.a9fccabe13d95591",
+    "page": "FloorPage",
+    "text": "Transfer Table"
+  },
+  {
+    "id": "FloorPage.281d6ce601d5bdda",
+    "page": "FloorPage",
+    "text": "Edit Table"
+  },
+  {
+    "id": "FloorPage.b26f7c26db4411a3",
+    "page": "FloorPage",
+    "text": "Close"
+  },
+  {
+    "id": "FloorPage.7699845ffa5f9e0f",
+    "page": "FloorPage",
+    "text": "Seat Guests"
+  },
+  {
+    "id": "FloorPage.e3fc8c139dc34fa7",
+    "page": "FloorPage",
+    "text": "Server"
+  },
+  {
+    "id": "FloorPage.384d6bb051c367b8",
+    "page": "FloorPage",
+    "text": "Choose server"
+  },
+  {
+    "id": "FloorPage.531998f4645e3d0d",
+    "page": "FloorPage",
+    "text": "One party will occupy all selected tables. Choose the server responsible for the party."
+  },
+  {
+    "id": "FloorPage.e44aeebd7e732765",
+    "page": "FloorPage",
+    "text": "Guest name"
+  },
+  {
+    "id": "FloorPage.e50cc9012f7e103e",
+    "page": "FloorPage",
+    "text": "Phone number"
+  },
+  {
+    "id": "FloorPage.f2dddedb7989ec42",
+    "page": "FloorPage",
+    "text": "Email"
+  },
+  {
+    "id": "FloorPage.6f52ad3b8af5273e",
+    "page": "FloorPage",
+    "text": "Party size"
+  },
+  {
+    "id": "FloorPage.8017a93cf20f7eca",
+    "page": "FloorPage",
+    "text": "Cancel"
+  },
+  {
+    "id": "InventoryPage.f1388b1e9e607a7f",
+    "page": "InventoryPage",
+    "text": "Inventory"
+  },
+  {
+    "id": "InventoryPage.877871e7737c481b",
+    "page": "InventoryPage",
+    "text": "Disposal count sheet"
+  },
+  {
+    "id": "InventoryPage.e56348a60ab39eae",
+    "page": "InventoryPage",
+    "text": "Count disposed bottles by brand and size. Add each row, then submit the sheet."
+  },
+  {
+    "id": "InventoryPage.c136c4415c67a5bd",
+    "page": "InventoryPage",
+    "text": "Loading bottle list…"
+  },
+  {
+    "id": "InventoryPage.5e7b14563da8af72",
+    "page": "InventoryPage",
+    "text": "Add bottles"
+  },
+  {
+    "id": "InventoryPage.8f8837fa6222b9dc",
+    "page": "InventoryPage",
+    "text": "Search brand"
+  },
+  {
+    "id": "InventoryPage.61345857e8f7eb6a",
+    "page": "InventoryPage",
+    "text": "Add new brand: "
+  },
+  {
+    "id": "InventoryPage.4947e0894fa46886",
+    "page": "InventoryPage",
+    "text": "New brands are saved for everyone. Existing names are reused automatically."
+  },
+  {
+    "id": "InventoryPage.f60bc09db782540c",
+    "page": "InventoryPage",
+    "text": "No matching brand."
+  },
+  {
+    "id": "InventoryPage.133b445ffb0c1316",
+    "page": "InventoryPage",
+    "text": "Showing 30 of "
+  },
+  {
+    "id": "InventoryPage.1bd1b34a136f9b40",
+    "page": "InventoryPage",
+    "text": ". Type more to narrow the list."
+  },
+  {
+    "id": "InventoryPage.6ad2b3a42ad2c574",
+    "page": "InventoryPage",
+    "text": "Selected:"
+  },
+  {
+    "id": "InventoryPage.df6341ce22682293",
+    "page": "InventoryPage",
+    "text": "Bottle size"
+  },
+  {
+    "id": "InventoryPage.4e7a1f4d1ed94ebd",
+    "page": "InventoryPage",
+    "text": "Choose size"
+  },
+  {
+    "id": "InventoryPage.996a62ac5c0e7f18",
+    "page": "InventoryPage",
+    "text": "Number of bottles"
+  },
+  {
+    "id": "InventoryPage.3463d996700a8348",
+    "page": "InventoryPage",
+    "text": "Add to sheet"
+  },
+  {
+    "id": "InventoryPage.b6f753efd8ebd9b0",
+    "page": "InventoryPage",
+    "text": "This disposal sheet · "
+  },
+  {
+    "id": "InventoryPage.cde29e195cdb94ac",
+    "page": "InventoryPage",
+    "text": " bottles"
+  },
+  {
+    "id": "InventoryPage.4e41b8ae6fc10242",
+    "page": "InventoryPage",
+    "text": "No bottles added yet."
+  },
+  {
+    "id": "InventoryPage.954bc5456284109a",
+    "page": "InventoryPage",
+    "text": "Quantity"
+  },
+  {
+    "id": "InventoryPage.db55c8214ffd0a15",
+    "page": "InventoryPage",
+    "text": "Remove"
+  },
+  {
+    "id": "InventoryPage.9d0554f279f2d151",
+    "page": "InventoryPage",
+    "text": "Disposal history"
+  },
+  {
+    "id": "InventoryPage.c0e09aabe6f9ff69",
+    "page": "InventoryPage",
+    "text": "Latest 50 submissions. Staff see their own sheets; managers see the team’s."
+  },
+  {
+    "id": "InventoryPage.3c5028af23e122e5",
+    "page": "InventoryPage",
+    "text": "Refresh history"
+  },
+  {
+    "id": "InventoryPage.88fd4f1e2a9b807b",
+    "page": "InventoryPage",
+    "text": "No disposal sheets submitted yet."
+  },
+  {
+    "id": "InventoryPage.54fb228b545587eb",
+    "page": "InventoryPage",
+    "text": " CT · "
+  },
+  {
+    "id": "InventoryPage.613175b626e8fce1",
+    "page": "InventoryPage",
+    "text": " bottles"
+  },
+  {
+    "id": "InventoryPage.4985eb7e89b7fe1d",
+    "page": "InventoryPage",
+    "text": " bottles"
+  },
+  {
+    "id": "LoginPage.262da4df982b420d",
+    "page": "LoginPage",
+    "text": "LNX Systems"
+  },
+  {
+    "id": "LoginPage.3148730a11c9bc5a",
+    "page": "LoginPage",
+    "text": "Restaurant Operations"
+  },
+  {
+    "id": "LoginPage.52160d77f0dfc05a",
+    "page": "LoginPage",
+    "text": "Floor, cash, tasks, rewards, and reporting."
+  },
+  {
+    "id": "LoginPage.aa65239e06fea8f7",
+    "page": "LoginPage",
+    "text": "Your GM must approve location access after signup."
+  },
+  {
+    "id": "LoginPage.cd3c2c8d0734931c",
+    "page": "LoginPage",
+    "text": "Full name"
+  },
+  {
+    "id": "LoginPage.8289cea56ff0acd8",
+    "page": "LoginPage",
+    "text": "Email"
+  },
+  {
+    "id": "LoginPage.09ac59f7c65f1dec",
+    "page": "LoginPage",
+    "text": "Password"
+  },
+  {
+    "id": "ManagerCloseoutPage.09310404aab17db7",
+    "page": "ManagerCloseoutPage",
+    "text": "Loading manager closeout…"
+  },
+  {
+    "id": "ManagerCloseoutPage.84dae12b44d2a1b4",
+    "page": "ManagerCloseoutPage",
+    "text": "← Closeout"
+  },
+  {
+    "id": "ManagerCloseoutPage.1fd28e8b873fc628",
+    "page": "ManagerCloseoutPage",
+    "text": "MANAGER ONLY"
+  },
+  {
+    "id": "ManagerCloseoutPage.adb158d73c5ee404",
+    "page": "ManagerCloseoutPage",
+    "text": "Manager Closeout"
+  },
+  {
+    "id": "ManagerCloseoutPage.b0bdef3954084e4a",
+    "page": "ManagerCloseoutPage",
+    "text": " · Private shift performance review"
+  },
+  {
+    "id": "ManagerCloseoutPage.77476d75d9140c97",
+    "page": "ManagerCloseoutPage",
+    "text": "Submitted: "
+  },
+  {
+    "id": "ManagerCloseoutPage.d5bb16ce999eef86",
+    "page": "ManagerCloseoutPage",
+    "text": " · Last updated: "
+  },
+  {
+    "id": "ManagerCloseoutPage.2202e5e40ee243a8",
+    "page": "ManagerCloseoutPage",
+    "text": "Shift date"
+  },
+  {
+    "id": "ManagerCloseoutPage.157828d4940d9702",
+    "page": "ManagerCloseoutPage",
+    "text": "Shift"
+  },
+  {
+    "id": "ManagerCloseoutPage.2e2d17cc21484d52",
+    "page": "ManagerCloseoutPage",
+    "text": "Select a shift"
+  },
+  {
+    "id": "ManagerCloseoutPage.c0165ed6e7811073",
+    "page": "ManagerCloseoutPage",
+    "text": " — create shift"
+  },
+  {
+    "id": "ManagerCloseoutPage.04eecb585c2af027",
+    "page": "ManagerCloseoutPage",
+    "text": "Loading shifts…"
+  },
+  {
+    "id": "ManagerCloseoutPage.b2e1bb32e9d242cc",
+    "page": "ManagerCloseoutPage",
+    "text": "Creating shift…"
+  },
+  {
+    "id": "ManagerCloseoutPage.779a089a26f12e4c",
+    "page": "ManagerCloseoutPage",
+    "text": "Loading private reviews…"
+  },
+  {
+    "id": "ManagerCloseoutPage.30ab09d20fac2ce2",
+    "page": "ManagerCloseoutPage",
+    "text": "Shift closeout"
+  },
+  {
+    "id": "ManagerCloseoutPage.f5960a21b5ce2a31",
+    "page": "ManagerCloseoutPage",
+    "text": "Staff ratings · What the numbers mean"
+  },
+  {
+    "id": "ManagerCloseoutPage.c862fd8a7e1bf3aa",
+    "page": "ManagerCloseoutPage",
+    "text": "Immediate intervention needed"
+  },
+  {
+    "id": "ManagerCloseoutPage.3378174a42e4b2c1",
+    "page": "ManagerCloseoutPage",
+    "text": "Poor performance · Needs coaching"
+  },
+  {
+    "id": "ManagerCloseoutPage.5ec953daa38e3a61",
+    "page": "ManagerCloseoutPage",
+    "text": "Meets expectations"
+  },
+  {
+    "id": "ManagerCloseoutPage.785e74a9f555fab6",
+    "page": "ManagerCloseoutPage",
+    "text": "Above expectations"
+  },
+  {
+    "id": "ManagerCloseoutPage.cba738c03149ce2e",
+    "page": "ManagerCloseoutPage",
+    "text": "Excellent performance"
+  },
+  {
+    "id": "ManagerCloseoutPage.d1a53be6c6a73c3b",
+    "page": "ManagerCloseoutPage",
+    "text": "Ratings and review notes are visible to managers only. Employees see a points adjustment only when an existing point rule applies."
+  },
+  {
+    "id": "ManagerCloseoutPage.1a185e0991f763b1",
+    "page": "ManagerCloseoutPage",
+    "text": "Staff who worked this shift"
+  },
+  {
+    "id": "ManagerCloseoutPage.1f37c15a83ce909b",
+    "page": "ManagerCloseoutPage",
+    "text": "Select everyone you supervised. Your own rating is completed by another manager."
+  },
+  {
+    "id": "ManagerCloseoutPage.ac046e18262bb92f",
+    "page": "ManagerCloseoutPage",
+    "text": "Add staff member"
+  },
+  {
+    "id": "ManagerCloseoutPage.fb3cb81aca03408d",
+    "page": "ManagerCloseoutPage",
+    "text": "Select staff who worked this shift"
+  },
+  {
+    "id": "ManagerCloseoutPage.81883b17a3fea7ca",
+    "page": "ManagerCloseoutPage",
+    "text": "Remove from this shift"
+  },
+  {
+    "id": "ManagerCloseoutPage.b025205640aa1910",
+    "page": "ManagerCloseoutPage",
+    "text": "Select 1–10"
+  },
+  {
+    "id": "ManagerCloseoutPage.c3683f3872b7cbbd",
+    "page": "ManagerCloseoutPage",
+    "text": "Choose a category"
+  },
+  {
+    "id": "ManagerCloseoutPage.8adb3b5f65f15041",
+    "page": "ManagerCloseoutPage",
+    "text": " (saved category)"
+  },
+  {
+    "id": "ManagerCloseoutPage.72dd478ce861585f",
+    "page": "ManagerCloseoutPage",
+    "text": "Specific examples (optional, private)"
+  },
+  {
+    "id": "ManagerCloseoutPage.7b278dbffcc825b9",
+    "page": "ManagerCloseoutPage",
+    "text": "Shift MVP"
+  },
+  {
+    "id": "ManagerCloseoutPage.ccfeac4132cad92f",
+    "page": "ManagerCloseoutPage",
+    "text": "Who stood out this shift? (optional)"
+  },
+  {
+    "id": "ManagerCloseoutPage.fb73f0c0d429ce03",
+    "page": "ManagerCloseoutPage",
+    "text": "No MVP selected"
+  },
+  {
+    "id": "ManagerCloseoutPage.a8a2758d60a53a18",
+    "page": "ManagerCloseoutPage",
+    "text": "Cash deposit &amp; register"
+  },
+  {
+    "id": "ManagerCloseoutPage.de994e02cc2dd028",
+    "page": "ManagerCloseoutPage",
+    "text": "Select an answer"
+  },
+  {
+    "id": "ManagerCloseoutPage.fb445af8657396a2",
+    "page": "ManagerCloseoutPage",
+    "text": "Yes"
+  },
+  {
+    "id": "ManagerCloseoutPage.c8ab7d6d4e30b2d9",
+    "page": "ManagerCloseoutPage",
+    "text": "No"
+  },
+  {
+    "id": "ManagerCloseoutPage.7fda744786eba784",
+    "page": "ManagerCloseoutPage",
+    "text": "Negative for a shortage; positive for an overage."
+  },
+  {
+    "id": "ManagerCloseoutPage.b8bb83d7f397b820",
+    "page": "ManagerCloseoutPage",
+    "text": "Archived answers from this closeout"
+  },
+  {
+    "id": "ManagerCloseoutPage.9978865bd56536f3",
+    "page": "ManagerCloseoutPage",
+    "text": "I included everyone I supervised who worked this shift."
+  },
+  {
+    "id": "ManagerCloseoutPage.30caf0d1c89056fc",
+    "page": "ManagerCloseoutPage",
+    "text": "Only the submitting MOD, owner, or GM can edit this saved closeout."
+  },
+  {
+    "id": "PermissionsPage.89412119744c72b5",
+    "page": "PermissionsPage",
+    "text": "← Closeout"
+  },
+  {
+    "id": "PermissionsPage.eba4c32dd13c83d3",
+    "page": "PermissionsPage",
+    "text": "Permissions"
+  },
+  {
+    "id": "PermissionsPage.d12d88b97232e821",
+    "page": "PermissionsPage",
+    "text": "Choose access for each employee at this location. Their job role stays the same."
+  },
+  {
+    "id": "PermissionsPage.56fcfaa54ccb7d09",
+    "page": "PermissionsPage",
+    "text": "Staff:"
+  },
+  {
+    "id": "PermissionsPage.681d3b871530589d",
+    "page": "PermissionsPage",
+    "text": " own closeout summary."
+  },
+  {
+    "id": "PermissionsPage.88900bc321bb8122",
+    "page": "PermissionsPage",
+    "text": "Manager:"
+  },
+  {
+    "id": "PermissionsPage.6191742eab1e9efb",
+    "page": "PermissionsPage",
+    "text": " all staff summaries, team recap, manager closeout, and point adjustments."
+  },
+  {
+    "id": "PermissionsPage.5bc58a6ada2e921f",
+    "page": "PermissionsPage",
+    "text": "General Manager:"
+  },
+  {
+    "id": "PermissionsPage.f06c082707c73f84",
+    "page": "PermissionsPage",
+    "text": " manager access plus form settings, point rules, and permissions."
+  },
+  {
+    "id": "PermissionsPage.02d0a9e3451617bf",
+    "page": "PermissionsPage",
+    "text": "Owner:"
+  },
+  {
+    "id": "PermissionsPage.3deac9dec36bd1fc",
+    "page": "PermissionsPage",
+    "text": " general manager administrative access, including private manager reviews and sales target settings."
+  },
+  {
+    "id": "PermissionsPage.6663fb06ab55cf4f",
+    "page": "PermissionsPage",
+    "text": "Loading permissions…"
+  },
+  {
+    "id": "PermissionsPage.d3d9fc4260ebd42e",
+    "page": "PermissionsPage",
+    "text": "Job role: "
+  },
+  {
+    "id": "PermissionsPage.b2d9b93ee36796d9",
+    "page": "PermissionsPage",
+    "text": "Access"
+  },
+  {
+    "id": "PermissionsPage.175d78737a59a4d4",
+    "page": "PermissionsPage",
+    "text": "Staff"
+  },
+  {
+    "id": "PermissionsPage.937330689bcbced3",
+    "page": "PermissionsPage",
+    "text": "Manager"
+  },
+  {
+    "id": "PermissionsPage.9c4a744e3bd4548e",
+    "page": "PermissionsPage",
+    "text": "General Manager"
+  },
+  {
+    "id": "PermissionsPage.7d46bc1460e96051",
+    "page": "PermissionsPage",
+    "text": "Owner"
+  },
+  {
+    "id": "PlaceholderPage.710c19aa51b76ee8",
+    "page": "PlaceholderPage",
+    "text": "Coming module"
+  },
+  {
+    "id": "PointsPage.262da4df982b420d",
+    "page": "PointsPage",
+    "text": "LNX Systems"
+  },
+  {
+    "id": "PointsPage.7227d397db4a9148",
+    "page": "PointsPage",
+    "text": "Points & Leaderboard"
+  },
+  {
+    "id": "PointsPage.29c57305376b3dd7",
+    "page": "PointsPage",
+    "text": "Track your progress and celebrate the team."
+  },
+  {
+    "id": "PointsPage.c2ae010ecda1aae1",
+    "page": "PointsPage",
+    "text": "Award / Deduct Points →"
+  },
+  {
+    "id": "PointsPage.92018619691663a6",
+    "page": "PointsPage",
+    "text": "Month "
+  },
+  {
+    "id": "PointsPage.85dcf42e118af84f",
+    "page": "PointsPage",
+    "text": "100 starting points each month. Winner: $100 + spotlight. Runner-up: $50 + first-cut pass."
+  },
+  {
+    "id": "PointsPage.c62c430488cafb76",
+    "page": "PointsPage",
+    "text": "My Points"
+  },
+  {
+    "id": "PointsPage.deb2f609e7bc3c81",
+    "page": "PointsPage",
+    "text": "Leaderboard"
+  },
+  {
+    "id": "PointsPage.e78e48fd3cbb9452",
+    "page": "PointsPage",
+    "text": "Loading points…"
+  },
+  {
+    "id": "PointsPage.8e1782649e375df9",
+    "page": "PointsPage",
+    "text": "Monthly Points"
+  },
+  {
+    "id": "PointsPage.2fac1087c80e5afe",
+    "page": "PointsPage",
+    "text": "Team Rank"
+  },
+  {
+    "id": "PointsPage.7c6d65131b8f4099",
+    "page": "PointsPage",
+    "text": "Points History"
+  },
+  {
+    "id": "PointsPage.3a329828f93c1c68",
+    "page": "PointsPage",
+    "text": "Monthly starting balance: +100"
+  },
+  {
+    "id": "PointsPage.ce41d9a585ca24c8",
+    "page": "PointsPage",
+    "text": "Date"
+  },
+  {
+    "id": "PointsPage.c5c21bab8b486453",
+    "page": "PointsPage",
+    "text": "Activity"
+  },
+  {
+    "id": "PointsPage.ff94246eb2bb289a",
+    "page": "PointsPage",
+    "text": "Points"
+  },
+  {
+    "id": "PointsPage.2206727e97da939d",
+    "page": "PointsPage",
+    "text": "No point adjustments this month."
+  },
+  {
+    "id": "PointsPage.d7848a33da6c724d",
+    "page": "PointsPage",
+    "text": "Team Leaderboard"
+  },
+  {
+    "id": "PointsPage.4380866cc0b528a9",
+    "page": "PointsPage",
+    "text": "Tied totals share a rank. Final prize ties require manager review."
+  },
+  {
+    "id": "PointsPage.d445873f8049aaa4",
+    "page": "PointsPage",
+    "text": "Monthly team standings"
+  },
+  {
+    "id": "PointsPage.febf9850512da3b5",
+    "page": "PointsPage",
+    "text": "Rank"
+  },
+  {
+    "id": "PointsPage.29018cc18c7e2d93",
+    "page": "PointsPage",
+    "text": "Team Member"
+  },
+  {
+    "id": "PointsPage.0e216e68dda20f0b",
+    "page": "PointsPage",
+    "text": "Points"
+  },
+  {
+    "id": "PreshiftFeedPage.d71405fe359398cf",
+    "page": "PreshiftFeedPage",
+    "text": "Team updates"
+  },
+  {
+    "id": "PreshiftFeedPage.3e4fda6d83458ca3",
+    "page": "PreshiftFeedPage",
+    "text": "Pre-Shift Feed"
+  },
+  {
+    "id": "PreshiftFeedPage.241067933fc09037",
+    "page": "PreshiftFeedPage",
+    "text": "Read your pre-shift updates before taking the daily quiz."
+  },
+  {
+    "id": "PreshiftFeedPage.530b78d4332310fb",
+    "page": "PreshiftFeedPage",
+    "text": "Take today’s quiz →"
+  },
+  {
+    "id": "PreshiftFeedPage.e5e12a67d3fe28f9",
+    "page": "PreshiftFeedPage",
+    "text": "Refresh feed"
+  },
+  {
+    "id": "PreshiftFeedPage.a76f3796689dc4f0",
+    "page": "PreshiftFeedPage",
+    "text": "New post"
+  },
+  {
+    "id": "PreshiftFeedPage.c893d3f335bc3d7f",
+    "page": "PreshiftFeedPage",
+    "text": "Shift date"
+  },
+  {
+    "id": "PreshiftFeedPage.640ad606e6e0e07a",
+    "page": "PreshiftFeedPage",
+    "text": "Posts appear immediately. The shift date tells staff which shift this update is for."
+  },
+  {
+    "id": "PreshiftFeedPage.421ea77bd55d50ed",
+    "page": "PreshiftFeedPage",
+    "text": "Title"
+  },
+  {
+    "id": "PreshiftFeedPage.9bc98d09920bda9d",
+    "page": "PreshiftFeedPage",
+    "text": "Post"
+  },
+  {
+    "id": "PreshiftFeedPage.e59d76e749e16b23",
+    "page": "PreshiftFeedPage",
+    "text": "Photos and videos"
+  },
+  {
+    "id": "PreshiftFeedPage.93298a425cc00b8f",
+    "page": "PreshiftFeedPage",
+    "text": "Up to 6 attachments · 50 MB each. Videos play when staff tap Play."
+  },
+  {
+    "id": "PreshiftFeedPage.7b282a454be608ff",
+    "page": "PreshiftFeedPage",
+    "text": "Uploading attachment…"
+  },
+  {
+    "id": "PreshiftFeedPage.ebecddb5f399fe93",
+    "page": "PreshiftFeedPage",
+    "text": "Caption"
+  },
+  {
+    "id": "PreshiftFeedPage.1bf6f8c4776d3c31",
+    "page": "PreshiftFeedPage",
+    "text": "Remove attachment"
+  },
+  {
+    "id": "PreshiftFeedPage.01b18dbf82541188",
+    "page": "PreshiftFeedPage",
+    "text": "Preview post"
+  },
+  {
+    "id": "PreshiftFeedPage.8d46c454e24ba298",
+    "page": "PreshiftFeedPage",
+    "text": "Pin to the top"
+  },
+  {
+    "id": "PreshiftFeedPage.d5c515dcd12201f0",
+    "page": "PreshiftFeedPage",
+    "text": "Cancel"
+  },
+  {
+    "id": "PreshiftFeedPage.556bf6b828d8489e",
+    "page": "PreshiftFeedPage",
+    "text": "Loading feed…"
+  },
+  {
+    "id": "PreshiftFeedPage.bbf7eecf15bf0a2b",
+    "page": "PreshiftFeedPage",
+    "text": "No pre-shift posts yet."
+  },
+  {
+    "id": "PreshiftFeedPage.c57b262f53318483",
+    "page": "PreshiftFeedPage",
+    "text": "Pinned"
+  },
+  {
+    "id": "PreshiftFeedPage.d14f3e863e02a331",
+    "page": "PreshiftFeedPage",
+    "text": "Pre-Shift · "
+  },
+  {
+    "id": "PreshiftFeedPage.1723972f91138c84",
+    "page": "PreshiftFeedPage",
+    "text": "Take the pre-shift quiz →"
+  },
+  {
+    "id": "PreshiftFeedPage.1e6fff57198154b6",
+    "page": "PreshiftFeedPage",
+    "text": "Posted by "
+  },
+  {
+    "id": "PreshiftFeedPage.46c613c9e74f96b8",
+    "page": "PreshiftFeedPage",
+    "text": " CT"
+  },
+  {
+    "id": "PreshiftFeedPage.c8bacbc661d5f322",
+    "page": "PreshiftFeedPage",
+    "text": " · Edited "
+  },
+  {
+    "id": "PreshiftFeedPage.996abd7b978793c1",
+    "page": "PreshiftFeedPage",
+    "text": " CT"
+  },
+  {
+    "id": "PreshiftFeedPage.25c4d03e2c2c91c8",
+    "page": "PreshiftFeedPage",
+    "text": "Edit post"
+  },
+  {
+    "id": "PreshiftFeedPage.8cef789752aceade",
+    "page": "PreshiftFeedPage",
+    "text": "Remove post"
+  },
+  {
+    "id": "PreshiftFeedPage.81a21a22be59bc9e",
+    "page": "PreshiftFeedPage",
+    "text": "Load older posts"
+  },
+  {
+    "id": "PreshiftFeedPage.c130725dc596fd00",
+    "page": "PreshiftFeedPage",
+    "text": "Showing the latest 1,000 posts."
+  },
+  {
+    "id": "PreshiftFeedPage.696d486f4fa2510d",
+    "page": "PreshiftFeedPage",
+    "text": "Updated "
+  },
+  {
+    "id": "PreshiftFeedPage.0738782d960aed1b",
+    "page": "PreshiftFeedPage",
+    "text": " CT · Checks for new posts every 15 seconds while this page is open."
+  },
+  {
+    "id": "QuizBuilderPage.32eaee06d35ddfd4",
+    "page": "QuizBuilderPage",
+    "text": "← Daily Quizzes"
+  },
+  {
+    "id": "QuizBuilderPage.0af9d71bf594c489",
+    "page": "QuizBuilderPage",
+    "text": "Manager only"
+  },
+  {
+    "id": "QuizBuilderPage.991e62629f7eca0d",
+    "page": "QuizBuilderPage",
+    "text": "Quiz date"
+  },
+  {
+    "id": "QuizBuilderPage.dd808b7daad09bdf",
+    "page": "QuizBuilderPage",
+    "text": "Existing scores and submitted answers are preserved. Edits apply to staff who have not submitted. Staff who already submitted cannot retake this quiz."
+  },
+  {
+    "id": "QuizBuilderPage.24102437495319ff",
+    "page": "QuizBuilderPage",
+    "text": "Loading…"
+  },
+  {
+    "id": "QuizBuilderPage.a2bfec93d4dd8f87",
+    "page": "QuizBuilderPage",
+    "text": "Quiz title and instructions"
+  },
+  {
+    "id": "QuizBuilderPage.2e0e8391cff492df",
+    "page": "QuizBuilderPage",
+    "text": "Title"
+  },
+  {
+    "id": "QuizBuilderPage.3b9de671dedb8bb7",
+    "page": "QuizBuilderPage",
+    "text": "Instructions"
+  },
+  {
+    "id": "QuizBuilderPage.01405b24586d6e78",
+    "page": "QuizBuilderPage",
+    "text": "Questions ("
+  },
+  {
+    "id": "QuizBuilderPage.eeabc641c78873eb",
+    "page": "QuizBuilderPage",
+    "text": "Add an existing question from the bank or write a new one. Open “Edit answers” to change the choices."
+  },
+  {
+    "id": "QuizBuilderPage.c7f27a70beb66909",
+    "page": "QuizBuilderPage",
+    "text": "＋ Add question"
+  },
+  {
+    "id": "QuizBuilderPage.c084cf0fef6aff70",
+    "page": "QuizBuilderPage",
+    "text": "How would you like to add a question?"
+  },
+  {
+    "id": "QuizBuilderPage.7fe9caf718563d6c",
+    "page": "QuizBuilderPage",
+    "text": "Write a question"
+  },
+  {
+    "id": "QuizBuilderPage.c88824809acf0691",
+    "page": "QuizBuilderPage",
+    "text": "Choose from the bank"
+  },
+  {
+    "id": "QuizBuilderPage.ce7ffdd48895e09d",
+    "page": "QuizBuilderPage",
+    "text": "Cancel"
+  },
+  {
+    "id": "QuizBuilderPage.bdd1413802ee2488",
+    "page": "QuizBuilderPage",
+    "text": "Removed: "
+  },
+  {
+    "id": "QuizBuilderPage.b4ce5fa24d0e4d4b",
+    "page": "QuizBuilderPage",
+    "text": "Undo remove"
+  },
+  {
+    "id": "QuizBuilderPage.a1d605c39123a595",
+    "page": "QuizBuilderPage",
+    "text": "Start with a new question or add questions from the bank."
+  },
+  {
+    "id": "QuizBuilderPage.0de4316cd9c3cc86",
+    "page": "QuizBuilderPage",
+    "text": "Question "
+  },
+  {
+    "id": "QuizBuilderPage.cb7f5ae7726ad176",
+    "page": "QuizBuilderPage",
+    "text": "Category"
+  },
+  {
+    "id": "QuizBuilderPage.9c7affd46893b801",
+    "page": "QuizBuilderPage",
+    "text": "Question"
+  },
+  {
+    "id": "QuizBuilderPage.f837d06ddc8b2780",
+    "page": "QuizBuilderPage",
+    "text": "Edit answers · "
+  },
+  {
+    "id": "QuizBuilderPage.b78e8e03614c0ab6",
+    "page": "QuizBuilderPage",
+    "text": " choices"
+  },
+  {
+    "id": "QuizBuilderPage.d29585b1f43a2f3e",
+    "page": "QuizBuilderPage",
+    "text": "Choice "
+  },
+  {
+    "id": "QuizBuilderPage.79c0c149b771ac44",
+    "page": "QuizBuilderPage",
+    "text": "Correct answer"
+  },
+  {
+    "id": "QuizBuilderPage.2ebcf179b77222f6",
+    "page": "QuizBuilderPage",
+    "text": "Remove choice"
+  },
+  {
+    "id": "QuizBuilderPage.b6f477dab4c93dd2",
+    "page": "QuizBuilderPage",
+    "text": "Add choice"
+  },
+  {
+    "id": "QuizBuilderPage.ef7fcc190b9529a8",
+    "page": "QuizBuilderPage",
+    "text": "Use True / False"
+  },
+  {
+    "id": "QuizBuilderPage.b20aaa2b9784234c",
+    "page": "QuizBuilderPage",
+    "text": "Explanation shown after submission (optional)"
+  },
+  {
+    "id": "QuizBuilderPage.3024bd24cc3c0304",
+    "page": "QuizBuilderPage",
+    "text": "Move up"
+  },
+  {
+    "id": "QuizBuilderPage.da6c338bb09def6d",
+    "page": "QuizBuilderPage",
+    "text": "Move down"
+  },
+  {
+    "id": "QuizBuilderPage.13589e4bff7afdc0",
+    "page": "QuizBuilderPage",
+    "text": "Remove question"
+  },
+  {
+    "id": "QuizBuilderPage.c399b5dd0f5cf572",
+    "page": "QuizBuilderPage",
+    "text": "Add question"
+  },
+  {
+    "id": "QuizBuilderPage.ff4083555dca251c",
+    "page": "QuizBuilderPage",
+    "text": "Save Draft"
+  },
+  {
+    "id": "QuizBuilderPage.b5d5bbd0d71a6552",
+    "page": "QuizBuilderPage",
+    "text": "Team scores ("
+  },
+  {
+    "id": "QuizBuilderPage.28769235af8d9c69",
+    "page": "QuizBuilderPage",
+    "text": " submitted)"
+  },
+  {
+    "id": "QuizBuilderPage.491aff72d66fda3a",
+    "page": "QuizBuilderPage",
+    "text": "No submissions yet."
+  },
+  {
+    "id": "QuizBuilderPage.3f2276a819431068",
+    "page": "QuizBuilderPage",
+    "text": "Submitted: "
+  },
+  {
+    "id": "QuizzesPage.415b1b5046913963",
+    "page": "QuizzesPage",
+    "text": "Your score: "
+  },
+  {
+    "id": "QuizzesPage.a96b839a58105eb0",
+    "page": "QuizzesPage",
+    "text": " · Your answer: "
+  },
+  {
+    "id": "QuizzesPage.9d4db8d05a3c92fd",
+    "page": "QuizzesPage",
+    "text": "Correct answer: "
+  },
+  {
+    "id": "QuizzesPage.246cabe13c327bdc",
+    "page": "QuizzesPage",
+    "text": "Pre-Shift Quiz · "
+  },
+  {
+    "id": "QuizzesPage.9590afcd98be4b71",
+    "page": "QuizzesPage",
+    "text": "View answers and quiz points"
+  },
+  {
+    "id": "QuizzesPage.77476d75d9140c97",
+    "page": "QuizzesPage",
+    "text": "Submitted: "
+  },
+  {
+    "id": "QuizzesPage.ef21706a6f8b637a",
+    "page": "QuizzesPage",
+    "text": "Quiz points earned: "
+  },
+  {
+    "id": "QuizzesPage.74e997483f95abd8",
+    "page": "QuizzesPage",
+    "text": " · Running quiz score through this quiz: "
+  },
+  {
+    "id": "QuizzesPage.01e8804e8e0a8c89",
+    "page": "QuizzesPage",
+    "text": " · Monthly reward points: "
+  },
+  {
+    "id": "QuizzesPage.15c8c5ead821decf",
+    "page": "QuizzesPage",
+    "text": "Pre-shift preparation"
+  },
+  {
+    "id": "QuizzesPage.38584cb9f2b57db7",
+    "page": "QuizzesPage",
+    "text": "Daily Quizzes"
+  },
+  {
+    "id": "QuizzesPage.84f911a877a2c179",
+    "page": "QuizzesPage",
+    "text": "Build Future Quizzes / Question Bank →"
+  },
+  {
+    "id": "QuizzesPage.879f2447f6bb95b8",
+    "page": "QuizzesPage",
+    "text": "Refresh"
+  },
+  {
+    "id": "QuizzesPage.6e4f183331ca689e",
+    "page": "QuizzesPage",
+    "text": "Today · "
+  },
+  {
+    "id": "QuizzesPage.6799e69e289fa08d",
+    "page": "QuizzesPage",
+    "text": "Loading…"
+  },
+  {
+    "id": "QuizzesPage.1d72b99728971f78",
+    "page": "QuizzesPage",
+    "text": "No quiz published for today"
+  },
+  {
+    "id": "QuizzesPage.21286979d56c5fd7",
+    "page": "QuizzesPage",
+    "text": "Your manager will publish today’s pre-shift quiz here."
+  },
+  {
+    "id": "QuizzesPage.0904328e9a0b32e1",
+    "page": "QuizzesPage",
+    "text": "Create / Publish Today’s Quiz →"
+  },
+  {
+    "id": "QuizzesPage.cf3a03ebcb629cd4",
+    "page": "QuizzesPage",
+    "text": "This quiz is required for you. Deadline: "
+  },
+  {
+    "id": "QuizzesPage.3780149cd908fc4d",
+    "page": "QuizzesPage",
+    "text": "Pre-Shift Quiz · "
+  },
+  {
+    "id": "QuizzesPage.b60395f153d3e55e",
+    "page": "QuizzesPage",
+    "text": "Submit Quiz"
+  },
+  {
+    "id": "QuizzesPage.0cb69b9dbee3b5dd",
+    "page": "QuizzesPage",
+    "text": "My Monthly Quiz Scores"
+  },
+  {
+    "id": "QuizzesPage.76488090a5a6664f",
+    "page": "QuizzesPage",
+    "text": "Month"
+  },
+  {
+    "id": "QuizzesPage.2932d9f524945dc5",
+    "page": "QuizzesPage",
+    "text": "Loading quiz points…"
+  },
+  {
+    "id": "QuizzesPage.c867c300a82de4b2",
+    "page": "QuizzesPage",
+    "text": " correct answers"
+  },
+  {
+    "id": "QuizzesPage.e88d2571ca0c7ec0",
+    "page": "QuizzesPage",
+    "text": " quizzes completed · "
+  },
+  {
+    "id": "QuizzesPage.8e8d6815000b8987",
+    "page": "QuizzesPage",
+    "text": " reward points"
+  },
+  {
+    "id": "QuizzesPage.630cf41c7a0e6dc8",
+    "page": "QuizzesPage",
+    "text": " points"
+  },
+  {
+    "id": "QuizzesPage.3c438183031c1c95",
+    "page": "QuizzesPage",
+    "text": "Completed quizzes"
+  },
+  {
+    "id": "QuizzesPage.26d09c58d141e83c",
+    "page": "QuizzesPage",
+    "text": "Manage Published Quizzes / Team Scores"
+  },
+  {
+    "id": "ResetPasswordPage.1977ef6b7e4b5136",
+    "page": "ResetPasswordPage",
+    "text": "Set New Password"
+  },
+  {
+    "id": "ResetPasswordPage.fc77ca8d593536f3",
+    "page": "ResetPasswordPage",
+    "text": "Your password has been updated."
+  },
+  {
+    "id": "ResetPasswordPage.1031abc00c092a13",
+    "page": "ResetPasswordPage",
+    "text": "This recovery link could not establish a session. Request a fresh recovery email and open its newest link."
+  },
+  {
+    "id": "ResetPasswordPage.193b9ba1376f0cb5",
+    "page": "ResetPasswordPage",
+    "text": "Return to Login"
+  },
+  {
+    "id": "ResetPasswordPage.b65d157e02c7ac2a",
+    "page": "ResetPasswordPage",
+    "text": "Enter and confirm your new password."
+  },
+  {
+    "id": "ResetPasswordPage.85c79db2447a2702",
+    "page": "ResetPasswordPage",
+    "text": "New password"
+  },
+  {
+    "id": "ResetPasswordPage.c1cbf2e591dad8b4",
+    "page": "ResetPasswordPage",
+    "text": "Confirm new password"
+  },
+  {
+    "id": "SalesTargetsPage.ad38ada26e3e5960",
+    "page": "SalesTargetsPage",
+    "text": "← Settings"
+  },
+  {
+    "id": "SalesTargetsPage.80824852a0f51869",
+    "page": "SalesTargetsPage",
+    "text": "Sales target setup"
+  },
+  {
+    "id": "SalesTargetsPage.5633c1a02ead3c1e",
+    "page": "SalesTargetsPage",
+    "text": "Enter total restaurant net sales for each past date. Blank means missing; enter 0 for a confirmed zero-sales day. The goal uses the six previous matching weekdays."
+  },
+  {
+    "id": "SalesTargetsPage.fed6ba6c4a47b680",
+    "page": "SalesTargetsPage",
+    "text": "Target date"
+  },
+  {
+    "id": "SalesTargetsPage.63b224b233660386",
+    "page": "SalesTargetsPage",
+    "text": "Reload schedule &amp; inputs"
+  },
+  {
+    "id": "SalesTargetsPage.2636b0a0386e6314",
+    "page": "SalesTargetsPage",
+    "text": "Loading sales target setup…"
+  },
+  {
+    "id": "SalesTargetsPage.a41eae4c48ebead8",
+    "page": "SalesTargetsPage",
+    "text": "Calculation settings"
+  },
+  {
+    "id": "SalesTargetsPage.625759988defaa78",
+    "page": "SalesTargetsPage",
+    "text": "Bar share (%)"
+  },
+  {
+    "id": "SalesTargetsPage.b6d1353b02fa9a28",
+    "page": "SalesTargetsPage",
+    "text": "Floor receives "
+  },
+  {
+    "id": "SalesTargetsPage.14385b3ceb4d794c",
+    "page": "SalesTargetsPage",
+    "text": "Growth adjustment (%)"
+  },
+  {
+    "id": "SalesTargetsPage.003be9d117c5ac3d",
+    "page": "SalesTargetsPage",
+    "text": "Past six weeks · Daily net sales"
+  },
+  {
+    "id": "SalesTargetsPage.61acfaebfea6432c",
+    "page": "SalesTargetsPage",
+    "text": "Schedule allocation"
+  },
+  {
+    "id": "SalesTargetsPage.e10154948e563be3",
+    "page": "SalesTargetsPage",
+    "text": "Each pool is divided by scheduled hours. Choose how each role contributes; managers, hosts and other roles start excluded. For shifts ending at Close or Business decline, enter expected hours."
+  },
+  {
+    "id": "SalesTargetsPage.2400a43d03dccfc6",
+    "page": "SalesTargetsPage",
+    "text": "Bar"
+  },
+  {
+    "id": "SalesTargetsPage.a522337dd74f7886",
+    "page": "SalesTargetsPage",
+    "text": "Floor"
+  },
+  {
+    "id": "SalesTargetsPage.de2b4bcfb25283d9",
+    "page": "SalesTargetsPage",
+    "text": "Exclude"
+  },
+  {
+    "id": "SalesTargetsPage.1c6f02f3deab79b4",
+    "page": "SalesTargetsPage",
+    "text": "Allocation"
+  },
+  {
+    "id": "SalesTargetsPage.492e3a0778b6e6f5",
+    "page": "SalesTargetsPage",
+    "text": "Bar"
+  },
+  {
+    "id": "SalesTargetsPage.9050adf5d55781c1",
+    "page": "SalesTargetsPage",
+    "text": "Floor"
+  },
+  {
+    "id": "SalesTargetsPage.ce6da94b2cb65c41",
+    "page": "SalesTargetsPage",
+    "text": "Exclude"
+  },
+  {
+    "id": "SalesTargetsPage.e16dbdc559e88947",
+    "page": "SalesTargetsPage",
+    "text": "Expected hours"
+  },
+  {
+    "id": "SalesTargetsPage.adc49d124b9b029a",
+    "page": "SalesTargetsPage",
+    "text": "Target preview"
+  },
+  {
+    "id": "SalesTargetsPage.0d97c739462f93ba",
+    "page": "SalesTargetsPage",
+    "text": "Six-day average: "
+  },
+  {
+    "id": "SalesTargetsPage.b5fdca9800f3dbfa",
+    "page": "SalesTargetsPage",
+    "text": " · Team goal: "
+  },
+  {
+    "id": "SalesTargetsPage.85324e671581449a",
+    "page": "SalesTargetsPage",
+    "text": "Bar "
+  },
+  {
+    "id": "SalesTargetsPage.3eb4b7c2664b3b68",
+    "page": "SalesTargetsPage",
+    "text": " · Floor "
+  },
+  {
+    "id": "SalesTargetsPage.1ce2d1acb9720273",
+    "page": "SalesTargetsPage",
+    "text": "Employee"
+  },
+  {
+    "id": "SalesTargetsPage.3e47e31eb21cfa65",
+    "page": "SalesTargetsPage",
+    "text": "Pool"
+  },
+  {
+    "id": "SalesTargetsPage.e1be69da2a7c4dbe",
+    "page": "SalesTargetsPage",
+    "text": "Hours"
+  },
+  {
+    "id": "SalesTargetsPage.22a899213932833c",
+    "page": "SalesTargetsPage",
+    "text": "Target"
+  },
+  {
+    "id": "SalesTargetsPage.4864400a9cf8ebc5",
+    "page": "SalesTargetsPage",
+    "text": "Open Pre-Shift →"
+  },
+  {
+    "id": "SettingsPage.a4baa08020e55315",
+    "page": "SettingsPage",
+    "text": "General manager"
+  },
+  {
+    "id": "SettingsPage.5a052c1146480afc",
+    "page": "SettingsPage",
+    "text": "Settings"
+  },
+  {
+    "id": "SummaryPage.e29d49cab08dfe4a",
+    "page": "SummaryPage",
+    "text": "Closeouts"
+  },
+  {
+    "id": "SummaryPage.149035aa258681ef",
+    "page": "SummaryPage",
+    "text": "Cash"
+  },
+  {
+    "id": "TasksPage.e75c9091d4c88667",
+    "page": "TasksPage",
+    "text": "Daily responsibilities"
+  },
+  {
+    "id": "TasksPage.5dead90c9ca59d8e",
+    "page": "TasksPage",
+    "text": "Task Groups"
+  },
+  {
+    "id": "TasksPage.90b47c9b2910fcd8",
+    "page": "TasksPage",
+    "text": "Service day"
+  },
+  {
+    "id": "TasksPage.ca249ab6eaa38b26",
+    "page": "TasksPage",
+    "text": " · Daily lists stay available in history after the 4 AM rollover."
+  },
+  {
+    "id": "TasksPage.7ac4da45b4a35ac9",
+    "page": "TasksPage",
+    "text": "Loading tasks…"
+  },
+  {
+    "id": "TasksPage.e7d9ebac3853177e",
+    "page": "TasksPage",
+    "text": "My task groups"
+  },
+  {
+    "id": "TasksPage.d81d4cba76dbc365",
+    "page": "TasksPage",
+    "text": "Assign a task group"
+  },
+  {
+    "id": "TasksPage.83160c44b9827b31",
+    "page": "TasksPage",
+    "text": "Choose any task group and any employees, regardless of their position. Each person checks off their own copy."
+  },
+  {
+    "id": "TasksPage.fcc270d049d857f4",
+    "page": "TasksPage",
+    "text": "Task group"
+  },
+  {
+    "id": "TasksPage.0f95411d32a1de45",
+    "page": "TasksPage",
+    "text": "Choose a group"
+  },
+  {
+    "id": "TasksPage.354f43c2295492b4",
+    "page": "TasksPage",
+    "text": "Preview "
+  },
+  {
+    "id": "TasksPage.d918e7f1ad255efd",
+    "page": "TasksPage",
+    "text": " tasks"
+  },
+  {
+    "id": "TasksPage.cc4ebdc620483a9b",
+    "page": "TasksPage",
+    "text": "Edit / Review list"
+  },
+  {
+    "id": "TasksPage.a804b23d36920a25",
+    "page": "TasksPage",
+    "text": "Review and save this older list before assigning it."
+  },
+  {
+    "id": "TasksPage.cedfc43a3d00f867",
+    "page": "TasksPage",
+    "text": "Shift or area (optional)"
+  },
+  {
+    "id": "TasksPage.1d9dab48d6c236dd",
+    "page": "TasksPage",
+    "text": "Assign to "
+  },
+  {
+    "id": "TasksPage.577b8c5fffc9df86",
+    "page": "TasksPage",
+    "text": " employee"
+  },
+  {
+    "id": "TasksPage.a75ad1f041569f5d",
+    "page": "TasksPage",
+    "text": "Create a new group"
+  },
+  {
+    "id": "TasksPage.a1bf138c8b30994e",
+    "page": "TasksPage",
+    "text": "Group name"
+  },
+  {
+    "id": "TasksPage.1b8aaac0c721eb25",
+    "page": "TasksPage",
+    "text": "Phase"
+  },
+  {
+    "id": "TasksPage.49a431a49ba64856",
+    "page": "TasksPage",
+    "text": "Tasks — up to 8, one per line"
+  },
+  {
+    "id": "TasksPage.de250c789a11a087",
+    "page": "TasksPage",
+    "text": "Each line becomes a clickable checkbox. Keep the group focused; use another group for a different setup or restocking area."
+  },
+  {
+    "id": "TasksPage.394808a6b53aecc5",
+    "page": "TasksPage",
+    "text": "I reviewed this list for current operations."
+  },
+  {
+    "id": "TasksPage.94fa91a98243ed62",
+    "page": "TasksPage",
+    "text": "Save group"
+  },
+  {
+    "id": "TasksPage.e6b650c12a0a2038",
+    "page": "TasksPage",
+    "text": "Cancel"
+  },
+  {
+    "id": "TasksPage.b72302d3995dbfda",
+    "page": "TasksPage",
+    "text": "Team progress"
+  },
+  {
+    "id": "TeamPage.262da4df982b420d",
+    "page": "TeamPage",
+    "text": "LNX Systems"
+  },
+  {
+    "id": "TeamPage.ba414bfe8fe6cf7b",
+    "page": "TeamPage",
+    "text": "Team"
+  },
+  {
+    "id": "TeamPage.9ab27c4cb1072ec7",
+    "page": "TeamPage",
+    "text": "Loading team…"
+  },
+  {
+    "id": "TeamPage.c1b5f294c1f55228",
+    "page": "TeamPage",
+    "text": "LNX Systems"
+  },
+  {
+    "id": "TeamPage.f8c6bdd37125a5eb",
+    "page": "TeamPage",
+    "text": "Team"
+  },
+  {
+    "id": "TeamPage.35779cd02cf5c4ef",
+    "page": "TeamPage",
+    "text": "active team members"
+  },
+  {
+    "id": "TeamPage.7b09c6cb92544e56",
+    "page": "TeamPage",
+    "text": "+ Add Team Member"
+  },
+  {
+    "id": "TeamPage.b2ea937011e56c51",
+    "page": "TeamPage",
+    "text": "View employee profile"
+  },
+  {
+    "id": "TeamPage.b03343aec9127b16",
+    "page": "TeamPage",
+    "text": "No team members found."
+  },
+  {
+    "id": "TeamPage.291bcd306c2e6ef4",
+    "page": "TeamPage",
+    "text": "Team Management"
+  },
+  {
+    "id": "TeamPage.1821210729db4e68",
+    "page": "TeamPage",
+    "text": "Add Team Member"
+  },
+  {
+    "id": "TeamPage.c648d0d1f86472a9",
+    "page": "TeamPage",
+    "text": "Full name"
+  },
+  {
+    "id": "TeamPage.7c0979fda0d91b63",
+    "page": "TeamPage",
+    "text": "Preferred name"
+  },
+  {
+    "id": "TeamPage.82076b654a58ad2e",
+    "page": "TeamPage",
+    "text": "Email"
+  },
+  {
+    "id": "TeamPage.7768a75fc61fe2c6",
+    "page": "TeamPage",
+    "text": "Phone"
+  },
+  {
+    "id": "TeamPage.19c01864eac1320a",
+    "page": "TeamPage",
+    "text": "Role"
+  },
+  {
+    "id": "TeamPage.ba1269b8eb9126c7",
+    "page": "TeamPage",
+    "text": "Employee number"
+  },
+  {
+    "id": "TeamPage.d5c515dcd12201f0",
+    "page": "TeamPage",
+    "text": "Cancel"
+  },
+  {
+    "id": "TrainingPage.0efd716f11d69211",
+    "page": "TrainingPage",
+    "text": "Training"
+  },
+  {
+    "id": "TrainingPage.374dababea1c733e",
+    "page": "TrainingPage",
+    "text": "Training guides"
+  },
+  {
+    "id": "TrainingPage.41ae148a616d87c3",
+    "page": "TrainingPage",
+    "text": "Your library of recipes, builds and training materials."
+  },
+  {
+    "id": "TrainingPage.fe36bab043706cc1",
+    "page": "TrainingPage",
+    "text": "Cocktails"
+  },
+  {
+    "id": "TrainingPage.23ce3ad6752b2e30",
+    "page": "TrainingPage",
+    "text": "Browse recipes and builds by category or search by name."
+  },
+  {
+    "id": "WalkInPage.fa81ed6f4f7540e0",
+    "page": "WalkInPage",
+    "text": "Walk-in check-in"
+  },
+  {
+    "id": "WalkInPage.272d341450d6f245",
+    "page": "WalkInPage",
+    "text": "You’re checked in!"
+  },
+  {
+    "id": "WalkInPage.c433f334fe39c138",
+    "page": "WalkInPage",
+    "text": "Please check in with the host."
+  },
+  {
+    "id": "WalkInPage.13ec3ad6903d11ad",
+    "page": "WalkInPage",
+    "text": "This check-in is not a reservation."
+  },
+  {
+    "id": "WalkInPage.094426cd3c11ead7",
+    "page": "WalkInPage",
+    "text": "Check in with the host."
+  },
+  {
+    "id": "WalkInPage.4fd23d1cfe365713",
+    "page": "WalkInPage",
+    "text": "Loading…"
+  },
+  {
+    "id": "WalkInPage.42c9d2bcced66815",
+    "page": "WalkInPage",
+    "text": "Your name"
+  },
+  {
+    "id": "WalkInPage.3460a8d2b9b96657",
+    "page": "WalkInPage",
+    "text": "Email"
+  },
+  {
+    "id": "WalkInPage.a796462ca58497ef",
+    "page": "WalkInPage",
+    "text": "Phone number "
+  },
+  {
+    "id": "WalkInPage.59429b98129b6198",
+    "page": "WalkInPage",
+    "text": "optional"
+  },
+  {
+    "id": "WalkInPage.aa75069a15ed94eb",
+    "page": "WalkInPage",
+    "text": "Number in your party"
+  },
+  {
+    "id": "WalkInPage.3dea6d83450fff48",
+    "page": "WalkInPage",
+    "text": "Email me JusTini’s news, events and offers."
+  },
+  {
+    "id": "WalkInPage.a053db25463ec752",
+    "page": "WalkInPage",
+    "text": "Your details are used for your visit. Joining the mailing list is optional."
+  },
+  {
+    "id": "WalkInPage.474501e00ccff391",
+    "page": "WalkInPage",
+    "text": "Website"
+  },
+  {
+    "id": "AppShell.262da4df982b420d",
+    "page": "AppShell",
+    "text": "LNX Systems"
+  },
+  {
+    "id": "AppearanceHeader.84360f079ab37551",
+    "page": "AppearanceHeader",
+    "text": "Settings"
+  },
+  {
+    "id": "AssignedTaskLists.37e4f4cd95ffa4f5",
+    "page": "AssignedTaskLists",
+    "text": "Loading task groups…"
+  },
+  {
+    "id": "AssignedTaskLists.44d8bf411a6101b7",
+    "page": "AssignedTaskLists",
+    "text": "No task groups assigned for this day."
+  },
+  {
+    "id": "AssignedTaskLists.8bd73d049d7baaa6",
+    "page": "AssignedTaskLists",
+    "text": " completed"
+  },
+  {
+    "id": "AssignedTaskLists.fbd72a6c065967c4",
+    "page": "AssignedTaskLists",
+    "text": "Tap a group to open it, then tap a task or its checkbox to mark it complete."
+  },
+  {
+    "id": "AssignedTaskLists.bf1569190878d18a",
+    "page": "AssignedTaskLists",
+    "text": "✓ Group complete"
+  },
+  {
+    "id": "AssignedTaskLists.a1f897b9e2b738f3",
+    "page": "AssignedTaskLists",
+    "text": "Completed "
+  },
+  {
+    "id": "AssignedTaskLists.ffc4a851cc456ee7",
+    "page": "AssignedTaskLists",
+    "text": "Remove assignment"
+  },
+  {
+    "id": "ClockTime.aef8a933c436ca7c",
+    "page": "ClockTime",
+    "text": "Hour"
+  },
+  {
+    "id": "ClockTime.7de1f7835e9061b2",
+    "page": "ClockTime",
+    "text": "Min"
+  },
+  {
+    "id": "ClockTime.b242dbd86b8b96d2",
+    "page": "ClockTime",
+    "text": "AM/PM"
+  },
+  {
+    "id": "ClockTime.1b8543599b2c4399",
+    "page": "ClockTime",
+    "text": "AM"
+  },
+  {
+    "id": "ClockTime.5d300ece854f58cc",
+    "page": "ClockTime",
+    "text": "PM"
+  },
+  {
+    "id": "CloseoutConfig.be4492a1358f3526",
+    "page": "CloseoutConfig",
+    "text": "Additional closeout questions"
+  },
+  {
+    "id": "CloseoutConfig.2091fd73e0c28daf",
+    "page": "CloseoutConfig",
+    "text": "Choose an answer"
+  },
+  {
+    "id": "CloseoutConfig.0ef3d89123c8ea40",
+    "page": "CloseoutConfig",
+    "text": "Yes"
+  },
+  {
+    "id": "CloseoutConfig.4019546009aa8a7f",
+    "page": "CloseoutConfig",
+    "text": "No"
+  },
+  {
+    "id": "CloseoutCorrectionEditor.c1194181eb44cbe3",
+    "page": "CloseoutCorrectionEditor",
+    "text": "Edit / Review: "
+  },
+  {
+    "id": "CloseoutCorrectionEditor.f50113b995380bfd",
+    "page": "CloseoutCorrectionEditor",
+    "text": "Correct the original record. Sales-related points and the recap update automatically."
+  },
+  {
+    "id": "CloseoutCorrectionEditor.c34fac7b67aabdec",
+    "page": "CloseoutCorrectionEditor",
+    "text": "Scheduled time"
+  },
+  {
+    "id": "CloseoutCorrectionEditor.dcc4312147f04470",
+    "page": "CloseoutCorrectionEditor",
+    "text": "Actual clock-in"
+  },
+  {
+    "id": "CloseoutCorrectionEditor.adfae5ab1d496a32",
+    "page": "CloseoutCorrectionEditor",
+    "text": "Actual clock-out"
+  },
+  {
+    "id": "CloseoutCorrectionEditor.9228f576057242d7",
+    "page": "CloseoutCorrectionEditor",
+    "text": "Older forms may have no recorded clock-out."
+  },
+  {
+    "id": "CloseoutCorrectionEditor.fb8900bc33772b2f",
+    "page": "CloseoutCorrectionEditor",
+    "text": "Role worked"
+  },
+  {
+    "id": "CloseoutCorrectionEditor.b6bca714113a1856",
+    "page": "CloseoutCorrectionEditor",
+    "text": "Shift"
+  },
+  {
+    "id": "CloseoutCorrectionEditor.37d96a6d86fed9b0",
+    "page": "CloseoutCorrectionEditor",
+    "text": "Not recorded"
+  },
+  {
+    "id": "CloseoutCorrectionEditor.17f55620f29a9483",
+    "page": "CloseoutCorrectionEditor",
+    "text": "AM"
+  },
+  {
+    "id": "CloseoutCorrectionEditor.1d898d87bd994294",
+    "page": "CloseoutCorrectionEditor",
+    "text": "PM"
+  },
+  {
+    "id": "CloseoutCorrectionEditor.ac6d102c4ab95530",
+    "page": "CloseoutCorrectionEditor",
+    "text": "To volume"
+  },
+  {
+    "id": "CloseoutCorrectionEditor.afa1e54e9c3c029c",
+    "page": "CloseoutCorrectionEditor",
+    "text": "I verified that $0 sales is accurate."
+  },
+  {
+    "id": "CloseoutCorrectionEditor.d5457e12492edb33",
+    "page": "CloseoutCorrectionEditor",
+    "text": "Reason for zero sales"
+  },
+  {
+    "id": "CloseoutCorrectionEditor.8175e11402fcf275",
+    "page": "CloseoutCorrectionEditor",
+    "text": "If this is an incorrect zero that still needs correction, leave it unconfirmed and mark the original submission inaccurate below."
+  },
+  {
+    "id": "CloseoutCorrectionEditor.ccfdd0f89d522c38",
+    "page": "CloseoutCorrectionEditor",
+    "text": "Choose an answer"
+  },
+  {
+    "id": "CloseoutCorrectionEditor.8670cf6f8bcb4c31",
+    "page": "CloseoutCorrectionEditor",
+    "text": "Yes"
+  },
+  {
+    "id": "CloseoutCorrectionEditor.c684d2565fbd1f56",
+    "page": "CloseoutCorrectionEditor",
+    "text": "No"
+  },
+  {
+    "id": "CloseoutCorrectionEditor.234447786cf05bff",
+    "page": "CloseoutCorrectionEditor",
+    "text": "Notes"
+  },
+  {
+    "id": "CloseoutCorrectionEditor.ddd33a17634bc331",
+    "page": "CloseoutCorrectionEditor",
+    "text": "The original submission was inaccurate. Withhold its closeout completion bonus."
+  },
+  {
+    "id": "CloseoutCorrectionEditor.195b413a6828df65",
+    "page": "CloseoutCorrectionEditor",
+    "text": "Correcting the form does not automatically restore this bonus. The GM can restore it from the Points page. Leave this unchecked for a clarification to an otherwise accurate submission."
+  },
+  {
+    "id": "CloseoutCorrectionEditor.1abf9b4fc9a29c70",
+    "page": "CloseoutCorrectionEditor",
+    "text": "Correction / review reason"
+  },
+  {
+    "id": "CloseoutCorrectionEditor.b72759632737e7c0",
+    "page": "CloseoutCorrectionEditor",
+    "text": "Cancel"
+  },
+  {
+    "id": "EmployeeProfile.012bdfc49821f95a",
+    "page": "EmployeeProfile",
+    "text": "Records are linked by employee ID and update when you reopen or refresh this profile."
+  },
+  {
+    "id": "EmployeeProfile.863f8b701c7c096d",
+    "page": "EmployeeProfile",
+    "text": "From"
+  },
+  {
+    "id": "EmployeeProfile.eab1de420141a397",
+    "page": "EmployeeProfile",
+    "text": "Through"
+  },
+  {
+    "id": "EmployeeProfile.3dc914f1260f9c68",
+    "page": "EmployeeProfile",
+    "text": "Refresh profile"
+  },
+  {
+    "id": "EmployeeProfile.24102437495319ff",
+    "page": "EmployeeProfile",
+    "text": "Loading…"
+  },
+  {
+    "id": "EmployeeProfile.70be783e1c0e0244",
+    "page": "EmployeeProfile",
+    "text": " · Employee #"
+  },
+  {
+    "id": "EmployeeProfile.ad2316532a047023",
+    "page": "EmployeeProfile",
+    "text": "Net sales"
+  },
+  {
+    "id": "EmployeeProfile.4de0dd0d9f1bebdf",
+    "page": "EmployeeProfile",
+    "text": "Recorded targets"
+  },
+  {
+    "id": "EmployeeProfile.1a55e42969c9f978",
+    "page": "EmployeeProfile",
+    "text": "Target achieved"
+  },
+  {
+    "id": "EmployeeProfile.dd054eb607e93fe3",
+    "page": "EmployeeProfile",
+    "text": "Points in date range"
+  },
+  {
+    "id": "EmployeeProfile.3abb93281a95e034",
+    "page": "EmployeeProfile",
+    "text": "Schedule sales target"
+  },
+  {
+    "id": "EmployeeProfile.a2b951c22ba35dd3",
+    "page": "EmployeeProfile",
+    "text": "Target date"
+  },
+  {
+    "id": "EmployeeProfile.c3af4fc1c09ad020",
+    "page": "EmployeeProfile",
+    "text": "7shifts employee ID"
+  },
+  {
+    "id": "EmployeeProfile.ca5fb3ce1f13a913",
+    "page": "EmployeeProfile",
+    "text": "Match this person once. Names alone are never used to link records. Clear the field to unlink."
+  },
+  {
+    "id": "EmployeeProfile.74c8e12fca6bcf5f",
+    "page": "EmployeeProfile",
+    "text": "Save schedule link"
+  },
+  {
+    "id": "EmployeeProfile.8c5bcd4b9dff1acf",
+    "page": "EmployeeProfile",
+    "text": "Closeouts · "
+  },
+  {
+    "id": "EmployeeProfile.1efd29a0ec349ad9",
+    "page": "EmployeeProfile",
+    "text": "Date"
+  },
+  {
+    "id": "EmployeeProfile.dd42f735447bea3e",
+    "page": "EmployeeProfile",
+    "text": "Sales"
+  },
+  {
+    "id": "EmployeeProfile.1d06fe3fe7ee7578",
+    "page": "EmployeeProfile",
+    "text": "Target"
+  },
+  {
+    "id": "EmployeeProfile.343c64fd28e2b767",
+    "page": "EmployeeProfile",
+    "text": "Achieved"
+  },
+  {
+    "id": "EmployeeProfile.71c218a0cf63ec6f",
+    "page": "EmployeeProfile",
+    "text": "Tables"
+  },
+  {
+    "id": "EmployeeProfile.45c72ede7a0743ee",
+    "page": "EmployeeProfile",
+    "text": "No submitted closeouts in this range."
+  },
+  {
+    "id": "EmployeeProfile.22f91f9ec39b336a",
+    "page": "EmployeeProfile",
+    "text": "Quizzes · "
+  },
+  {
+    "id": "EmployeeProfile.5f8aab8b153333b4",
+    "page": "EmployeeProfile",
+    "text": " reward points"
+  },
+  {
+    "id": "EmployeeProfile.e0db0af2c9808d25",
+    "page": "EmployeeProfile",
+    "text": "Task lists · "
+  },
+  {
+    "id": "EmployeeProfile.035ab878726a6311",
+    "page": "EmployeeProfile",
+    "text": " complete"
+  },
+  {
+    "id": "EmployeeProfile.56997a12a3a06179",
+    "page": "EmployeeProfile",
+    "text": "Sections"
+  },
+  {
+    "id": "EmployeeProfile.ce342c92d9dbcd37",
+    "page": "EmployeeProfile",
+    "text": "Points history"
+  },
+  {
+    "id": "EmployeeProfile.b811a065e8efe9c3",
+    "page": "EmployeeProfile",
+    "text": "Inventory disposal sheets · "
+  },
+  {
+    "id": "EmployeeProfile.0880572f0f8946c2",
+    "page": "EmployeeProfile",
+    "text": "Manager reviews · private"
+  },
+  {
+    "id": "EmployeeProfile.4ca0411cfc1392b9",
+    "page": "EmployeeProfile",
+    "text": "No submitted manager reviews in this range."
+  },
+  {
+    "id": "HomeOperations.ef9a2e6ea79fd49e",
+    "page": "HomeOperations",
+    "text": "Today’s Reservations"
+  },
+  {
+    "id": "HomeOperations.525371addd04800c",
+    "page": "HomeOperations",
+    "text": "Floor / Upload →"
+  },
+  {
+    "id": "HomeOperations.4b5b6fd9f16ece53",
+    "page": "HomeOperations",
+    "text": "Loading reservations…"
+  },
+  {
+    "id": "HomeOperations.038a1540ce774c1f",
+    "page": "HomeOperations",
+    "text": "No reservations uploaded for today."
+  },
+  {
+    "id": "HomeOperations.5bfc9304f46db128",
+    "page": "HomeOperations",
+    "text": " reservations · "
+  },
+  {
+    "id": "HomeOperations.3e37fafca1f8ec5f",
+    "page": "HomeOperations",
+    "text": " guests expected"
+  },
+  {
+    "id": "HomeOperations.23ab780df5c1456d",
+    "page": "HomeOperations",
+    "text": "View list"
+  },
+  {
+    "id": "HomeOperations.3a3d6d41061d8f7d",
+    "page": "HomeOperations",
+    "text": " guests"
+  },
+  {
+    "id": "HomeOperations.91bac0b640b277a1",
+    "page": "HomeOperations",
+    "text": "Table "
+  },
+  {
+    "id": "HomeOperations.276629158999ecbd",
+    "page": "HomeOperations",
+    "text": "Today’s 7shifts Schedule"
+  },
+  {
+    "id": "HomeOperations.e75f0e38c8bbcf4a",
+    "page": "HomeOperations",
+    "text": "Open 7shifts →"
+  },
+  {
+    "id": "HomeOperations.243da5661e86cb31",
+    "page": "HomeOperations",
+    "text": "New Orleans time · Updates automatically while Home is open."
+  },
+  {
+    "id": "HomeOperations.fdbf6534bde17933",
+    "page": "HomeOperations",
+    "text": "Loading schedule…"
+  },
+  {
+    "id": "HomeOperations.84da857b0ea523b5",
+    "page": "HomeOperations",
+    "text": "The 7shifts connection needs to be configured by your administrator."
+  },
+  {
+    "id": "HomeOperations.5700c2781c0b19c3",
+    "page": "HomeOperations",
+    "text": "Last synced: "
+  },
+  {
+    "id": "HomeOperations.af9221a5532fc9de",
+    "page": "HomeOperations",
+    "text": "No published shifts for today."
+  },
+  {
+    "id": "ManagementAccess.80409edadbb53ccf",
+    "page": "ManagementAccess",
+    "text": "Checking access…"
+  },
+  {
+    "id": "ManagementAccess.66253c5629fe2863",
+    "page": "ManagementAccess",
+    "text": "Access restricted"
+  },
+  {
+    "id": "ManagementAccess.5bf2843cf474120a",
+    "page": "ManagementAccess",
+    "text": "Return to Closeout"
+  },
+  {
+    "id": "MySections.95fa0af551b5f5f1",
+    "page": "MySections",
+    "text": "My Sections"
+  },
+  {
+    "id": "MySections.993f0bbfdc80c378",
+    "page": "MySections",
+    "text": "Open floor →"
+  },
+  {
+    "id": "MySections.b5de2c6ad88b27f5",
+    "page": "MySections",
+    "text": "Loading sections…"
+  },
+  {
+    "id": "MySections.906682ebbac27a3d",
+    "page": "MySections",
+    "text": "No section published for you for this service day."
+  },
+  {
+    "id": "MySections.58249e8dd9d43f25",
+    "page": "MySections",
+    "text": "Tables:"
+  },
+  {
+    "id": "PointEntryEditor.e125db0089fa554f",
+    "page": "PointEntryEditor",
+    "text": "Edit Point Entries · GM Only"
+  },
+  {
+    "id": "PointEntryEditor.df72d5e83c0d2ad7",
+    "page": "PointEntryEditor",
+    "text": "Set the final points for an entry. Changes keep an audit record and update monthly totals."
+  },
+  {
+    "id": "PointEntryEditor.bd11e74b6158de3b",
+    "page": "PointEntryEditor",
+    "text": "Staff member"
+  },
+  {
+    "id": "PointEntryEditor.5a4578f8f8cfbdae",
+    "page": "PointEntryEditor",
+    "text": "All staff"
+  },
+  {
+    "id": "PointEntryEditor.ef3d72a1b1d62324",
+    "page": "PointEntryEditor",
+    "text": "Loading / saving…"
+  },
+  {
+    "id": "PointEntryEditor.03ef2a10c1b156d6",
+    "page": "PointEntryEditor",
+    "text": "Current: "
+  },
+  {
+    "id": "PointEntryEditor.6efe688a9587d889",
+    "page": "PointEntryEditor",
+    "text": " · Automatic value: "
+  },
+  {
+    "id": "PointEntryEditor.c78ae477bc032fd8",
+    "page": "PointEntryEditor",
+    "text": "Adjustment"
+  },
+  {
+    "id": "PointEntryEditor.a0ff2c0624fc4bab",
+    "page": "PointEntryEditor",
+    "text": "Add points"
+  },
+  {
+    "id": "PointEntryEditor.4f3b4e003514961c",
+    "page": "PointEntryEditor",
+    "text": "Deduct points"
+  },
+  {
+    "id": "PointEntryEditor.3a055c2338e55ac2",
+    "page": "PointEntryEditor",
+    "text": "Points"
+  },
+  {
+    "id": "PointEntryEditor.ac37a73a0b87d997",
+    "page": "PointEntryEditor",
+    "text": "Reason for edit"
+  },
+  {
+    "id": "PointEntryEditor.69e1ba9436006723",
+    "page": "PointEntryEditor",
+    "text": "Save entry"
+  },
+  {
+    "id": "PointEntryEditor.8e288358f1fe23cc",
+    "page": "PointEntryEditor",
+    "text": "Restore automatic points"
+  },
+  {
+    "id": "PointEntryEditor.ce7ffdd48895e09d",
+    "page": "PointEntryEditor",
+    "text": "Cancel"
+  },
+  {
+    "id": "PointEntryEditor.a9578638d07cab74",
+    "page": "PointEntryEditor",
+    "text": "Date"
+  },
+  {
+    "id": "PointEntryEditor.29ae802ee68d2602",
+    "page": "PointEntryEditor",
+    "text": "Employee"
+  },
+  {
+    "id": "PointEntryEditor.c3e7caccd9393ba9",
+    "page": "PointEntryEditor",
+    "text": "Activity"
+  },
+  {
+    "id": "PointEntryEditor.9de7b0a5637966eb",
+    "page": "PointEntryEditor",
+    "text": "Points"
+  },
+  {
+    "id": "PointEntryEditor.ab9cc9ff643e1de0",
+    "page": "PointEntryEditor",
+    "text": "Edit"
+  },
+  {
+    "id": "PointEntryEditor.2e25f862da08fd65",
+    "page": "PointEntryEditor",
+    "text": "Edited "
+  },
+  {
+    "id": "PointEntryEditor.62064020755fa14c",
+    "page": "PointEntryEditor",
+    "text": "Edit points"
+  },
+  {
+    "id": "PointEntryEditor.63e2c86c00f9c161",
+    "page": "PointEntryEditor",
+    "text": "No entries this month."
+  },
+  {
+    "id": "PostMedia.91ac02e781801e15",
+    "page": "PostMedia",
+    "text": "Loading "
+  },
+  {
+    "id": "PreshiftArchive.1cf3c0d3d514cd2c",
+    "page": "PreshiftArchive",
+    "text": "Past Pre-Shifts"
+  },
+  {
+    "id": "PreshiftArchive.9e7f1306b6a47d01",
+    "page": "PreshiftArchive",
+    "text": "Search words in titles and posts. Past service days move here after the 4 AM rollover."
+  },
+  {
+    "id": "PreshiftArchive.a22d3ad37cecef26",
+    "page": "PreshiftArchive",
+    "text": "Search words"
+  },
+  {
+    "id": "PreshiftArchive.c3c96d1bde2f5b54",
+    "page": "PreshiftArchive",
+    "text": "From date"
+  },
+  {
+    "id": "PreshiftArchive.02a53d5bb2b3426d",
+    "page": "PreshiftArchive",
+    "text": "Through date"
+  },
+  {
+    "id": "PreshiftArchive.3d1ea9c59284d589",
+    "page": "PreshiftArchive",
+    "text": "Search archive"
+  },
+  {
+    "id": "PreshiftArchive.74edfa7dfa2b3ce7",
+    "page": "PreshiftArchive",
+    "text": "Clear filters"
+  },
+  {
+    "id": "PreshiftArchive.7cad8dba38b655f8",
+    "page": "PreshiftArchive",
+    "text": "Searching…"
+  },
+  {
+    "id": "PreshiftArchive.e871b6a34ee7d972",
+    "page": "PreshiftArchive",
+    "text": " matching pre-shifts"
+  },
+  {
+    "id": "PreshiftArchive.f14b0efb72362272",
+    "page": "PreshiftArchive",
+    "text": "Posted by "
+  },
+  {
+    "id": "PreshiftArchive.a30ddb94835000dd",
+    "page": "PreshiftArchive",
+    "text": "Previous"
+  },
+  {
+    "id": "PreshiftArchive.6e2d5fa2489c3cb1",
+    "page": "PreshiftArchive",
+    "text": " of "
+  },
+  {
+    "id": "PreshiftArchive.278605cec2eeaa84",
+    "page": "PreshiftArchive",
+    "text": "Next"
+  },
+  {
+    "id": "PreshiftPresetBuilder.02bcc5390bfc72de",
+    "page": "PreshiftPresetBuilder",
+    "text": "Build with preset sections"
+  },
+  {
+    "id": "PreshiftPresetBuilder.35775100d0250ad2",
+    "page": "PreshiftPresetBuilder",
+    "text": "Pick the pieces you need, edit their wording for this shift, then insert them into your post. Daily hours and specials are starter drafts—confirm today’s details before publishing."
+  },
+  {
+    "id": "PreshiftPresetBuilder.0aa6e5e7de2fdbff",
+    "page": "PreshiftPresetBuilder",
+    "text": "Preset library"
+  },
+  {
+    "id": "PreshiftPresetBuilder.efcda099179f0882",
+    "page": "PreshiftPresetBuilder",
+    "text": "Day"
+  },
+  {
+    "id": "PreshiftPresetBuilder.73461b2a185415e5",
+    "page": "PreshiftPresetBuilder",
+    "text": "Category"
+  },
+  {
+    "id": "PreshiftPresetBuilder.fa2dbdfa6b1d9daf",
+    "page": "PreshiftPresetBuilder",
+    "text": "All sections"
+  },
+  {
+    "id": "PreshiftPresetBuilder.043881a4f90ea4c9",
+    "page": "PreshiftPresetBuilder",
+    "text": "Read preset"
+  },
+  {
+    "id": "PreshiftPresetBuilder.d3907b776d9693a3",
+    "page": "PreshiftPresetBuilder",
+    "text": "Edit preset"
+  },
+  {
+    "id": "PreshiftPresetBuilder.835b90f5d48bf61d",
+    "page": "PreshiftPresetBuilder",
+    "text": "Remove preset"
+  },
+  {
+    "id": "PreshiftPresetBuilder.78d7c7fa8f8de7be",
+    "page": "PreshiftPresetBuilder",
+    "text": "Create a preset"
+  },
+  {
+    "id": "PreshiftPresetBuilder.a6197e7a25dc4edc",
+    "page": "PreshiftPresetBuilder",
+    "text": "Preset title"
+  },
+  {
+    "id": "PreshiftPresetBuilder.6d79811f584afd71",
+    "page": "PreshiftPresetBuilder",
+    "text": "Category"
+  },
+  {
+    "id": "PreshiftPresetBuilder.cb40f387e240177e",
+    "page": "PreshiftPresetBuilder",
+    "text": "Day"
+  },
+  {
+    "id": "PreshiftPresetBuilder.f4c3413f600aa52e",
+    "page": "PreshiftPresetBuilder",
+    "text": "Any day"
+  },
+  {
+    "id": "PreshiftPresetBuilder.05a047b9c63f7395",
+    "page": "PreshiftPresetBuilder",
+    "text": "Reusable wording"
+  },
+  {
+    "id": "PreshiftPresetBuilder.987872b88d50468b",
+    "page": "PreshiftPresetBuilder",
+    "text": "Saving changes the library preset. Existing posts and sections already added to this draft keep their wording."
+  },
+  {
+    "id": "PreshiftPresetBuilder.5c4326db6fafcb6d",
+    "page": "PreshiftPresetBuilder",
+    "text": "Save preset"
+  },
+  {
+    "id": "PreshiftPresetBuilder.b7ecf032a48fc552",
+    "page": "PreshiftPresetBuilder",
+    "text": "Cancel preset edit"
+  },
+  {
+    "id": "PreshiftPresetBuilder.9fad76583580b96a",
+    "page": "PreshiftPresetBuilder",
+    "text": "Sections for this post"
+  },
+  {
+    "id": "PreshiftPresetBuilder.1392085b0f85676f",
+    "page": "PreshiftPresetBuilder",
+    "text": "Section heading"
+  },
+  {
+    "id": "PreshiftPresetBuilder.c0a05b6c1249b6a2",
+    "page": "PreshiftPresetBuilder",
+    "text": "Wording for this shift"
+  },
+  {
+    "id": "PreshiftPresetBuilder.b8706da4ea148687",
+    "page": "PreshiftPresetBuilder",
+    "text": "Move up"
+  },
+  {
+    "id": "PreshiftPresetBuilder.6facfe40141a8165",
+    "page": "PreshiftPresetBuilder",
+    "text": "Move down"
+  },
+  {
+    "id": "PreshiftPresetBuilder.ffe01b9208869838",
+    "page": "PreshiftPresetBuilder",
+    "text": "Remove"
+  },
+  {
+    "id": "PreshiftPresetBuilder.5d5af424be5bdeb0",
+    "page": "PreshiftPresetBuilder",
+    "text": "Add to post"
+  },
+  {
+    "id": "PreshiftSections.2562281ceb7c4693",
+    "page": "PreshiftSections",
+    "text": "Sections"
+  },
+  {
+    "id": "PreshiftSections.6ea0c1becc1f6c75",
+    "page": "PreshiftSections",
+    "text": "Pull assignments from Floor, then edit the server, name or tables. Publishing this post saves these assignments to Floor and publishes any included timed drafts. Later Floor changes keep this post as a record."
+  },
+  {
+    "id": "PreshiftSections.fda003be2ac13b87",
+    "page": "PreshiftSections",
+    "text": "Section name"
+  },
+  {
+    "id": "PreshiftSections.fd606679b46c8bc6",
+    "page": "PreshiftSections",
+    "text": "Tables: "
+  },
+  {
+    "id": "PreshiftSections.46b3ee20f5642575",
+    "page": "PreshiftSections",
+    "text": "Sections will save to Floor together with this post. To add sections or change their times, use Floor and reload here."
+  },
+  {
+    "id": "PublishedQuizzes.ffb407bdb85192c4",
+    "page": "PublishedQuizzes",
+    "text": "Loading published quizzes…"
+  },
+  {
+    "id": "PublishedQuizzes.480e872324288a23",
+    "page": "PublishedQuizzes",
+    "text": " questions · "
+  },
+  {
+    "id": "QuizQuestionBank.c2266270f6b43e98",
+    "page": "QuizQuestionBank",
+    "text": "＋ Question Bank ("
+  },
+  {
+    "id": "QuizQuestionBank.ea96d5e5a2d9fd42",
+    "page": "QuizQuestionBank",
+    "text": ") — by day"
+  },
+  {
+    "id": "QuizQuestionBank.89a1438d47709fa4",
+    "page": "QuizQuestionBank",
+    "text": "Every quiz saved in this app appears under its quiz date. Select one question or the whole day’s set. Copies can be edited before publishing."
+  },
+  {
+    "id": "QuizQuestionBank.1f9d1106a75d5c62",
+    "page": "QuizQuestionBank",
+    "text": "Loading question bank…"
+  },
+  {
+    "id": "QuizQuestionBank.eea41b687fbeb818",
+    "page": "QuizQuestionBank",
+    "text": "Search"
+  },
+  {
+    "id": "QuizQuestionBank.a6306e2dee3beaf3",
+    "page": "QuizQuestionBank",
+    "text": "Quiz day"
+  },
+  {
+    "id": "QuizQuestionBank.75f7596a7a9f4104",
+    "page": "QuizQuestionBank",
+    "text": "All"
+  },
+  {
+    "id": "QuizQuestionBank.6ebee72f93250359",
+    "page": "QuizQuestionBank",
+    "text": "Category"
+  },
+  {
+    "id": "QuizQuestionBank.50e544df8c5e981f",
+    "page": "QuizQuestionBank",
+    "text": "All"
+  },
+  {
+    "id": "QuizQuestionBank.d8778ebf21a3f41d",
+    "page": "QuizQuestionBank",
+    "text": "Add selected ("
+  },
+  {
+    "id": "QuizQuestionBank.d10e458258825abc",
+    "page": "QuizQuestionBank",
+    "text": " questions"
+  },
+  {
+    "id": "QuizQuestionBank.d4f12e433e8289ab",
+    "page": "QuizQuestionBank",
+    "text": "Select this day’s questions"
+  },
+  {
+    "id": "QuizQuestionBank.2c33d13a364e39b8",
+    "page": "QuizQuestionBank",
+    "text": "Preview choices and answer"
+  },
+  {
+    "id": "QuizQuestionBank.4206cfb972af9a6e",
+    "page": "QuizQuestionBank",
+    "text": "No matching questions."
+  },
+  {
+    "id": "QuizQuestionBank.29432acab14e0dec",
+    "page": "QuizQuestionBank",
+    "text": "I will check these older recipes, prices and policies before publishing."
+  },
+  {
+    "id": "QuizQuestionBank.b5e8b71e76b8daff",
+    "page": "QuizQuestionBank",
+    "text": "Choose fewer questions. The limit is 50 per quiz."
+  },
+  {
+    "id": "QuizQuestionBank.48aad5738d9c5b36",
+    "page": "QuizQuestionBank",
+    "text": "Import an older quiz from a JSON file"
+  },
+  {
+    "id": "QuizQuestionBank.3721b90fb7c0f755",
+    "page": "QuizQuestionBank",
+    "text": "Use the original questions and correct answers. Importing the same date and title replaces that imported set."
+  },
+  {
+    "id": "QuizQuestionBank.6e2b36f6f5356c07",
+    "page": "QuizQuestionBank",
+    "text": "Quiz date"
+  },
+  {
+    "id": "QuizQuestionBank.7f320b8eed13f1bd",
+    "page": "QuizQuestionBank",
+    "text": "Quiz title"
+  },
+  {
+    "id": "QuizQuestionBank.b9b7485d72361ade",
+    "page": "QuizQuestionBank",
+    "text": "Questions file"
+  },
+  {
+    "id": "QuizQuestionBank.ab6870a996cd92f8",
+    "page": "QuizQuestionBank",
+    "text": " questions ready"
+  },
+  {
+    "id": "QuizQuestionBank.6b34a1b5d05242c8",
+    "page": "QuizQuestionBank",
+    "text": "Import dated set"
+  },
+  {
+    "id": "QuizRequiredStaff.33a292e2be22e42e",
+    "page": "QuizRequiredStaff",
+    "text": "Staff Required to Take This Quiz"
+  },
+  {
+    "id": "QuizRequiredStaff.cbeee98f60a17d60",
+    "page": "QuizRequiredStaff",
+    "text": "Select staff working this day. Only selected staff receive a 10-point deduction if they miss the deadline."
+  },
+  {
+    "id": "QuizRequiredStaff.e433feea7b154ab8",
+    "page": "QuizRequiredStaff",
+    "text": "Deadline: "
+  },
+  {
+    "id": "QuizRequiredStaff.a9847e1e69e60381",
+    "page": "QuizRequiredStaff",
+    "text": "Late submission does not remove the missed-quiz deduction. The GM can waive it in Points."
+  },
+  {
+    "id": "QuizRequiredStaff.347f969be1df5343",
+    "page": "QuizRequiredStaff",
+    "text": "The deadline has passed. Point corrections are available to the GM in Points."
+  },
+  {
+    "id": "QuizRequiredStaff.e76e1c7e28631c9c",
+    "page": "QuizRequiredStaff",
+    "text": "Save Required Staff"
+  },
+  {
+    "id": "QuizUpload.6b66f804c8d5da9f",
+    "page": "QuizUpload",
+    "text": "Paste or upload questions"
+  },
+  {
+    "id": "QuizUpload.c75c9cc8c8674e5e",
+    "page": "QuizUpload",
+    "text": "Copy your list of questions, choices and correct answers here, or drop a file. Review first, then add it to the quiz for "
+  },
+  {
+    "id": "QuizUpload.7a0f88cbb146920a",
+    "page": "QuizUpload",
+    "text": "Paste quiz questions"
+  },
+  {
+    "id": "QuizUpload.ed6641ab99463735",
+    "page": "QuizUpload",
+    "text": "Use A., B., C. for choices and “Correct Answer: B” after each question. Up to 50 questions."
+  },
+  {
+    "id": "QuizUpload.dcd1cdf0be32a316",
+    "page": "QuizUpload",
+    "text": "Preview pasted questions"
+  },
+  {
+    "id": "QuizUpload.103e8d87e4c353a3",
+    "page": "QuizUpload",
+    "text": "Drop a quiz file here"
+  },
+  {
+    "id": "QuizUpload.b5bdcd9a74fa92f3",
+    "page": "QuizUpload",
+    "text": "TXT, CSV or JSON · up to 1 MB"
+  },
+  {
+    "id": "QuizUpload.5df71b577323e8be",
+    "page": "QuizUpload",
+    "text": "Or choose a file"
+  },
+  {
+    "id": "QuizUpload.102b0049c9f7a07f",
+    "page": "QuizUpload",
+    "text": "Text example"
+  },
+  {
+    "id": "QuizUpload.3fbf5326bd0fc001",
+    "page": "QuizUpload",
+    "text": "CSV template"
+  },
+  {
+    "id": "QuizUpload.690e1acf410d37df",
+    "page": "QuizUpload",
+    "text": "Reading quiz…"
+  },
+  {
+    "id": "QuizUpload.81aa5d96259a023c",
+    "page": "QuizUpload",
+    "text": " questions"
+  },
+  {
+    "id": "QuizUpload.49e1dfda156b9511",
+    "page": "QuizUpload",
+    "text": "The file’s date is "
+  },
+  {
+    "id": "QuizUpload.23dd2f9619534d21",
+    "page": "QuizUpload",
+    "text": ". These questions will load into "
+  },
+  {
+    "id": "QuizUpload.2d38034e16a355e5",
+    "page": "QuizUpload",
+    "text": ". Change the editor date first if needed."
+  },
+  {
+    "id": "QuizUpload.67a6b697d58ce0a6",
+    "page": "QuizUpload",
+    "text": "Import action"
+  },
+  {
+    "id": "QuizUpload.5ec41fa7efaebb4e",
+    "page": "QuizUpload",
+    "text": "Add to current questions"
+  },
+  {
+    "id": "QuizUpload.01d172ee376e1ed0",
+    "page": "QuizUpload",
+    "text": "Replace current questions"
+  },
+  {
+    "id": "QuizUpload.428da7542f469998",
+    "page": "QuizUpload",
+    "text": "I reviewed the questions and correct answers."
+  },
+  {
+    "id": "QuizUpload.e64adf90d0e5151f",
+    "page": "QuizUpload",
+    "text": " for "
+  },
+  {
+    "id": "QuizUpload.61c23c7b08003abe",
+    "page": "QuizUpload",
+    "text": "You can edit everything below before saving or publishing."
+  },
+  {
+    "id": "SalesTargetPreview.1007f835daa57934",
+    "page": "SalesTargetPreview",
+    "text": "Automatic sales targets"
+  },
+  {
+    "id": "SalesTargetPreview.d50a6366aa174e22",
+    "page": "SalesTargetPreview",
+    "text": "From six matching weekdays and the published 7shifts schedule for "
+  },
+  {
+    "id": "SalesTargetPreview.73753ccff0f23c9e",
+    "page": "SalesTargetPreview",
+    "text": "Sales target setup →"
+  },
+  {
+    "id": "SalesTargetPreview.3a79bd01f89f1b9f",
+    "page": "SalesTargetPreview",
+    "text": "Refresh targets"
+  },
+  {
+    "id": "SalesTargetPreview.7747bd3454d5fb6b",
+    "page": "SalesTargetPreview",
+    "text": "Loading sales targets…"
+  },
+  {
+    "id": "SalesTargetPreview.2a83e6948fec973b",
+    "page": "SalesTargetPreview",
+    "text": "Team goal: "
+  },
+  {
+    "id": "SalesTargetPreview.fc3bf496cb1c89df",
+    "page": "SalesTargetPreview",
+    "text": " · Bar "
+  },
+  {
+    "id": "SalesTargetPreview.fdf5053e47551e97",
+    "page": "SalesTargetPreview",
+    "text": " · Floor "
+  },
+  {
+    "id": "SalesTargetPreview.1ed67c35bc4d51eb",
+    "page": "SalesTargetPreview",
+    "text": "Add calculated sales targets"
+  },
+  {
+    "id": "SalesTargetPreview.f7bae67372f735b4",
+    "page": "SalesTargetPreview",
+    "text": "Inserted targets are an editable snapshot for this post. Refresh and add again if the schedule changes before publishing."
+  },
+  {
+    "id": "SectionEmployeePicker.e9da19479e1aba8d",
+    "page": "SectionEmployeePicker",
+    "text": "Employee"
+  },
+  {
+    "id": "SectionEmployeePicker.3d9713bdcbe5fedc",
+    "page": "SectionEmployeePicker",
+    "text": "Choose employee"
+  },
+  {
+    "id": "SectionEmployeePicker.5f1f623e838dbe8b",
+    "page": "SectionEmployeePicker",
+    "text": "Type a name — no account yet"
+  },
+  {
+    "id": "SectionEmployeePicker.02d9aac96d78610a",
+    "page": "SectionEmployeePicker",
+    "text": "Unavailable employee — choose another"
+  },
+  {
+    "id": "SectionEmployeePicker.31dc3e20589ffae4",
+    "page": "SectionEmployeePicker",
+    "text": "Employee name"
+  },
+  {
+    "id": "SectionEmployeePicker.c9c4ffd4e7ab5c62",
+    "page": "SectionEmployeePicker",
+    "text": "After they sign up, edit this assignment and choose their account to connect it to their Home screen."
+  },
+  {
+    "id": "SectionSchedule.196da854f649d6cb",
+    "page": "SectionSchedule",
+    "text": "Scheduled sections"
+  },
+  {
+    "id": "SectionSchedule.8f62c3eb1cefcd83",
+    "page": "SectionSchedule",
+    "text": "Save private drafts by date and time, even before a shift opens. Publish when ready for staff. Editing a published plan returns it to draft until you publish again. Times are New Orleans time. At the end of a window, regular shift assignments resume. Seated parties keep their server."
+  },
+  {
+    "id": "SectionSchedule.e7bfe854841871f8",
+    "page": "SectionSchedule",
+    "text": "Schedule selected tables"
+  },
+  {
+    "id": "SectionSchedule.cfd10df2281dd979",
+    "page": "SectionSchedule",
+    "text": "Select tables on the floor map first."
+  },
+  {
+    "id": "SectionSchedule.e8bac123398122ab",
+    "page": "SectionSchedule",
+    "text": "Current and upcoming plans ("
+  },
+  {
+    "id": "SectionSchedule.f306d16c91bb9dee",
+    "page": "SectionSchedule",
+    "text": "Employee is inactive. Edit this plan to choose another employee."
+  },
+  {
+    "id": "SectionSchedule.a2c3a83e61a1a060",
+    "page": "SectionSchedule",
+    "text": "Show tables"
+  },
+  {
+    "id": "SectionSchedule.1de30d8950882701",
+    "page": "SectionSchedule",
+    "text": "Edit"
+  },
+  {
+    "id": "SectionSchedule.ddfd18c59fef293e",
+    "page": "SectionSchedule",
+    "text": "Remove plan"
+  },
+  {
+    "id": "SectionSchedule.5a73214e5c76440d",
+    "page": "SectionSchedule",
+    "text": "Section name"
+  },
+  {
+    "id": "SectionSchedule.c4174443f0091ab9",
+    "page": "SectionSchedule",
+    "text": "Date"
+  },
+  {
+    "id": "SectionSchedule.fb3f82054aa55dd6",
+    "page": "SectionSchedule",
+    "text": "Start"
+  },
+  {
+    "id": "SectionSchedule.19c1e1516164e177",
+    "page": "SectionSchedule",
+    "text": "End"
+  },
+  {
+    "id": "SectionSchedule.2a88f3060a920546",
+    "page": "SectionSchedule",
+    "text": "An end time earlier than start means the next day. Overlapping plans for the same tables are blocked."
+  },
+  {
+    "id": "SectionSchedule.ce7ffdd48895e09d",
+    "page": "SectionSchedule",
+    "text": "Cancel"
+  },
+  {
+    "id": "SignedPoints.13b469b07e1e0249",
+    "page": "SignedPoints",
+    "text": "Action"
+  },
+  {
+    "id": "SignedPoints.9d65f816c4f51b45",
+    "page": "SignedPoints",
+    "text": "Add points"
+  },
+  {
+    "id": "SignedPoints.d2f17814093a629f",
+    "page": "SignedPoints",
+    "text": "Deduct points"
+  },
+  {
+    "id": "SignedPoints.20ce811bf513231d",
+    "page": "SignedPoints",
+    "text": "Point amount"
+  },
+  {
+    "id": "SignedPoints.54cfc4a26f7f6c4d",
+    "page": "SignedPoints",
+    "text": " points. Maximum 1000."
+  },
+  {
+    "id": "SignupApprovals.95a9f1d8b4c13366",
+    "page": "SignupApprovals",
+    "text": "Staff registration"
+  },
+  {
+    "id": "SignupApprovals.3a73d6354f18049d",
+    "page": "SignupApprovals",
+    "text": "Share this location’s registration link. New accounts wait for your approval."
+  },
+  {
+    "id": "SignupApprovals.05123828a691762a",
+    "page": "SignupApprovals",
+    "text": "Show registration link"
+  },
+  {
+    "id": "SignupApprovals.05fe0dd879dc8934",
+    "page": "SignupApprovals",
+    "text": "Link to share"
+  },
+  {
+    "id": "SignupApprovals.568b322cd36d6794",
+    "page": "SignupApprovals",
+    "text": "Copy link"
+  },
+  {
+    "id": "SignupApprovals.85ec8552b653471b",
+    "page": "SignupApprovals",
+    "text": "Pending approvals"
+  },
+  {
+    "id": "SignupApprovals.d3a52cdec2918e1c",
+    "page": "SignupApprovals",
+    "text": "Refresh requests"
+  },
+  {
+    "id": "SignupApprovals.039c735a83bd164d",
+    "page": "SignupApprovals",
+    "text": "No pending requests."
+  },
+  {
+    "id": "SignupApprovals.f4c886ee06bf98eb",
+    "page": "SignupApprovals",
+    "text": "Job role"
+  },
+  {
+    "id": "SignupApprovals.a3c282007006d3a4",
+    "page": "SignupApprovals",
+    "text": "Closeout and points access"
+  },
+  {
+    "id": "SignupApprovals.da3517fc883115dc",
+    "page": "SignupApprovals",
+    "text": "Staff"
+  },
+  {
+    "id": "SignupApprovals.512df00a51aa1f81",
+    "page": "SignupApprovals",
+    "text": "Manager"
+  },
+  {
+    "id": "SignupApprovals.4d708599f2eb2fee",
+    "page": "SignupApprovals",
+    "text": "General Manager"
+  },
+  {
+    "id": "SignupApprovals.54fb778996195dc7",
+    "page": "SignupApprovals",
+    "text": "Owner"
+  },
+  {
+    "id": "SignupApprovals.a8b1800d91c87bb4",
+    "page": "SignupApprovals",
+    "text": "Approve"
+  },
+  {
+    "id": "SignupApprovals.efa6b04a57456942",
+    "page": "SignupApprovals",
+    "text": "Decline"
+  },
+  {
+    "id": "SignupGate.d52193e0ca026e4c",
+    "page": "SignupGate",
+    "text": "Checking your account…"
+  },
+  {
+    "id": "SignupGate.3b3e3f47f4ed1470",
+    "page": "SignupGate",
+    "text": "Confirm your email, then sign in again to request access."
+  },
+  {
+    "id": "SignupGate.ae7887eeffcd78ce",
+    "page": "SignupGate",
+    "text": "Open the registration link from your GM to request access to your location."
+  },
+  {
+    "id": "SignupGate.01e2b13809a92be9",
+    "page": "SignupGate",
+    "text": "Sign out"
+  },
+  {
+    "id": "TableDetailsModal.92b6ec5c49039726",
+    "page": "TableDetailsModal",
+    "text": "TABLE DETAILS"
+  },
+  {
+    "id": "TableDetailsModal.5705dc7e0621a37c",
+    "page": "TableDetailsModal",
+    "text": " seats"
+  },
+  {
+    "id": "TableDetailsModal.8dc215a2e38b9732",
+    "page": "TableDetailsModal",
+    "text": "ASSIGNED SERVER"
+  },
+  {
+    "id": "TableDetailsModal.7fa25123d80d4719",
+    "page": "TableDetailsModal",
+    "text": "Not assigned"
+  },
+  {
+    "id": "TableDetailsModal.b867679892edbcd6",
+    "page": "TableDetailsModal",
+    "text": "Change Server"
+  },
+  {
+    "id": "TableDetailsModal.869045c7738be5f4",
+    "page": "TableDetailsModal",
+    "text": "Select server"
+  },
+  {
+    "id": "TableDetailsModal.5b079e9eda148a97",
+    "page": "TableDetailsModal",
+    "text": "UPCOMING RESERVATIONS"
+  },
+  {
+    "id": "TableDetailsModal.75608b12bee704e1",
+    "page": "TableDetailsModal",
+    "text": "No upcoming reservations assigned to this table."
+  },
+  {
+    "id": "TableDetailsModal.3bed51a91b97f853",
+    "page": "TableDetailsModal",
+    "text": "covers"
+  },
+  {
+    "id": "TableDetailsModal.2d9eb989bfec08cd",
+    "page": "TableDetailsModal",
+    "text": "Close"
+  },
+  {
+    "id": "TableDetailsModal.05e249339dd7924c",
+    "page": "TableDetailsModal",
+    "text": "Seat Walk-In"
+  },
+  {
+    "id": "TonightsFloorCards.6f61093d8beda6b9",
+    "page": "TonightsFloorCards",
+    "text": "TONIGHT&apos;S FLOOR"
+  },
+  {
+    "id": "TonightsFloorCards.ea0bc2ad9e59292b",
+    "page": "TonightsFloorCards",
+    "text": "Server Assignments"
+  },
+  {
+    "id": "TonightsFloorCards.3a1e1f15cf911d13",
+    "page": "TonightsFloorCards",
+    "text": "No server assignments yet."
+  },
+  {
+    "id": "TonightsFloorCards.a9507a1ecffee18f",
+    "page": "TonightsFloorCards",
+    "text": "TONIGHT&apos;S FLOOR"
+  },
+  {
+    "id": "TonightsFloorCards.3b714a37b8a31eac",
+    "page": "TonightsFloorCards",
+    "text": "Server Assignments"
+  },
+  {
+    "id": "TonightsFloorCards.19cc9990a67a83f9",
+    "page": "TonightsFloorCards",
+    "text": "Assigned Covers"
+  },
+  {
+    "id": "TonightsFloorCards.cd89c0514744da7b",
+    "page": "TonightsFloorCards",
+    "text": "Tables"
+  },
+  {
+    "id": "TonightsFloorCards.7eeb80ddf32f22ed",
+    "page": "TonightsFloorCards",
+    "text": "No tables assigned"
+  },
+  {
+    "id": "WalkinPanel.e7304ba9b71908cb",
+    "page": "WalkinPanel",
+    "text": "Walk-ins"
+  },
+  {
+    "id": "WalkinPanel.76d2b1144ce625d4",
+    "page": "WalkinPanel",
+    "text": "Walk-ins"
+  },
+  {
+    "id": "WalkinPanel.b381c8d56c81928d",
+    "page": "WalkinPanel",
+    "text": "Add walk-in guest"
+  },
+  {
+    "id": "WalkinPanel.9d88b89c128fce01",
+    "page": "WalkinPanel",
+    "text": "Name"
+  },
+  {
+    "id": "WalkinPanel.38a185987af920e3",
+    "page": "WalkinPanel",
+    "text": "Party size"
+  },
+  {
+    "id": "WalkinPanel.2c4dd2ecd402a88d",
+    "page": "WalkinPanel",
+    "text": "Email · optional"
+  },
+  {
+    "id": "WalkinPanel.24befdf57e906205",
+    "page": "WalkinPanel",
+    "text": "Phone · optional"
+  },
+  {
+    "id": "WalkinPanel.d54a079e91fa3c15",
+    "page": "WalkinPanel",
+    "text": "Guest agreed to receive news, events and offers by email."
+  },
+  {
+    "id": "WalkinPanel.06254fc3aa0cb235",
+    "page": "WalkinPanel",
+    "text": "Date"
+  },
+  {
+    "id": "WalkinPanel.a5e44767d71f4b62",
+    "page": "WalkinPanel",
+    "text": "Show"
+  },
+  {
+    "id": "WalkinPanel.2e527b0f5d385d66",
+    "page": "WalkinPanel",
+    "text": "Waiting"
+  },
+  {
+    "id": "WalkinPanel.c21ce3d94d48438d",
+    "page": "WalkinPanel",
+    "text": "Seated"
+  },
+  {
+    "id": "WalkinPanel.151c0cd5fd23b856",
+    "page": "WalkinPanel",
+    "text": "Left"
+  },
+  {
+    "id": "WalkinPanel.7165ffb2f752f895",
+    "page": "WalkinPanel",
+    "text": "All check-ins"
+  },
+  {
+    "id": "WalkinPanel.75c351d6508abb92",
+    "page": "WalkinPanel",
+    "text": "Refresh"
+  },
+  {
+    "id": "WalkinPanel.cd6705ead09ae068",
+    "page": "WalkinPanel",
+    "text": "QR code / Print"
+  },
+  {
+    "id": "WalkinPanel.fe240c1746d3e8c9",
+    "page": "WalkinPanel",
+    "text": "Export mailing opt-ins"
+  },
+  {
+    "id": "WalkinPanel.e66f8f5058de7e75",
+    "page": "WalkinPanel",
+    "text": "Updates every 10 seconds. Check-ins stay in history after the 4 AM rollover."
+  },
+  {
+    "id": "WalkinPanel.9ac3b40e1267c897",
+    "page": "WalkinPanel",
+    "text": " · party of "
+  },
+  {
+    "id": "WalkinPanel.da92f44f6aaee6f3",
+    "page": "WalkinPanel",
+    "text": "Contact details"
+  },
+  {
+    "id": "WalkinPanel.ead96cab5da387dc",
+    "page": "WalkinPanel",
+    "text": "Seat on floor"
+  },
+  {
+    "id": "WalkinPanel.409c2418c486c0d4",
+    "page": "WalkinPanel",
+    "text": "Mark seated"
+  },
+  {
+    "id": "WalkinPanel.7a9734921ef2fd30",
+    "page": "WalkinPanel",
+    "text": "Left"
+  },
+  {
+    "id": "WalkinPanel.e8e12fd4b3ffc111",
+    "page": "WalkinPanel",
+    "text": "Return to waiting"
+  },
+  {
+    "id": "WalkinPanel.bbce9792dd1ba7d5",
+    "page": "WalkinPanel",
+    "text": "No "
+  },
+  {
+    "id": "WalkinPanel.b3bf990a063a7a2d",
+    "page": "WalkinPanel",
+    "text": "check-ins for this date."
+  },
+  {
+    "id": "WalkinPanel.5f1e7716d3f8669c",
+    "page": "WalkinPanel",
+    "text": "Walk-in check-in QR code"
+  },
+  {
+    "id": "WalkinPanel.29c6f74898f451a7",
+    "page": "WalkinPanel",
+    "text": "Open guest form"
+  },
+  {
+    "id": "WalkinPanel.c1b1c77ab1a758a3",
+    "page": "WalkinPanel",
+    "text": "Print QR sign"
+  }
+]

@@ -1,3 +1,4 @@
+import { ScreenText } from "./ScreenText"
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 export type Question = { id: string; audience: 'staff' | 'manager'; label: string; type: 'text' | 'number' | 'yesno'; required: boolean; active: boolean; builtin: boolean }
@@ -37,10 +38,10 @@ export function checkAnswers(config: Config | null, audience: string, answers: A
 export function CloseoutQuestions({config,audience,answers,onChange}: {config: Config | null; audience: string; answers: Answers; onChange: (answers: Answers) => void}) {
   const questions = config?.questions.filter(q => q.active && !q.builtin && q.audience === audience) ?? []
   if (!questions.length) return null
-  return <div className="card mod-review"><h2>Additional closeout questions</h2><div className="mod-fields">
+  return <div className="card mod-review"><h2><ScreenText id="CloseoutConfig.be4492a1358f3526">Additional closeout questions</ScreenText></h2><div className="mod-fields">
     {questions.map(q => <label key={q.id}>{q.label}{!q.required && ' (optional)'}
       {q.type === 'yesno' ? <select required={q.required} value={answers[q.id] ?? ''} onChange={e => onChange({...answers,[q.id]:e.target.value})}>
-        <option value="">Choose an answer</option><option value="yes">Yes</option><option value="no">No</option>
+        <option value=""><ScreenText id="CloseoutConfig.2091fd73e0c28daf">Choose an answer</ScreenText></option><option value="yes"><ScreenText id="CloseoutConfig.0ef3d89123c8ea40">Yes</ScreenText></option><option value="no"><ScreenText id="CloseoutConfig.4019546009aa8a7f">No</ScreenText></option>
       </select> : q.type === 'number' ? <input type="number" step="any" required={q.required} value={answers[q.id] ?? ''} onChange={e => onChange({...answers,[q.id]:e.target.value})} />
         : <textarea rows={3} maxLength={2000} required={q.required} value={answers[q.id] ?? ''} onChange={e => onChange({...answers,[q.id]:e.target.value})} />}
     </label>)}

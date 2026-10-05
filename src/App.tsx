@@ -1,3 +1,4 @@
+import { ScreenWordingPage } from './pages/ScreenWordingPage'
 import { TrainingPage } from './pages/TrainingPage'
 import { CocktailTrainingPage } from './pages/CocktailTrainingPage'
 import { InventoryPage } from './pages/InventoryPage'
@@ -128,6 +129,7 @@ export default function App() {
         <Route path="/training" element={<TrainingPage />} />
         <Route path="/training/cocktails" element={<CocktailTrainingPage />} />
         <Route path="/settings/sales-targets" element={<ManagementOnly gmOnly><SalesTargetsPage /></ManagementOnly>} />
+        <Route path="/settings/wording" element={<ManagementOnly gmOnly><ScreenWordingPage /></ManagementOnly>} />
         <Route path="/settings" element={<ManagementOnly gmOnly><SettingsPage /></ManagementOnly>} />
         <Route path="/settings/point-rules" element={<ManagementOnly gmOnly><CloseoutSettingsPage key="point-rules" initialTab="points" /></ManagementOnly>} />
         <Route path="/closeout-summary/cash" element={<SummaryPage cash />} />

@@ -1,3 +1,4 @@
+import { ScreenText } from "../components/ScreenText"
 import { PointEntryEditor } from '../components/PointEntryEditor'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
@@ -61,33 +62,33 @@ export function PointsPage() {
   }, [locationId, month, refresh])
   const mine = dashboard.standings.find(s => s.user_id === userId)
   return <section className="points-page">
-    <div className="page-heading"><p className="eyebrow">LNX Systems</p><h1>Points & Leaderboard</h1>
-      <p className="muted">Track your progress and celebrate the team.</p></div>
-    {manager && <p><Link to="/closeout/awards">Award / Deduct Points →</Link></p>}
-    <label>Month <input type="month" value={month} required onChange={e => { if (e.target.value) setMonth(e.target.value) }} /></label>
-    <p className="muted">100 starting points each month. Winner: $100 + spotlight. Runner-up: $50 + first-cut pass.</p>
+    <div className="page-heading"><p className="eyebrow"><ScreenText id="PointsPage.262da4df982b420d">LNX Systems</ScreenText></p><h1><ScreenText id="PointsPage.7227d397db4a9148">Points & Leaderboard</ScreenText></h1>
+      <p className="muted"><ScreenText id="PointsPage.29c57305376b3dd7">Track your progress and celebrate the team.</ScreenText></p></div>
+    {manager && <p><Link to="/closeout/awards"><ScreenText id="PointsPage.c2ae010ecda1aae1">Award / Deduct Points →</ScreenText></Link></p>}
+    <label><ScreenText id="PointsPage.92018619691663a6">Month </ScreenText><input type="month" value={month} required onChange={e => { if (e.target.value) setMonth(e.target.value) }} /></label>
+    <p className="muted"><ScreenText id="PointsPage.85dcf42e118af84f">100 starting points each month. Winner: $100 + spotlight. Runner-up: $50 + first-cut pass.</ScreenText></p>
     <div className="points-switch" role="group" aria-label="Points views">
-      <button type="button" aria-pressed={view === 'individual'} onClick={() => setView('individual')}>My Points</button>
-      <button type="button" aria-pressed={view === 'leaderboard'} onClick={() => setView('leaderboard')}>Leaderboard</button>
+      <button type="button" aria-pressed={view === 'individual'} onClick={() => setView('individual')}><ScreenText id="PointsPage.c62c430488cafb76">My Points</ScreenText></button>
+      <button type="button" aria-pressed={view === 'leaderboard'} onClick={() => setView('leaderboard')}><ScreenText id="PointsPage.deb2f609e7bc3c81">Leaderboard</ScreenText></button>
     </div>
     {error && <p role="alert">{error}</p>}
-    {loading && <p role="status">Loading points…</p>}
+    {loading && <p role="status"><ScreenText id="PointsPage.e78e48fd3cbb9452">Loading points…</ScreenText></p>}
     {!loading && !error && (view === 'individual' ? <>
       <div className="points-stats">
-        <article className="points-card"><h2>Monthly Points</h2><p className="points-value">{mine?.total ?? '—'}</p></article>
-        <article className="points-card"><h2>Team Rank</h2><p className="points-value">{mine?.rank ?? '—'}</p></article>
+        <article className="points-card"><h2><ScreenText id="PointsPage.8e1782649e375df9">Monthly Points</ScreenText></h2><p className="points-value">{mine?.total ?? '—'}</p></article>
+        <article className="points-card"><h2><ScreenText id="PointsPage.2fac1087c80e5afe">Team Rank</ScreenText></h2><p className="points-value">{mine?.rank ?? '—'}</p></article>
       </div>
-      <article className="points-card"><h2>Points History</h2><p>Monthly starting balance: +100</p>
+      <article className="points-card"><h2><ScreenText id="PointsPage.7c6d65131b8f4099">Points History</ScreenText></h2><p><ScreenText id="PointsPage.3a329828f93c1c68">Monthly starting balance: +100</ScreenText></p>
         {dashboard.history.length ? <div className="points-table-wrap"><table className="points-table">
-          <thead><tr><th>Date</th><th>Activity</th><th>Points</th></tr></thead>
+          <thead><tr><th><ScreenText id="PointsPage.ce41d9a585ca24c8">Date</ScreenText></th><th><ScreenText id="PointsPage.c5c21bab8b486453">Activity</ScreenText></th><th><ScreenText id="PointsPage.ff94246eb2bb289a">Points</ScreenText></th></tr></thead>
           <tbody>{dashboard.history.map((e, i) => <tr key={i}><td>{e.business_date}</td>
             <td>{e.description}</td><td>{e.points > 0 ? '+' : ''}{e.points}</td></tr>)}</tbody>
-        </table></div> : <p className="muted">No point adjustments this month.</p>}
+        </table></div> : <p className="muted"><ScreenText id="PointsPage.2206727e97da939d">No point adjustments this month.</ScreenText></p>}
       </article>
-    </> : <article className="points-card"><h2>Team Leaderboard</h2>
-      <p className="muted">Tied totals share a rank. Final prize ties require manager review.</p>
-      <div className="points-table-wrap"><table className="points-table"><caption>Monthly team standings</caption>
-        <thead><tr><th>Rank</th><th>Team Member</th><th>Points</th></tr></thead>
+    </> : <article className="points-card"><h2><ScreenText id="PointsPage.d7848a33da6c724d">Team Leaderboard</ScreenText></h2>
+      <p className="muted"><ScreenText id="PointsPage.4380866cc0b528a9">Tied totals share a rank. Final prize ties require manager review.</ScreenText></p>
+      <div className="points-table-wrap"><table className="points-table"><caption><ScreenText id="PointsPage.d445873f8049aaa4">Monthly team standings</ScreenText></caption>
+        <thead><tr><th><ScreenText id="PointsPage.febf9850512da3b5">Rank</ScreenText></th><th><ScreenText id="PointsPage.29018cc18c7e2d93">Team Member</ScreenText></th><th><ScreenText id="PointsPage.0e216e68dda20f0b">Points</ScreenText></th></tr></thead>
         <tbody>{dashboard.standings.map(s => <tr key={s.user_id}><td>{s.rank}</td><td>{s.name}</td><td>{s.total}</td></tr>)}</tbody>
       </table></div></article>)}
     {gm && <PointEntryEditor location={locationId} month={month} onChanged={()=>setRefresh(v=>v+1)} />}

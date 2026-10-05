@@ -1,3 +1,4 @@
+import { ScreenText } from "../components/ScreenText"
 import { EmployeeProfile } from '../components/EmployeeProfile'
 import { useManagementAccess } from '../components/ManagementAccess'
 import { useEffect, useMemo, useState } from 'react'
@@ -339,9 +340,9 @@ export function TeamPage() {
     return (
       <section>
         <div className="page-heading">
-          <p className="eyebrow">LNX Systems</p>
-          <h1>Team</h1>
-          <p className="muted">Loading team…</p>
+          <p className="eyebrow"><ScreenText id="TeamPage.262da4df982b420d">LNX Systems</ScreenText></p>
+          <h1><ScreenText id="TeamPage.ba414bfe8fe6cf7b">Team</ScreenText></h1>
+          <p className="muted"><ScreenText id="TeamPage.9ab27c4cb1072ec7">Loading team…</ScreenText></p>
         </div>
       </section>
     )
@@ -350,12 +351,12 @@ export function TeamPage() {
   return (
     <section>
       <div className="page-heading">
-        <p className="eyebrow">LNX Systems</p>
-        <h1>Team</h1>
+        <p className="eyebrow"><ScreenText id="TeamPage.c1b5f294c1f55228">LNX Systems</ScreenText></p>
+        <h1><ScreenText id="TeamPage.f8c6bdd37125a5eb">Team</ScreenText></h1>
         <p className="muted">
-          {locationName || 'Current Location'} · {activeCount}{' '}
+          {locationName || 'Current Location'} · {activeCount}{' '}<ScreenText id="TeamPage.35779cd02cf5c4ef">
           active team members
-        </p>
+        </ScreenText></p>
       </div>
 
       {error && (
@@ -394,9 +395,9 @@ export function TeamPage() {
           padding: '13px',
         }}
         onClick={() => setShowInvite(true)}
-      >
+      ><ScreenText id="TeamPage.7b09c6cb92544e56">
         + Add Team Member
-      </button>
+      </ScreenText></button>
 
       <div
         style={{
@@ -473,7 +474,7 @@ export function TeamPage() {
               </div>
             </div>
 
-            {(profileAccess.manager||viewerId===member.user_id)&&<button type="button" className="wt-profile-link" onClick={()=>setProfileUser(member.user_id)}>View employee profile</button>}
+            {(profileAccess.manager||viewerId===member.user_id)&&<button type="button" className="wt-profile-link" onClick={()=>setProfileUser(member.user_id)}><ScreenText id="TeamPage.b2ea937011e56c51">View employee profile</ScreenText></button>}
             <div
               style={{
                 display: 'grid',
@@ -521,9 +522,9 @@ export function TeamPage() {
               textAlign: 'center',
               opacity: 0.7,
             }}
-          >
+          ><ScreenText id="TeamPage.b03343aec9127b16">
             No team members found.
-          </div>
+          </ScreenText></div>
         )}
       </div>
 
@@ -531,12 +532,12 @@ export function TeamPage() {
       {showInvite && (
         <div className="modal-backdrop">
           <div className="modal-card">
-            <p className="eyebrow">Team Management</p>
-            <h2>Add Team Member</h2>
+            <p className="eyebrow"><ScreenText id="TeamPage.291bcd306c2e6ef4">Team Management</ScreenText></p>
+            <h2><ScreenText id="TeamPage.1821210729db4e68">Add Team Member</ScreenText></h2>
 
-            <label>
+            <label><ScreenText id="TeamPage.c648d0d1f86472a9">
               Full name
-              <input
+              </ScreenText><input
                 value={fullName}
                 onChange={(event) =>
                   setFullName(event.target.value)
@@ -545,9 +546,9 @@ export function TeamPage() {
               />
             </label>
 
-            <label style={{ marginTop: '10px' }}>
+            <label style={{ marginTop: '10px' }}><ScreenText id="TeamPage.7c0979fda0d91b63">
               Preferred name
-              <input
+              </ScreenText><input
                 value={preferredName}
                 onChange={(event) =>
                   setPreferredName(event.target.value)
@@ -556,9 +557,9 @@ export function TeamPage() {
               />
             </label>
 
-            <label style={{ marginTop: '10px' }}>
+            <label style={{ marginTop: '10px' }}><ScreenText id="TeamPage.82076b654a58ad2e">
               Email
-              <input
+              </ScreenText><input
                 type="email"
                 value={email}
                 onChange={(event) =>
@@ -568,9 +569,9 @@ export function TeamPage() {
               />
             </label>
 
-            <label style={{ marginTop: '10px' }}>
+            <label style={{ marginTop: '10px' }}><ScreenText id="TeamPage.7768a75fc61fe2c6">
               Phone
-              <input
+              </ScreenText><input
                 value={phone}
                 onChange={(event) =>
                   setPhone(event.target.value)
@@ -579,9 +580,9 @@ export function TeamPage() {
               />
             </label>
 
-            <label style={{ marginTop: '10px' }}>
+            <label style={{ marginTop: '10px' }}><ScreenText id="TeamPage.19c01864eac1320a">
               Role
-              <select
+              </ScreenText><select
                 value={role}
                 onChange={(event) =>
                   setRole(
@@ -600,9 +601,9 @@ export function TeamPage() {
               </select>
             </label>
 
-            <label style={{ marginTop: '10px' }}>
+            <label style={{ marginTop: '10px' }}><ScreenText id="TeamPage.ba1269b8eb9126c7">
               Employee number
-              <input
+              </ScreenText><input
                 value={employeeNumber}
                 onChange={(event) =>
                   setEmployeeNumber(event.target.value)
@@ -617,9 +618,9 @@ export function TeamPage() {
                   setShowInvite(false)
                   setError('')
                 }}
-              >
+              ><ScreenText id="TeamPage.d5c515dcd12201f0">
                 Cancel
-              </button>
+              </ScreenText></button>
 
               <button
                 className="primary-button"
