@@ -4,6 +4,7 @@ import type { PropsWithChildren } from 'react'
 import type { Session } from '@supabase/supabase-js'
 
 import {
+  Package,
   Newspaper,
   BookOpen,
   BarChart3,
@@ -61,6 +62,7 @@ const links = [
   },
   { to: '/preshift', label: 'Pre-Shift', icon: Newspaper },
   { to: '/quizzes', label: 'Quizzes', icon: BookOpen },
+  { to: '/inventory', label: 'Inventory', icon: Package },
 ]
 
 export function AppShell({
