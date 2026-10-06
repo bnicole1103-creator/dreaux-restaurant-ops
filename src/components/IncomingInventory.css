@@ -1,1 +1,17 @@
 .incoming-inventory label{display:grid;gap:6px;margin:12px 0}.receipt-fields,.receipt-line{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}.receipt-line{border:1px solid var(--border-color,#d8c3ae);border-radius:16px;padding:16px;margin:16px 0}.receipt-line>strong,.receipt-line>p{grid-column:1/-1}.receipt-drop{border:2px dashed #bfa78f}.incoming-inventory .receipt-confirm{display:flex;align-items:center;gap:12px}.receipt-confirm input{width:24px;height:24px;flex-shrink:0}.receipt-warning{padding:12px;border-left:4px solid #b87632}.incoming-inventory button{margin:4px}.incoming-inventory input,.incoming-inventory textarea{width:100%;box-sizing:border-box}.incoming-inventory details{border-top:1px solid #d8c3ae;padding:12px 0}
+
+/* Prevent native fieldsets and checkbox inputs from widening the phone layout. */
+.incoming-inventory,.incoming-inventory .receipt-editor{min-width:0;max-width:100%;box-sizing:border-box}
+.incoming-inventory label,.receipt-fields>* ,.receipt-line>*{min-width:0;overflow-wrap:anywhere}
+.incoming-inventory .receipt-fields,.incoming-inventory .receipt-line{grid-template-columns:repeat(auto-fit,minmax(min(180px,100%),1fr))}
+.incoming-inventory .receipt-confirm{display:flex;align-items:flex-start;justify-content:flex-start}
+.incoming-inventory .receipt-confirm input[type=checkbox]{display:inline-block;width:24px;min-width:24px;max-width:24px;height:24px;min-height:24px;flex:0 0 24px;padding:0;margin:0}
+.incoming-inventory .receipt-confirm span{flex:1;min-width:0;white-space:normal}
+.receipt-status,.receipt-editor{scroll-margin-top:24px}
+.receipt-viewer{width:min(850px,calc(100vw - 24px));max-height:85dvh;overflow:auto;box-sizing:border-box;border:1px solid #d8c3ae;border-radius:16px;padding:16px;color:var(--warm-ink,#493024);background:var(--app-card,#fff)}
+.receipt-viewer::backdrop{background:#0008}
+.receipt-viewer header{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.receipt-viewer button{min-height:44px;padding:10px 16px}
+.receipt-viewer img{display:block;max-width:100%;height:auto;margin-top:16px}
+.receipt-viewer iframe{display:block;width:100%;height:60dvh;border:0;margin-top:16px}
+.receipt-viewer p{overflow-wrap:anywhere}
