@@ -23,3 +23,10 @@
 .quiz-card-score { color: var(--app-accent); font-weight: 700; }
 .quiz-month-total { font-size: 1.4rem; }
 .quiz-month-total strong { color: var(--app-accent); font-size: 2rem; }
+
+/* Keep answer controls compact even when shared form styles use full-width inputs. */
+.quiz-page .quiz-choice{width:100%;box-sizing:border-box;min-width:0;min-height:44px;justify-content:flex-start;flex-wrap:nowrap;line-height:1.5}
+.quiz-page .quiz-choice input[type=radio],.quiz-page .quiz-choice input[type=checkbox]{display:inline-block;width:22px;min-width:22px;max-width:22px;height:22px;min-height:22px;flex:0 0 22px;margin:2px 0 0;padding:0;box-sizing:border-box}
+.quiz-page .quiz-choice>span{display:block;flex:1 1 0%;min-width:0;max-width:100%;white-space:normal;overflow-wrap:anywhere}
+.quiz-page .quiz-question{max-width:100%;box-sizing:border-box;overflow-wrap:anywhere}
+.quiz-page .quiz-question legend{max-width:100%;box-sizing:border-box;white-space:normal;line-height:1.5}
