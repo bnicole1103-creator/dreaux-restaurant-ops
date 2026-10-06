@@ -1,3 +1,4 @@
+import type { GeneratedQuiz } from '../lib/generatedQuiz'
 import { ScreenText } from "../components/ScreenText"
 import { QuizUpload } from '../components/QuizUpload'
 import { QuizRequiredStaff } from '../components/QuizRequiredStaff'
@@ -17,10 +18,10 @@ type Submission={user_id:string;name:string;submitted_at:string;result:QuizResul
 type DraftQuestion=Question&{editorKey:string}
 const draftQuestion=(q:Question):DraftQuestion=>({...q,options:[...q.options],editorKey:crypto.randomUUID()})
 const emptyQuestion=():DraftQuestion=>draftQuestion({prompt:'',category:'Guest service',options:['','','',''],correct:0,explanation:''})
-export function QuizBuilderPage({publishedView=false}:{publishedView?:boolean}) {
+export function QuizBuilderPage({publishedView=false,initialDate,generatedDraft}:{publishedView?:boolean;initialDate?:string;generatedDraft?:GeneratedQuiz}) {
  const [params]=useSearchParams()
  const [location,setLocation]=useState('')
- const [date,setDate]=useState(()=>{const d=params.get('date') ?? '';return publishedView?(/^\d{4}-\d{2}-\d{2}$/.test(d) && d<=quizToday()?d:quizToday()):quizTomorrow()})
+ const [date,setDate]=useState(()=>{const d=initialDate??params.get('date')??'';return publishedView?(/^\d{4}-\d{2}-\d{2}$/.test(d) && d<=quizToday()?d:quizToday()):(/^\d{4}-\d{2}-\d{2}$/.test(d)&&d>=quizTomorrow()?d:quizTomorrow())})
  const [title,setTitle]=useState('Daily Pre-Shift Quiz')
  const [instructions,setInstructions]=useState('Read the pre-shift before answering. Choose one answer for each question.')
  const [questions,setQuestions]=useState<DraftQuestion[]>([])
@@ -35,6 +36,10 @@ export function QuizBuilderPage({publishedView=false}:{publishedView?:boolean}) 
  const [listRefresh,setListRefresh]=useState(0)
  const [editorReload,setEditorReload]=useState(0)
  const [addMenu,setAddMenu]=useState(false),[bankOpen,setBankOpen]=useState(false)
+ const [generated,setGenerated]=useState<GeneratedQuiz|null>(null)
+ const [loadFailed,setLoadFailed]=useState(false)
+ useEffect(()=>{if(generatedDraft?.location===location&&generatedDraft.date===date)setGenerated(generatedDraft);else setGenerated(null)},[generatedDraft,location,date])
+ function importGenerated(append:boolean){if(!generated||loadFailed)return;if(append&&questions.length+generated.questions.length>50){setError('A quiz can contain up to 50 questions.');return}if(!append&&questions.length&&!window.confirm('Replace the current questions with generated questions? This stays unsaved until you save or publish.'))return;setQuestions(v=>append?[...v,...generated.questions.map(draftQuestion)]:generated.questions.map(draftQuestion));if(!append)setTitle(generated.title);setDirty(true);setRemoved(null);setGenerated(null);setMessage('Generated questions added. Review the answers, edit, or add bank questions before saving or publishing.')}
  const [removed,setRemoved]=useState<{question:DraftQuestion;index:number}|null>(null)
  const chooser=useRef<HTMLDivElement>(null),bankPanel=useRef<HTMLDivElement>(null)
  function chooseAdd(){setAddMenu(true);requestAnimationFrame(()=>chooser.current?.scrollIntoView({behavior:'smooth',block:'center'}))}
@@ -45,7 +50,7 @@ export function QuizBuilderPage({publishedView=false}:{publishedView?:boolean}) 
 
  function apply(q:Quiz|null){setQuizId(q?.id ?? '');setTitle(q?.title ?? 'Daily Pre-Shift Quiz');setInstructions(q?.instructions ?? 'Read the pre-shift before answering. Choose one answer for each question.');setQuestions((q?.questions ?? []).map(draftQuestion));setRemoved(null);setAddMenu(false);setBankOpen(false);setVersion(q?.version ?? 0);setPublished(q?.published ?? false);setDirty(false)}
  useEffect(()=>{let live=true;void loadTenantData().then(t=>{if(!t.locations[0])throw new Error('No active location.');if(live)setLocation(t.locations[0].id)}).catch(e=>{if(live){setError(quizError(e));setBusy(false)}});return()=>{live=false}},[])
- useEffect(()=>{if(!location)return;let live=true;setBusy(true);setError('');setMessage('');apply(null);setResults([]);void supabase.rpc('quiz_manager_load',{p_location_id:location,p_date:date}).then(({data,error})=>{if(!live)return;if(error)setError(error.message);else{apply(data.quiz);setResults(data.results)}setBusy(false)});return()=>{live=false}},[location,date,editorReload])
+ useEffect(()=>{if(!location)return;let live=true;setBusy(true);setLoadFailed(false);setError('');setMessage('');apply(null);setResults([]);void supabase.rpc('quiz_manager_load',{p_location_id:location,p_date:date}).then(({data,error})=>{if(!live)return;if(error){setLoadFailed(true);setError(error.message)}else{apply(data.quiz);setResults(data.results)}setBusy(false)});return()=>{live=false}},[location,date,editorReload])
  function update(i:number,patch:Partial<Question>){setQuestions(q=>q.map((x,n)=>n===i?{...x,...patch}:x));setDirty(true)}
  function move(i:number,delta:number){setQuestions(q=>{const next=[...q];[next[i],next[i+delta]]=[next[i+delta],next[i]];return next});setDirty(true)}
  async function save(publish:boolean){if(!publishedView && date<quizTomorrow()){setError('Choose a future date. Manage today’s quiz from the main Quizzes page.');return}setBusy(true);setError('');setMessage('');try{
@@ -58,15 +63,16 @@ export function QuizBuilderPage({publishedView=false}:{publishedView?:boolean}) 
   try{const {error}=await supabase.rpc('quiz_manager_remove',{p_location_id:location,p_quiz_id:q.id,p_version:q.version});if(error)throw error;setListRefresh(v=>v+1);if(q.quiz_date===date)setEditorReload(v=>v+1);else setMessage('Quiz removed from staff access. Its draft and submissions are preserved.')}
   catch(e){setError(quizError(e))}finally{setBusy(false)}
  }
- return <section className="mod-page quiz-page quiz-workspace"><Link to="/quizzes"><ScreenText id="QuizBuilderPage.32eaee06d35ddfd4">← Daily Quizzes</ScreenText></Link><p className="eyebrow"><ScreenText id="QuizBuilderPage.0af9d71bf594c489">Manager only</ScreenText></p><h1>{publishedView?'Manage Published Quiz':'Build Future Quizzes'}</h1>
- {!publishedView && <PublishedQuizzes future location={location} refresh={listRefresh} disabled={busy || !location} onEdit={openPublished} onRemove={removePublished} />}
- <label><ScreenText id="QuizBuilderPage.991e62629f7eca0d">Quiz date</ScreenText><input type="date" min={publishedView?undefined:quizTomorrow()} max={publishedView?quizToday():undefined} value={date} disabled={busy} onChange={e=>{if(!e.target.value || (!publishedView && e.target.value<quizTomorrow()) || (publishedView && e.target.value>quizToday()) || (dirty && !window.confirm('Discard unsaved edits and open another date?')))return;setDate(e.target.value)}} /></label>
+ return <section className="mod-page quiz-page quiz-workspace">{!generatedDraft&&<Link to="/quizzes"><ScreenText id="QuizBuilderPage.32eaee06d35ddfd4">← Daily Quizzes</ScreenText></Link>}<p className="eyebrow"><ScreenText id="QuizBuilderPage.0af9d71bf594c489">Manager only</ScreenText></p><h1>{generatedDraft?'Review Pre-Shift Quiz':publishedView?'Manage Published Quiz':'Build Future Quizzes'}</h1>
+ {!publishedView && !generatedDraft && <PublishedQuizzes future location={location} refresh={listRefresh} disabled={busy || !location} onEdit={openPublished} onRemove={removePublished} />}
+ <label><ScreenText id="QuizBuilderPage.991e62629f7eca0d">Quiz date</ScreenText><input type="date" min={publishedView?undefined:quizTomorrow()} max={publishedView?quizToday():undefined} value={date} disabled={busy||!!generatedDraft} onChange={e=>{if(!e.target.value || (!publishedView && e.target.value<quizTomorrow()) || (publishedView && e.target.value>quizToday()) || (dirty && !window.confirm('Discard unsaved edits and open another date?')))return;setDate(e.target.value)}} /></label>
  <p>{published?(publishedView?'Published':'Scheduled'):'Draft'}{dirty?' · Unsaved changes':''}</p>
  {results.length>0 && <p><ScreenText id="QuizBuilderPage.dd808b7daad09bdf">Existing scores and submitted answers are preserved. Edits apply to staff who have not submitted. Staff who already submitted cannot retake this quiz.</ScreenText></p>}
  {error && <p role="alert">{error}</p>}{message && <p role="status">{message}</p>}{busy && <p><ScreenText id="QuizBuilderPage.24102437495319ff">Loading…</ScreenText></p>}
+ <div>{generated&&<article className="mod-review"><h2>Generated from your pre-shift · {generated.date}</h2><p>{generated.questions.length} questions ready. Nothing has been saved or published.</p>{generated.warnings.map((w,i)=><p key={i}>{w}</p>)}<div className="quiz-actions"><button type="button" disabled={busy||loadFailed||!location||questions.length+generated.questions.length>50} onClick={()=>importGenerated(true)}>Add generated questions</button><button type="button" disabled={busy||loadFailed||!location} onClick={()=>importGenerated(false)}>{questions.length?"Replace current questions":"Use generated questions"}</button><button type="button" onClick={()=>setGenerated(null)}>Discard generated questions</button></div></article>}</div>
  <QuizUpload disabled={busy || !location} date={date} onApply={(upload,append)=>{if(append && questions.length+upload.questions.length>50){setMessage('Choose fewer questions. A quiz can contain up to 50.');return false}if(!append && questions.length && !window.confirm('Replace the current questions? Saved submissions stay unchanged.'))return false;setQuestions(v=>append?[...v,...upload.questions.map(draftQuestion)]:upload.questions.map(draftQuestion));setRemoved(null);if(!append){if(upload.title)setTitle(upload.title);if(upload.instructions)setInstructions(upload.instructions)}setDirty(true);setMessage('Questions loaded. Review and edit them below, then save or publish.');return true}} />
  <div ref={bankPanel}><QuizQuestionBank location={location} open={bankOpen} onOpenChange={setBankOpen} disabled={busy || !location} questions={questions} onAdd={items=>{setQuestions(v=>[...v,...items.map(draftQuestion)].slice(0,50));setDirty(true);setMessage(`${items.length} questions added from the bank. Save the quiz to keep them.`)}} /></div>
- <fieldset disabled={busy || !location} className="quiz-editor">
+ <fieldset disabled={busy || !location || loadFailed} className="quiz-editor">
  <details className="quiz-settings"><summary><ScreenText id="QuizBuilderPage.a2bfec93d4dd8f87">Quiz title and instructions</ScreenText></summary>
  <label><ScreenText id="QuizBuilderPage.2e0e8391cff492df">Title</ScreenText><input maxLength={200} value={title} onChange={e=>{setTitle(e.target.value);setDirty(true)}} /></label>
  <label><ScreenText id="QuizBuilderPage.3b9de671dedb8bb7">Instructions</ScreenText><textarea maxLength={4000} value={instructions} onChange={e=>{setInstructions(e.target.value);setDirty(true)}} /></label>
