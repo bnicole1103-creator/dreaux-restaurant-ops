@@ -1,3 +1,4 @@
+import { serviceDay } from '../lib/serviceDay'
 import { ScreenText } from "../components/ScreenText"
 import { ClockTime } from '../components/ClockTime'
 import { closeoutHours } from '../lib/closeoutHours'
@@ -375,8 +376,11 @@ export function CloseoutPage() {
 
   useEffect(() => { setZeroSalesConfirmed(false); setZeroSalesReason('') }, [netSales])
 
-  const [salesTarget, setSalesTarget] =
-    useState('')
+  const [salesTarget, setSalesTarget] = useState('0')
+  const [targetState,setTargetState] = useState<{loading:boolean;ready:boolean;reason:string}>({loading:false,ready:false,reason:'Enter your scheduled start and role to load your target.'})
+  const [targetRefresh,setTargetRefresh] = useState(0)
+  const [closeoutDay,setCloseoutDay] = useState(serviceDay)
+
 
   const [cashDeposit, setCashDeposit] =
     useState('')
@@ -787,6 +791,22 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
       config,
     ])
 
+  useEffect(()=>{const timer=window.setInterval(()=>setCloseoutDay(serviceDay()),30000);return()=>clearInterval(timer)},[])
+  useEffect(()=>{
+    let live=true;setSalesTarget('0')
+    if(!locationId||!scheduledTime){setTargetState({loading:false,ready:false,reason:'Enter your scheduled start and role to load your target.'});return}
+    setTargetState({loading:true,ready:false,reason:''})
+    const timer=window.setTimeout(()=>{void(async()=>{
+      // Attempt a schedule refresh; a previously locked allocation stays usable.
+      await supabase.functions.invoke('home-schedule',{body:{location_id:locationId,date:closeoutDay}}).catch(()=>null)
+      const r=await supabase.rpc('closeout_automatic_target',{p_location_id:locationId,p_date:closeoutDay,p_start:scheduledTime,p_role:jobRole})
+      if(r.error)throw r.error;if(!live)return
+      setSalesTarget(r.data?.ready?String(r.data.target):'0')
+      setTargetState({loading:false,ready:!!r.data?.ready,reason:r.data?.reason??''})
+    })().catch(e=>{if(live)setTargetState({loading:false,ready:false,reason:(e as Error).message})})},300)
+    return()=>{live=false;clearTimeout(timer)}
+  },[locationId,scheduledTime,jobRole,closeoutDay,targetRefresh])
+
   function toggleTable(
     tableId: string
   ) {
@@ -813,7 +833,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
     setClockOutTime('')
 
     setNetSales('')
-    setSalesTarget('')
+    setSalesTarget('0')
 
     setCashDeposit('')
 
@@ -892,7 +912,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
         )
       }
 
-      for (const [label, raw] of [['Net sales', netSales], ['Sales target', salesTarget], ['Cash deposit', cashDeposit], ['Voids', voidValue], ['Discounts', discountValue]]) {
+      for (const [label, raw] of [['Net sales', netSales], ['Cash deposit', cashDeposit], ['Voids', voidValue], ['Discounts', discountValue]]) {
         if (!raw.trim() || !/^\d+(\.\d{1,2})?$/.test(raw.trim()) || !Number.isFinite(Number(raw)) || Number(raw)>100000000) throw new Error(`Enter ${label.toLowerCase()} as a valid amount. Enter 0 only when it is accurate.`)
       }
       if (!shiftType) throw new Error('Select the shift you worked.')
@@ -931,6 +951,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
             ),
         })
 
+      if (targetState.loading) throw new Error('Your automatic sales target is still loading. Try again shortly.')
       // Peer Recognition validation
       if (!peerVoteEmployeeId) {
         throw new Error(
@@ -981,10 +1002,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
           user_id:
             user.id,
 
-          closeout_date:
-            new Date()
-              .toISOString()
-              .slice(0, 10),
+          closeout_date: serviceDay(),
 
           scheduled_start:
             scheduledTime,
@@ -1052,7 +1070,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
           points_summary:
             finalPoints.adjustments,
         })
-        .select('id,submitted_at,shift_score')
+        .select('id,submitted_at,shift_score,closeout_date,automatic_target_snapshot')
         .single()
 
       if (closeoutError) {
@@ -1139,13 +1157,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
           closeout_id:
             closeout.id,
 
-          business_date:
-            new Date()
-              .toISOString()
-              .slice(
-                0,
-                10
-              ),
+          business_date: closeout.closeout_date,
 
           action_code:
             'PEER_RECOGNITION',
@@ -1357,29 +1369,12 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
             />
           </label>
 
-          <label>
-            {questionLabel(config, 'staff_4', "Individual Sales Target")}
 
-            <input
-              type="number"
-              inputMode="decimal"
-              step="0.01"
-              value={
-                salesTarget
-              }
-              onChange={(
-                event
-              ) =>
-                setSalesTarget(
-                  event.target
-                    .value
-                )
-              }
-            />
-          </label>
 
         </div>
       </div>
+
+      <div className="card"><h3>Sales performance</h3><p>Service date: {closeoutDay}</p>{targetState.loading?<p role="status">Loading your calculated target…</p>:targetState.ready?<p>{Number(salesTarget)>0?`${((numberValue(netSales)/Number(salesTarget))*100).toFixed(1)}% of your calculated shift target${netSales.trim()!==''?(numberValue(netSales)>=Number(salesTarget)?' · Target met':' · Below target'):''}.`:'Your calculated shift target is $0; sales points do not apply.'}</p>:<p role="status">Sales comparison unavailable: {targetState.reason} Your closeout can still be submitted; no sales-target points will be applied.</p>}<button type="button" disabled={saving||targetState.loading} onClick={()=>setTargetRefresh(v=>v+1)}>Refresh sales comparison</button><p>The app supplies the target automatically. Points use your configured rules and the target saved when you submit.</p></div>
 
       {netSales.trim()!=='' && Number(netSales)===0 && <div className="closeout-warning"><h3><ScreenText id="CloseoutPage.08bbbe6dfa02693c">Check your sales</ScreenText></h3><p><ScreenText id="CloseoutPage.b8864cc8785a4b68">You entered $0. Check your Toast report before continuing.</ScreenText></p><label className="closeout-check"><input type="checkbox" checked={zeroSalesConfirmed} onChange={e=>setZeroSalesConfirmed(e.target.checked)} /><span><ScreenText id="CloseoutPage.21209f4ceb62d671">I checked my report and $0 sales is accurate.</ScreenText></span></label><label><ScreenText id="CloseoutPage.0c8ea3df31e4441b">Why were sales zero?</ScreenText><textarea rows={2} maxLength={2000} value={zeroSalesReason} onChange={e=>setZeroSalesReason(e.target.value)} placeholder="Explain why this shift had no sales." /></label></div>}
 
@@ -1973,7 +1968,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
         <h2><ScreenText id="CloseoutPage.e13d79760a892b77">
           Review & Submit
         </ScreenText></h2>
-        <div className="closeout-review"><p><ScreenText id="CloseoutPage.bc9bdc4ef1b422cf">Net sales: </ScreenText><strong>${netSales || 'Not entered'}</strong></p><p><ScreenText id="CloseoutPage.a8c21bd2c5567414">Sales target: </ScreenText><strong>${salesTarget || 'Not entered'}</strong></p><p><ScreenText id="CloseoutPage.0ca82121e91cc413">Cash deposit: </ScreenText><strong>${cashDeposit || 'Not entered'}</strong></p><p><ScreenText id="CloseoutPage.898ca3b88156a4c9">Review these amounts against your Toast report. An inaccurate submission does not earn the completion bonus.</ScreenText></p></div>
+        <div className="closeout-review"><p><ScreenText id="CloseoutPage.bc9bdc4ef1b422cf">Net sales: </ScreenText><strong>${netSales || 'Not entered'}</strong></p><p><ScreenText id="CloseoutPage.0ca82121e91cc413">Cash deposit: </ScreenText><strong>${cashDeposit || 'Not entered'}</strong></p><p><ScreenText id="CloseoutPage.898ca3b88156a4c9">Review these amounts against your Toast report. An inaccurate submission does not earn the completion bonus.</ScreenText></p></div>
 
         {pointResult && (
           <p>
@@ -2012,4 +2007,3 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
     </section>
   )
 }
-
