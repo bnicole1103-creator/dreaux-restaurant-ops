@@ -2,7 +2,7 @@
   {
     "id": "AppearancePage.89412119744c72b5",
     "page": "AppearancePage",
-    "text": "← Closeout"
+    "text": "\u2190 Closeout"
   },
   {
     "id": "AppearancePage.1e4bd93d88a48f32",
@@ -17,7 +17,7 @@
   {
     "id": "AppearancePage.54f37cceeacf18ab",
     "page": "AppearancePage",
-    "text": "Choose your location’s colors and font. Preview below before saving."
+    "text": "Choose your location\u2019s colors and font. Preview below before saving."
   },
   {
     "id": "AppearancePage.08f96f13013e39cf",
@@ -32,12 +32,12 @@
   {
     "id": "AppearancePage.c9f28a730f834a65",
     "page": "AppearancePage",
-    "text": "Today’s pre-shift"
+    "text": "Today\u2019s pre-shift"
   },
   {
     "id": "AppearancePage.8921d28a100b7379",
     "page": "AppearancePage",
-    "text": "Ready for service ✨"
+    "text": "Ready for service \u2728"
   },
   {
     "id": "AppearancePage.d8d35c13c9717996",
@@ -97,7 +97,7 @@
   {
     "id": "CloseoutHub.3d3d6a8ac79389ec",
     "page": "CloseoutHub",
-    "text": "Open Staff Closeout →"
+    "text": "Open Staff Closeout \u2192"
   },
   {
     "id": "CloseoutHub.c5974b145fd52498",
@@ -107,7 +107,7 @@
   {
     "id": "CloseoutHub.8b80a7ed4ed96752",
     "page": "CloseoutHub",
-    "text": "Open Summary →"
+    "text": "Open Summary \u2192"
   },
   {
     "id": "CloseoutHub.5a0c7948f9a8e57c",
@@ -122,7 +122,7 @@
   {
     "id": "CloseoutHub.b5f151a95a328e5b",
     "page": "CloseoutHub",
-    "text": "Open Manager Closeout →"
+    "text": "Open Manager Closeout \u2192"
   },
   {
     "id": "CloseoutHub.c042e14cd0556c31",
@@ -137,7 +137,7 @@
   {
     "id": "CloseoutHub.2af52bb3240d25cb",
     "page": "CloseoutHub",
-    "text": "Open Points Adjustments →"
+    "text": "Open Points Adjustments \u2192"
   },
   {
     "id": "CloseoutHub.8f31c04b843d0986",
@@ -152,7 +152,7 @@
   {
     "id": "CloseoutHub.42f17c4540c0b8d3",
     "page": "CloseoutHub",
-    "text": "Open Settings →"
+    "text": "Open Settings \u2192"
   },
   {
     "id": "CloseoutHub.763e8ef414fa8e22",
@@ -167,7 +167,7 @@
   {
     "id": "CloseoutHub.bf2e1b7855d92a89",
     "page": "CloseoutHub",
-    "text": "Manage Permissions →"
+    "text": "Manage Permissions \u2192"
   },
   {
     "id": "CloseoutPage.19b404e3d4da3b09",
@@ -192,7 +192,7 @@
   {
     "id": "CloseoutPage.0ce3457f5ccec1c4",
     "page": "CloseoutPage",
-    "text": "← Closeout"
+    "text": "\u2190 Closeout"
   },
   {
     "id": "CloseoutPage.dfb5350d0897214f",
@@ -297,7 +297,7 @@
   {
     "id": "CloseoutPage.4064ac585c437950",
     "page": "CloseoutPage",
-    "text": "⭐ Peer Recognition — +5 Points"
+    "text": "\u2b50 Peer Recognition \u2014 +5 Points"
   },
   {
     "id": "CloseoutPage.30eeb3cde10686c0",
@@ -432,7 +432,7 @@
   {
     "id": "CloseoutSettingsPage.89412119744c72b5",
     "page": "CloseoutSettingsPage",
-    "text": "← Closeout"
+    "text": "\u2190 Closeout"
   },
   {
     "id": "CloseoutSettingsPage.6987a743a4e1d65b",
@@ -497,7 +497,7 @@
   {
     "id": "CloseoutSettingsPage.0f526e8e187ed139",
     "page": "CloseoutSettingsPage",
-    "text": "Saved awards keep their values. Manager rating policies are fixed for an already-started Tuesday–Sunday week. Automatic rules retain their existing triggers; new rules are awarded by a manager."
+    "text": "Saved awards keep their values. Manager rating policies are fixed for an already-started Tuesday\u2013Sunday week. Automatic rules retain their existing triggers; new rules are awarded by a manager."
   },
   {
     "id": "CloseoutSettingsPage.783f5ba78c270aac",
@@ -567,7 +567,7 @@
   {
     "id": "CloseoutSummary.b6126f0911b1fda7",
     "page": "CloseoutSummary",
-    "text": " · Service day resets at 4 a.m. New Orleans time."
+    "text": " \u00b7 Service day resets at 4 a.m. New Orleans time."
   },
   {
     "id": "CloseoutSummary.e6794e03699dd0cb",
@@ -742,7 +742,7 @@
   {
     "id": "CloseoutSummary.5c3f475acefcfa5d",
     "page": "CloseoutSummary",
-    "text": "Loading history…"
+    "text": "Loading history\u2026"
   },
   {
     "id": "CloseoutSummary.acbc70394af59cae",
@@ -772,7 +772,7 @@
   {
     "id": "CocktailTrainingPage.9961ffcf77724e8c",
     "page": "CocktailTrainingPage",
-    "text": "← Training guides"
+    "text": "\u2190 Training guides"
   },
   {
     "id": "CocktailTrainingPage.fe36bab043706cc1",
@@ -787,7 +787,7 @@
   {
     "id": "CocktailTrainingPage.d66fe1289f7128be",
     "page": "CocktailTrainingPage",
-    "text": "Loading recipes…"
+    "text": "Loading recipes\u2026"
   },
   {
     "id": "CocktailTrainingPage.64dc003d5e5dd579",
@@ -872,22 +872,22 @@
   {
     "id": "DashboardPage.a1d1c867053fcd8f",
     "page": "DashboardPage",
-    "text": "Loading your restaurant…"
+    "text": "Loading your restaurant\u2026"
   },
   {
     "id": "DashboardPage.fa3c874b7ec2f04f",
     "page": "DashboardPage",
-    "text": "Today’s Pre-Shift"
+    "text": "Today\u2019s Pre-Shift"
   },
   {
     "id": "DashboardPage.438fb1924659b005",
     "page": "DashboardPage",
-    "text": "Open feed →"
+    "text": "Open feed \u2192"
   },
   {
     "id": "DashboardPage.5899d053d78dbc90",
     "page": "DashboardPage",
-    "text": "Loading today’s posts…"
+    "text": "Loading today\u2019s posts\u2026"
   },
   {
     "id": "DashboardPage.7d5117c94d1c7c83",
@@ -897,32 +897,32 @@
   {
     "id": "DashboardPage.b9bdfa05f2a58e58",
     "page": "DashboardPage",
-    "text": "Read pre-shift · "
+    "text": "Read pre-shift \u00b7 "
   },
   {
     "id": "DashboardPage.05c55bb281e731f2",
     "page": "DashboardPage",
-    "text": "Today’s Quiz"
+    "text": "Today\u2019s Quiz"
   },
   {
     "id": "DashboardPage.ad20f179d16eca06",
     "page": "DashboardPage",
-    "text": "Quiz history →"
+    "text": "Quiz history \u2192"
   },
   {
     "id": "DashboardPage.f6d279821b18fae7",
     "page": "DashboardPage",
-    "text": "Loading quiz…"
+    "text": "Loading quiz\u2026"
   },
   {
     "id": "DashboardPage.8e884be7d9d9f347",
     "page": "DashboardPage",
-    "text": "Pre-shift quiz · "
+    "text": "Pre-shift quiz \u00b7 "
   },
   {
     "id": "DashboardPage.9700412bbfc801f1",
     "page": "DashboardPage",
-    "text": "Submitted · "
+    "text": "Submitted \u00b7 "
   },
   {
     "id": "DashboardPage.a0295d2dc9305b4a",
@@ -937,12 +937,12 @@
   {
     "id": "DashboardPage.c52440f9c488fc63",
     "page": "DashboardPage",
-    "text": " questions · Not submitted yet"
+    "text": " questions \u00b7 Not submitted yet"
   },
   {
     "id": "DashboardPage.80d4c0570ae8d48f",
     "page": "DashboardPage",
-    "text": "Take today’s quiz"
+    "text": "Take today\u2019s quiz"
   },
   {
     "id": "DashboardPage.51fc46349f9e7a35",
@@ -957,7 +957,7 @@
   {
     "id": "DashboardPage.5bd7afd0d47d85c7",
     "page": "DashboardPage",
-    "text": "All lists / Assign tasks →"
+    "text": "All lists / Assign tasks \u2192"
   },
   {
     "id": "DashboardPage.eab2baa316a5794f",
@@ -967,7 +967,7 @@
   {
     "id": "FloorPage.6bd3823f78ebe444",
     "page": "FloorPage",
-    "text": "Loading floor plan…"
+    "text": "Loading floor plan\u2026"
   },
   {
     "id": "FloorPage.9affe661a5cddb9c",
@@ -992,7 +992,7 @@
   {
     "id": "FloorPage.0e1b1fe85997c7d1",
     "page": "FloorPage",
-    "text": " · party of "
+    "text": " \u00b7 party of "
   },
   {
     "id": "FloorPage.aaf48aa3abcc020d",
@@ -1022,7 +1022,7 @@
   {
     "id": "FloorPage.7b01d68c1fbd4367",
     "page": "FloorPage",
-    "text": " tables · "
+    "text": " tables \u00b7 "
   },
   {
     "id": "FloorPage.5a8f27d4d02c6b32",
@@ -1032,7 +1032,7 @@
   {
     "id": "FloorPage.edbbd1c1ad3bf9bc",
     "page": "FloorPage",
-    "text": "No shift selected · sections can be planned now"
+    "text": "No shift selected \u00b7 sections can be planned now"
   },
   {
     "id": "FloorPage.546456d48459c5bd",
@@ -1107,7 +1107,7 @@
   {
     "id": "FloorPage.157d0929048b90c2",
     "page": "FloorPage",
-    "text": " guests ·"
+    "text": " guests \u00b7"
   },
   {
     "id": "FloorPage.0f0cfbadeed9a791",
@@ -1237,12 +1237,12 @@
   {
     "id": "FloorPage.3cc5f5f9eee5793a",
     "page": "FloorPage",
-    "text": "Checking history and assigned capacity…"
+    "text": "Checking history and assigned capacity\u2026"
   },
   {
     "id": "FloorPage.1e21c88bc28cc5d3",
     "page": "FloorPage",
-    "text": " seats ·"
+    "text": " seats \u00b7"
   },
   {
     "id": "FloorPage.f0a2d26707228fe6",
@@ -1252,7 +1252,7 @@
   {
     "id": "FloorPage.f99c8033c61d6f17",
     "page": "FloorPage",
-    "text": "/hr average · "
+    "text": "/hr average \u00b7 "
   },
   {
     "id": "FloorPage.24a6edb170727de9",
@@ -1357,7 +1357,7 @@
   {
     "id": "FloorPage.4be8115d05aa0496",
     "page": "FloorPage",
-    "text": "−1 Cover Correction"
+    "text": "\u22121 Cover Correction"
   },
   {
     "id": "FloorPage.4926bb8bf7347b08",
@@ -1427,7 +1427,7 @@
   {
     "id": "FloorPage.7df20441dc99277c",
     "page": "FloorPage",
-    "text": "− Seat"
+    "text": "\u2212 Seat"
   },
   {
     "id": "FloorPage.56d4bb2b594a79fe",
@@ -1537,37 +1537,37 @@
   {
     "id": "FloorPage.093ec970131d5b82",
     "page": "FloorPage",
-    "text": "🔵 Seated"
+    "text": "\ud83d\udd35 Seated"
   },
   {
     "id": "FloorPage.1d19103e786ec74f",
     "page": "FloorPage",
-    "text": "🟡 Drinks"
+    "text": "\ud83d\udfe1 Drinks"
   },
   {
     "id": "FloorPage.8353242e893ef598",
     "page": "FloorPage",
-    "text": "🟠 Food"
+    "text": "\ud83d\udfe0 Food"
   },
   {
     "id": "FloorPage.9b188c58096a18aa",
     "page": "FloorPage",
-    "text": "🟣 Check"
+    "text": "\ud83d\udfe3 Check"
   },
   {
     "id": "FloorPage.ceb815d3af266d20",
     "page": "FloorPage",
-    "text": "⚫ Dirty / Needs Busser"
+    "text": "\u26ab Dirty / Needs Busser"
   },
   {
     "id": "FloorPage.26c57cd297d801b5",
     "page": "FloorPage",
-    "text": "🔴 Manager Assist"
+    "text": "\ud83d\udd34 Manager Assist"
   },
   {
     "id": "FloorPage.19c6834d7471e913",
     "page": "FloorPage",
-    "text": "🟢 Mark Ready / Close Table"
+    "text": "\ud83d\udfe2 Mark Ready / Close Table"
   },
   {
     "id": "FloorPage.51023ef8ef67b615",
@@ -1652,7 +1652,7 @@
   {
     "id": "InventoryPage.c136c4415c67a5bd",
     "page": "InventoryPage",
-    "text": "Loading bottle list…"
+    "text": "Loading bottle list\u2026"
   },
   {
     "id": "InventoryPage.5e7b14563da8af72",
@@ -1717,7 +1717,7 @@
   {
     "id": "InventoryPage.b6f753efd8ebd9b0",
     "page": "InventoryPage",
-    "text": "This disposal sheet · "
+    "text": "This disposal sheet \u00b7 "
   },
   {
     "id": "InventoryPage.cde29e195cdb94ac",
@@ -1747,7 +1747,7 @@
   {
     "id": "InventoryPage.c0e09aabe6f9ff69",
     "page": "InventoryPage",
-    "text": "Latest 50 submissions. Staff see their own sheets; managers see the team’s."
+    "text": "Latest 50 submissions. Staff see their own sheets; managers see the team\u2019s."
   },
   {
     "id": "InventoryPage.3c5028af23e122e5",
@@ -1762,7 +1762,7 @@
   {
     "id": "InventoryPage.54fb228b545587eb",
     "page": "InventoryPage",
-    "text": " CT · "
+    "text": " CT \u00b7 "
   },
   {
     "id": "InventoryPage.613175b626e8fce1",
@@ -1812,12 +1812,12 @@
   {
     "id": "ManagerCloseoutPage.09310404aab17db7",
     "page": "ManagerCloseoutPage",
-    "text": "Loading manager closeout…"
+    "text": "Loading manager closeout\u2026"
   },
   {
     "id": "ManagerCloseoutPage.84dae12b44d2a1b4",
     "page": "ManagerCloseoutPage",
-    "text": "← Closeout"
+    "text": "\u2190 Closeout"
   },
   {
     "id": "ManagerCloseoutPage.1fd28e8b873fc628",
@@ -1832,7 +1832,7 @@
   {
     "id": "ManagerCloseoutPage.b0bdef3954084e4a",
     "page": "ManagerCloseoutPage",
-    "text": " · Private shift performance review"
+    "text": " \u00b7 Private shift performance review"
   },
   {
     "id": "ManagerCloseoutPage.77476d75d9140c97",
@@ -1842,7 +1842,7 @@
   {
     "id": "ManagerCloseoutPage.d5bb16ce999eef86",
     "page": "ManagerCloseoutPage",
-    "text": " · Last updated: "
+    "text": " \u00b7 Last updated: "
   },
   {
     "id": "ManagerCloseoutPage.2202e5e40ee243a8",
@@ -1862,22 +1862,22 @@
   {
     "id": "ManagerCloseoutPage.c0165ed6e7811073",
     "page": "ManagerCloseoutPage",
-    "text": " — create shift"
+    "text": " \u2014 create shift"
   },
   {
     "id": "ManagerCloseoutPage.04eecb585c2af027",
     "page": "ManagerCloseoutPage",
-    "text": "Loading shifts…"
+    "text": "Loading shifts\u2026"
   },
   {
     "id": "ManagerCloseoutPage.b2e1bb32e9d242cc",
     "page": "ManagerCloseoutPage",
-    "text": "Creating shift…"
+    "text": "Creating shift\u2026"
   },
   {
     "id": "ManagerCloseoutPage.779a089a26f12e4c",
     "page": "ManagerCloseoutPage",
-    "text": "Loading private reviews…"
+    "text": "Loading private reviews\u2026"
   },
   {
     "id": "ManagerCloseoutPage.30ab09d20fac2ce2",
@@ -1887,7 +1887,7 @@
   {
     "id": "ManagerCloseoutPage.f5960a21b5ce2a31",
     "page": "ManagerCloseoutPage",
-    "text": "Staff ratings · What the numbers mean"
+    "text": "Staff ratings \u00b7 What the numbers mean"
   },
   {
     "id": "ManagerCloseoutPage.c862fd8a7e1bf3aa",
@@ -1897,7 +1897,7 @@
   {
     "id": "ManagerCloseoutPage.3378174a42e4b2c1",
     "page": "ManagerCloseoutPage",
-    "text": "Poor performance · Needs coaching"
+    "text": "Poor performance \u00b7 Needs coaching"
   },
   {
     "id": "ManagerCloseoutPage.5ec953daa38e3a61",
@@ -1947,7 +1947,7 @@
   {
     "id": "ManagerCloseoutPage.b025205640aa1910",
     "page": "ManagerCloseoutPage",
-    "text": "Select 1–10"
+    "text": "Select 1\u201310"
   },
   {
     "id": "ManagerCloseoutPage.c3683f3872b7cbbd",
@@ -2022,7 +2022,7 @@
   {
     "id": "PermissionsPage.89412119744c72b5",
     "page": "PermissionsPage",
-    "text": "← Closeout"
+    "text": "\u2190 Closeout"
   },
   {
     "id": "PermissionsPage.eba4c32dd13c83d3",
@@ -2077,7 +2077,7 @@
   {
     "id": "PermissionsPage.6663fb06ab55cf4f",
     "page": "PermissionsPage",
-    "text": "Loading permissions…"
+    "text": "Loading permissions\u2026"
   },
   {
     "id": "PermissionsPage.d3d9fc4260ebd42e",
@@ -2132,7 +2132,7 @@
   {
     "id": "PointsPage.c2ae010ecda1aae1",
     "page": "PointsPage",
-    "text": "Award / Deduct Points →"
+    "text": "Award / Deduct Points \u2192"
   },
   {
     "id": "PointsPage.92018619691663a6",
@@ -2157,7 +2157,7 @@
   {
     "id": "PointsPage.e78e48fd3cbb9452",
     "page": "PointsPage",
-    "text": "Loading points…"
+    "text": "Loading points\u2026"
   },
   {
     "id": "PointsPage.8e1782649e375df9",
@@ -2247,7 +2247,7 @@
   {
     "id": "PreshiftFeedPage.530b78d4332310fb",
     "page": "PreshiftFeedPage",
-    "text": "Take today’s quiz →"
+    "text": "Take today\u2019s quiz \u2192"
   },
   {
     "id": "PreshiftFeedPage.e5e12a67d3fe28f9",
@@ -2287,12 +2287,12 @@
   {
     "id": "PreshiftFeedPage.93298a425cc00b8f",
     "page": "PreshiftFeedPage",
-    "text": "Up to 6 attachments · 50 MB each. Videos play when staff tap Play."
+    "text": "Up to 6 attachments \u00b7 50 MB each. Videos play when staff tap Play."
   },
   {
     "id": "PreshiftFeedPage.7b282a454be608ff",
     "page": "PreshiftFeedPage",
-    "text": "Uploading attachment…"
+    "text": "Uploading attachment\u2026"
   },
   {
     "id": "PreshiftFeedPage.ebecddb5f399fe93",
@@ -2322,7 +2322,7 @@
   {
     "id": "PreshiftFeedPage.556bf6b828d8489e",
     "page": "PreshiftFeedPage",
-    "text": "Loading feed…"
+    "text": "Loading feed\u2026"
   },
   {
     "id": "PreshiftFeedPage.bbf7eecf15bf0a2b",
@@ -2337,12 +2337,12 @@
   {
     "id": "PreshiftFeedPage.d14f3e863e02a331",
     "page": "PreshiftFeedPage",
-    "text": "Pre-Shift · "
+    "text": "Pre-Shift \u00b7 "
   },
   {
     "id": "PreshiftFeedPage.1723972f91138c84",
     "page": "PreshiftFeedPage",
-    "text": "Take the pre-shift quiz →"
+    "text": "Take the pre-shift quiz \u2192"
   },
   {
     "id": "PreshiftFeedPage.1e6fff57198154b6",
@@ -2357,7 +2357,7 @@
   {
     "id": "PreshiftFeedPage.c8bacbc661d5f322",
     "page": "PreshiftFeedPage",
-    "text": " · Edited "
+    "text": " \u00b7 Edited "
   },
   {
     "id": "PreshiftFeedPage.996abd7b978793c1",
@@ -2392,12 +2392,12 @@
   {
     "id": "PreshiftFeedPage.0738782d960aed1b",
     "page": "PreshiftFeedPage",
-    "text": " CT · Checks for new posts every 15 seconds while this page is open."
+    "text": " CT \u00b7 Checks for new posts every 15 seconds while this page is open."
   },
   {
     "id": "QuizBuilderPage.32eaee06d35ddfd4",
     "page": "QuizBuilderPage",
-    "text": "← Daily Quizzes"
+    "text": "\u2190 Daily Quizzes"
   },
   {
     "id": "QuizBuilderPage.0af9d71bf594c489",
@@ -2417,7 +2417,7 @@
   {
     "id": "QuizBuilderPage.24102437495319ff",
     "page": "QuizBuilderPage",
-    "text": "Loading…"
+    "text": "Loading\u2026"
   },
   {
     "id": "QuizBuilderPage.a2bfec93d4dd8f87",
@@ -2442,12 +2442,12 @@
   {
     "id": "QuizBuilderPage.eeabc641c78873eb",
     "page": "QuizBuilderPage",
-    "text": "Add an existing question from the bank or write a new one. Open “Edit answers” to change the choices."
+    "text": "Add an existing question from the bank or write a new one. Open \u201cEdit answers\u201d to change the choices."
   },
   {
     "id": "QuizBuilderPage.c7f27a70beb66909",
     "page": "QuizBuilderPage",
-    "text": "＋ Add question"
+    "text": "\uff0b Add question"
   },
   {
     "id": "QuizBuilderPage.c084cf0fef6aff70",
@@ -2502,7 +2502,7 @@
   {
     "id": "QuizBuilderPage.f837d06ddc8b2780",
     "page": "QuizBuilderPage",
-    "text": "Edit answers · "
+    "text": "Edit answers \u00b7 "
   },
   {
     "id": "QuizBuilderPage.b78e8e03614c0ab6",
@@ -2592,7 +2592,7 @@
   {
     "id": "QuizzesPage.a96b839a58105eb0",
     "page": "QuizzesPage",
-    "text": " · Your answer: "
+    "text": " \u00b7 Your answer: "
   },
   {
     "id": "QuizzesPage.9d4db8d05a3c92fd",
@@ -2602,7 +2602,7 @@
   {
     "id": "QuizzesPage.246cabe13c327bdc",
     "page": "QuizzesPage",
-    "text": "Pre-Shift Quiz · "
+    "text": "Pre-Shift Quiz \u00b7 "
   },
   {
     "id": "QuizzesPage.9590afcd98be4b71",
@@ -2622,12 +2622,12 @@
   {
     "id": "QuizzesPage.74e997483f95abd8",
     "page": "QuizzesPage",
-    "text": " · Running quiz score through this quiz: "
+    "text": " \u00b7 Running quiz score through this quiz: "
   },
   {
     "id": "QuizzesPage.01e8804e8e0a8c89",
     "page": "QuizzesPage",
-    "text": " · Monthly reward points: "
+    "text": " \u00b7 Monthly reward points: "
   },
   {
     "id": "QuizzesPage.15c8c5ead821decf",
@@ -2642,7 +2642,7 @@
   {
     "id": "QuizzesPage.84f911a877a2c179",
     "page": "QuizzesPage",
-    "text": "Build Future Quizzes / Question Bank →"
+    "text": "Build Future Quizzes / Question Bank \u2192"
   },
   {
     "id": "QuizzesPage.879f2447f6bb95b8",
@@ -2652,12 +2652,12 @@
   {
     "id": "QuizzesPage.6e4f183331ca689e",
     "page": "QuizzesPage",
-    "text": "Today · "
+    "text": "Today \u00b7 "
   },
   {
     "id": "QuizzesPage.6799e69e289fa08d",
     "page": "QuizzesPage",
-    "text": "Loading…"
+    "text": "Loading\u2026"
   },
   {
     "id": "QuizzesPage.1d72b99728971f78",
@@ -2667,12 +2667,12 @@
   {
     "id": "QuizzesPage.21286979d56c5fd7",
     "page": "QuizzesPage",
-    "text": "Your manager will publish today’s pre-shift quiz here."
+    "text": "Your manager will publish today\u2019s pre-shift quiz here."
   },
   {
     "id": "QuizzesPage.0904328e9a0b32e1",
     "page": "QuizzesPage",
-    "text": "Create / Publish Today’s Quiz →"
+    "text": "Create / Publish Today\u2019s Quiz \u2192"
   },
   {
     "id": "QuizzesPage.cf3a03ebcb629cd4",
@@ -2682,7 +2682,7 @@
   {
     "id": "QuizzesPage.3780149cd908fc4d",
     "page": "QuizzesPage",
-    "text": "Pre-Shift Quiz · "
+    "text": "Pre-Shift Quiz \u00b7 "
   },
   {
     "id": "QuizzesPage.b60395f153d3e55e",
@@ -2702,7 +2702,7 @@
   {
     "id": "QuizzesPage.2932d9f524945dc5",
     "page": "QuizzesPage",
-    "text": "Loading quiz points…"
+    "text": "Loading quiz points\u2026"
   },
   {
     "id": "QuizzesPage.c867c300a82de4b2",
@@ -2712,7 +2712,7 @@
   {
     "id": "QuizzesPage.e88d2571ca0c7ec0",
     "page": "QuizzesPage",
-    "text": " quizzes completed · "
+    "text": " quizzes completed \u00b7 "
   },
   {
     "id": "QuizzesPage.8e8d6815000b8987",
@@ -2772,7 +2772,7 @@
   {
     "id": "SalesTargetsPage.ad38ada26e3e5960",
     "page": "SalesTargetsPage",
-    "text": "← Settings"
+    "text": "\u2190 Settings"
   },
   {
     "id": "SalesTargetsPage.80824852a0f51869",
@@ -2797,7 +2797,7 @@
   {
     "id": "SalesTargetsPage.2636b0a0386e6314",
     "page": "SalesTargetsPage",
-    "text": "Loading sales target setup…"
+    "text": "Loading sales target setup\u2026"
   },
   {
     "id": "SalesTargetsPage.a41eae4c48ebead8",
@@ -2822,7 +2822,7 @@
   {
     "id": "SalesTargetsPage.003be9d117c5ac3d",
     "page": "SalesTargetsPage",
-    "text": "Past six weeks · Daily net sales"
+    "text": "Past six weeks \u00b7 Daily net sales"
   },
   {
     "id": "SalesTargetsPage.61acfaebfea6432c",
@@ -2887,7 +2887,7 @@
   {
     "id": "SalesTargetsPage.b5fdca9800f3dbfa",
     "page": "SalesTargetsPage",
-    "text": " · Team goal: "
+    "text": " \u00b7 Team goal: "
   },
   {
     "id": "SalesTargetsPage.85324e671581449a",
@@ -2897,7 +2897,7 @@
   {
     "id": "SalesTargetsPage.3eb4b7c2664b3b68",
     "page": "SalesTargetsPage",
-    "text": " · Floor "
+    "text": " \u00b7 Floor "
   },
   {
     "id": "SalesTargetsPage.1ce2d1acb9720273",
@@ -2922,7 +2922,7 @@
   {
     "id": "SalesTargetsPage.4864400a9cf8ebc5",
     "page": "SalesTargetsPage",
-    "text": "Open Pre-Shift →"
+    "text": "Open Pre-Shift \u2192"
   },
   {
     "id": "SettingsPage.a4baa08020e55315",
@@ -2962,12 +2962,12 @@
   {
     "id": "TasksPage.ca249ab6eaa38b26",
     "page": "TasksPage",
-    "text": " · Daily lists stay available in history after the 4 AM rollover."
+    "text": " \u00b7 Daily lists stay available in history after the 4 AM rollover."
   },
   {
     "id": "TasksPage.7ac4da45b4a35ac9",
     "page": "TasksPage",
-    "text": "Loading tasks…"
+    "text": "Loading tasks\u2026"
   },
   {
     "id": "TasksPage.e7d9ebac3853177e",
@@ -3047,7 +3047,7 @@
   {
     "id": "TasksPage.49a431a49ba64856",
     "page": "TasksPage",
-    "text": "Tasks — up to 8, one per line"
+    "text": "Tasks \u2014 up to 8, one per line"
   },
   {
     "id": "TasksPage.de250c789a11a087",
@@ -3087,7 +3087,7 @@
   {
     "id": "TeamPage.9ab27c4cb1072ec7",
     "page": "TeamPage",
-    "text": "Loading team…"
+    "text": "Loading team\u2026"
   },
   {
     "id": "TeamPage.c1b5f294c1f55228",
@@ -3197,7 +3197,7 @@
   {
     "id": "WalkInPage.272d341450d6f245",
     "page": "WalkInPage",
-    "text": "You’re checked in!"
+    "text": "You\u2019re checked in!"
   },
   {
     "id": "WalkInPage.c433f334fe39c138",
@@ -3217,7 +3217,7 @@
   {
     "id": "WalkInPage.4fd23d1cfe365713",
     "page": "WalkInPage",
-    "text": "Loading…"
+    "text": "Loading\u2026"
   },
   {
     "id": "WalkInPage.42c9d2bcced66815",
@@ -3247,7 +3247,7 @@
   {
     "id": "WalkInPage.3dea6d83450fff48",
     "page": "WalkInPage",
-    "text": "Email me JusTini’s news, events and offers."
+    "text": "Email me JusTini\u2019s news, events and offers."
   },
   {
     "id": "WalkInPage.a053db25463ec752",
@@ -3272,7 +3272,7 @@
   {
     "id": "AssignedTaskLists.37e4f4cd95ffa4f5",
     "page": "AssignedTaskLists",
-    "text": "Loading task groups…"
+    "text": "Loading task groups\u2026"
   },
   {
     "id": "AssignedTaskLists.44d8bf411a6101b7",
@@ -3292,7 +3292,7 @@
   {
     "id": "AssignedTaskLists.bf1569190878d18a",
     "page": "AssignedTaskLists",
-    "text": "✓ Group complete"
+    "text": "\u2713 Group complete"
   },
   {
     "id": "AssignedTaskLists.a1f897b9e2b738f3",
@@ -3487,12 +3487,12 @@
   {
     "id": "EmployeeProfile.24102437495319ff",
     "page": "EmployeeProfile",
-    "text": "Loading…"
+    "text": "Loading\u2026"
   },
   {
     "id": "EmployeeProfile.70be783e1c0e0244",
     "page": "EmployeeProfile",
-    "text": " · Employee #"
+    "text": " \u00b7 Employee #"
   },
   {
     "id": "EmployeeProfile.ad2316532a047023",
@@ -3542,7 +3542,7 @@
   {
     "id": "EmployeeProfile.8c5bcd4b9dff1acf",
     "page": "EmployeeProfile",
-    "text": "Closeouts · "
+    "text": "Closeouts \u00b7 "
   },
   {
     "id": "EmployeeProfile.1efd29a0ec349ad9",
@@ -3577,7 +3577,7 @@
   {
     "id": "EmployeeProfile.22f91f9ec39b336a",
     "page": "EmployeeProfile",
-    "text": "Quizzes · "
+    "text": "Quizzes \u00b7 "
   },
   {
     "id": "EmployeeProfile.5f8aab8b153333b4",
@@ -3587,7 +3587,7 @@
   {
     "id": "EmployeeProfile.e0db0af2c9808d25",
     "page": "EmployeeProfile",
-    "text": "Task lists · "
+    "text": "Task lists \u00b7 "
   },
   {
     "id": "EmployeeProfile.035ab878726a6311",
@@ -3607,12 +3607,12 @@
   {
     "id": "EmployeeProfile.b811a065e8efe9c3",
     "page": "EmployeeProfile",
-    "text": "Inventory disposal sheets · "
+    "text": "Inventory disposal sheets \u00b7 "
   },
   {
     "id": "EmployeeProfile.0880572f0f8946c2",
     "page": "EmployeeProfile",
-    "text": "Manager reviews · private"
+    "text": "Manager reviews \u00b7 private"
   },
   {
     "id": "EmployeeProfile.4ca0411cfc1392b9",
@@ -3622,17 +3622,17 @@
   {
     "id": "HomeOperations.ef9a2e6ea79fd49e",
     "page": "HomeOperations",
-    "text": "Today’s Reservations"
+    "text": "Today\u2019s Reservations"
   },
   {
     "id": "HomeOperations.525371addd04800c",
     "page": "HomeOperations",
-    "text": "Floor / Upload →"
+    "text": "Floor / Upload \u2192"
   },
   {
     "id": "HomeOperations.4b5b6fd9f16ece53",
     "page": "HomeOperations",
-    "text": "Loading reservations…"
+    "text": "Loading reservations\u2026"
   },
   {
     "id": "HomeOperations.038a1540ce774c1f",
@@ -3642,7 +3642,7 @@
   {
     "id": "HomeOperations.5bfc9304f46db128",
     "page": "HomeOperations",
-    "text": " reservations · "
+    "text": " reservations \u00b7 "
   },
   {
     "id": "HomeOperations.3e37fafca1f8ec5f",
@@ -3667,22 +3667,22 @@
   {
     "id": "HomeOperations.276629158999ecbd",
     "page": "HomeOperations",
-    "text": "Today’s 7shifts Schedule"
+    "text": "Today\u2019s 7shifts Schedule"
   },
   {
     "id": "HomeOperations.e75f0e38c8bbcf4a",
     "page": "HomeOperations",
-    "text": "Open 7shifts →"
+    "text": "Open 7shifts \u2192"
   },
   {
     "id": "HomeOperations.243da5661e86cb31",
     "page": "HomeOperations",
-    "text": "New Orleans time · Updates automatically while Home is open."
+    "text": "New Orleans time \u00b7 Updates automatically while Home is open."
   },
   {
     "id": "HomeOperations.fdbf6534bde17933",
     "page": "HomeOperations",
-    "text": "Loading schedule…"
+    "text": "Loading schedule\u2026"
   },
   {
     "id": "HomeOperations.84da857b0ea523b5",
@@ -3702,7 +3702,7 @@
   {
     "id": "ManagementAccess.80409edadbb53ccf",
     "page": "ManagementAccess",
-    "text": "Checking access…"
+    "text": "Checking access\u2026"
   },
   {
     "id": "ManagementAccess.66253c5629fe2863",
@@ -3722,12 +3722,12 @@
   {
     "id": "MySections.993f0bbfdc80c378",
     "page": "MySections",
-    "text": "Open floor →"
+    "text": "Open floor \u2192"
   },
   {
     "id": "MySections.b5de2c6ad88b27f5",
     "page": "MySections",
-    "text": "Loading sections…"
+    "text": "Loading sections\u2026"
   },
   {
     "id": "MySections.906682ebbac27a3d",
@@ -3742,7 +3742,7 @@
   {
     "id": "PointEntryEditor.e125db0089fa554f",
     "page": "PointEntryEditor",
-    "text": "Edit Point Entries · GM Only"
+    "text": "Edit Point Entries \u00b7 GM Only"
   },
   {
     "id": "PointEntryEditor.df72d5e83c0d2ad7",
@@ -3762,7 +3762,7 @@
   {
     "id": "PointEntryEditor.ef3d72a1b1d62324",
     "page": "PointEntryEditor",
-    "text": "Loading / saving…"
+    "text": "Loading / saving\u2026"
   },
   {
     "id": "PointEntryEditor.03ef2a10c1b156d6",
@@ -3772,7 +3772,7 @@
   {
     "id": "PointEntryEditor.6efe688a9587d889",
     "page": "PointEntryEditor",
-    "text": " · Automatic value: "
+    "text": " \u00b7 Automatic value: "
   },
   {
     "id": "PointEntryEditor.c78ae477bc032fd8",
@@ -3897,7 +3897,7 @@
   {
     "id": "PreshiftArchive.7cad8dba38b655f8",
     "page": "PreshiftArchive",
-    "text": "Searching…"
+    "text": "Searching\u2026"
   },
   {
     "id": "PreshiftArchive.e871b6a34ee7d972",
@@ -3932,7 +3932,7 @@
   {
     "id": "PreshiftPresetBuilder.35775100d0250ad2",
     "page": "PreshiftPresetBuilder",
-    "text": "Pick the pieces you need, edit their wording for this shift, then insert them into your post. Daily hours and specials are starter drafts—confirm today’s details before publishing."
+    "text": "Pick the pieces you need, edit their wording for this shift, then insert them into your post. Daily hours and specials are starter drafts\u2014confirm today\u2019s details before publishing."
   },
   {
     "id": "PreshiftPresetBuilder.0aa6e5e7de2fdbff",
@@ -4077,32 +4077,32 @@
   {
     "id": "PublishedQuizzes.ffb407bdb85192c4",
     "page": "PublishedQuizzes",
-    "text": "Loading published quizzes…"
+    "text": "Loading published quizzes\u2026"
   },
   {
     "id": "PublishedQuizzes.480e872324288a23",
     "page": "PublishedQuizzes",
-    "text": " questions · "
+    "text": " questions \u00b7 "
   },
   {
     "id": "QuizQuestionBank.c2266270f6b43e98",
     "page": "QuizQuestionBank",
-    "text": "＋ Question Bank ("
+    "text": "\uff0b Question Bank ("
   },
   {
     "id": "QuizQuestionBank.ea96d5e5a2d9fd42",
     "page": "QuizQuestionBank",
-    "text": ") — by day"
+    "text": ") \u2014 by day"
   },
   {
     "id": "QuizQuestionBank.89a1438d47709fa4",
     "page": "QuizQuestionBank",
-    "text": "Every quiz saved in this app appears under its quiz date. Select one question or the whole day’s set. Copies can be edited before publishing."
+    "text": "Every quiz saved in this app appears under its quiz date. Select one question or the whole day\u2019s set. Copies can be edited before publishing."
   },
   {
     "id": "QuizQuestionBank.1f9d1106a75d5c62",
     "page": "QuizQuestionBank",
-    "text": "Loading question bank…"
+    "text": "Loading question bank\u2026"
   },
   {
     "id": "QuizQuestionBank.eea41b687fbeb818",
@@ -4142,7 +4142,7 @@
   {
     "id": "QuizQuestionBank.d4f12e433e8289ab",
     "page": "QuizQuestionBank",
-    "text": "Select this day’s questions"
+    "text": "Select this day\u2019s questions"
   },
   {
     "id": "QuizQuestionBank.2c33d13a364e39b8",
@@ -4247,7 +4247,7 @@
   {
     "id": "QuizUpload.ed6641ab99463735",
     "page": "QuizUpload",
-    "text": "Use A., B., C. for choices and “Correct Answer: B” after each question. Up to 50 questions."
+    "text": "Use A., B., C. for choices and \u201cCorrect Answer: B\u201d after each question. Up to 50 questions."
   },
   {
     "id": "QuizUpload.dcd1cdf0be32a316",
@@ -4262,7 +4262,7 @@
   {
     "id": "QuizUpload.b5bdcd9a74fa92f3",
     "page": "QuizUpload",
-    "text": "TXT, CSV or JSON · up to 1 MB"
+    "text": "TXT, CSV or JSON \u00b7 up to 1 MB"
   },
   {
     "id": "QuizUpload.5df71b577323e8be",
@@ -4282,7 +4282,7 @@
   {
     "id": "QuizUpload.690e1acf410d37df",
     "page": "QuizUpload",
-    "text": "Reading quiz…"
+    "text": "Reading quiz\u2026"
   },
   {
     "id": "QuizUpload.81aa5d96259a023c",
@@ -4292,7 +4292,7 @@
   {
     "id": "QuizUpload.49e1dfda156b9511",
     "page": "QuizUpload",
-    "text": "The file’s date is "
+    "text": "The file\u2019s date is "
   },
   {
     "id": "QuizUpload.23dd2f9619534d21",
@@ -4347,7 +4347,7 @@
   {
     "id": "SalesTargetPreview.73753ccff0f23c9e",
     "page": "SalesTargetPreview",
-    "text": "Sales target setup →"
+    "text": "Sales target setup \u2192"
   },
   {
     "id": "SalesTargetPreview.3a79bd01f89f1b9f",
@@ -4357,7 +4357,7 @@
   {
     "id": "SalesTargetPreview.7747bd3454d5fb6b",
     "page": "SalesTargetPreview",
-    "text": "Loading sales targets…"
+    "text": "Loading sales targets\u2026"
   },
   {
     "id": "SalesTargetPreview.2a83e6948fec973b",
@@ -4367,12 +4367,12 @@
   {
     "id": "SalesTargetPreview.fc3bf496cb1c89df",
     "page": "SalesTargetPreview",
-    "text": " · Bar "
+    "text": " \u00b7 Bar "
   },
   {
     "id": "SalesTargetPreview.fdf5053e47551e97",
     "page": "SalesTargetPreview",
-    "text": " · Floor "
+    "text": " \u00b7 Floor "
   },
   {
     "id": "SalesTargetPreview.1ed67c35bc4d51eb",
@@ -4397,12 +4397,12 @@
   {
     "id": "SectionEmployeePicker.5f1f623e838dbe8b",
     "page": "SectionEmployeePicker",
-    "text": "Type a name — no account yet"
+    "text": "Type a name \u2014 no account yet"
   },
   {
     "id": "SectionEmployeePicker.02d9aac96d78610a",
     "page": "SectionEmployeePicker",
-    "text": "Unavailable employee — choose another"
+    "text": "Unavailable employee \u2014 choose another"
   },
   {
     "id": "SectionEmployeePicker.31dc3e20589ffae4",
@@ -4522,7 +4522,7 @@
   {
     "id": "SignupApprovals.3a73d6354f18049d",
     "page": "SignupApprovals",
-    "text": "Share this location’s registration link. New accounts wait for your approval."
+    "text": "Share this location\u2019s registration link. New accounts wait for your approval."
   },
   {
     "id": "SignupApprovals.05123828a691762a",
@@ -4597,7 +4597,7 @@
   {
     "id": "SignupGate.d52193e0ca026e4c",
     "page": "SignupGate",
-    "text": "Checking your account…"
+    "text": "Checking your account\u2026"
   },
   {
     "id": "SignupGate.3b3e3f47f4ed1470",
@@ -4737,12 +4737,12 @@
   {
     "id": "WalkinPanel.2c4dd2ecd402a88d",
     "page": "WalkinPanel",
-    "text": "Email · optional"
+    "text": "Email \u00b7 optional"
   },
   {
     "id": "WalkinPanel.24befdf57e906205",
     "page": "WalkinPanel",
-    "text": "Phone · optional"
+    "text": "Phone \u00b7 optional"
   },
   {
     "id": "WalkinPanel.d54a079e91fa3c15",
@@ -4802,7 +4802,7 @@
   {
     "id": "WalkinPanel.9ac3b40e1267c897",
     "page": "WalkinPanel",
-    "text": " · party of "
+    "text": " \u00b7 party of "
   },
   {
     "id": "WalkinPanel.da92f44f6aaee6f3",
@@ -4853,5 +4853,165 @@
     "id": "WalkinPanel.c1b1c77ab1a758a3",
     "page": "WalkinPanel",
     "text": "Print QR sign"
+  },
+  {
+    "id": "GuestFeedbackPage.3d1c9633709ed474",
+    "page": "GuestFeedbackPage",
+    "text": "Comments, concerns & feedback"
+  },
+  {
+    "id": "GuestFeedbackPage.92003c7c3a078515",
+    "page": "GuestFeedbackPage",
+    "text": "Thank you for sharing."
+  },
+  {
+    "id": "GuestFeedbackPage.e7edb7208f8e2fc2",
+    "page": "GuestFeedbackPage",
+    "text": "Your feedback has been sent to our management team."
+  },
+  {
+    "id": "GuestFeedbackPage.40345500dd02fd43",
+    "page": "GuestFeedbackPage",
+    "text": "You requested a follow-up using the contact details you provided."
+  },
+  {
+    "id": "GuestFeedbackPage.a9837bcb7bd588ea",
+    "page": "GuestFeedbackPage",
+    "text": "Tell us about your experience. Your feedback helps us improve."
+  },
+  {
+    "id": "GuestFeedbackPage.f28a01226f52c69f",
+    "page": "GuestFeedbackPage",
+    "text": "You can submit without your name or contact details. For a concern that needs attention during your visit, please speak with a manager."
+  },
+  {
+    "id": "GuestFeedbackPage.ba3bbbe10d8bef66",
+    "page": "GuestFeedbackPage",
+    "text": "Loading\u2026"
+  },
+  {
+    "id": "GuestFeedbackPage.1f6a77e264bc7602",
+    "page": "GuestFeedbackPage",
+    "text": "Feedback type"
+  },
+  {
+    "id": "GuestFeedbackPage.44f5e3fbec57be75",
+    "page": "GuestFeedbackPage",
+    "text": "Comment"
+  },
+  {
+    "id": "GuestFeedbackPage.bead1be3fa973b50",
+    "page": "GuestFeedbackPage",
+    "text": "Concern"
+  },
+  {
+    "id": "GuestFeedbackPage.527f6bc857ad184e",
+    "page": "GuestFeedbackPage",
+    "text": "Suggestion"
+  },
+  {
+    "id": "GuestFeedbackPage.1332b5c1540251b8",
+    "page": "GuestFeedbackPage",
+    "text": "Compliment"
+  },
+  {
+    "id": "GuestFeedbackPage.cdb1c0a5f34f5f4f",
+    "page": "GuestFeedbackPage",
+    "text": "Your feedback"
+  },
+  {
+    "id": "GuestFeedbackPage.75409074d75f6695",
+    "page": "GuestFeedbackPage",
+    "text": "Date of your visit (optional)"
+  },
+  {
+    "id": "GuestFeedbackPage.e09b37bcc4f301f4",
+    "page": "GuestFeedbackPage",
+    "text": "Name (optional)"
+  },
+  {
+    "id": "GuestFeedbackPage.6eea8608c452711b",
+    "page": "GuestFeedbackPage",
+    "text": "Email (optional)"
+  },
+  {
+    "id": "GuestFeedbackPage.35878f0bd6c133b3",
+    "page": "GuestFeedbackPage",
+    "text": "Phone (optional)"
+  },
+  {
+    "id": "GuestFeedbackPage.9defa3a9c96be8c8",
+    "page": "GuestFeedbackPage",
+    "text": "I would like management to follow up with me."
+  },
+  {
+    "id": "GuestFeedbackPage.654e4aecce534213",
+    "page": "GuestFeedbackPage",
+    "text": "Contact details are used to respond to your feedback. This form does not sign you up for marketing."
+  },
+  {
+    "id": "GuestFeedbackPage.b5a229ac8becc603",
+    "page": "GuestFeedbackPage",
+    "text": "Website"
+  },
+  {
+    "id": "CloseoutPage.7f6af06b00b0189f",
+    "page": "CloseoutPage",
+    "text": "Sales performance"
+  },
+  {
+    "id": "CloseoutPage.14acd8d7f71380ca",
+    "page": "CloseoutPage",
+    "text": "Service date:"
+  },
+  {
+    "id": "CloseoutPage.e9770c364ebc0326",
+    "page": "CloseoutPage",
+    "text": "Loading your calculated target\u2026"
+  },
+  {
+    "id": "CloseoutPage.dbfc92213389d7e2",
+    "page": "CloseoutPage",
+    "text": "Sales comparison unavailable:"
+  },
+  {
+    "id": "CloseoutPage.04f6bebaec27bdc9",
+    "page": "CloseoutPage",
+    "text": "Your closeout can still be submitted; no sales-target points will be applied."
+  },
+  {
+    "id": "CloseoutPage.e9a3dfb1035e0f72",
+    "page": "CloseoutPage",
+    "text": "Refresh sales comparison"
+  },
+  {
+    "id": "CloseoutPage.23ce0e8790ad974a",
+    "page": "CloseoutPage",
+    "text": "The app supplies the target automatically. Points use your configured rules and the target saved when you submit."
+  },
+  {
+    "id": "CloseoutPage.1c574f44136f81e1",
+    "page": "CloseoutPage",
+    "text": "86 Items"
+  },
+  {
+    "id": "CloseoutPage.f4615f74236e8f37",
+    "page": "CloseoutPage",
+    "text": "Enter one unavailable item per line. These items are added to the shared board when you submit this closeout."
+  },
+  {
+    "id": "CloseoutPage.2392bdca27c7d9c1",
+    "page": "CloseoutPage",
+    "text": "Items marked 86"
+  },
+  {
+    "id": "CloseoutPage.ad57366865126e55",
+    "page": "CloseoutPage",
+    "text": "100"
+  },
+  {
+    "id": "CloseoutPage.09fc96082d34c2df",
+    "page": "CloseoutPage",
+    "text": "$"
   }
 ]

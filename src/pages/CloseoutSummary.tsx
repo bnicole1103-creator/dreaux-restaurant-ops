@@ -1,3 +1,4 @@
+import { StockBoard,CloseoutStockDetails } from '../components/StockBoard'
 import { useSearchParams } from 'react-router-dom'
 import { ScreenText } from "../components/ScreenText"
 import './CloseoutMobile.css'
@@ -22,6 +23,7 @@ type PointSummaryItem = {
 }
 
 type CloseoutRow = {
+  omitted_questions?: string[]
   edit_version?: number
   shift_type?: string | null
   custom_answers?: Record<string,string>
@@ -643,6 +645,7 @@ function CloseoutDay({selectedDate,refresh,onDeleted,locationId,locationName,cur
         )}
       </div>
 
+      {locationId&&<StockBoard location={locationId} readOnly date={selectedDate}/>}
       {error && (
         <div
           style={{
@@ -1197,6 +1200,8 @@ function CloseoutDay({selectedDate,refresh,onDeleted,locationId,locationName,cur
                             </div>
                           )}
 
+                          {!!closeout.omitted_questions?.length&&<p role="status">Not collected on this form: {closeout.omitted_questions.map(id=>({'staff_0':'scheduled start','staff_1':'clock-in','staff_2':'shift','staff_3':'net sales','staff_4':'manual target','staff_5':'cash deposit','staff_6':'voids','staff_7':'discounts','staff_8':'register cash','staff_9':'imbalance reason','staff_10':'verifier','staff_11':'peer recognition','staff_12':'recognition reason','staff_13':'recognition explanation','staff_14':'money recipient','staff_15':'drink maker'} as Record<string,string>)[id]??id).join(', ')}. Removed sales and attendance questions do not produce performance adjustments.</p>}
+                          <CloseoutStockDetails location={locationId} id={closeout.id}/>
                           {closeout.notes && (
                             <div
                               style={{
@@ -1280,5 +1285,6 @@ export function CloseoutSummaryPage() {
   {archiveDate && archiveDate<day && <CloseoutDay focusId={linkedDate===archiveDate?focusId:''} key={archiveDate} selectedDate={archiveDate} current={false} refresh={refresh} locationId={location.id} locationName={location.name} onDeleted={reload} />}
  </>
 }
+
 
 

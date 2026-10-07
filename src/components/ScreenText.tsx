@@ -9,15 +9,16 @@ const subscribe=(f:()=>void)=>{listeners.add(f);return()=>{listeners.delete(f)}}
 export function setScreenWording(next:Record<string,string>){values=next;listeners.forEach(f=>f())}
 export function ScreenText({id,children}:{id:string;children:ReactNode}){
  const text=useSyncExternalStore(subscribe,()=>values[id],()=>undefined)
- return <>{text===undefined?children:text}</>
+ return new URLSearchParams(window.location.search).has('wording-preview') ? <span data-wording-id={id}>{text===undefined?children:text}</span> : <>{text===undefined?children:text}</>
 }
 export function ScreenWordingLoader(){
  const {pathname}=useLocation()
  useEffect(()=>{let live=true,sequence=0
  async function refresh(){const current=++sequence;try{
-  const guest=pathname.match(/^\/walk-in\/([0-9a-f-]{36})$/i)
+  const guest=pathname.match(/^\/walk-in\/([0-9a-f-]{36})$/i),feedback=pathname.match(/^\/guest-feedback\/([0-9a-f-]{36})$/i)
   let r
   if(guest)r=await supabase.rpc('screen_wording_public',{p_key:guest[1]})
+  else if(feedback)r=await supabase.rpc('screen_wording_feedback',{p_key:feedback[1]})
   else {const {data}=await supabase.auth.getSession();if(!data.session){if(live&&current===sequence)setScreenWording({});return}const tenant=await loadTenantData();if(!tenant.locations[0])return;r=await supabase.rpc('screen_wording_get',{p_location_id:tenant.locations[0].id})}
   if(!r.error&&live&&current===sequence)setScreenWording(r.data||{})
  }catch{/* Original text remains available if the settings cannot load. */}}
@@ -27,3 +28,4 @@ export function ScreenWordingLoader(){
  },[pathname])
  return null
 }
+

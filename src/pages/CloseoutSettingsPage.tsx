@@ -58,7 +58,7 @@ export function CloseoutSettingsPage({awardsOnly = false, initialTab = 'staff'}:
     {!config&&<p>{busy?'Loading settings…':'Settings unavailable.'}</p>}
     {config&&<><div className="settings-tabs">{(awardsOnly ? ['award'] as const : ['staff','manager','points','award'] as const).map(t=><button key={t} type="button" disabled={busy} aria-pressed={tab===t} onClick={()=>setTab(t)}>{({staff:'Staff Questions',manager:'Manager Questions',points:'Point Rules',award:'Award Points'})[t]}</button>)}</div>
     {tab!=='award'&&<form onSubmit={e=>{e.preventDefault();void save()}}><fieldset disabled={busy}>
-      {(tab==='staff'||tab==='manager')&&<><p><ScreenText id="CloseoutSettingsPage.ea06472db1ca16d2">Operational fields keep their existing validation; you can change their wording. Custom questions can be removed. Previously saved answers remain in their original closeouts.</ScreenText></p>
+      {(tab==='staff'||tab==='manager')&&<><p><ScreenText id="CloseoutSettingsPage.ea06472db1ca16d2">Edit labels and remove staff questions from future forms. Removing a question also disables its associated automatic points. Saved closeouts retain their original answers and point rules.</ScreenText></p>
         {config.questions.filter(q=>q.audience===tab).map(q=><article className="mod-review" key={q.id}><label><ScreenText id="CloseoutSettingsPage.b45379e8eccb5aad">Question</ScreenText><textarea required rows={2} maxLength={500} value={q.label} onChange={e=>updateQuestion(q.id,{label:e.target.value})}/></label>
           {!q.builtin&&<div className="mod-fields"><label><ScreenText id="CloseoutSettingsPage.01164c368bd99fd0">Answer type</ScreenText><select value={q.type} onChange={e=>updateQuestion(q.id,{type:e.target.value as Question['type']})}><option value="text"><ScreenText id="CloseoutSettingsPage.6b3ace26a361ac6c">Written answer</ScreenText></option><option value="number"><ScreenText id="CloseoutSettingsPage.c7527ecfa76fa775">Number</ScreenText></option><option value="yesno"><ScreenText id="CloseoutSettingsPage.bcaa86591c49ccd9">Yes / No</ScreenText></option></select></label>
           <label className="mod-check"><input type="checkbox" checked={q.required} onChange={e=>updateQuestion(q.id,{required:e.target.checked})}/><ScreenText id="CloseoutSettingsPage.eac1c0b6f8b1d338">Required</ScreenText></label>
@@ -67,7 +67,7 @@ export function CloseoutSettingsPage({awardsOnly = false, initialTab = 'staff'}:
             if (!window.confirm('Remove this question from future forms? Saved answers will remain available.')) return
             setDirty(true); setMessage(''); setConfig(c => c && ({...c, questions: c.questions.filter(item => item.id !== q.id)}))
           }}><ScreenText id="CloseoutSettingsPage.75e6832d204f3149">Remove Question</ScreenText></button>}
-          {q.builtin && <small><ScreenText id="CloseoutSettingsPage.43cb8c506629acf0">Required operational field. Its wording can be edited.</ScreenText></small>}
+          {q.builtin&&q.audience==='staff'&&<label className="mod-check"><input type="checkbox" checked={q.active} onChange={e=>updateQuestion(q.id,{active:e.target.checked})}/>Show this question on future forms</label>}{q.builtin && <small><ScreenText id="CloseoutSettingsPage.43cb8c506629acf0">Built-in question. Staff questions can be removed and restored with the checkbox above.</ScreenText></small>}
         </article>)}
         <button type="button" disabled={config.questions.length>=100} onClick={()=>{setDirty(true);setConfig({...config,questions:[...config.questions,{id:crypto.randomUUID(),audience:tab,label:'',type:'text',required:true,active:true,builtin:false}]})}}><ScreenText id="CloseoutSettingsPage.fa61b25ed7f306ce">Add Question</ScreenText></button>
       </>}
@@ -92,4 +92,5 @@ export function CloseoutSettingsPage({awardsOnly = false, initialTab = 'staff'}:
     </form>}</>}
   </section>
 }
+
 

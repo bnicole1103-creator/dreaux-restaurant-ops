@@ -21,7 +21,8 @@ export function useCloseoutConfig(locationId: string) {
   return { config, error, setConfig }
 }
 export function questionLabel(config: Config | null, id: string, fallback: string) {
-  return config?.questions.find(q => q.id === id)?.label ?? fallback
+  const text=config?.questions.find(q => q.id === id)?.label ?? fallback
+  return new URLSearchParams(window.location.search).has('wording-preview') ? <span data-question-id={id}>{text}</span> : text
 }
 export function checkAnswers(config: Config | null, audience: string, answers: Answers) {
   if (!config) throw new Error('Closeout settings are not loaded. Reload the page before submitting.')
@@ -39,11 +40,19 @@ export function CloseoutQuestions({config,audience,answers,onChange}: {config: C
   const questions = config?.questions.filter(q => q.active && !q.builtin && q.audience === audience) ?? []
   if (!questions.length) return null
   return <div className="card mod-review"><h2><ScreenText id="CloseoutConfig.be4492a1358f3526">Additional closeout questions</ScreenText></h2><div className="mod-fields">
-    {questions.map(q => <label key={q.id}>{q.label}{!q.required && ' (optional)'}
+    {questions.map(q => <label key={q.id}><span data-question-id={new URLSearchParams(window.location.search).has('wording-preview')?q.id:undefined}>{q.label}</span>{!q.required && ' (optional)'}
       {q.type === 'yesno' ? <select required={q.required} value={answers[q.id] ?? ''} onChange={e => onChange({...answers,[q.id]:e.target.value})}>
         <option value=""><ScreenText id="CloseoutConfig.2091fd73e0c28daf">Choose an answer</ScreenText></option><option value="yes"><ScreenText id="CloseoutConfig.0ef3d89123c8ea40">Yes</ScreenText></option><option value="no"><ScreenText id="CloseoutConfig.4019546009aa8a7f">No</ScreenText></option>
       </select> : q.type === 'number' ? <input type="number" step="any" required={q.required} value={answers[q.id] ?? ''} onChange={e => onChange({...answers,[q.id]:e.target.value})} />
         : <textarea rows={3} maxLength={2000} required={q.required} value={answers[q.id] ?? ''} onChange={e => onChange({...answers,[q.id]:e.target.value})} />}
     </label>)}
   </div></div>
+}
+
+
+export function questionActive(config:Config|null,id:string){
+ const active=(key:string)=>config?.questions.find(q=>q.id===key)?.active!==false
+ if(['staff_9','staff_10'].includes(id)&&!active('staff_8'))return false
+ if(['staff_12','staff_13'].includes(id)&&!active('staff_11'))return false
+ return active(id)
 }

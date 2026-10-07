@@ -1,3 +1,4 @@
+import { StockBoard } from '../components/StockBoard'
 import { serviceDay } from '../lib/serviceDay'
 import { ScreenText } from "../components/ScreenText"
 import { ClockTime } from '../components/ClockTime'
@@ -5,7 +6,7 @@ import { closeoutHours } from '../lib/closeoutHours'
 import './CloseoutMobile.css'
 import { submissionLabel } from '../lib/submissionTime'
 import { Link } from 'react-router-dom'
-import { CloseoutQuestions, useCloseoutConfig, checkAnswers, questionLabel } from '../components/CloseoutConfig'
+import { CloseoutQuestions, useCloseoutConfig, checkAnswers, questionLabel, questionActive } from '../components/CloseoutConfig'
 import type { Answers } from '../components/CloseoutConfig'
 import { useEffect, useMemo, useState } from 'react'
 import { supabase } from '../lib/supabase'
@@ -338,9 +339,17 @@ export function CloseoutPage() {
     useState('')
 
   const { config, error: configError } = useCloseoutConfig(locationId)
+  const shown=(id:string)=>questionActive(config,id)
+  const [stockItems,setStockItems]=useState('')
   function configuredShiftPoints(input: Parameters<typeof calculateShiftPoints>[0]) {
     const original = calculateShiftPoints(input)
-    const adjustments = original.adjustments.map(a => {
+    const adjustments = original.adjustments.filter(a=>{
+      if(a.code.startsWith('LATE_'))return shown('staff_0')&&shown('staff_1')
+      if(a.code.startsWith('SALES_'))return shown('staff_0')&&shown('staff_3')
+      if(a.code==='VOID_OVER_15')return shown('staff_6')
+      if(a.code==='DISCOUNT_OVER_15')return shown('staff_7')
+      return true
+    }).map(a => {
       const rule = config?.rules.find(r => r.id === a.code)
       return rule ? {...a, points: rule.active ? rule.points : 0, description: rule.reason} : a
     })
@@ -886,21 +895,21 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
         )
       }
 
-      if (!scheduledTime) {
+      if (shown('staff_0') && !scheduledTime) {
         throw new Error(
           'Enter your scheduled time.'
         )
       }
 
-      if (!clockInTime) {
+      if (shown('staff_1') && !clockInTime) {
         throw new Error(
           'Enter your actual clock-in time.'
         )
       }
 
-      if (closeoutHours(clockInTime, clockOutTime) === null) throw new Error('Enter your clock-out time. Shift length must be greater than zero and no more than 18 hours. A clock-out earlier than clock-in means the next day.')
+      if (shown('staff_1') && closeoutHours(clockInTime, clockOutTime) === null) throw new Error('Enter your clock-out time. Shift length must be greater than zero and no more than 18 hours. A clock-out earlier than clock-in means the next day.')
 
-      if (!moneyTurnedInTo) {
+      if (shown('staff_14') && !moneyTurnedInTo) {
         throw new Error(
           'Select who received your money.'
         )
@@ -913,11 +922,11 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
       }
 
       for (const [label, raw] of [['Net sales', netSales], ['Cash deposit', cashDeposit], ['Voids', voidValue], ['Discounts', discountValue]]) {
-        if (!raw.trim() || !/^\d+(\.\d{1,2})?$/.test(raw.trim()) || !Number.isFinite(Number(raw)) || Number(raw)>100000000) throw new Error(`Enter ${label.toLowerCase()} as a valid amount. Enter 0 only when it is accurate.`)
+        if (shown(({'Net sales':'staff_3','Cash deposit':'staff_5','Voids':'staff_6','Discounts':'staff_7','Sales target':'staff_4'} as Record<string,string>)[label]) && (!raw.trim() || !/^\d+(\.\d{1,2})?$/.test(raw.trim()) || !Number.isFinite(Number(raw)) || Number(raw)>100000000)) throw new Error(`Enter ${label.toLowerCase()} as a valid amount. Enter 0 only when it is accurate.`)
       }
-      if (!shiftType) throw new Error('Select the shift you worked.')
+      if (shown('staff_2') && !shiftType) throw new Error('Select the shift you worked.')
       if (voidCount && (!/^\d+$/.test(voidCount) || Number(voidCount)>100000)) throw new Error('Void count must be a nonnegative whole number.')
-      if (Number(netSales)===0 && (!zeroSalesConfirmed || zeroSalesReason.trim().length<3)) throw new Error('Confirm that $0 sales is accurate and explain why.')
+      if (shown('staff_3') && Number(netSales)===0 && (!zeroSalesConfirmed || zeroSalesReason.trim().length<3)) throw new Error('Confirm that $0 sales is accurate and explain why.')
       const customAnswers = checkAnswers(config, 'staff', answers)
       const finalPoints =
         configuredShiftPoints({
@@ -953,26 +962,26 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
 
       if (targetState.loading) throw new Error('Your automatic sales target is still loading. Try again shortly.')
       // Peer Recognition validation
-      if (!peerVoteEmployeeId) {
+      if (shown('staff_11') && !peerVoteEmployeeId) {
         throw new Error(
           'Please choose a teammate for Peer Recognition.'
         )
       }
 
-      if (peerVoteEmployeeId === user.id) {
+      if (shown('staff_11') && peerVoteEmployeeId === user.id) {
         throw new Error(
           'You cannot select yourself for Peer Recognition.'
         )
       }
 
-      if (!peerVoteReason) {
+      if (shown('staff_12') && !peerVoteReason) {
         throw new Error(
           'Please choose a Peer Recognition reason.'
         )
       }
 
       if (
-        peerVoteReason === 'Other' &&
+        shown('staff_13') && peerVoteReason === 'Other' &&
         !peerVoteOtherReason.trim()
       ) {
         throw new Error(
@@ -989,9 +998,10 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
           'daily_closeouts'
         )
         .insert({
+          stock_items: [...new Set(stockItems.split('\n').map(n=>n.trim()).filter(Boolean))],
           zero_sales_confirmed: Number(netSales)===0 && zeroSalesConfirmed,
           zero_sales_reason: Number(netSales)===0 ? zeroSalesReason.trim() : null,
-          shift_type: shiftType,
+          shift_type: shiftType || 'PM',
           custom_answers: customAnswers,
           organization_id:
             organizationId,
@@ -1005,11 +1015,11 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
           closeout_date: serviceDay(),
 
           scheduled_start:
-            scheduledTime,
+            scheduledTime || '00:00',
 
           clock_in:
-            clockInTime,
-          clock_out: clockOutTime,
+            clockInTime || scheduledTime || '00:00',
+          clock_out: shown('staff_1') ? clockOutTime : null,
 
           job_role:
             jobRole,
@@ -1138,6 +1148,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
           ? peerVoteOtherReason.trim()
           : peerVoteReason
 
+      if(shown('staff_11')&&peerVoteEmployeeId){
       const {
         error: peerRecognitionError,
       } = await supabase
@@ -1182,9 +1193,11 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
         )
       }
 
+      }
       const submittedScore =
         closeout.shift_score
 
+      setStockItems('')
       setAnswers({})
       resetForm()
 
@@ -1307,17 +1320,17 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
 
         <div className="form-grid">
 
-          <label>
+          {shown('staff_0') && (<label>
             {questionLabel(config, 'staff_0', "Scheduled Time")}
 
             <ClockTime required label="Scheduled time" value={scheduledTime} onChange={setScheduledTime} />
-          </label>
+          </label>)}
 
-          <label>
+          {shown('staff_1') && (<label>
             {questionLabel(config, 'staff_1', "Actual Clock-In Time")}
 
             <ClockTime required label="Clock-in time" value={clockInTime} onChange={setClockInTime} />
-          </label>
+          </label>)}
 
           <label><ScreenText id="CloseoutPage.a803ddaf64e382d1">Actual Clock-Out Time
             </ScreenText><ClockTime required label="Clock-out time" value={clockOutTime} onChange={setClockOutTime} />
@@ -1325,7 +1338,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
           </label>
           {closeoutHours(clockInTime,clockOutTime)!==null && <p><ScreenText id="CloseoutPage.ecbf49a3335e8ec7">Shift length: </ScreenText>{closeoutHours(clockInTime,clockOutTime)!.toFixed(2)}<ScreenText id="CloseoutPage.9b614fcd90489a0d"> hours</ScreenText></p>}
 
-          <label>
+          {shown('staff_2') && (<label>
             {questionLabel(config, 'staff_2', "Shift")}
 
             <select
@@ -1337,7 +1350,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
               <option value="PM"><ScreenText id="CloseoutPage.1c0f4170d0704b8b">PM</ScreenText></option>
               <option value="TO_VOLUME"><ScreenText id="CloseoutPage.77baab9ee40baaa4">To Volume</ScreenText></option>
             </select>
-          </label>
+          </label>)}
         </div>
       </div>
 
@@ -1348,7 +1361,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
 
         <div className="form-grid">
 
-          <label>
+          {shown('staff_3') && (<label>
             {questionLabel(config, 'staff_3', "Total Net Sales")}
 
             <input
@@ -1367,16 +1380,16 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
                 )
               }
             />
-          </label>
+          </label>)}
 
 
 
         </div>
       </div>
 
-      <div className="card"><h3>Sales performance</h3><p>Service date: {closeoutDay}</p>{targetState.loading?<p role="status">Loading your calculated target…</p>:targetState.ready?<p>{Number(salesTarget)>0?`${((numberValue(netSales)/Number(salesTarget))*100).toFixed(1)}% of your calculated shift target${netSales.trim()!==''?(numberValue(netSales)>=Number(salesTarget)?' · Target met':' · Below target'):''}.`:'Your calculated shift target is $0; sales points do not apply.'}</p>:<p role="status">Sales comparison unavailable: {targetState.reason} Your closeout can still be submitted; no sales-target points will be applied.</p>}<button type="button" disabled={saving||targetState.loading} onClick={()=>setTargetRefresh(v=>v+1)}>Refresh sales comparison</button><p>The app supplies the target automatically. Points use your configured rules and the target saved when you submit.</p></div>
+      {shown('staff_0')&&shown('staff_3')&&(<div className="card"><h3><ScreenText id="CloseoutPage.7f6af06b00b0189f">Sales performance</ScreenText></h3><p><ScreenText id="CloseoutPage.14acd8d7f71380ca">Service date: </ScreenText>{closeoutDay}</p>{targetState.loading?<p role="status"><ScreenText id="CloseoutPage.e9770c364ebc0326">Loading your calculated target…</ScreenText></p>:targetState.ready?<p>{Number(salesTarget)>0?`${((numberValue(netSales)/Number(salesTarget))*100).toFixed(1)}% of your calculated shift target${shown('staff_3') && netSales.trim()!==''?(numberValue(netSales)>=Number(salesTarget)?' · Target met':' · Below target'):''}.`:'Your calculated shift target is $0; sales points do not apply.'}</p>:<p role="status"><ScreenText id="CloseoutPage.dbfc92213389d7e2">Sales comparison unavailable: </ScreenText>{targetState.reason} <ScreenText id="CloseoutPage.04f6bebaec27bdc9">Your closeout can still be submitted; no sales-target points will be applied.</ScreenText></p>}<button type="button" disabled={saving||targetState.loading} onClick={()=>setTargetRefresh(v=>v+1)}><ScreenText id="CloseoutPage.e9a3dfb1035e0f72">Refresh sales comparison</ScreenText></button><p><ScreenText id="CloseoutPage.23ce0e8790ad974a">The app supplies the target automatically. Points use your configured rules and the target saved when you submit.</ScreenText></p></div>)} 
 
-      {netSales.trim()!=='' && Number(netSales)===0 && <div className="closeout-warning"><h3><ScreenText id="CloseoutPage.08bbbe6dfa02693c">Check your sales</ScreenText></h3><p><ScreenText id="CloseoutPage.b8864cc8785a4b68">You entered $0. Check your Toast report before continuing.</ScreenText></p><label className="closeout-check"><input type="checkbox" checked={zeroSalesConfirmed} onChange={e=>setZeroSalesConfirmed(e.target.checked)} /><span><ScreenText id="CloseoutPage.21209f4ceb62d671">I checked my report and $0 sales is accurate.</ScreenText></span></label><label><ScreenText id="CloseoutPage.0c8ea3df31e4441b">Why were sales zero?</ScreenText><textarea rows={2} maxLength={2000} value={zeroSalesReason} onChange={e=>setZeroSalesReason(e.target.value)} placeholder="Explain why this shift had no sales." /></label></div>}
+      {shown('staff_3') && netSales.trim()!=='' && Number(netSales)===0 && <div className="closeout-warning"><h3><ScreenText id="CloseoutPage.08bbbe6dfa02693c">Check your sales</ScreenText></h3><p><ScreenText id="CloseoutPage.b8864cc8785a4b68">You entered $0. Check your Toast report before continuing.</ScreenText></p><label className="closeout-check"><input type="checkbox" checked={zeroSalesConfirmed} onChange={e=>setZeroSalesConfirmed(e.target.checked)} /><span><ScreenText id="CloseoutPage.21209f4ceb62d671">I checked my report and $0 sales is accurate.</ScreenText></span></label><label><ScreenText id="CloseoutPage.0c8ea3df31e4441b">Why were sales zero?</ScreenText><textarea rows={2} maxLength={2000} value={zeroSalesReason} onChange={e=>setZeroSalesReason(e.target.value)} placeholder="Explain why this shift had no sales." /></label></div>}
 
       <div className="card">
         <h2><ScreenText id="CloseoutPage.fa54c9aa63aa0de5">
@@ -1393,7 +1406,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
               }}
             >
 
-          <label>
+          {shown('staff_5') && (<label>
             {questionLabel(config, 'staff_5', "Cash Deposit")}
 
             <input
@@ -1411,10 +1424,10 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
                 )
               }
             />
-          </label>
+          </label>)}
 
 
-          <label>
+          {shown('staff_6') && (<label>
             {questionLabel(config, 'staff_6', "Total Value of Voids")}
 
             <input
@@ -1432,9 +1445,9 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
                 )
               }
             />
-          </label>
+          </label>)}
 
-          <label>
+          {shown('staff_7') && (<label>
             {questionLabel(config, 'staff_7', "Total Value of Discounts")}
 
             <input
@@ -1452,7 +1465,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
                 )
               }
             />
-          </label>
+          </label>)}
 
         </div>
       </div>
@@ -1521,7 +1534,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
   <div className="card">
     <h2><ScreenText id="CloseoutPage.0a257811571b1959">Register Closeout</ScreenText></h2>
 
-    <label>
+    {shown('staff_8') && (<label>
       {questionLabel(config, 'staff_8', "Cash Left in Register")}
       <input
         type="number"
@@ -1534,12 +1547,12 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
         placeholder="200.00"
         required
       />
-    </label>
+    </label>)}
 
     {registerCash !== '' &&
       Number(registerCash) !== 200 && (
         <>
-          <label>
+          {shown('staff_9') && (<label>
             {questionLabel(config, 'staff_9', "Why is the register not at $200?")}
             <textarea
               value={registerImbalanceReason}
@@ -1550,9 +1563,9 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
               }
               required
             />
-          </label>
+          </label>)}
 
-          <label>
+          {shown('staff_10') && (<label>
             {questionLabel(config, 'staff_10', "Who verified the imbalance?")}
             <select
               value={registerVerifiedBy}
@@ -1576,7 +1589,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
                 </option>
               ))}
             </select>
-          </label>
+          </label>)}
         </>
       )}
   </div>
@@ -1679,7 +1692,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
         <h2><ScreenText id="CloseoutPage.4064ac585c437950">⭐ Peer Recognition — +5 Points</ScreenText></h2>
 
         <div className="form-grid">
-          <label>
+          {shown('staff_11') && (<label>
             {questionLabel(config, 'staff_11', "Which team member contributed the most to a successful shift?")}
 
             <select
@@ -1699,9 +1712,9 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
                 </option>
               ))}
             </select>
-          </label>
+          </label>)}
 
-          <label>
+          {shown('staff_12') && (<label>
             {questionLabel(config, 'staff_12', "Why are you recognizing them?")}
 
             <select
@@ -1724,10 +1737,10 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
               </ScreenText></option>
               <option value="Other"><ScreenText id="CloseoutPage.4284cb61f89adb7f">Other</ScreenText></option>
             </select>
-          </label>
+          </label>)}
 
-          {peerVoteReason === 'Other' && (
-            <label>
+          {shown('staff_13') && peerVoteReason === 'Other' && (
+            (shown('staff_13') && (<label>
               {questionLabel(config, 'staff_13', "Tell us why you're recognizing them:")}
 
               <input
@@ -1738,7 +1751,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
                 }
                 placeholder="Enter recognition reason"
               />
-            </label>
+            </label>))
           )}
         </div>
       </div>
@@ -1750,7 +1763,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
 
         <div className="form-grid">
 
-          <label>
+          {shown('staff_14') && (<label>
             {questionLabel(config, 'staff_14', "Who did you turn your money in to?")}
 
             <select
@@ -1787,9 +1800,9 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
                 )
               )}
             </select>
-          </label>
+          </label>)}
 
-          <label>
+          {shown('staff_15') && (<label>
             {questionLabel(config, 'staff_15', "Who made your drinks?")}
 
             <select
@@ -1826,11 +1839,13 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
                 )
               )}
             </select>
-          </label>
+          </label>)}
 
         </div>
       </div>
 
+      <div className="card"><h2><ScreenText id="CloseoutPage.1c574f44136f81e1">86 Items</ScreenText></h2><p><ScreenText id="CloseoutPage.f4615f74236e8f37">Enter one unavailable item per line. These items are added to the shared board when you submit this closeout.</ScreenText></p><label><ScreenText id="CloseoutPage.2392bdca27c7d9c1">Items marked 86</ScreenText><textarea rows={4} maxLength={8000} value={stockItems} disabled={saving} onChange={e=>setStockItems(e.target.value)} placeholder="One item per line"/></label></div>
+      <StockBoard location={locationId}/>
       <div className="card">
         <h2><ScreenText id="CloseoutPage.e0f8109cb9cd8aa4">
           Notes
@@ -1875,8 +1890,8 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
 
             <p><ScreenText id="CloseoutPage.0e2a4f8a7539964b">
               Starting score:
-              </ScreenText>{' '}100
-            </p>
+              </ScreenText>{' '}<ScreenText id="CloseoutPage.ad57366865126e55">100
+            </ScreenText></p>
 
             <div className="point-adjustment-list">
 
@@ -1968,7 +1983,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
         <h2><ScreenText id="CloseoutPage.e13d79760a892b77">
           Review & Submit
         </ScreenText></h2>
-        <div className="closeout-review"><p><ScreenText id="CloseoutPage.bc9bdc4ef1b422cf">Net sales: </ScreenText><strong>${netSales || 'Not entered'}</strong></p><p><ScreenText id="CloseoutPage.0ca82121e91cc413">Cash deposit: </ScreenText><strong>${cashDeposit || 'Not entered'}</strong></p><p><ScreenText id="CloseoutPage.898ca3b88156a4c9">Review these amounts against your Toast report. An inaccurate submission does not earn the completion bonus.</ScreenText></p></div>
+        <div className="closeout-review"><p><ScreenText id="CloseoutPage.bc9bdc4ef1b422cf">Net sales: </ScreenText><strong><ScreenText id="CloseoutPage.09fc96082d34c2df">$</ScreenText>{netSales || 'Not entered'}</strong></p><p><ScreenText id="CloseoutPage.0ca82121e91cc413">Cash deposit: </ScreenText><strong><ScreenText id="CloseoutPage.09fc96082d34c2df">$</ScreenText>{cashDeposit || 'Not entered'}</strong></p><p><ScreenText id="CloseoutPage.898ca3b88156a4c9">Review these amounts against your Toast report. An inaccurate submission does not earn the completion bonus.</ScreenText></p></div>
 
         {pointResult && (
           <p>
