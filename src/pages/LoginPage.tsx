@@ -1,3 +1,4 @@
+import { ForgotPassword } from '../components/PasswordTools'
 // page-designer-instrumented
 import { PageWord } from "../components/PageDesign"
 import { ScreenText } from "../components/ScreenText"
@@ -65,6 +66,7 @@ export function LoginPage() {
           {mode === 'signin' ? <PageWord id="copy.738bef181af17873.1">{"Create an account"}</PageWord> : <PageWord id="copy.7793a86aac0872c3.1">{"Already have an account? Sign in"}</PageWord>}
         </button>
 
+        <ForgotPassword/>
         {message && <p data-design-block="copy.a43a9bfaddb8b824.1" className="form-message">{message}</p>}
       </form>
     </div>

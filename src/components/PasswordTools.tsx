@@ -1,0 +1,16 @@
+import { useEffect, useState, type FormEvent } from 'react'
+import { supabase } from '../lib/supabase'
+const recoveryUrl='https://justinis-nola.vercel.app/reset-password'
+const errorText=(e:unknown)=>String((e as {message?:string})?.message??e)
+export function ForgotPassword(){
+ const [open,setOpen]=useState(false),[email,setEmail]=useState(''),[busy,setBusy]=useState(false),[notice,setNotice]=useState(''),[error,setError]=useState('')
+ async function send(){if(busy)return;setBusy(true);setError('');setNotice('');try{const r=await supabase.auth.resetPasswordForEmail(email.trim(),{redirectTo:recoveryUrl});if(r.error)throw r.error;setNotice('If this email has an account, a reset link has been requested. Open the newest email.')}catch(e){setError(errorText(e))}finally{setBusy(false)}}
+ return <div><button type="button" className="text-button" onClick={()=>setOpen(v=>!v)}>Forgot your password?</button>{open&&<fieldset disabled={busy}><legend>Reset your password</legend><label>Account email<input type="email" autoComplete="email" value={email} onChange={e=>setEmail(e.target.value)}/></label><button type="button" disabled={busy||! /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())} onClick={()=>void send()}>{busy?'Sending…':'Send reset email'}</button>{notice&&<p role="status">{notice}</p>}{error&&<p role="alert">{error}</p>}</fieldset>}</div>
+}
+export function PasswordTools({userId}:{userId?:string}){
+ const [self,setSelf]=useState(false),[current,setCurrent]=useState(''),[password,setPassword]=useState(''),[confirm,setConfirm]=useState(''),[busy,setBusy]=useState(false),[notice,setNotice]=useState(''),[error,setError]=useState('')
+ useEffect(()=>{let live=true;void supabase.auth.getUser().then(r=>{if(live)setSelf(!!r.data.user&&(!userId||r.data.user.id===userId))});return()=>{live=false}},[userId])
+ async function save(e:FormEvent){e.preventDefault();if(busy)return;setError('');setNotice('');if(password!==confirm){setError('Your new passwords do not match.');return}if(password.length<8){setError('Use at least 8 characters.');return}setBusy(true);try{const r=await supabase.auth.updateUser({password,current_password:current});if(r.error)throw r.error;setCurrent('');setPassword('');setConfirm('');setNotice('Your password has been changed.')}catch(e){setError(errorText(e))}finally{setBusy(false)}}
+ if(!self)return null
+ return <details className="home-section"><summary>My account · Change password</summary><form onSubmit={save}><fieldset disabled={busy}><legend>Change my password</legend><label>Current password<input type="password" autoComplete="current-password" required value={current} onChange={e=>setCurrent(e.target.value)}/></label><label>New password<input type="password" autoComplete="new-password" required minLength={8} value={password} onChange={e=>setPassword(e.target.value)}/></label><label>Confirm new password<input type="password" autoComplete="new-password" required minLength={8} value={confirm} onChange={e=>setConfirm(e.target.value)}/></label><button type="submit" disabled={busy}>{busy?'Saving…':'Save new password'}</button></fieldset>{notice&&<p role="status">{notice}</p>}{error&&<p role="alert">{error}</p>}</form><ForgotPassword/></details>
+}
