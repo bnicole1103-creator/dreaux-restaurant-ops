@@ -1,3 +1,4 @@
+import { ManualReservation, reservationToday } from '../components/ManualReservation'
 import { ScreenText } from "../components/ScreenText"
 import { WalkinPanel, type Walkin } from '../components/WalkinPanel'
 import { SectionEmployeePicker } from '../components/SectionEmployeePicker'
@@ -124,6 +125,7 @@ export function FloorPage() {
   const [smartNotice,setSmartNotice]=useState('')
   const [floorNotice,setFloorNotice]=useState('')
   const [seatServerId,setSeatServerId]=useState('')
+  const [manualReservation,setManualReservation]=useState(false)
   const [organizationId, setOrganizationId] = useState('')
   const [locationId, setLocationId] = useState('')
   const [locationName, setLocationName] = useState('')
@@ -546,7 +548,7 @@ const [partySize, setPartySize] = useState(1)
 
   async function loadReservations(locationIdValue: string) {
     const reservationDate =
-      new Date().toLocaleDateString('en-CA')
+      reservationToday()
 
     const { data, error: reservationError } =
       await supabase
@@ -710,7 +712,7 @@ const [partySize, setPartySize] = useState(1)
       }
 
       const reservationDate =
-        new Date().toLocaleDateString('en-CA')
+        reservationToday()
 
       const insertRows = rows
         .map((row) => {
@@ -846,34 +848,12 @@ const [partySize, setPartySize] = useState(1)
         )
       }
 
-      const { error: deleteError } = await supabase
-        .from('reservations')
-        .delete()
-        .eq('location_id', locationId)
-        .eq('reservation_date', reservationDate)
-        .eq('imported_source', 'csv')
-
-      if (deleteError) {
-        throw deleteError
-      }
-
-      const { error: insertError } = await supabase
-        .from('reservations')
-        .insert(insertRows)
-
-      if (insertError) {
-        throw insertError
-      }
+      const merge=await supabase.rpc('reservation_merge',{p_location_id:locationId,p_rows:insertRows})
+      if(merge.error)throw merge.error
 
       await loadReservations(locationId)
 
-      const matchedCount = insertRows.filter(
-        (row) => row.table_id,
-      ).length
-
-      setReservationUploadMessage(
-        `${insertRows.length} reservations uploaded · ${matchedCount} matched to tables`,
-      )
+      setReservationUploadMessage(`${merge.data.added} new reservations added · ${merge.data.duplicates} duplicates skipped · ${merge.data.matched} new reservations matched to tables`)
 
       setShowReservationsPanel(true)
     } catch (caughtError) {
@@ -1910,6 +1890,9 @@ const [partySize, setPartySize] = useState(1)
         ><ScreenText id="FloorPage.c8c2e54ac7c982eb">
           Reservations (</ScreenText>{reservations.length})
         </button>
+
+        <button type="button" disabled={saving||!locationId||!organizationId} onClick={()=>setManualReservation(true)}>+ Add reservation</button>
+        {manualReservation&&<ManualReservation location={locationId} organization={organizationId} tables={tables} onClose={()=>setManualReservation(false)} onSaved={message=>{setReservationUploadMessage(message);setShowReservationsPanel(true);void loadReservations(locationId)}}/>}
 
         <label
           style={{
