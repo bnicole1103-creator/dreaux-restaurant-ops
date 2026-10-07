@@ -2,6 +2,8 @@ import { ScreenWordingPage } from './pages/ScreenWordingPage'
 import { TrainingPage } from './pages/TrainingPage'
 import { CocktailTrainingPage } from './pages/CocktailTrainingPage'
 import { InventoryPage } from './pages/InventoryPage'
+import { GuestFeedbackPage } from './pages/GuestFeedbackPage'
+import { GuestFeedbackInbox } from './pages/GuestFeedbackInbox'
 import { WalkInPage } from './pages/WalkInPage'
 import { useLocation } from 'react-router-dom'
 import { SalesTargetsPage } from './pages/SalesTargetsPage'
@@ -96,6 +98,8 @@ export default function App() {
     }
   }, [])
 
+  if (walkinPath.startsWith('/guest-feedback/')) return <GuestFeedbackPage key={walkinPath} publicKey={walkinPath.slice('/guest-feedback/'.length)} />
+
   if (walkinPath.startsWith('/walk-in/')) return <WalkInPage key={walkinPath} publicKey={walkinPath.slice('/walk-in/'.length)} />
 
   if (loading) {
@@ -130,6 +134,7 @@ export default function App() {
         <Route path="/training/cocktails" element={<CocktailTrainingPage />} />
         <Route path="/settings/sales-targets" element={<ManagementOnly gmOnly><SalesTargetsPage /></ManagementOnly>} />
         <Route path="/settings/wording" element={<ManagementOnly gmOnly><ScreenWordingPage /></ManagementOnly>} />
+        <Route path="/guest-feedback" element={<ManagementOnly><GuestFeedbackInbox /></ManagementOnly>} />
         <Route path="/settings" element={<ManagementOnly gmOnly><SettingsPage /></ManagementOnly>} />
         <Route path="/settings/point-rules" element={<ManagementOnly gmOnly><CloseoutSettingsPage key="point-rules" initialTab="points" /></ManagementOnly>} />
         <Route path="/closeout-summary/cash" element={<SummaryPage cash />} />
