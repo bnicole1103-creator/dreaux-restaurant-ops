@@ -1,3 +1,5 @@
+// page-designer-instrumented
+import { PageWord } from "./PageDesign"
 import { ScreenText } from "./ScreenText"
 type FloorTable = {
   id?: string | null
@@ -138,18 +140,18 @@ export function TonightsFloorCards({
 
   if (validServerIds.length === 0) {
     return (
-      <section className="tonights-floor-panel">
-        <div className="tonights-floor-heading">
-          <div>
-            <p className="eyebrow"><ScreenText id="TonightsFloorCards.6f61093d8beda6b9">
+      <section data-design-block="copy.45ec43eb98bc70f6.1" className="tonights-floor-panel">
+        <div data-design-block="copy.e97b0a6919f6f122.1" className="tonights-floor-heading">
+          <div data-design-block="copy.e5a4fc73f4141b43.1">
+            <p data-design-block="copy.221de76e6ff20003.1" className="eyebrow"><ScreenText id="TonightsFloorCards.6f61093d8beda6b9">
               TONIGHT&apos;S FLOOR
             </ScreenText></p>
 
-            <h2><ScreenText id="TonightsFloorCards.ea0bc2ad9e59292b">Server Assignments</ScreenText></h2>
+            <h2 data-design-block="copy.07e26c0a9aa2b112.1"><ScreenText id="TonightsFloorCards.ea0bc2ad9e59292b">Server Assignments</ScreenText></h2>
           </div>
         </div>
 
-        <div className="tonights-floor-card">
+        <div data-design-block="copy.d4a761ae577a5727.1" className="tonights-floor-card">
           <span className="muted"><ScreenText id="TonightsFloorCards.3a1e1f15cf911d13">
             No server assignments yet.
           </ScreenText></span>
@@ -159,18 +161,18 @@ export function TonightsFloorCards({
   }
 
   return (
-    <section className="tonights-floor-panel">
-      <div className="tonights-floor-heading">
-        <div>
-          <p className="eyebrow"><ScreenText id="TonightsFloorCards.a9507a1ecffee18f">
+    <section data-design-block="copy.45ec43eb98bc70f6.2" className="tonights-floor-panel">
+      <div data-design-block="copy.e97b0a6919f6f122.2" className="tonights-floor-heading">
+        <div data-design-block="copy.e5a4fc73f4141b43.2">
+          <p data-design-block="copy.221de76e6ff20003.2" className="eyebrow"><ScreenText id="TonightsFloorCards.a9507a1ecffee18f">
             TONIGHT&apos;S FLOOR
           </ScreenText></p>
 
-          <h2><ScreenText id="TonightsFloorCards.3b714a37b8a31eac">Server Assignments</ScreenText></h2>
+          <h2 data-design-block="copy.07e26c0a9aa2b112.2"><ScreenText id="TonightsFloorCards.3b714a37b8a31eac">Server Assignments</ScreenText></h2>
         </div>
       </div>
 
-      <div className="tonights-floor-grid">
+      <div data-design-block="copy.d2221cc40e8ab67b.1" className="tonights-floor-grid">
         {validServerIds.map((serverId) => {
           const serverAssignments =
             safeAssignments.filter(
@@ -238,7 +240,7 @@ export function TonightsFloorCards({
               .find(Boolean) || undefined
 
           return (
-            <button
+            <button data-design-block="copy.c6b80fd17ac3f247.1"
               key={serverId}
               type="button"
               className="tonights-floor-card"
@@ -255,7 +257,7 @@ export function TonightsFloorCards({
                   : undefined
               }
             >
-              <div className="tonights-floor-card-top">
+              <div data-design-block="copy.0e566bf1455fb504.1" className="tonights-floor-card-top">
                 <strong>
                   {getMemberName(serverId)}
                 </strong>
@@ -263,14 +265,14 @@ export function TonightsFloorCards({
                 {(start || end) && (
                   <span>
                     {formatTime(start)}
-                    {start && end ? '–' : ''}
+                    {start && end ? <PageWord id="copy.d0f4b9d50e0f990c.1">{"–"}</PageWord> : <PageWord id="copy.f1891022c2c7cb25.1">{""}</PageWord>}
                     {formatTime(end)}
                   </span>
                 )}
               </div>
 
-              <div className="tonights-floor-card-metrics">
-                <div>
+              <div data-design-block="copy.01506c398e732040.1" className="tonights-floor-card-metrics">
+                <div data-design-block="copy.e5a4fc73f4141b43.3">
                   <span><ScreenText id="TonightsFloorCards.19cc9990a67a83f9">
                     Assigned Covers
                   </ScreenText></span>
@@ -280,7 +282,7 @@ export function TonightsFloorCards({
                   </strong>
                 </div>
 
-                <div>
+                <div data-design-block="copy.e5a4fc73f4141b43.4">
                   <span><ScreenText id="TonightsFloorCards.cd89c0514744da7b">Tables</ScreenText></span>
 
                   <strong>
@@ -289,7 +291,7 @@ export function TonightsFloorCards({
                 </div>
               </div>
 
-              <div className="tonights-floor-card-tables">
+              <div data-design-block="copy.86319f4a138f60d8.1" className="tonights-floor-card-tables">
                 {serverTables.length > 0 ? (
                   serverTables.map(
                     (table, index) => (

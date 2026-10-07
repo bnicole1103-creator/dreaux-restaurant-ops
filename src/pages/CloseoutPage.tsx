@@ -1,3 +1,5 @@
+// page-designer-instrumented
+import { PageWord, PageInput, PageOption } from "../components/PageDesign"
 import { StockBoard } from '../components/StockBoard'
 import { serviceDay } from '../lib/serviceDay'
 import { ScreenText } from "../components/ScreenText"
@@ -1246,12 +1248,12 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
 
   if (loading) {
     return (
-      <section className="page closeout-mobile">
-        <h1><ScreenText id="CloseoutPage.19b404e3d4da3b09">
+      <section data-design-block="copy.2c896870c0622b2a.1" className="page closeout-mobile">
+        <h1 data-design-block="copy.7b589b42e522b192.1"><ScreenText id="CloseoutPage.19b404e3d4da3b09">
           Daily Closeout
         </ScreenText></h1>
 
-        <p><ScreenText id="CloseoutPage.341b29a41c67c361">
+        <p data-design-block="copy.9780dbc6198cd2d5.1"><ScreenText id="CloseoutPage.341b29a41c67c361">
           Loading...
         </ScreenText></p>
       </section>
@@ -1259,24 +1261,24 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
   }
 
   return (
-    <section className="page closeout-mobile">
+    <section data-design-block="copy.2c896870c0622b2a.2" className="page closeout-mobile">
 
-      <div className="page-header">
-        <p className="eyebrow"><ScreenText id="CloseoutPage.07a01084df9fad3a">
+      <div data-design-block="copy.47c9b7ba7c51dc00.1" className="page-header">
+        <p data-design-block="copy.5b48154f3880900c.1" className="eyebrow"><ScreenText id="CloseoutPage.07a01084df9fad3a">
           SHIFT ACCOUNTABILITY
         </ScreenText></p>
 
-        <h1><ScreenText id="CloseoutPage.78176397e4f5311f">
+        <h1 data-design-block="copy.7b589b42e522b192.2"><ScreenText id="CloseoutPage.78176397e4f5311f">
           Daily Closeout
         </ScreenText></h1>
 
-        <p>
+        <p data-design-block="copy.9780dbc6198cd2d5.2">
           {locationName}
         </p>
       </div>
 
       {error && (
-        <div
+        <div data-design-block="copy.50484d57069c0d3a.1"
           style={{
             marginBottom: 20,
             padding: 16,
@@ -1293,7 +1295,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
       )}
 
       {message && (
-        <div
+        <div data-design-block="copy.d65df369fa218acc.1"
           style={{
             marginBottom: 20,
             padding: 16,
@@ -1309,59 +1311,59 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
         </div>
       )}
 
-      <p><Link to="/closeout"><ScreenText id="CloseoutPage.0ce3457f5ccec1c4">← Closeout</ScreenText></Link></p>
-      {configError && <p role="alert">{configError}</p>}
+      <p data-design-block="copy.9780dbc6198cd2d5.3"><Link to="/closeout"><ScreenText id="CloseoutPage.0ce3457f5ccec1c4">← Closeout</ScreenText></Link></p>
+      {configError && <p data-design-block="copy.0ddaed72ed7c19a9.1" role="alert">{configError}</p>}
       
 
-      <div className="card">
-        <h2><ScreenText id="CloseoutPage.dfb5350d0897214f">
+      <div data-design-block="copy.af6b2df48414bca0.1" className="card">
+        <h2 data-design-block="copy.601726244d06e9b3.1"><ScreenText id="CloseoutPage.dfb5350d0897214f">
           Shift Information
         </ScreenText></h2>
 
-        <div className="form-grid">
+        <div data-design-block="copy.cd860d0c2bc6318a.1" className="form-grid">
 
-          {shown('staff_0') && (<label>
+          {shown('staff_0') && (<label data-design-block="copy.1d3e51bec05d6401.1">
             {questionLabel(config, 'staff_0', "Scheduled Time")}
 
             <ClockTime required label="Scheduled time" value={scheduledTime} onChange={setScheduledTime} />
           </label>)}
 
-          {shown('staff_1') && (<label>
+          {shown('staff_1') && (<label data-design-block="copy.1d3e51bec05d6401.2">
             {questionLabel(config, 'staff_1', "Actual Clock-In Time")}
 
             <ClockTime required label="Clock-in time" value={clockInTime} onChange={setClockInTime} />
           </label>)}
 
-          <label><ScreenText id="CloseoutPage.a803ddaf64e382d1">Actual Clock-Out Time
+          <label data-design-block="copy.1d3e51bec05d6401.3"><ScreenText id="CloseoutPage.a803ddaf64e382d1">Actual Clock-Out Time
             </ScreenText><ClockTime required label="Clock-out time" value={clockOutTime} onChange={setClockOutTime} />
             <small><ScreenText id="CloseoutPage.0cb264d4769f0e13">Use your actual end time. After-midnight clock-out is treated as the next day.</ScreenText></small>
           </label>
-          {closeoutHours(clockInTime,clockOutTime)!==null && <p><ScreenText id="CloseoutPage.ecbf49a3335e8ec7">Shift length: </ScreenText>{closeoutHours(clockInTime,clockOutTime)!.toFixed(2)}<ScreenText id="CloseoutPage.9b614fcd90489a0d"> hours</ScreenText></p>}
+          {closeoutHours(clockInTime,clockOutTime)!==null && <p data-design-block="copy.9780dbc6198cd2d5.4"><ScreenText id="CloseoutPage.ecbf49a3335e8ec7">Shift length: </ScreenText>{closeoutHours(clockInTime,clockOutTime)!.toFixed(2)}<ScreenText id="CloseoutPage.9b614fcd90489a0d"> hours</ScreenText></p>}
 
-          {shown('staff_2') && (<label>
+          {shown('staff_2') && (<label data-design-block="copy.1d3e51bec05d6401.4">
             {questionLabel(config, 'staff_2', "Shift")}
 
             <select
               value={shiftType}
               onChange={(event) => setShiftType(event.target.value)}
             >
-              <option value=""><ScreenText id="CloseoutPage.48e9a699102a192e">Select Shift</ScreenText></option>
-              <option value="AM"><ScreenText id="CloseoutPage.6350660034efc36b">AM</ScreenText></option>
-              <option value="PM"><ScreenText id="CloseoutPage.1c0f4170d0704b8b">PM</ScreenText></option>
-              <option value="TO_VOLUME"><ScreenText id="CloseoutPage.77baab9ee40baaa4">To Volume</ScreenText></option>
+              <PageOption designId="copy.870f72c3520d9a59.1" value=""><ScreenText plain id="CloseoutPage.48e9a699102a192e">Select Shift</ScreenText></PageOption>
+              <PageOption designId="copy.58d1cb102c52361d.1" value="AM"><ScreenText plain id="CloseoutPage.6350660034efc36b">AM</ScreenText></PageOption>
+              <PageOption designId="copy.02af1ec40f3efd20.1" value="PM"><ScreenText plain id="CloseoutPage.1c0f4170d0704b8b">PM</ScreenText></PageOption>
+              <PageOption designId="copy.46cc66ba19a8e855.1" value="TO_VOLUME"><ScreenText plain id="CloseoutPage.77baab9ee40baaa4">To Volume</ScreenText></PageOption>
             </select>
           </label>)}
         </div>
       </div>
 
-      <div className="card">
-        <h2><ScreenText id="CloseoutPage.e97932f94c4d02e8">
+      <div data-design-block="copy.af6b2df48414bca0.2" className="card">
+        <h2 data-design-block="copy.601726244d06e9b3.2"><ScreenText id="CloseoutPage.e97932f94c4d02e8">
           Sales
         </ScreenText></h2>
 
-        <div className="form-grid">
+        <div data-design-block="copy.cd860d0c2bc6318a.2" className="form-grid">
 
-          {shown('staff_3') && (<label>
+          {shown('staff_3') && (<label data-design-block="copy.1d3e51bec05d6401.5">
             {questionLabel(config, 'staff_3', "Total Net Sales")}
 
             <input
@@ -1387,16 +1389,16 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
         </div>
       </div>
 
-      {shown('staff_0')&&shown('staff_3')&&(<div className="card"><h3><ScreenText id="CloseoutPage.7f6af06b00b0189f">Sales performance</ScreenText></h3><p><ScreenText id="CloseoutPage.14acd8d7f71380ca">Service date: </ScreenText>{closeoutDay}</p>{targetState.loading?<p role="status"><ScreenText id="CloseoutPage.e9770c364ebc0326">Loading your calculated target…</ScreenText></p>:targetState.ready?<p>{Number(salesTarget)>0?`${((numberValue(netSales)/Number(salesTarget))*100).toFixed(1)}% of your calculated shift target${shown('staff_3') && netSales.trim()!==''?(numberValue(netSales)>=Number(salesTarget)?' · Target met':' · Below target'):''}.`:'Your calculated shift target is $0; sales points do not apply.'}</p>:<p role="status"><ScreenText id="CloseoutPage.dbfc92213389d7e2">Sales comparison unavailable: </ScreenText>{targetState.reason} <ScreenText id="CloseoutPage.04f6bebaec27bdc9">Your closeout can still be submitted; no sales-target points will be applied.</ScreenText></p>}<button type="button" disabled={saving||targetState.loading} onClick={()=>setTargetRefresh(v=>v+1)}><ScreenText id="CloseoutPage.e9a3dfb1035e0f72">Refresh sales comparison</ScreenText></button><p><ScreenText id="CloseoutPage.23ce0e8790ad974a">The app supplies the target automatically. Points use your configured rules and the target saved when you submit.</ScreenText></p></div>)} 
+      {shown('staff_0')&&shown('staff_3')&&(<div data-design-block="copy.af6b2df48414bca0.3" className="card"><h3 data-design-block="copy.376cc9db1049f0cb.1"><ScreenText id="CloseoutPage.7f6af06b00b0189f">Sales performance</ScreenText></h3><p data-design-block="copy.9780dbc6198cd2d5.5"><ScreenText id="CloseoutPage.14acd8d7f71380ca">Service date: </ScreenText>{closeoutDay}</p>{targetState.loading?<p data-design-block="copy.a8125c77852fab4e.1" role="status"><ScreenText id="CloseoutPage.e9770c364ebc0326">Loading your calculated target…</ScreenText></p>:targetState.ready?<p data-design-block="copy.9780dbc6198cd2d5.6">{Number(salesTarget)>0?`${((numberValue(netSales)/Number(salesTarget))*100).toFixed(1)}% of your calculated shift target${shown('staff_3') && netSales.trim()!==''?(numberValue(netSales)>=Number(salesTarget)?' · Target met':' · Below target'):''}.`:<PageWord id="copy.d95baa5b991da417.1">{"Your calculated shift target is $0; sales points do not apply."}</PageWord>}</p>:<p data-design-block="copy.a8125c77852fab4e.2" role="status"><ScreenText id="CloseoutPage.dbfc92213389d7e2">Sales comparison unavailable: </ScreenText>{targetState.reason} <ScreenText id="CloseoutPage.04f6bebaec27bdc9">Your closeout can still be submitted; no sales-target points will be applied.</ScreenText></p>}<button data-design-block="copy.85fa0ebb999781b3.1" type="button" disabled={saving||targetState.loading} onClick={()=>setTargetRefresh(v=>v+1)}><ScreenText id="CloseoutPage.e9a3dfb1035e0f72">Refresh sales comparison</ScreenText></button><p data-design-block="copy.9780dbc6198cd2d5.7"><ScreenText id="CloseoutPage.23ce0e8790ad974a">The app supplies the target automatically. Points use your configured rules and the target saved when you submit.</ScreenText></p></div>)} 
 
-      {shown('staff_3') && netSales.trim()!=='' && Number(netSales)===0 && <div className="closeout-warning"><h3><ScreenText id="CloseoutPage.08bbbe6dfa02693c">Check your sales</ScreenText></h3><p><ScreenText id="CloseoutPage.b8864cc8785a4b68">You entered $0. Check your Toast report before continuing.</ScreenText></p><label className="closeout-check"><input type="checkbox" checked={zeroSalesConfirmed} onChange={e=>setZeroSalesConfirmed(e.target.checked)} /><span><ScreenText id="CloseoutPage.21209f4ceb62d671">I checked my report and $0 sales is accurate.</ScreenText></span></label><label><ScreenText id="CloseoutPage.0c8ea3df31e4441b">Why were sales zero?</ScreenText><textarea rows={2} maxLength={2000} value={zeroSalesReason} onChange={e=>setZeroSalesReason(e.target.value)} placeholder="Explain why this shift had no sales." /></label></div>}
+      {shown('staff_3') && netSales.trim()!=='' && Number(netSales)===0 && <div data-design-block="copy.a49020c974bf8cb3.1" className="closeout-warning"><h3 data-design-block="copy.376cc9db1049f0cb.2"><ScreenText id="CloseoutPage.08bbbe6dfa02693c">Check your sales</ScreenText></h3><p data-design-block="copy.9780dbc6198cd2d5.8"><ScreenText id="CloseoutPage.b8864cc8785a4b68">You entered $0. Check your Toast report before continuing.</ScreenText></p><label data-design-block="copy.35bcf28795a297dd.1" className="closeout-check"><input type="checkbox" checked={zeroSalesConfirmed} onChange={e=>setZeroSalesConfirmed(e.target.checked)} /><span><ScreenText id="CloseoutPage.21209f4ceb62d671">I checked my report and $0 sales is accurate.</ScreenText></span></label><label data-design-block="copy.1d3e51bec05d6401.6"><ScreenText id="CloseoutPage.0c8ea3df31e4441b">Why were sales zero?</ScreenText><textarea rows={2} maxLength={2000} value={zeroSalesReason} onChange={e=>setZeroSalesReason(e.target.value)} placeholder="Explain why this shift had no sales." /></label></div>}
 
-      <div className="card">
-        <h2><ScreenText id="CloseoutPage.fa54c9aa63aa0de5">
+      <div data-design-block="copy.af6b2df48414bca0.4" className="card">
+        <h2 data-design-block="copy.601726244d06e9b3.3"><ScreenText id="CloseoutPage.fa54c9aa63aa0de5">
           Cash & Adjustments
         </ScreenText></h2>
 
-        <div className="form-grid"
+        <div data-design-block="copy.7231a33be3530dd9.1" className="form-grid"
               style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
@@ -1406,7 +1408,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
               }}
             >
 
-          {shown('staff_5') && (<label>
+          {shown('staff_5') && (<label data-design-block="copy.1d3e51bec05d6401.7">
             {questionLabel(config, 'staff_5', "Cash Deposit")}
 
             <input
@@ -1427,7 +1429,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
           </label>)}
 
 
-          {shown('staff_6') && (<label>
+          {shown('staff_6') && (<label data-design-block="copy.1d3e51bec05d6401.8">
             {questionLabel(config, 'staff_6', "Total Value of Voids")}
 
             <input
@@ -1447,7 +1449,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
             />
           </label>)}
 
-          {shown('staff_7') && (<label>
+          {shown('staff_7') && (<label data-design-block="copy.1d3e51bec05d6401.9">
             {questionLabel(config, 'staff_7', "Total Value of Discounts")}
 
             <input
@@ -1470,8 +1472,8 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
         </div>
       </div>
 
-      <div className="card">
-        <h2><ScreenText id="CloseoutPage.ef596096378905dc">
+      <div data-design-block="copy.af6b2df48414bca0.5" className="card">
+        <h2 data-design-block="copy.601726244d06e9b3.4"><ScreenText id="CloseoutPage.ef596096378905dc">
           Role Worked
         </ScreenText></h2>
 
@@ -1512,7 +1514,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
           )}
         </select>
 
-        <div className="role-description">
+        <div data-design-block="copy.f8a452f93368fd3f.1" className="role-description">
           <strong>
             {
               ROLE_LABELS[
@@ -1521,7 +1523,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
             }
           </strong>
 
-          <p>
+          <p data-design-block="copy.9780dbc6198cd2d5.9">
             {
               ROLE_DESCRIPTIONS[
                 jobRole
@@ -1531,12 +1533,12 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
         </div>
       </div>
 {jobRole === 'main_bartender' && (
-  <div className="card">
-    <h2><ScreenText id="CloseoutPage.0a257811571b1959">Register Closeout</ScreenText></h2>
+  <div data-design-block="copy.af6b2df48414bca0.6" className="card">
+    <h2 data-design-block="copy.601726244d06e9b3.5"><ScreenText id="CloseoutPage.0a257811571b1959">Register Closeout</ScreenText></h2>
 
-    {shown('staff_8') && (<label>
+    {shown('staff_8') && (<label data-design-block="copy.1d3e51bec05d6401.10">
       {questionLabel(config, 'staff_8', "Cash Left in Register")}
-      <input
+      <PageInput designId="copy.393b1ea89e060356.1"
         type="number"
         step="0.01"
         min="0"
@@ -1552,7 +1554,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
     {registerCash !== '' &&
       Number(registerCash) !== 200 && (
         <>
-          {shown('staff_9') && (<label>
+          {shown('staff_9') && (<label data-design-block="copy.1d3e51bec05d6401.11">
             {questionLabel(config, 'staff_9', "Why is the register not at $200?")}
             <textarea
               value={registerImbalanceReason}
@@ -1565,7 +1567,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
             />
           </label>)}
 
-          {shown('staff_10') && (<label>
+          {shown('staff_10') && (<label data-design-block="copy.1d3e51bec05d6401.12">
             {questionLabel(config, 'staff_10', "Who verified the imbalance?")}
             <select
               value={registerVerifiedBy}
@@ -1576,9 +1578,9 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
               }
               required
             >
-              <option value=""><ScreenText id="CloseoutPage.109949a6b786df90">
+              <PageOption designId="copy.f0708cbf429da944.1" value=""><ScreenText plain id="CloseoutPage.109949a6b786df90">
                 Select verifier
-              </ScreenText></option>
+              </ScreenText></PageOption>
 
               {employees.map((employee) => (
                 <option
@@ -1594,8 +1596,8 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
       )}
   </div>
       )}
-      <div className="card">
-        <h2><ScreenText id="CloseoutPage.168812ccfe0a7259">
+      <div data-design-block="copy.af6b2df48414bca0.7" className="card">
+        <h2 data-design-block="copy.601726244d06e9b3.6"><ScreenText id="CloseoutPage.168812ccfe0a7259">
           Tables Worked
         </ScreenText></h2>
 
@@ -1606,19 +1608,19 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
             roomName,
             roomTables,
           ]) => (
-            <div
+            <div data-design-block="copy.e504eb9cedd619ff.1"
               key={
                 roomName
               }
               className="closeout-room-group"
             >
-              <h3>
+              <h3 data-design-block="copy.376cc9db1049f0cb.3">
                 {
                   roomName
                 }
               </h3>
 
-              <div className="closeout-table-grid">
+              <div data-design-block="copy.9c4126ff19fd40d6.1" className="closeout-table-grid">
 
                 {roomTables.map(
                   (table) => {
@@ -1628,7 +1630,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
                       )
 
                     return (
-                      <button
+                      <button data-design-block="copy.8aca45050763e074.1"
                         key={
                           table.id
                         }
@@ -1670,7 +1672,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
           )
         )}
 
-        <p>
+        <p data-design-block="copy.9780dbc6198cd2d5.10">
           <strong><ScreenText id="CloseoutPage.fcad3a28960326e6">
             Selected:
           </ScreenText></strong>{' '}
@@ -1683,23 +1685,23 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
                     table.table_name
                 )
                 .join(', ')
-            : 'None'}
+            : <PageWord id="copy.4d3966fcacfbab86.1">{"None"}</PageWord>}
         </p>
       </div>
 
 
-      <div className="card">
-        <h2><ScreenText id="CloseoutPage.4064ac585c437950">⭐ Peer Recognition — +5 Points</ScreenText></h2>
+      <div data-design-block="copy.af6b2df48414bca0.8" className="card">
+        <h2 data-design-block="copy.601726244d06e9b3.7"><ScreenText id="CloseoutPage.4064ac585c437950">⭐ Peer Recognition — +5 Points</ScreenText></h2>
 
-        <div className="form-grid">
-          {shown('staff_11') && (<label>
+        <div data-design-block="copy.cd860d0c2bc6318a.3" className="form-grid">
+          {shown('staff_11') && (<label data-design-block="copy.1d3e51bec05d6401.13">
             {questionLabel(config, 'staff_11', "Which team member contributed the most to a successful shift?")}
 
             <select
               value={peerVoteEmployeeId}
               onChange={(e) => setPeerVoteEmployeeId(e.target.value)}
             >
-              <option value=""><ScreenText id="CloseoutPage.30eeb3cde10686c0">Select a teammate</ScreenText></option>
+              <PageOption designId="copy.7d6ba5bdb4594ad9.1" value=""><ScreenText plain id="CloseoutPage.30eeb3cde10686c0">Select a teammate</ScreenText></PageOption>
 
               {employees.map((employee) => (
                 <option
@@ -1714,36 +1716,36 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
             </select>
           </label>)}
 
-          {shown('staff_12') && (<label>
+          {shown('staff_12') && (<label data-design-block="copy.1d3e51bec05d6401.14">
             {questionLabel(config, 'staff_12', "Why are you recognizing them?")}
 
             <select
               value={peerVoteReason}
               onChange={(e) => setPeerVoteReason(e.target.value)}
             >
-              <option value=""><ScreenText id="CloseoutPage.4c67cd90a32ac4a9">Select a reason</ScreenText></option>
-              <option value="Teamwork"><ScreenText id="CloseoutPage.9c39771c2c349c41">Teamwork</ScreenText></option>
-              <option value="Positive Attitude / Motivation"><ScreenText id="CloseoutPage.ac38f5f03e1b83fb">
+              <PageOption designId="copy.f0106def2f52b5d3.1" value=""><ScreenText plain id="CloseoutPage.4c67cd90a32ac4a9">Select a reason</ScreenText></PageOption>
+              <PageOption designId="copy.b6ac39c86574892b.1" value="Teamwork"><ScreenText plain id="CloseoutPage.9c39771c2c349c41">Teamwork</ScreenText></PageOption>
+              <PageOption designId="copy.b67332e6c7c6a6a2.1" value="Positive Attitude / Motivation"><ScreenText plain id="CloseoutPage.ac38f5f03e1b83fb">
                 Positive Attitude / Motivation
-              </ScreenText></option>
-              <option value="Helped During a Rush"><ScreenText id="CloseoutPage.7341dc289f28176f">
+              </ScreenText></PageOption>
+              <PageOption designId="copy.88df4028b12ba608.1" value="Helped During a Rush"><ScreenText plain id="CloseoutPage.7341dc289f28176f">
                 Helped During a Rush
-              </ScreenText></option>
-              <option value="Guest Support"><ScreenText id="CloseoutPage.b22073e733572be6">Guest Support</ScreenText></option>
-              <option value="Leadership"><ScreenText id="CloseoutPage.cc4feffede8ae163">Leadership</ScreenText></option>
-              <option value="Communication"><ScreenText id="CloseoutPage.307271de7146778c">Communication</ScreenText></option>
-              <option value="Went Above & Beyond"><ScreenText id="CloseoutPage.d07f19ce73f71580">
+              </ScreenText></PageOption>
+              <PageOption designId="copy.a708be69395fe6ee.1" value="Guest Support"><ScreenText plain id="CloseoutPage.b22073e733572be6">Guest Support</ScreenText></PageOption>
+              <PageOption designId="copy.4b30a80ac58c2d1b.1" value="Leadership"><ScreenText plain id="CloseoutPage.cc4feffede8ae163">Leadership</ScreenText></PageOption>
+              <PageOption designId="copy.1955cd7891443e70.1" value="Communication"><ScreenText plain id="CloseoutPage.307271de7146778c">Communication</ScreenText></PageOption>
+              <PageOption designId="copy.3385f8ac346747ff.1" value="Went Above & Beyond"><ScreenText plain id="CloseoutPage.d07f19ce73f71580">
                 Went Above &amp; Beyond
-              </ScreenText></option>
-              <option value="Other"><ScreenText id="CloseoutPage.4284cb61f89adb7f">Other</ScreenText></option>
+              </ScreenText></PageOption>
+              <PageOption designId="copy.dbc44762a1f9f446.1" value="Other"><ScreenText plain id="CloseoutPage.4284cb61f89adb7f">Other</ScreenText></PageOption>
             </select>
           </label>)}
 
           {shown('staff_13') && peerVoteReason === 'Other' && (
-            (shown('staff_13') && (<label>
+            (shown('staff_13') && (<label data-design-block="copy.1d3e51bec05d6401.15">
               {questionLabel(config, 'staff_13', "Tell us why you're recognizing them:")}
 
-              <input
+              <PageInput designId="copy.d79b02e6a13dfe11.1"
                 type="text"
                 value={peerVoteOtherReason}
                 onChange={(e) =>
@@ -1756,14 +1758,14 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
         </div>
       </div>
 
-      <div className="card">
-        <h2><ScreenText id="CloseoutPage.6425a625f082028a">
+      <div data-design-block="copy.af6b2df48414bca0.9" className="card">
+        <h2 data-design-block="copy.601726244d06e9b3.8"><ScreenText id="CloseoutPage.6425a625f082028a">
           Shift Accountability
         </ScreenText></h2>
 
-        <div className="form-grid">
+        <div data-design-block="copy.cd860d0c2bc6318a.4" className="form-grid">
 
-          {shown('staff_14') && (<label>
+          {shown('staff_14') && (<label data-design-block="copy.1d3e51bec05d6401.16">
             {questionLabel(config, 'staff_14', "Who did you turn your money in to?")}
 
             <select
@@ -1779,9 +1781,9 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
                 )
               }
             >
-              <option value=""><ScreenText id="CloseoutPage.4abe602200d57d86">
+              <PageOption designId="copy.cb2e85ecf7126707.1" value=""><ScreenText plain id="CloseoutPage.4abe602200d57d86">
                 Select employee
-              </ScreenText></option>
+              </ScreenText></PageOption>
 
               {employees.map(
                 (employee) => (
@@ -1802,7 +1804,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
             </select>
           </label>)}
 
-          {shown('staff_15') && (<label>
+          {shown('staff_15') && (<label data-design-block="copy.1d3e51bec05d6401.17">
             {questionLabel(config, 'staff_15', "Who made your drinks?")}
 
             <select
@@ -1818,9 +1820,9 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
                 )
               }
             >
-              <option value=""><ScreenText id="CloseoutPage.34be05437c660577">
+              <PageOption designId="copy.a30265454c1af2fd.1" value=""><ScreenText plain id="CloseoutPage.34be05437c660577">
                 Not applicable
-              </ScreenText></option>
+              </ScreenText></PageOption>
 
               {employees.map(
                 (employee) => (
@@ -1844,10 +1846,10 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
         </div>
       </div>
 
-      <div className="card"><h2><ScreenText id="CloseoutPage.1c574f44136f81e1">86 Items</ScreenText></h2><p><ScreenText id="CloseoutPage.f4615f74236e8f37">Enter one unavailable item per line. These items are added to the shared board when you submit this closeout.</ScreenText></p><label><ScreenText id="CloseoutPage.2392bdca27c7d9c1">Items marked 86</ScreenText><textarea rows={4} maxLength={8000} value={stockItems} disabled={saving} onChange={e=>setStockItems(e.target.value)} placeholder="One item per line"/></label></div>
+      <div data-design-block="copy.af6b2df48414bca0.10" className="card"><h2 data-design-block="copy.601726244d06e9b3.9"><ScreenText id="CloseoutPage.1c574f44136f81e1">86 Items</ScreenText></h2><p data-design-block="copy.9780dbc6198cd2d5.11"><ScreenText id="CloseoutPage.f4615f74236e8f37">Enter one unavailable item per line. These items are added to the shared board when you submit this closeout.</ScreenText></p><label data-design-block="copy.1d3e51bec05d6401.18"><ScreenText id="CloseoutPage.2392bdca27c7d9c1">Items marked 86</ScreenText><textarea rows={4} maxLength={8000} value={stockItems} disabled={saving} onChange={e=>setStockItems(e.target.value)} placeholder="One item per line"/></label></div>
       <StockBoard location={locationId}/>
-      <div className="card">
-        <h2><ScreenText id="CloseoutPage.e0f8109cb9cd8aa4">
+      <div data-design-block="copy.af6b2df48414bca0.11" className="card">
+        <h2 data-design-block="copy.601726244d06e9b3.10"><ScreenText id="CloseoutPage.e0f8109cb9cd8aa4">
           Notes
         </ScreenText></h2>
 
@@ -1868,13 +1870,13 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
         />
       </div>
 
-      <div className="card">
-        <h2><ScreenText id="CloseoutPage.371d2d55a7237afc">
+      <div data-design-block="copy.af6b2df48414bca0.12" className="card">
+        <h2 data-design-block="copy.601726244d06e9b3.11"><ScreenText id="CloseoutPage.371d2d55a7237afc">
           Shift Score
         </ScreenText></h2>
 
         {!pointResult ? (
-          <p><ScreenText id="CloseoutPage.44540397f70e496a">
+          <p data-design-block="copy.9780dbc6198cd2d5.12"><ScreenText id="CloseoutPage.44540397f70e496a">
             Enter scheduled
             and actual
             clock-in times
@@ -1882,22 +1884,22 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
           </ScreenText></p>
         ) : (
           <>
-            <div className="shift-score-number">
+            <div data-design-block="copy.af66a2a6770a2a0c.1" className="shift-score-number">
               {
                 pointResult.shiftScore
               }
             </div>
 
-            <p><ScreenText id="CloseoutPage.0e2a4f8a7539964b">
+            <p data-design-block="copy.9780dbc6198cd2d5.13"><ScreenText id="CloseoutPage.0e2a4f8a7539964b">
               Starting score:
               </ScreenText>{' '}<ScreenText id="CloseoutPage.ad57366865126e55">100
             </ScreenText></p>
 
-            <div className="point-adjustment-list">
+            <div data-design-block="copy.4d9fe49f70483b17.1" className="point-adjustment-list">
 
               {pointResult.adjustments.map(
                 (item) => (
-                  <div
+                  <div data-design-block="copy.8b86a6fee39e8c8b.1"
                     key={
                       item.code
                     }
@@ -1921,7 +1923,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
 
             </div>
 
-            <div className="point-total">
+            <div data-design-block="copy.2404f0af255afc39.1" className="point-total">
               <span><ScreenText id="CloseoutPage.33f40dc823dadbd0">
                 Net Adjustment
               </ScreenText></span>
@@ -1937,14 +1939,14 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
         )}
       </div>
 
-      <fieldset disabled={saving}><CloseoutQuestions config={config} audience="staff" answers={answers} onChange={setAnswers} /></fieldset>
+      <fieldset data-design-block="copy.8c754f7e3c019e7b.1" disabled={saving}><CloseoutQuestions config={config} audience="staff" answers={answers} onChange={setAnswers} /></fieldset>
 
-      <div className="card">
-        <h2><ScreenText id="CloseoutPage.7c5ffc958d77a5c3">
+      <div data-design-block="copy.af6b2df48414bca0.13" className="card">
+        <h2 data-design-block="copy.601726244d06e9b3.12"><ScreenText id="CloseoutPage.7c5ffc958d77a5c3">
           Certification
         </ScreenText></h2>
 
-        <label
+        <label data-design-block="copy.8af48ed555396f33.1"
           style={{
             display:
               'flex',
@@ -1979,14 +1981,14 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
         </label>
       </div>
 
-      <div className="card">
-        <h2><ScreenText id="CloseoutPage.e13d79760a892b77">
+      <div data-design-block="copy.af6b2df48414bca0.14" className="card">
+        <h2 data-design-block="copy.601726244d06e9b3.13"><ScreenText id="CloseoutPage.e13d79760a892b77">
           Review & Submit
         </ScreenText></h2>
-        <div className="closeout-review"><p><ScreenText id="CloseoutPage.bc9bdc4ef1b422cf">Net sales: </ScreenText><strong><ScreenText id="CloseoutPage.09fc96082d34c2df">$</ScreenText>{netSales || 'Not entered'}</strong></p><p><ScreenText id="CloseoutPage.0ca82121e91cc413">Cash deposit: </ScreenText><strong><ScreenText id="CloseoutPage.09fc96082d34c2df">$</ScreenText>{cashDeposit || 'Not entered'}</strong></p><p><ScreenText id="CloseoutPage.898ca3b88156a4c9">Review these amounts against your Toast report. An inaccurate submission does not earn the completion bonus.</ScreenText></p></div>
+        <div data-design-block="copy.68d161372c7b6924.1" className="closeout-review"><p data-design-block="copy.9780dbc6198cd2d5.14"><ScreenText id="CloseoutPage.bc9bdc4ef1b422cf">Net sales: </ScreenText><strong><ScreenText id="CloseoutPage.09fc96082d34c2df">$</ScreenText>{netSales || 'Not entered'}</strong></p><p data-design-block="copy.9780dbc6198cd2d5.15"><ScreenText id="CloseoutPage.0ca82121e91cc413">Cash deposit: </ScreenText><strong><ScreenText id="CloseoutPage.09fc96082d34c2df">$</ScreenText>{cashDeposit || 'Not entered'}</strong></p><p data-design-block="copy.9780dbc6198cd2d5.16"><ScreenText id="CloseoutPage.898ca3b88156a4c9">Review these amounts against your Toast report. An inaccurate submission does not earn the completion bonus.</ScreenText></p></div>
 
         {pointResult && (
-          <p>
+          <p data-design-block="copy.9780dbc6198cd2d5.17">
             <strong><ScreenText id="CloseoutPage.8bbb98bfd2fc2d4e">
               Shift Score:
             </ScreenText></strong>{' '}
@@ -1997,7 +1999,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
           </p>
         )}
 
-        <button
+        <button data-design-block="copy.e9cc5c19684ed3b8.1"
           type="button"
           className="primary-button"
           onClick={
@@ -2008,8 +2010,8 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
           }
         >
           {saving
-            ? 'Submitting...'
-            : 'Submit Daily Closeout'}
+            ? <PageWord id="copy.8140cc7f00ecd5df.1">{"Submitting..."}</PageWord>
+            : <PageWord id="copy.e5df344566429541.1">{"Submit Daily Closeout"}</PageWord>}
         </button>
       </div>
 

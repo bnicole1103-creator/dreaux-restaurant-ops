@@ -1,3 +1,5 @@
+// page-designer-instrumented
+import { PageOption } from "./PageDesign"
 import { ScreenText } from "./ScreenText"
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
@@ -39,10 +41,10 @@ export function checkAnswers(config: Config | null, audience: string, answers: A
 export function CloseoutQuestions({config,audience,answers,onChange}: {config: Config | null; audience: string; answers: Answers; onChange: (answers: Answers) => void}) {
   const questions = config?.questions.filter(q => q.active && !q.builtin && q.audience === audience) ?? []
   if (!questions.length) return null
-  return <div className="card mod-review"><h2><ScreenText id="CloseoutConfig.be4492a1358f3526">Additional closeout questions</ScreenText></h2><div className="mod-fields">
-    {questions.map(q => <label key={q.id}><span data-question-id={new URLSearchParams(window.location.search).has('wording-preview')?q.id:undefined}>{q.label}</span>{!q.required && ' (optional)'}
+  return <div data-design-block="copy.9e913222ca2b429c.1" className="card mod-review"><h2 data-design-block="copy.4882f056929fd20f.1"><ScreenText id="CloseoutConfig.be4492a1358f3526">Additional closeout questions</ScreenText></h2><div data-design-block="copy.23ad7f492795460f.1" className="mod-fields">
+    {questions.map(q => <label data-design-block="copy.9e090ec37286d9cc.1" key={q.id}><span data-question-id={new URLSearchParams(window.location.search).has('wording-preview')?q.id:undefined}>{q.label}</span>{!q.required && ' (optional)'}
       {q.type === 'yesno' ? <select required={q.required} value={answers[q.id] ?? ''} onChange={e => onChange({...answers,[q.id]:e.target.value})}>
-        <option value=""><ScreenText id="CloseoutConfig.2091fd73e0c28daf">Choose an answer</ScreenText></option><option value="yes"><ScreenText id="CloseoutConfig.0ef3d89123c8ea40">Yes</ScreenText></option><option value="no"><ScreenText id="CloseoutConfig.4019546009aa8a7f">No</ScreenText></option>
+        <PageOption designId="copy.0b5a0857330bef49.1" value=""><ScreenText plain id="CloseoutConfig.2091fd73e0c28daf">Choose an answer</ScreenText></PageOption><PageOption designId="copy.773b0f303c857968.1" value="yes"><ScreenText plain id="CloseoutConfig.0ef3d89123c8ea40">Yes</ScreenText></PageOption><PageOption designId="copy.16faa9683c824aa4.1" value="no"><ScreenText plain id="CloseoutConfig.4019546009aa8a7f">No</ScreenText></PageOption>
       </select> : q.type === 'number' ? <input type="number" step="any" required={q.required} value={answers[q.id] ?? ''} onChange={e => onChange({...answers,[q.id]:e.target.value})} />
         : <textarea rows={3} maxLength={2000} required={q.required} value={answers[q.id] ?? ''} onChange={e => onChange({...answers,[q.id]:e.target.value})} />}
     </label>)}

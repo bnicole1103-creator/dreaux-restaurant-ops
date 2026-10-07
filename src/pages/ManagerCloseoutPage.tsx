@@ -1,3 +1,5 @@
+// page-designer-instrumented
+import { PageWord, PageInput, PageOption } from "../components/PageDesign"
 import { ScreenText } from "../components/ScreenText"
 import './ManagerRatingGuide.css'
 import { submissionLabel } from '../lib/submissionTime'
@@ -219,106 +221,106 @@ export function ManagerCloseoutPage() {
     } catch (e) { setError(errorMessage(e)) }
     finally { setSaving(false) }
   }
-  if (loading) return <section className="page"><p><ScreenText id="ManagerCloseoutPage.09310404aab17db7">Loading manager closeout…</ScreenText></p></section>
-  return <section className="mod-page">
+  if (loading) return <section data-design-block="copy.12b488bb634c8598.1" className="page"><p data-design-block="copy.0441952f380976f4.1"><ScreenText id="ManagerCloseoutPage.09310404aab17db7">Loading manager closeout…</ScreenText></p></section>
+  return <section data-design-block="copy.962ae05cdc73eb4f.1" className="mod-page">
     <Link to="/closeout"><ScreenText id="ManagerCloseoutPage.84dae12b44d2a1b4">← Closeout</ScreenText></Link>
-    <p className="eyebrow"><ScreenText id="ManagerCloseoutPage.1fd28e8b873fc628">MANAGER ONLY</ScreenText></p><h1><ScreenText id="ManagerCloseoutPage.adb158d73c5ee404">Manager Closeout</ScreenText></h1>
-    <p>{locationName}<ScreenText id="ManagerCloseoutPage.b0bdef3954084e4a"> · Private shift performance review</ScreenText></p>
-    {configError && <p role="alert">{configError}</p>}
-    {error && <p role="alert">{error}</p>}
-    {message && <p role="status">{message}</p>}
-    {stamp && <p><ScreenText id="ManagerCloseoutPage.77476d75d9140c97">Submitted: </ScreenText>{submissionLabel(stamp.submitted_at)}{stamp.updated_at!==stamp.submitted_at && <><ScreenText id="ManagerCloseoutPage.d5bb16ce999eef86"> · Last updated: </ScreenText>{submissionLabel(stamp.updated_at)}</>}</p>}
+    <p data-design-block="copy.5f9eae41b6338cd9.1" className="eyebrow"><ScreenText id="ManagerCloseoutPage.1fd28e8b873fc628">MANAGER ONLY</ScreenText></p><h1 data-design-block="copy.16f94c658aeddd86.1"><ScreenText id="ManagerCloseoutPage.adb158d73c5ee404">Manager Closeout</ScreenText></h1>
+    <p data-design-block="copy.0441952f380976f4.2">{locationName}<ScreenText id="ManagerCloseoutPage.b0bdef3954084e4a"> · Private shift performance review</ScreenText></p>
+    {configError && <p data-design-block="copy.d4b2922a100383aa.1" role="alert">{configError}</p>}
+    {error && <p data-design-block="copy.d4b2922a100383aa.2" role="alert">{error}</p>}
+    {message && <p data-design-block="copy.e6598ab30c274935.1" role="status">{message}</p>}
+    {stamp && <p data-design-block="copy.0441952f380976f4.3"><ScreenText id="ManagerCloseoutPage.77476d75d9140c97">Submitted: </ScreenText>{submissionLabel(stamp.submitted_at)}{stamp.updated_at!==stamp.submitted_at && <><ScreenText id="ManagerCloseoutPage.d5bb16ce999eef86"> · Last updated: </ScreenText>{submissionLabel(stamp.updated_at)}</>}</p>}
     {allowed && <>
-      <form onSubmit={submit}>
-        <fieldset disabled={saving || creatingShift} className="mod-controls">
-          <label><ScreenText id="ManagerCloseoutPage.2202e5e40ee243a8">Shift date</ScreenText><input type="date" required max={localDate()} value={date}
+      <form data-design-block="copy.dd10d8aa672e4d86.1" onSubmit={submit}>
+        <fieldset data-design-block="copy.77f40dd73dabd8ed.1" disabled={saving || creatingShift} className="mod-controls">
+          <label data-design-block="copy.34cec310e481785a.1"><ScreenText id="ManagerCloseoutPage.2202e5e40ee243a8">Shift date</ScreenText><input type="date" required max={localDate()} value={date}
             onChange={e => setDate(e.target.value)} /></label>
-          <label><ScreenText id="ManagerCloseoutPage.157828d4940d9702">Shift</ScreenText><select required value={shiftId} disabled={shiftLoading}
+          <label data-design-block="copy.34cec310e481785a.2"><ScreenText id="ManagerCloseoutPage.157828d4940d9702">Shift</ScreenText><select required value={shiftId} disabled={shiftLoading}
             onChange={e => { const value = e.target.value; if(value.startsWith("new:")) void addShift(value.slice(4)); else setShiftId(value) }}>
-            <option value=""><ScreenText id="ManagerCloseoutPage.2e2d17cc21484d52">Select a shift</ScreenText></option>
+            <PageOption designId="copy.3237137317abd4ca.1" value=""><ScreenText plain id="ManagerCloseoutPage.2e2d17cc21484d52">Select a shift</ScreenText></PageOption>
             {shifts.map(s => <option key={s.id} value={s.id}>{s.shift_name}</option>)}
-            {["Brunch", "Lunch", "Dinner", "Full Day"].filter(name => !shifts.some(s => s.shift_name.toLowerCase() === name.toLowerCase())).map(name => <option key={name} value={`new:${name}`}>{name}<ScreenText id="ManagerCloseoutPage.c0165ed6e7811073"> — create shift</ScreenText></option>)}
+            {["Brunch", "Lunch", "Dinner", "Full Day"].filter(name => !shifts.some(s => s.shift_name.toLowerCase() === name.toLowerCase())).map(name => <option key={name} value={`new:${name}`}>{name}<ScreenText plain id="ManagerCloseoutPage.c0165ed6e7811073"> — create shift</ScreenText></option>)}
           </select></label>
         </fieldset>
-        {shiftLoading && <p><ScreenText id="ManagerCloseoutPage.04eecb585c2af027">Loading shifts…</ScreenText></p>}
-        {creatingShift && <p><ScreenText id="ManagerCloseoutPage.b2e1bb32e9d242cc">Creating shift…</ScreenText></p>}
-        {reviewLoading && <p><ScreenText id="ManagerCloseoutPage.779a089a26f12e4c">Loading private reviews…</ScreenText></p>}
-        {shiftId && !reviewLoading && <fieldset disabled={saving || !canEdit}>
+        {shiftLoading && <p data-design-block="copy.0441952f380976f4.4"><ScreenText id="ManagerCloseoutPage.04eecb585c2af027">Loading shifts…</ScreenText></p>}
+        {creatingShift && <p data-design-block="copy.0441952f380976f4.5"><ScreenText id="ManagerCloseoutPage.b2e1bb32e9d242cc">Creating shift…</ScreenText></p>}
+        {reviewLoading && <p data-design-block="copy.0441952f380976f4.6"><ScreenText id="ManagerCloseoutPage.779a089a26f12e4c">Loading private reviews…</ScreenText></p>}
+        {shiftId && !reviewLoading && <fieldset data-design-block="copy.ced9f2f20202fef9.1" disabled={saving || !canEdit}>
           <legend><ScreenText id="ManagerCloseoutPage.30ab09d20fac2ce2">Shift closeout</ScreenText></legend>
-          <section className="mod-rating-guide" aria-labelledby="rating-guide-heading">
-            <h2 id="rating-guide-heading"><ScreenText id="ManagerCloseoutPage.f5960a21b5ce2a31">Staff ratings · What the numbers mean</ScreenText></h2>
+          <section data-design-block="copy.6c15e9c966d6ea8c.1" className="mod-rating-guide" aria-labelledby="rating-guide-heading">
+            <h2 data-design-block="copy.50d5dd187e23d190.1" id="rating-guide-heading"><ScreenText id="ManagerCloseoutPage.f5960a21b5ce2a31">Staff ratings · What the numbers mean</ScreenText></h2>
             <dl>
-              <div><dt>1–2</dt><dd><ScreenText id="ManagerCloseoutPage.c862fd8a7e1bf3aa">Immediate intervention needed</ScreenText></dd></div>
-              <div><dt>3–4</dt><dd><ScreenText id="ManagerCloseoutPage.3378174a42e4b2c1">Poor performance · Needs coaching</ScreenText></dd></div>
-              <div><dt>5–7</dt><dd><ScreenText id="ManagerCloseoutPage.5ec953daa38e3a61">Meets expectations</ScreenText></dd></div>
-              <div><dt>8</dt><dd><ScreenText id="ManagerCloseoutPage.785e74a9f555fab6">Above expectations</ScreenText></dd></div>
-              <div><dt>9–10</dt><dd><ScreenText id="ManagerCloseoutPage.cba738c03149ce2e">Excellent performance</ScreenText></dd></div>
+              <div data-design-block="copy.d29c0da1be28c491.1"><dt><PageWord id="copy.c537a0787bcde172.1">1–2</PageWord></dt><dd><ScreenText id="ManagerCloseoutPage.c862fd8a7e1bf3aa">Immediate intervention needed</ScreenText></dd></div>
+              <div data-design-block="copy.d29c0da1be28c491.2"><dt><PageWord id="copy.e5183c8268f07b01.1">3–4</PageWord></dt><dd><ScreenText id="ManagerCloseoutPage.3378174a42e4b2c1">Poor performance · Needs coaching</ScreenText></dd></div>
+              <div data-design-block="copy.d29c0da1be28c491.3"><dt><PageWord id="copy.aa50af24b3473a18.1">5–7</PageWord></dt><dd><ScreenText id="ManagerCloseoutPage.5ec953daa38e3a61">Meets expectations</ScreenText></dd></div>
+              <div data-design-block="copy.d29c0da1be28c491.4"><dt><PageWord id="copy.bc019eea0620b885.1">8</PageWord></dt><dd><ScreenText id="ManagerCloseoutPage.785e74a9f555fab6">Above expectations</ScreenText></dd></div>
+              <div data-design-block="copy.d29c0da1be28c491.5"><dt><PageWord id="copy.f3e7f3a977383488.1">9–10</PageWord></dt><dd><ScreenText id="ManagerCloseoutPage.cba738c03149ce2e">Excellent performance</ScreenText></dd></div>
             </dl>
-            <p><ScreenText id="ManagerCloseoutPage.d1a53be6c6a73c3b">Ratings and review notes are visible to managers only. Employees see a points adjustment only when an existing point rule applies.</ScreenText></p>
+            <p data-design-block="copy.0441952f380976f4.7"><ScreenText id="ManagerCloseoutPage.d1a53be6c6a73c3b">Ratings and review notes are visible to managers only. Employees see a points adjustment only when an existing point rule applies.</ScreenText></p>
           </section>
-          <h2><ScreenText id="ManagerCloseoutPage.1a185e0991f763b1">Staff who worked this shift</ScreenText></h2>
-          <p><ScreenText id="ManagerCloseoutPage.1f37c15a83ce909b">Select everyone you supervised. Your own rating is completed by another manager.</ScreenText></p>
-          <label><ScreenText id="ManagerCloseoutPage.ac046e18262bb92f">Add staff member</ScreenText><select value="" onChange={e => {if(e.target.value) toggle(e.target.value)}}>
-            <option value=""><ScreenText id="ManagerCloseoutPage.fb3cb81aca03408d">Select staff who worked this shift</ScreenText></option>
+          <h2 data-design-block="copy.d823c4c9c777dbfc.1"><ScreenText id="ManagerCloseoutPage.1a185e0991f763b1">Staff who worked this shift</ScreenText></h2>
+          <p data-design-block="copy.0441952f380976f4.8"><ScreenText id="ManagerCloseoutPage.1f37c15a83ce909b">Select everyone you supervised. Your own rating is completed by another manager.</ScreenText></p>
+          <label data-design-block="copy.34cec310e481785a.3"><ScreenText id="ManagerCloseoutPage.ac046e18262bb92f">Add staff member</ScreenText><select value="" onChange={e => {if(e.target.value) toggle(e.target.value)}}>
+            <PageOption designId="copy.2a21202309abe1be.1" value=""><ScreenText plain id="ManagerCloseoutPage.fb3cb81aca03408d">Select staff who worked this shift</ScreenText></PageOption>
             {team.filter(m => !reviews.some(r => r.user_id === m.user_id)).map(m => <option key={m.user_id} value={m.user_id}>{m.profile?.preferred_name || m.profile?.full_name || 'Team member'} · {m.role.replace(/_/g, ' ')}</option>)}
           </select></label>
           {reviews.map(review => {
             const id = review.user_id
             const member = team.find(m => m.user_id === id)
             const name = member?.profile?.preferred_name || member?.profile?.full_name || 'Former team member'
-            return <article className="mod-review" key={id}><h3>{name}</h3>
-              <button type="button" onClick={() => toggle(id)}><ScreenText id="ManagerCloseoutPage.81883b17a3fea7ca">Remove from this shift</ScreenText></button>
-              <div className="mod-fields">
-                <label>{questionLabel(config, 'rating', 'Rating')} · {name}<select required value={review.rating || ''}
+            return <article data-design-block="copy.5fd1f2f695380fa0.1" className="mod-review" key={id}><h3 data-design-block="copy.628c1d612e6d1c74.1">{name}</h3>
+              <button data-design-block="copy.aebacf2b188b2094.1" type="button" onClick={() => toggle(id)}><ScreenText id="ManagerCloseoutPage.81883b17a3fea7ca">Remove from this shift</ScreenText></button>
+              <div data-design-block="copy.c07e631dcfff3e04.1" className="mod-fields">
+                <label data-design-block="copy.34cec310e481785a.4">{questionLabel(config, 'rating', 'Rating')}<PageWord id="copy.4220523917c9f6ad.1">· </PageWord>{name}<select required value={review.rating || ''}
                   onChange={e => update(id, { rating: Number(e.target.value) })}>
-                  <option value=""><ScreenText id="ManagerCloseoutPage.b025205640aa1910">Select 1–10</ScreenText></option>
+                  <PageOption designId="copy.a29b9ead58a0ed84.1" value=""><ScreenText plain id="ManagerCloseoutPage.b025205640aa1910">Select 1–10</ScreenText></PageOption>
                   {Array.from({ length: 10 }, (_, i) => i + 1).map(n => <option key={n} value={n}>{n} · {n <= 2 ? 'Immediate intervention' : n <= 4 ? 'Needs coaching' : n <= 7 ? 'Meets expectations' : n === 8 ? 'Above expectations' : 'Excellent'}</option>)}
                 </select></label>
-                <label>{questionLabel(config, 'rating_reason', 'Why this rating?')}<select required value={review.category ?? ''}
+                <label data-design-block="copy.34cec310e481785a.5">{questionLabel(config, 'rating_reason', 'Why this rating?')}<select required value={review.category ?? ''}
                   onChange={e => update(id, {category: e.target.value})}>
-                  <option value=""><ScreenText id="ManagerCloseoutPage.c3683f3872b7cbbd">Choose a category</ScreenText></option>
-                  {review.category && !categories.includes(review.category) && <option value={review.category}>{review.category}<ScreenText id="ManagerCloseoutPage.8adb3b5f65f15041"> (saved category)</ScreenText></option>}
+                  <PageOption designId="copy.51d11126c2193d57.1" value=""><ScreenText plain id="ManagerCloseoutPage.c3683f3872b7cbbd">Choose a category</ScreenText></PageOption>
+                  {review.category && !categories.includes(review.category) && <option value={review.category}>{review.category}<ScreenText plain id="ManagerCloseoutPage.8adb3b5f65f15041"> (saved category)</ScreenText></option>}
                   {categories.map(category => <option key={category} value={category}>{category}</option>)}
                 </select></label>
-                <label><ScreenText id="ManagerCloseoutPage.72dd478ce861585f">Specific examples (optional, private)</ScreenText><textarea maxLength={1800} rows={3} value={review.reason}
+                <label data-design-block="copy.34cec310e481785a.6"><ScreenText id="ManagerCloseoutPage.72dd478ce861585f">Specific examples (optional, private)</ScreenText><textarea maxLength={1800} rows={3} value={review.reason}
                   onChange={e => update(id, { reason: e.target.value })}
                   placeholder="Add context about this employee’s shift." /></label>
               </div>
             </article>
           })}
-          <article className="mod-review"><h2><ScreenText id="ManagerCloseoutPage.7b278dbffcc825b9">Shift MVP</ScreenText></h2>
-            <label><ScreenText id="ManagerCloseoutPage.ccfeac4132cad92f">Who stood out this shift? (optional)</ScreenText><select value={shiftMvp} onChange={e => setShiftMvp(e.target.value)}>
-              <option value=""><ScreenText id="ManagerCloseoutPage.fb73f0c0d429ce03">No MVP selected</ScreenText></option>
+          <article data-design-block="copy.ed4685c4baa6df61.1" className="mod-review"><h2 data-design-block="copy.d823c4c9c777dbfc.2"><ScreenText id="ManagerCloseoutPage.7b278dbffcc825b9">Shift MVP</ScreenText></h2>
+            <label data-design-block="copy.34cec310e481785a.7"><ScreenText id="ManagerCloseoutPage.ccfeac4132cad92f">Who stood out this shift? (optional)</ScreenText><select value={shiftMvp} onChange={e => setShiftMvp(e.target.value)}>
+              <PageOption designId="copy.b2f2fd7933f5124e.1" value=""><ScreenText plain id="ManagerCloseoutPage.fb73f0c0d429ce03">No MVP selected</ScreenText></PageOption>
               {reviews.map(r => { const m = team.find(member => member.user_id === r.user_id); return <option key={r.user_id} value={r.user_id}>{m?.profile?.preferred_name || m?.profile?.full_name || 'Team member'}</option> })}
             </select></label>
           </article>
-          <h2><ScreenText id="ManagerCloseoutPage.a8a2758d60a53a18">Cash deposit &amp; register</ScreenText></h2>
-          <div className="mod-fields">
-            <label>{questionLabel(config, 'deposit', "Cash deposit amount ($)")}<input required type="number" min="0" max="999999999.99" step="0.01"
+          <h2 data-design-block="copy.d823c4c9c777dbfc.3"><ScreenText id="ManagerCloseoutPage.a8a2758d60a53a18">Cash deposit &amp; register</ScreenText></h2>
+          <div data-design-block="copy.c07e631dcfff3e04.2" className="mod-fields">
+            <label data-design-block="copy.34cec310e481785a.8">{questionLabel(config, 'deposit', "Cash deposit amount ($)")}<input required type="number" min="0" max="999999999.99" step="0.01"
               value={deposit} onChange={e => setDeposit(e.target.value)} /></label>
-            <label>{questionLabel(config, 'cash_left', "Where was the cash left?")}<input required maxLength={500} value={cashLeft}
+            <label data-design-block="copy.34cec310e481785a.9">{questionLabel(config, 'cash_left', "Where was the cash left?")}<PageInput designId="copy.80a540761dc1164d.1" required maxLength={500} value={cashLeft}
               onChange={e => setCashLeft(e.target.value)} placeholder="Location and bag or envelope reference" /></label>
-            <label>{questionLabel(config, 'balanced', "Was the register balanced?")}<select required value={balanced}
+            <label data-design-block="copy.34cec310e481785a.10">{questionLabel(config, 'balanced', "Was the register balanced?")}<select required value={balanced}
               onChange={e => { setBalanced(e.target.value); setDifference(''); setCashNotes('') }}>
-              <option value=""><ScreenText id="ManagerCloseoutPage.de994e02cc2dd028">Select an answer</ScreenText></option><option value="yes"><ScreenText id="ManagerCloseoutPage.fb445af8657396a2">Yes</ScreenText></option><option value="no"><ScreenText id="ManagerCloseoutPage.c8ab7d6d4e30b2d9">No</ScreenText></option>
+              <PageOption designId="copy.d1bcc6c12c6c585b.1" value=""><ScreenText plain id="ManagerCloseoutPage.de994e02cc2dd028">Select an answer</ScreenText></PageOption><PageOption designId="copy.5ca59f3d052ee4e5.1" value="yes"><ScreenText plain id="ManagerCloseoutPage.fb445af8657396a2">Yes</ScreenText></PageOption><PageOption designId="copy.280cbaedf729a79b.1" value="no"><ScreenText plain id="ManagerCloseoutPage.c8ab7d6d4e30b2d9">No</ScreenText></PageOption>
             </select></label>
             {balanced === 'no' && <>
-              <label>{questionLabel(config, 'difference', "Register difference ($)")}<input required type="number" step="0.01" min="-999999999.99" max="999999999.99"
+              <label data-design-block="copy.34cec310e481785a.11">{questionLabel(config, 'difference', "Register difference ($)")}<input required type="number" step="0.01" min="-999999999.99" max="999999999.99"
                 value={difference} onChange={e => setDifference(e.target.value)} />
                 <small><ScreenText id="ManagerCloseoutPage.7fda744786eba784">Negative for a shortage; positive for an overage.</ScreenText></small></label>
-              <label>{questionLabel(config, 'cash_notes', "Explain the difference")}<textarea required rows={3} maxLength={2000} value={cashNotes}
+              <label data-design-block="copy.34cec310e481785a.12">{questionLabel(config, 'cash_notes', "Explain the difference")}<textarea required rows={3} maxLength={2000} value={cashNotes}
                 onChange={e => setCashNotes(e.target.value)} /></label>
             </>}
           </div>
           <CloseoutQuestions config={config} audience="manager" answers={answers} onChange={setAnswers} />
-          {savedQuestions.some(q => !config?.questions.some(current => current.id === q.id && current.active && current.label === q.label)) && <article className="mod-review"><h2><ScreenText id="ManagerCloseoutPage.b8bb83d7f397b820">Archived answers from this closeout</ScreenText></h2>
-            {savedQuestions.filter(q => !config?.questions.some(current => current.id === q.id && current.active && current.label === q.label)).map(q => <p key={q.id}>{q.label}: {answers[q.id] || 'No answer'}</p>)}
+          {savedQuestions.some(q => !config?.questions.some(current => current.id === q.id && current.active && current.label === q.label)) && <article data-design-block="copy.ed4685c4baa6df61.2" className="mod-review"><h2 data-design-block="copy.d823c4c9c777dbfc.4"><ScreenText id="ManagerCloseoutPage.b8bb83d7f397b820">Archived answers from this closeout</ScreenText></h2>
+            {savedQuestions.filter(q => !config?.questions.some(current => current.id === q.id && current.active && current.label === q.label)).map(q => <p data-design-block="copy.baf7ab1d12779f98.1" key={q.id}>{q.label}<PageWord id="copy.3ff66c896150b376.1">: </PageWord>{answers[q.id] || 'No answer'}</p>)}
           </article>}
-          <label className="mod-check"><input type="checkbox" required checked={confirmed}
+          <label data-design-block="copy.555a75cba4b3447e.1" className="mod-check"><input type="checkbox" required checked={confirmed}
             onChange={e => setConfirmed(e.target.checked)} /><ScreenText id="ManagerCloseoutPage.9978865bd56536f3">I included everyone I supervised who worked this shift.</ScreenText></label>
-          <button type="submit" disabled={!reviews.length || !confirmed}>{saving ? 'Saving…' : 'Submit Manager Closeout'}</button>
+          <button data-design-block="copy.8cb3e942b1ad10b7.1" type="submit" disabled={!reviews.length || !confirmed}>{saving ? <PageWord id="copy.0f556bfd5560fe2d.1">{"Saving…"}</PageWord> : <PageWord id="copy.f13061703e4e7e97.1">{"Submit Manager Closeout"}</PageWord>}</button>
         </fieldset>}
-        {shiftId && !reviewLoading && !canEdit && <p><ScreenText id="ManagerCloseoutPage.30caf0d1c89056fc">Only the submitting MOD, owner, or GM can edit this saved closeout.</ScreenText></p>}
+        {shiftId && !reviewLoading && !canEdit && <p data-design-block="copy.0441952f380976f4.9"><ScreenText id="ManagerCloseoutPage.30caf0d1c89056fc">Only the submitting MOD, owner, or GM can edit this saved closeout.</ScreenText></p>}
       </form>
     </>}
   </section>

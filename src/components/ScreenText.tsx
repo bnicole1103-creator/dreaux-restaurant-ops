@@ -1,3 +1,4 @@
+import { PageWord } from './PageDesign'
 import { useEffect, useSyncExternalStore } from 'react'
 import type { ReactNode } from 'react'
 import { useLocation } from 'react-router-dom'
@@ -7,9 +8,9 @@ let values: Record<string,string> = {}
 const listeners = new Set<()=>void>()
 const subscribe=(f:()=>void)=>{listeners.add(f);return()=>{listeners.delete(f)}}
 export function setScreenWording(next:Record<string,string>){values=next;listeners.forEach(f=>f())}
-export function ScreenText({id,children}:{id:string;children:ReactNode}){
+export function ScreenText({id,children,plain=false}:{id:string;children:ReactNode;plain?:boolean}){
  const text=useSyncExternalStore(subscribe,()=>values[id],()=>undefined)
- return new URLSearchParams(window.location.search).has('wording-preview') ? <span data-wording-id={id}>{text===undefined?children:text}</span> : <>{text===undefined?children:text}</>
+ return plain ? <>{text===undefined?children:text}</> : <PageWord id={id}>{text===undefined?children:text}</PageWord>
 }
 export function ScreenWordingLoader(){
  const {pathname}=useLocation()

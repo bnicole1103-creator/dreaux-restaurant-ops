@@ -1,3 +1,5 @@
+// page-designer-instrumented
+import { PageWord, PageOption } from "./PageDesign"
 import { ScreenText } from "./ScreenText"
 type FloorTable = {
   id: string
@@ -188,7 +190,7 @@ export function TableDetailsModal({
     )
 
   return (
-    <div
+    <div data-design-block="copy.d5debd580a009876.1"
       className="table-details-backdrop"
       onClick={(event) => {
         if (
@@ -199,32 +201,31 @@ export function TableDetailsModal({
         }
       }}
     >
-      <section className="table-details-modal">
-        <header className="table-details-header">
-          <div>
-            <p className="eyebrow"><ScreenText id="TableDetailsModal.92b6ec5c49039726">
+      <section data-design-block="copy.4e89920fed7bbc7e.1" className="table-details-modal">
+        <header data-design-block="copy.51fcf0f2241481ed.1" className="table-details-header">
+          <div data-design-block="copy.0fde5515d399a4b6.1">
+            <p data-design-block="copy.07824f82ed552af0.1" className="eyebrow"><ScreenText id="TableDetailsModal.92b6ec5c49039726">
               TABLE DETAILS
             </ScreenText></p>
 
-            <h2>
+            <h2 data-design-block="copy.7be584ec947c7a11.1">
               {tableNames.join(' + ')}
             </h2>
 
-            <p className="muted">
+            <p data-design-block="copy.5a3f60e9f4ccf83f.1" className="muted">
               {totalSeats}<ScreenText id="TableDetailsModal.5705dc7e0621a37c"> seats
             </ScreenText></p>
           </div>
 
-          <button
+          <button data-design-block="copy.e227be19de3c643e.1"
             type="button"
             className="table-details-close"
             onClick={onClose}
-          >
-            ×
-          </button>
+          ><PageWord id="copy.9de522b2d542594a.1">×
+          </PageWord></button>
         </header>
 
-        <div className="table-details-section">
+        <div data-design-block="copy.a87d8aed62d28e5e.1" className="table-details-section">
           <span className="table-details-label"><ScreenText id="TableDetailsModal.8dc215a2e38b9732">
             ASSIGNED SERVER
           </ScreenText></span>
@@ -243,7 +244,7 @@ export function TableDetailsModal({
             </ScreenText></strong>
           )}
 
-          <label><ScreenText id="TableDetailsModal.b867679892edbcd6">
+          <label data-design-block="copy.82ee143fe34190d7.1"><ScreenText id="TableDetailsModal.b867679892edbcd6">
             Change Server
             </ScreenText><select
               value={selectedServerId}
@@ -251,9 +252,9 @@ export function TableDetailsModal({
                 onServerChange(event.target.value)
               }
             >
-              <option value=""><ScreenText id="TableDetailsModal.869045c7738be5f4">
+              <PageOption designId="copy.3e7f99dd6817d537.1" value=""><ScreenText plain id="TableDetailsModal.869045c7738be5f4">
                 Select server
-              </ScreenText></option>
+              </ScreenText></PageOption>
 
               {teamMembers.map((member) => (
                 <option
@@ -267,25 +268,25 @@ export function TableDetailsModal({
           </label>
         </div>
 
-        <div className="table-details-section">
+        <div data-design-block="copy.a87d8aed62d28e5e.2" className="table-details-section">
           <span className="table-details-label"><ScreenText id="TableDetailsModal.5b079e9eda148a97">
             UPCOMING RESERVATIONS
           </ScreenText></span>
 
           {matchingReservations.length ===
           0 ? (
-            <p className="muted"><ScreenText id="TableDetailsModal.75608b12bee704e1">
+            <p data-design-block="copy.5a3f60e9f4ccf83f.2" className="muted"><ScreenText id="TableDetailsModal.75608b12bee704e1">
               No upcoming reservations
               assigned to this table.
             </ScreenText></p>
           ) : (
             matchingReservations.map(
               (reservation) => (
-                <article
+                <article data-design-block="copy.6732ef074cc889d2.1"
                   key={reservation.id}
                   className="table-details-reservation"
                 >
-                  <div>
+                  <div data-design-block="copy.0fde5515d399a4b6.2">
                     <strong>
                       {getReservationName(
                         reservation,
@@ -311,15 +312,15 @@ export function TableDetailsModal({
           )}
         </div>
 
-        <div className="table-details-actions">
-          <button
+        <div data-design-block="copy.98ec5a9f362f1717.1" className="table-details-actions">
+          <button data-design-block="copy.d782149279255763.1"
             type="button"
             onClick={onClose}
           ><ScreenText id="TableDetailsModal.2d9eb989bfec08cd">
             Close
           </ScreenText></button>
 
-          <button
+          <button data-design-block="copy.3033adcd7a270fec.1"
             type="button"
             className="primary-button"
             onClick={onSeat}

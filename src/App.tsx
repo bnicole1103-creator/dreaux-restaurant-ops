@@ -1,3 +1,5 @@
+// page-designer-instrumented
+import { PageWord } from "./components/PageDesign"
 import { ScreenWordingPage } from './pages/ScreenWordingPage'
 import { TrainingPage } from './pages/TrainingPage'
 import { CocktailTrainingPage } from './pages/CocktailTrainingPage'
@@ -104,9 +106,8 @@ export default function App() {
 
   if (loading) {
     return (
-      <div className="app-loading">
-        Loading...
-      </div>
+      <div data-design-block="copy.47b021b4417b7997.1" className="app-loading"><PageWord id="copy.8c08eaa51e524373.1">Loading...
+      </PageWord></div>
     )
   }
 

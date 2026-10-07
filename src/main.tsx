@@ -1,3 +1,4 @@
+import { PageDesignLoader } from './components/PageDesign'
 import { ScreenWordingLoader } from './components/ScreenText'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
@@ -15,7 +16,7 @@ createRoot(rootElement).render(
   <StrictMode>
     <BrowserRouter>
       <ScreenWordingLoader />
-      <App />
+      <PageDesignLoader /><App />
     </BrowserRouter>
   </StrictMode>,
 )

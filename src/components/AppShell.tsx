@@ -1,3 +1,5 @@
+// page-designer-instrumented
+import { PageWord } from "./PageDesign"
 import { ScreenText } from "./ScreenText"
 import { AppearanceHeader } from './AppearanceHeader'
 import '../pages/WarmTheme.css'
@@ -85,12 +87,12 @@ export function AppShell({
   }
 
   return (
-    <div className="app-shell">
+    <div data-design-block="copy.45d24048ce7bc1e6.1" className="app-shell">
 
-      <header className="app-header">
+      <header data-design-block="copy.edeb9250004ef168.1" className="app-header">
         <AppearanceHeader />
 
-        <div className="app-brand">
+        <div data-design-block="copy.4440213bd6ff846f.1" className="app-brand">
           <strong><ScreenText id="AppShell.262da4df982b420d">
             LNX Systems
           </ScreenText></strong>
@@ -100,7 +102,7 @@ export function AppShell({
           </span>
         </div>
 
-        <button
+        <button data-design-block="copy.816668b675145def.1"
           type="button"
           className="logout-button"
           onClick={signOut}
@@ -111,11 +113,11 @@ export function AppShell({
 
       </header>
 
-      <main className="app-content" style={{paddingBottom: 'calc(300px + env(safe-area-inset-bottom))'}}>
+      <main data-design-block="copy.60535db1b6f53b61.1" className="app-content" style={{paddingBottom: 'calc(300px + env(safe-area-inset-bottom))'}}>
         {children}
       </main>
 
-      <nav className="bottom-nav">
+      <nav data-design-block="copy.7cb60e4ed1acdcd5.1" className="bottom-nav">
 
         {links.map(
           ({
@@ -138,7 +140,7 @@ export function AppShell({
               <Icon size={22} />
 
               <span>
-                {label}
+                <PageWord instance id="copy.134d06397a14a4fd.1">{label}</PageWord>
               </span>
             </NavLink>
           )

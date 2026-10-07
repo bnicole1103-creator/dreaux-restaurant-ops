@@ -1,3 +1,5 @@
+// page-designer-instrumented
+import { PageWord, PageInput } from "../components/PageDesign"
 import { ScreenText } from "../components/ScreenText"
 import { EmployeeProfile } from '../components/EmployeeProfile'
 import { useManagementAccess } from '../components/ManagementAccess'
@@ -338,29 +340,29 @@ export function TeamPage() {
 
   if (loading) {
     return (
-      <section>
-        <div className="page-heading">
-          <p className="eyebrow"><ScreenText id="TeamPage.262da4df982b420d">LNX Systems</ScreenText></p>
-          <h1><ScreenText id="TeamPage.ba414bfe8fe6cf7b">Team</ScreenText></h1>
-          <p className="muted"><ScreenText id="TeamPage.9ab27c4cb1072ec7">Loading team…</ScreenText></p>
+      <section data-design-block="copy.4c43cbee06845863.1">
+        <div data-design-block="copy.e32e085900ed1308.1" className="page-heading">
+          <p data-design-block="copy.7c3584cc95fdafc8.1" className="eyebrow"><ScreenText id="TeamPage.262da4df982b420d">LNX Systems</ScreenText></p>
+          <h1 data-design-block="copy.2d15be00ac397f1a.1"><ScreenText id="TeamPage.ba414bfe8fe6cf7b">Team</ScreenText></h1>
+          <p data-design-block="copy.9a0abcbc5e238444.1" className="muted"><ScreenText id="TeamPage.9ab27c4cb1072ec7">Loading team…</ScreenText></p>
         </div>
       </section>
     )
   }
 
   return (
-    <section>
-      <div className="page-heading">
-        <p className="eyebrow"><ScreenText id="TeamPage.c1b5f294c1f55228">LNX Systems</ScreenText></p>
-        <h1><ScreenText id="TeamPage.f8c6bdd37125a5eb">Team</ScreenText></h1>
-        <p className="muted">
-          {locationName || 'Current Location'} · {activeCount}{' '}<ScreenText id="TeamPage.35779cd02cf5c4ef">
+    <section data-design-block="copy.4c43cbee06845863.2">
+      <div data-design-block="copy.e32e085900ed1308.2" className="page-heading">
+        <p data-design-block="copy.7c3584cc95fdafc8.2" className="eyebrow"><ScreenText id="TeamPage.c1b5f294c1f55228">LNX Systems</ScreenText></p>
+        <h1 data-design-block="copy.2d15be00ac397f1a.2"><ScreenText id="TeamPage.f8c6bdd37125a5eb">Team</ScreenText></h1>
+        <p data-design-block="copy.9a0abcbc5e238444.2" className="muted">
+          {locationName || 'Current Location'}<PageWord id="copy.eab76aa7af0bc1b2.1">· </PageWord>{activeCount}{' '}<ScreenText id="TeamPage.35779cd02cf5c4ef">
           active team members
         </ScreenText></p>
       </div>
 
       {error && (
-        <div
+        <div data-design-block="copy.e0ab435294e08379.1"
           style={{
             marginTop: '12px',
             padding: '12px',
@@ -374,7 +376,7 @@ export function TeamPage() {
       )}
 
       {message && (
-        <div
+        <div data-design-block="copy.c38532aaffa61db2.1"
           style={{
             marginTop: '12px',
             padding: '12px',
@@ -387,7 +389,7 @@ export function TeamPage() {
         </div>
       )}
 
-      <button
+      <button data-design-block="copy.b00cb3cf7897edda.1"
         className="primary-button"
         style={{
           width: '100%',
@@ -399,7 +401,7 @@ export function TeamPage() {
         + Add Team Member
       </ScreenText></button>
 
-      <div
+      <div data-design-block="copy.2c9f0e066c23a9e5.1"
         style={{
           display: 'grid',
           gap: '10px',
@@ -407,7 +409,7 @@ export function TeamPage() {
         }}
       >
         {team.map((member) => (
-          <div
+          <div data-design-block="copy.66bf4e38430df29f.1"
             key={member.user_id}
             style={{
               padding: '14px',
@@ -418,7 +420,7 @@ export function TeamPage() {
                 member.status === 'active' ? 1 : 0.6,
             }}
           >
-            <div
+            <div data-design-block="copy.3524ae46d03d8a6f.1"
               style={{
                 display: 'flex',
                 justifyContent: 'space-between',
@@ -426,7 +428,7 @@ export function TeamPage() {
                 alignItems: 'flex-start',
               }}
             >
-              <div>
+              <div data-design-block="copy.d644361ed64c08f1.1">
                 <strong
                   style={{
                     display: 'block',
@@ -440,7 +442,7 @@ export function TeamPage() {
                 {member.preferred_name &&
                   member.preferred_name !==
                     member.full_name && (
-                    <div
+                    <div data-design-block="copy.eff6b2695ee15157.1"
                       style={{
                         marginTop: '2px',
                         opacity: 0.65,
@@ -451,7 +453,7 @@ export function TeamPage() {
                     </div>
                   )}
 
-                <div
+                <div data-design-block="copy.412f0462412f6fda.1"
                   style={{
                     marginTop: '5px',
                     color: '#f4b860',
@@ -462,20 +464,20 @@ export function TeamPage() {
                 </div>
               </div>
 
-              <div
+              <div data-design-block="copy.ed57497e2f2445f6.1"
                 style={{
                   fontSize: '12px',
                   fontWeight: 700,
                 }}
               >
                 {member.status === 'active'
-                  ? '🟢 Active'
-                  : '⚪ Inactive'}
+                  ? <PageWord id="copy.4066a7adf2c231ed.1">{"🟢 Active"}</PageWord>
+                  : <PageWord id="copy.2863be56bff5604d.1">{"⚪ Inactive"}</PageWord>}
               </div>
             </div>
 
-            {(profileAccess.manager||viewerId===member.user_id)&&<button type="button" className="wt-profile-link" onClick={()=>setProfileUser(member.user_id)}><ScreenText id="TeamPage.b2ea937011e56c51">View employee profile</ScreenText></button>}
-            <div
+            {(profileAccess.manager||viewerId===member.user_id)&&<button data-design-block="copy.04b416d7841d6c6c.1" type="button" className="wt-profile-link" onClick={()=>setProfileUser(member.user_id)}><ScreenText id="TeamPage.b2ea937011e56c51">View employee profile</ScreenText></button>}
+            <div data-design-block="copy.e2dc7a1a95db3c76.1"
               style={{
                 display: 'grid',
                 gridTemplateColumns: '1fr 1fr',
@@ -504,19 +506,19 @@ export function TeamPage() {
                 ))}
               </select>
 
-              <button
+              <button data-design-block="copy.76f84758895d8417.1"
                 onClick={() => toggleActive(member)}
               >
                 {member.status === 'active'
-                  ? 'Deactivate'
-                  : 'Reactivate'}
+                  ? <PageWord id="copy.02f9740f534e5478.1">{"Deactivate"}</PageWord>
+                  : <PageWord id="copy.159d8d4ae0f3300d.1">{"Reactivate"}</PageWord>}
               </button>
             </div>
           </div>
         ))}
 
         {team.length === 0 && (
-          <div
+          <div data-design-block="copy.f2e4d2249a93cd3a.1"
             style={{
               padding: '20px',
               textAlign: 'center',
@@ -530,14 +532,14 @@ export function TeamPage() {
 
       {profileUser&&<EmployeeProfile key={profileUser} locationId={locationId} userId={profileUser} onClose={()=>setProfileUser('')} />}
       {showInvite && (
-        <div className="modal-backdrop">
-          <div className="modal-card">
-            <p className="eyebrow"><ScreenText id="TeamPage.291bcd306c2e6ef4">Team Management</ScreenText></p>
-            <h2><ScreenText id="TeamPage.1821210729db4e68">Add Team Member</ScreenText></h2>
+        <div data-design-block="copy.d08ca345ae0725ab.1" className="modal-backdrop">
+          <div data-design-block="copy.78089139315be863.1" className="modal-card">
+            <p data-design-block="copy.7c3584cc95fdafc8.3" className="eyebrow"><ScreenText id="TeamPage.291bcd306c2e6ef4">Team Management</ScreenText></p>
+            <h2 data-design-block="copy.617a3eabbc359aaf.1"><ScreenText id="TeamPage.1821210729db4e68">Add Team Member</ScreenText></h2>
 
-            <label><ScreenText id="TeamPage.c648d0d1f86472a9">
+            <label data-design-block="copy.6555634b7e0c4bb3.1"><ScreenText id="TeamPage.c648d0d1f86472a9">
               Full name
-              </ScreenText><input
+              </ScreenText><PageInput designId="copy.7596479ae37f8bbd.1"
                 value={fullName}
                 onChange={(event) =>
                   setFullName(event.target.value)
@@ -546,9 +548,9 @@ export function TeamPage() {
               />
             </label>
 
-            <label style={{ marginTop: '10px' }}><ScreenText id="TeamPage.7c0979fda0d91b63">
+            <label data-design-block="copy.ebb1caebaa81c102.1" style={{ marginTop: '10px' }}><ScreenText id="TeamPage.7c0979fda0d91b63">
               Preferred name
-              </ScreenText><input
+              </ScreenText><PageInput designId="copy.0ca61d2531817e2a.1"
                 value={preferredName}
                 onChange={(event) =>
                   setPreferredName(event.target.value)
@@ -557,9 +559,9 @@ export function TeamPage() {
               />
             </label>
 
-            <label style={{ marginTop: '10px' }}><ScreenText id="TeamPage.82076b654a58ad2e">
+            <label data-design-block="copy.ebb1caebaa81c102.2" style={{ marginTop: '10px' }}><ScreenText id="TeamPage.82076b654a58ad2e">
               Email
-              </ScreenText><input
+              </ScreenText><PageInput designId="copy.4b971b0d19fd420a.1"
                 type="email"
                 value={email}
                 onChange={(event) =>
@@ -569,9 +571,9 @@ export function TeamPage() {
               />
             </label>
 
-            <label style={{ marginTop: '10px' }}><ScreenText id="TeamPage.7768a75fc61fe2c6">
+            <label data-design-block="copy.ebb1caebaa81c102.3" style={{ marginTop: '10px' }}><ScreenText id="TeamPage.7768a75fc61fe2c6">
               Phone
-              </ScreenText><input
+              </ScreenText><PageInput designId="copy.30722145e8ce6864.1"
                 value={phone}
                 onChange={(event) =>
                   setPhone(event.target.value)
@@ -580,7 +582,7 @@ export function TeamPage() {
               />
             </label>
 
-            <label style={{ marginTop: '10px' }}><ScreenText id="TeamPage.19c01864eac1320a">
+            <label data-design-block="copy.ebb1caebaa81c102.4" style={{ marginTop: '10px' }}><ScreenText id="TeamPage.19c01864eac1320a">
               Role
               </ScreenText><select
                 value={role}
@@ -601,9 +603,9 @@ export function TeamPage() {
               </select>
             </label>
 
-            <label style={{ marginTop: '10px' }}><ScreenText id="TeamPage.ba1269b8eb9126c7">
+            <label data-design-block="copy.ebb1caebaa81c102.5" style={{ marginTop: '10px' }}><ScreenText id="TeamPage.ba1269b8eb9126c7">
               Employee number
-              </ScreenText><input
+              </ScreenText><PageInput designId="copy.fe9f33cc6ff8e5f1.1"
                 value={employeeNumber}
                 onChange={(event) =>
                   setEmployeeNumber(event.target.value)
@@ -612,8 +614,8 @@ export function TeamPage() {
               />
             </label>
 
-            <div className="modal-actions">
-              <button
+            <div data-design-block="copy.5b345ea6ffc6797d.1" className="modal-actions">
+              <button data-design-block="copy.3aa38101f6bb5fbf.1"
                 onClick={() => {
                   setShowInvite(false)
                   setError('')
@@ -622,7 +624,7 @@ export function TeamPage() {
                 Cancel
               </ScreenText></button>
 
-              <button
+              <button data-design-block="copy.e25a3bb1aa5f7968.1"
                 className="primary-button"
                 onClick={inviteTeamMember}
                 disabled={
@@ -632,8 +634,8 @@ export function TeamPage() {
                 }
               >
                 {saving
-                  ? 'Sending…'
-                  : 'Send Invite'}
+                  ? <PageWord id="copy.fc2672923a339789.1">{"Sending…"}</PageWord>
+                  : <PageWord id="copy.2a1840ca99bdfff4.1">{"Send Invite"}</PageWord>}
               </button>
             </div>
           </div>
