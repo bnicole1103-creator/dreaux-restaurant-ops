@@ -7,7 +7,7 @@ import { useState } from 'react'
 import { supabase } from '../lib/supabase'
 import type { Question } from './CloseoutConfig'
 export type EditableCloseout={id:string;edit_version?:number;scheduled_start:string|null;clock_in:string|null;clock_out?:string|null;job_role:string;shift_type?:string|null;net_sales:number;sales_target:number;cash_deposit:number;void_count:number;void_value:number;discount_value:number;notes:string|null;custom_answers?:Record<string,string>;question_snapshot?:Question[];zero_sales_confirmed?:boolean;zero_sales_reason?:string|null;completion_points_withheld?:boolean}
-const amounts=[['net_sales','Net sales ($)'],['sales_target','Sales target ($)'],['cash_deposit','Cash deposit ($)'],['void_value','Voids ($)'],['discount_value','Discounts ($)'],['void_count','Number of voids']] as const
+const amounts=[['net_sales','Net sales ($)'],['cash_deposit','Cash deposit ($)'],['void_value','Voids ($)'],['discount_value','Discounts ($)'],['void_count','Number of voids']] as const
 const roles={server:'Server',main_bartender:'Main Bartender',back_bartender_1:'Back Bartender 1',back_bar_service_bartender:'Back Bar Service Bartender',host:'Host',busser:'Busser',manager:'Manager',assistant_manager:'Assistant Manager',general_manager:'General Manager'}
 export function CloseoutCorrectionEditor({closeout,locationId,name,onSaved,onCancel}:{closeout:EditableCloseout;locationId:string;name:string;onSaved:()=>void;onCancel:()=>void}){
  const [values,setValues]=useState(()=>Object.fromEntries(amounts.map(([key])=>[key,String(closeout[key] ?? '')])));const [scheduled,setScheduled]=useState(closeout.scheduled_start?.slice(0,5) ?? '');const [clock,setClock]=useState(closeout.clock_in?.slice(0,5) ?? '')

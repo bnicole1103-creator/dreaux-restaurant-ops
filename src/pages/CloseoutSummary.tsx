@@ -1,4 +1,5 @@
 // page-designer-instrumented
+import { ManagerRecap } from "../components/ManagerRecap"
 import { PageWord } from "../components/PageDesign"
 import { StockBoard,CloseoutStockDetails } from '../components/StockBoard'
 import { useSearchParams } from 'react-router-dom'
@@ -73,6 +74,25 @@ type CloseoutTableRow = {
   closeout_id: string
   table_id: string
   table_name: string
+}
+
+type ManagerCloseoutRow = {
+  shift_id: string
+  shift_name: string
+  shift_date: string
+  submitted_by: string
+  submitted_by_name: string | null
+  submitted_at: string
+  updated_at: string
+  cash_deposit: number | null
+  cash_left_at: string | null
+  register_balanced: boolean | null
+  register_difference: number | null
+  register_notes: string | null
+  review_count: number
+  average_rating: number | null
+  shift_mvp: string | null
+  shift_mvp_name: string | null
 }
 
 type CardKey =
@@ -203,6 +223,9 @@ function CloseoutDay({selectedDate,refresh,onDeleted,locationId,locationName,cur
   const [closeoutTables, setCloseoutTables] =
     useState<CloseoutTableRow[]>([])
 
+  const [managerCloseouts, setManagerCloseouts] =
+    useState<ManagerCloseoutRow[]>([])
+
   const [expandedId, setExpandedId] =
     useState<string | null>(null)
 
@@ -235,12 +258,12 @@ function CloseoutDay({selectedDate,refresh,onDeleted,locationId,locationName,cur
   useEffect(()=>{void loadSummary(locationId,selectedDate);return()=>{request.current+=1}},[locationId,selectedDate,refresh])
   async function loadSummary(targetLocationId:string,businessDate:string) {
     const ticket=++request.current
-    setLoading(true);setError('');setCloseouts([]);setProfiles([]);setCloseoutTables([]);setIsManager(false)
+    setLoading(true);setError('');setCloseouts([]);setProfiles([]);setCloseoutTables([]);setManagerCloseouts([]);setIsManager(false)
     try {
       const {data,error}=await supabase.rpc('closeout_summary_day',{p_location_id:targetLocationId,p_day:businessDate})
       if(error)throw error
       if(ticket!==request.current)return
-      setIsManager(!!data.manager);setCloseouts(data.closeouts ?? []);setProfiles(data.profiles ?? []);setCloseoutTables(data.tables ?? [])
+      setIsManager(!!data.manager);setCloseouts(data.closeouts ?? []);setProfiles(data.profiles ?? []);setCloseoutTables(data.tables ?? []);setManagerCloseouts(data.manager_closeouts ?? [])
     } catch(e) {if(ticket===request.current)setError(String((e as {message?:string})?.message ?? e))}
     finally {if(ticket===request.current)setLoading(false)}
   }
@@ -365,71 +388,19 @@ function CloseoutDay({selectedDate,refresh,onDeleted,locationId,locationName,cur
       }
     }, [closeouts])
 
-  const recap =
-    useMemo(() => {
-      if (
-        closeouts.length === 0
-      ) {
-        return `No closeouts have been submitted for ${selectedDate}.`
-      }
-
-      const overTarget =
-        closeouts.filter(
-          (closeout) =>
-            Number(
-              closeout.sales_target
-            ) > 0 &&
-            Number(
-              closeout.net_sales
-            ) >=
-              Number(
-                closeout.sales_target
-              )
-        ).length
-
-      const underTarget =
-        closeouts.filter(
-          (closeout) =>
-            Number(
-              closeout.sales_target
-            ) > 0 &&
-            Number(
-              closeout.net_sales
-            ) <
-              Number(
-                closeout.sales_target
-              )
-        ).length
-
-      return `${serviceDateLabel(selectedDate)}: ${closeouts.length} closeouts submitted (${closeouts.map(c=>displayName(profileMap.get(c.user_id))).join(', ')}). Team net sales were ${money(
-        totals.totalSales
-      )} against a combined target of ${money(
-        totals.totalTarget
-      )}, finishing at ${percent(
-        totals.teamPercent
-      )} of target. ${overTarget} employee${
-        overTarget === 1
-          ? ''
-          : 's'
-      } met or exceeded target and ${underTarget} finished below target. Cash deposits totaled ${money(
-        totals.totalCash
-      )}. There were ${totals.totalVoidCount} void${
-        totals.totalVoidCount === 1
-          ? ''
-          : 's'
-      } totaling ${money(
-        totals.totalVoids
-      )}, with ${money(
-        totals.totalDiscounts
-      )} in discounts. Average shift score was ${totals.averageScore.toFixed(
-        1
-      )}.`
-    }, [
-      closeouts,
-      selectedDate,
-      totals,
-      profileMap,
-    ])
+  const recap = useMemo(() => {
+    const over = closeouts.filter(c=>Number(c.sales_target)>0 && Number(c.net_sales)>=Number(c.sales_target)).length
+    const under = closeouts.filter(c=>Number(c.sales_target)>0 && Number(c.net_sales)<Number(c.sales_target)).length
+    const managerCash = managerCloseouts.reduce((n,m)=>n+Number(m.cash_deposit??0),0)
+    return [
+      `Employee closeouts: ${closeouts.length}${closeouts.length ? ' — '+closeouts.map(c=>displayName(profileMap.get(c.user_id))).join(', ') : ''}.`,
+      `Net sales: ${money(totals.totalSales)}. ${totals.totalTarget>0 ? `Target performance: ${percent(totals.teamPercent)}; ${over} met or exceeded target, ${under} below target.` : 'No sales target available.'}`,
+      `Voids: ${totals.totalVoidCount}, totaling ${money(totals.totalVoids)}. Discounts: ${money(totals.totalDiscounts)}.`,
+      `Average shift score: ${closeouts.length ? totals.averageScore.toFixed(1) : 'Not available'}.`,
+      `Cash report — total deposited on manager closeouts: ${managerCloseouts.length ? money(managerCash) : 'No manager closeout submitted'}.`,
+      ...managerCloseouts.map(m=>`${m.shift_name}: ${m.cash_deposit==null?'Deposit not recorded':money(m.cash_deposit)+' deposited'}; cash left: ${m.cash_left_at||'Not recorded'}. Submitted by ${m.submitted_by_name||'Manager'} at ${submissionLabel(m.submitted_at)}.`),
+    ]
+  },[closeouts,managerCloseouts,totals,profileMap])
 
   function tablesForCloseout(
     closeoutId: string
@@ -495,16 +466,6 @@ function CloseoutDay({selectedDate,refresh,onDeleted,locationId,locationName,cur
         DEFAULT_CARDS
       )
     )
-  }
-
-  async function copyRecap() {
-    try {
-      await navigator.clipboard.writeText(
-        recap
-      )
-    } catch {
-      // Clipboard may be restricted.
-    }
   }
 
   return (
@@ -808,43 +769,51 @@ function CloseoutDay({selectedDate,refresh,onDeleted,locationId,locationName,cur
           </div>
 
           {isManager && (
-          <div data-design-block="copy.df748de098f5387f.3" className="card">
-            <div data-design-block="copy.ecfd7e0999fcd30b.1"
-              style={{
-                display:
-                  'flex',
-                alignItems:
-                  'center',
-                justifyContent:
-                  'space-between',
-                gap: 12,
-                flexWrap:
-                  'wrap',
-              }}
-            >
-              <h2 data-design-block="copy.f9ef78219c5e44bd.1">
-                {current ? <PageWord id="copy.0f06f3f68acc253d.1">{"Today’s Manager Recap"}</PageWord> : <PageWord id="copy.6972bc00b93ee219.1">{"Manager Recap"}</PageWord>}
-              </h2>
-
-              <button data-design-block="copy.4a37fec68aba8a32.1"
-                type="button"
-                onClick={
-                  copyRecap
-                }
-              ><ScreenText id="CloseoutSummary.2f68c5951f51442a">
-                Copy Recap
-              </ScreenText></button>
-            </div>
-
-            <p data-design-block="copy.fc1857362f0bf21a.1"
-              style={{
-                lineHeight:
-                  1.7,
-              }}
-            >
-              {recap}
-            </p>
+          <div data-design-block="copy.manager-closeouts-summary.1" className="card">
+            <h2 data-design-block="copy.manager-closeouts-summary.2">
+              <ScreenText id="CloseoutSummary.managerCloseouts">Manager Closeouts</ScreenText>
+            </h2>
+            {managerCloseouts.length === 0 ? (
+              <p data-design-block="copy.manager-closeouts-summary.3">
+                <ScreenText id="CloseoutSummary.noManagerCloseouts">No manager closeout submitted for this date yet.</ScreenText>
+              </p>
+            ) : (
+              <div data-design-block="copy.manager-closeouts-summary.4" style={{display:'grid',gap:12}}>
+                {managerCloseouts.map(row => (
+                  <article data-design-block="copy.manager-closeouts-summary.5" className="closeout-summary-row" key={row.shift_id}>
+                    <div data-design-block="copy.manager-closeouts-summary.6" className="closeout-summary-header">
+                      <div data-design-block="copy.manager-closeouts-summary.7">
+                        <strong>{row.shift_name}</strong>
+                        <div>{row.submitted_by_name || 'Manager'}</div>
+                      </div>
+                      <div data-design-block="copy.manager-closeouts-summary.8">
+                        <strong>{money(row.cash_deposit)}</strong>
+                        <div><ScreenText id="CloseoutSummary.managerCashDeposit">Cash deposit</ScreenText></div>
+                      </div>
+                      <div data-design-block="copy.manager-closeouts-summary.9">
+                        <strong>{row.review_count}</strong>
+                        <div><ScreenText id="CloseoutSummary.managerReviews">staff reviews</ScreenText></div>
+                      </div>
+                    </div>
+                    <div data-design-block="copy.manager-closeouts-summary.10" className="closeout-summary-details">
+                      <div data-design-block="copy.manager-closeouts-summary.11"><span><ScreenText id="CloseoutSummary.managerSubmitted">Submitted</ScreenText></span><strong>{submissionLabel(row.submitted_at)}</strong></div>
+                      <div data-design-block="copy.manager-closeouts-summary.12"><span><ScreenText id="CloseoutSummary.managerRegister">Register</ScreenText></span><strong>{row.register_balanced == null ? 'Not recorded' : row.register_balanced ? 'Balanced' : `Off by ${money(row.register_difference)}`}</strong></div>
+                      <div data-design-block="copy.manager-closeouts-summary.13"><span><ScreenText id="CloseoutSummary.managerCashLeft">Cash left at</ScreenText></span><strong>{row.cash_left_at || 'Not recorded'}</strong></div>
+                      <div data-design-block="copy.manager-closeouts-summary.14"><span><ScreenText id="CloseoutSummary.managerAverageRating">Average rating</ScreenText></span><strong>{row.average_rating == null ? '—' : row.average_rating.toFixed(1)}</strong></div>
+                      <div data-design-block="copy.manager-closeouts-summary.15"><span><ScreenText id="CloseoutSummary.managerMvp">Shift MVP</ScreenText></span><strong>{row.shift_mvp_name || 'Not selected'}</strong></div>
+                      {row.register_notes && <div data-design-block="copy.manager-closeouts-summary.16" style={{gridColumn:'1 / -1'}}><span><ScreenText id="CloseoutSummary.managerRegisterNotes">Register notes</ScreenText></span><strong>{row.register_notes}</strong></div>}
+                    </div>
+                  </article>
+                ))}
+              </div>
+            )}
           </div>
+          )}
+
+          {isManager && (
+          <ManagerRecap location={locationId} day={selectedDate} refresh={refresh}
+            title={current ? 'Today’s Manager Recap' : 'Manager Recap'} lines={recap}/>
+
           )}
 
           <div data-design-block="copy.df748de098f5387f.4" className="card">

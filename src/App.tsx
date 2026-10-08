@@ -136,7 +136,7 @@ export default function App() {
         <Route path="/settings/sales-targets" element={<ManagementOnly gmOnly><SalesTargetsPage /></ManagementOnly>} />
         <Route path="/settings/wording" element={<ManagementOnly gmOnly><ScreenWordingPage /></ManagementOnly>} />
         <Route path="/guest-feedback" element={<ManagementOnly><GuestFeedbackInbox /></ManagementOnly>} />
-        <Route path="/settings" element={<ManagementOnly gmOnly><SettingsPage /></ManagementOnly>} />
+        <Route path="/settings" element={<SettingsPage />} />
         <Route path="/settings/point-rules" element={<ManagementOnly gmOnly><CloseoutSettingsPage key="point-rules" initialTab="points" /></ManagementOnly>} />
         <Route path="/closeout-summary/cash" element={<SummaryPage cash />} />
         <Route path="/appearance" element={<AppearanceGuard gmOnly><LocationAppearancePage /></AppearanceGuard>} />

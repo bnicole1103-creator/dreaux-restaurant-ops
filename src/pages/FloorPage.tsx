@@ -8,6 +8,7 @@ import { SectionSchedule, type SectionPlan } from '../components/SectionSchedule
 import { floorRoomRatio, floorTableGeometry } from '../lib/floorPhotoLayout'
 import './FloorMap.css'
 import { recommendSections } from '../lib/smartSections'
+import { ReservationEditor } from '../components/ReservationEditor'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { loadTenantData } from '../lib/tenant'
@@ -71,6 +72,8 @@ type ActiveTableSession = {
 
 
 type ReservationRecord = {
+  assigned_server_id: string | null
+  edit_version: number
   id: string
   reservation_time: string | null
   guest_name: string
@@ -568,7 +571,9 @@ const [partySize, setPartySize] = useState(1)
           occasion,
           is_birthday,
           is_vip,
-          notes
+          notes,
+          assigned_server_id,
+          edit_version
         `)
         .eq('location_id', locationIdValue)
         .eq('reservation_date', reservationDate)
@@ -2411,6 +2416,9 @@ const [partySize, setPartySize] = useState(1)
                       {reservation.is_vip ? <PageWord id="copy.f33e31ed72695421.1">{"⭐ VIP "}</PageWord> : <PageWord id="copy.d8faa01e919cbb07.4">{""}</PageWord>}
                       {reservation.occasion || ''}
                     </div>
+                    {reservation.assigned_server_id && <p>Server: {memberName(reservation.assigned_server_id)}</p>}
+                    {reservation.notes && <p>{reservation.notes}</p>}
+                    <ReservationEditor reservation={reservation} locationId={locationId} tables={tables} team={team} onSaved={()=>{void loadReservations(locationId)}} />
                   </div>
                 ))
               )}
