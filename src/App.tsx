@@ -42,6 +42,8 @@ import { FloorPage } from './pages/FloorPage'
 import { PlaceholderPage } from './pages/PlaceholderPage'
 import { TeamPage } from './pages/TeamPage'
 import { CloseoutPage } from './pages/CloseoutPage'
+import { ReservationInquiryPage } from './pages/ReservationInquiryPage'
+import { InquiryInboxPage } from './pages/InquiryInboxPage'
 
 export default function App() {
   const walkinPath=useLocation().pathname
@@ -131,6 +133,8 @@ export default function App() {
     <AppShell session={session}>
       <Routes>
         <Route path="/inventory" element={<InventoryPage />} />
+        <Route path="/reservation-inquiries" element={<ReservationInquiryPage />} />
+        <Route path="/inquiry-inbox" element={<ManagementOnly><InquiryInboxPage /></ManagementOnly>} />
         <Route path="/training" element={<TrainingPage />} />
         <Route path="/training/cocktails" element={<CocktailTrainingPage />} />
         <Route path="/settings/sales-targets" element={<ManagementOnly gmOnly><SalesTargetsPage /></ManagementOnly>} />
