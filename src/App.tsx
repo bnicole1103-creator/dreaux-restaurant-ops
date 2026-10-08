@@ -43,6 +43,7 @@ import { PlaceholderPage } from './pages/PlaceholderPage'
 import { TeamPage } from './pages/TeamPage'
 import { CloseoutPage } from './pages/CloseoutPage'
 import { ReservationInquiryPage } from './pages/ReservationInquiryPage'
+import { InquiryStudioPage } from './pages/InquiryStudioPage'
 import { InquiryInboxPage } from './pages/InquiryInboxPage'
 
 export default function App() {
@@ -134,6 +135,7 @@ export default function App() {
       <Routes>
         <Route path="/inventory" element={<InventoryPage />} />
         <Route path="/reservation-inquiries" element={<ReservationInquiryPage />} />
+        <Route path="/inquiry-studio" element={<ManagementOnly><InquiryStudioPage /></ManagementOnly>} />
         <Route path="/inquiry-inbox" element={<ManagementOnly><InquiryInboxPage /></ManagementOnly>} />
         <Route path="/training" element={<TrainingPage />} />
         <Route path="/training/cocktails" element={<CocktailTrainingPage />} />

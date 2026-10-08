@@ -46,7 +46,7 @@ export function InquiryInboxPage() {
   const shown=rows.filter(r=>(source==='All'||r.source===source)&&`${r.name} ${r.email} ${r.phone} ${r.status}`.toLowerCase().includes(query.toLowerCase()))
   return <section className="page guest-feedback-inbox">
     <h1><ScreenText id="InquiryInbox.title">Inquiry inbox</ScreenText></h1>
-    <p><Link to="/reservation-inquiries">Add host inquiry</Link> · <a href={studio} target="_blank" rel="noopener noreferrer">Guest form / QR link</a> · <a href={`${studio}/admin`} target="_blank" rel="noopener noreferrer">Edit guest forms and packages</a></p>
+    <p><Link to="/reservation-inquiries">Add host inquiry</Link> · <a href={studio} target="_blank" rel="noopener noreferrer">Guest form / QR link</a> · <Link to="/inquiry-studio">Edit guest forms and packages</Link></p>
     <p>Guest submissions and host inquiries appear here. Each source shows its latest 2,000 requests. An inquiry is confirmed only after availability has been checked.</p>
     <div className="form-grid"><label>Search<input value={query} onChange={e=>setQuery(e.target.value)} /></label><label>Source<select value={source} onChange={e=>setSource(e.target.value)}>{['All','Guest form','Host'].map(s=><option key={s}>{s}</option>)}</select></label><button disabled={loading||!location} onClick={()=>void reload(location)}>Refresh</button></div>
     {error&&<p role="alert">{error} Loaded records below may be incomplete.</p>}
