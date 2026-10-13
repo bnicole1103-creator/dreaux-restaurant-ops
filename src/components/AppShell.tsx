@@ -1,3 +1,4 @@
+import { disconnectPush } from './PushPreferences'
 // page-designer-instrumented
 import { PageWord } from "./PageDesign"
 import { ScreenText } from "./ScreenText"
@@ -17,7 +18,6 @@ import {
   BarChart3,
   ClipboardCheck,
   ClipboardList,
-  Gift,
   Home,
   LayoutGrid,
   LogOut,
@@ -60,11 +60,6 @@ const links = [
     to: '/tasks',
     label: 'Tasks',
     icon: ClipboardCheck,
-  },
-  {
-    to: '/rewards',
-    label: 'Points',
-    icon: Gift,
   },
   {
     to: '/team',
@@ -115,6 +110,7 @@ export function AppShell({
     return <NavLink key={to} to={to} end={to === '/'} onClick={() => setMore(false)} className={({isActive}) => isActive ? 'nav-item active' : 'nav-item'}><Icon size={20} aria-hidden="true"/><span><PageWord instance id={`AppShell.nav.${label.replace(/\s+/g, '')}`}>{label}</PageWord></span></NavLink>
   }
   async function signOut() {
+    await disconnectPush().catch(() => {});
     if(signingOut) return
     setSigningOut(true); setSignOutError('')
     try {

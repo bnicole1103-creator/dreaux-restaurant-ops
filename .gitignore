@@ -5,3 +5,7 @@ dist
 .vercel
 .DS_Store
 *.tsbuildinfo
+
+.push-secrets.env
+
+.push-cron-setup.sql
