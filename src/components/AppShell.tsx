@@ -36,6 +36,7 @@ type Props = PropsWithChildren<{
 }>
 
 const links = [
+  { to: '/rewards', label: 'Points', icon: BarChart3 },
   {
     to: '/',
     label: 'Home',

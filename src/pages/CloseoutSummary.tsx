@@ -1,3 +1,4 @@
+import {PeerRecognition} from '../components/PeerRecognition'
 // page-designer-instrumented
 import { ManagerRecap } from "../components/ManagerRecap"
 import { PageWord } from "../components/PageDesign"
@@ -12,6 +13,8 @@ import { serviceDay, serviceDateLabel, nextServiceBoundary } from '../lib/servic
 import { useEffect, useMemo, useState, useRef } from 'react'
 import { supabase } from '../lib/supabase'
 import { loadTenantData } from '../lib/tenant'
+
+function hasTarget(c: {sales_target:number;automatic_target_snapshot?:{ready?:boolean}}) { return c.automatic_target_snapshot?.ready===true || (c.automatic_target_snapshot==null && Number(c.sales_target)>0) }
 
 type ProfileOption = {
   id: string
@@ -47,6 +50,7 @@ type CloseoutRow = {
   job_role: string
 
   net_sales: number
+  automatic_target_snapshot?: {ready?:boolean}
   sales_target: number
 
   cash_deposit: number
@@ -309,7 +313,7 @@ function CloseoutDay({selectedDate,refresh,onDeleted,locationId,locationName,cur
           (total, closeout) =>
             total +
             Number(
-              closeout.sales_target ?? 0
+              hasTarget(closeout)?closeout.sales_target:0
             ),
           0
         )
@@ -370,7 +374,7 @@ function CloseoutDay({selectedDate,refresh,onDeleted,locationId,locationName,cur
       const teamPercent =
         totalTarget > 0
           ? (
-              totalSales /
+              closeouts.filter(c=>hasTarget(c)&&Number(c.sales_target)>0).reduce((sum,c)=>sum+Number(c.net_sales||0),0) /
               totalTarget
             ) *
             100
@@ -608,6 +612,8 @@ function CloseoutDay({selectedDate,refresh,onDeleted,locationId,locationName,cur
         )}
       </div>
 
+      {locationId && <PeerRecognition location={locationId} from={selectedDate} to={selectedDate}/>}
+      {closeouts.some(c=>!hasTarget(c))&&<p role="status">Some closeouts have no saved target. Target percentages include only closeouts with available positive targets.</p>}
       {locationId&&<StockBoard location={locationId} readOnly date={selectedDate}/>}
       {error && (
         <div data-design-block="copy.7928f50964d7a778.1"
@@ -676,9 +682,7 @@ function CloseoutDay({selectedDate,refresh,onDeleted,locationId,locationName,cur
                 </span>
 
                 <strong>
-                  {money(
-                    totals.totalTarget
-                  )}
+                  {closeouts.some(hasTarget)?money(totals.totalTarget):'Not available'}
                 </strong>
               </div>
             )}
@@ -692,9 +696,7 @@ function CloseoutDay({selectedDate,refresh,onDeleted,locationId,locationName,cur
                 </ScreenText></span>
 
                 <strong>
-                  {percent(
-                    totals.teamPercent
-                  )}
+                  {totals.totalTarget>0?percent(totals.teamPercent):'Not available'}
                 </strong>
               </div>
             )}
@@ -940,9 +942,7 @@ function CloseoutDay({selectedDate,refresh,onDeleted,locationId,locationName,cur
                           </strong>
 
                           <div data-design-block="copy.504686d723f6f4b4.4">
-                            {percent(
-                              employeePercent
-                            )}
+                            {hasTarget(closeout)&&target>0?percent(employeePercent):'No target comparison'}
                           </div>
                         </div>
 
@@ -1015,9 +1015,7 @@ function CloseoutDay({selectedDate,refresh,onDeleted,locationId,locationName,cur
                             </ScreenText></span>
 
                             <strong>
-                              {money(
-                                closeout.sales_target
-                              )}
+                              {hasTarget(closeout)?money(closeout.sales_target):'Not available'}
                             </strong>
                           </div>
 

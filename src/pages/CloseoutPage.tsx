@@ -374,7 +374,6 @@ export function CloseoutPage() {
     useState<EmployeeOption[]>([])
 
   const [peerVoteEmployeeId, setPeerVoteEmployeeId] = useState('')
-  const [peerVoteReason, setPeerVoteReason] = useState('')
   const [peerVoteOtherReason, setPeerVoteOtherReason] = useState('')
 
   const [tables, setTables] =
@@ -816,8 +815,6 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
     if(!locationId||!scheduledTime){setTargetState({loading:false,ready:false,reason:'Enter your scheduled start and role to load your target.'});return}
     setTargetState({loading:true,ready:false,reason:''})
     const timer=window.setTimeout(()=>{void(async()=>{
-      // Attempt a schedule refresh; a previously locked allocation stays usable.
-      await supabase.functions.invoke('home-schedule',{body:{location_id:locationId,date:closeoutDay}}).catch(()=>null)
       const r=await supabase.rpc('closeout_automatic_target',{p_location_id:locationId,p_date:closeoutDay,p_start:scheduledTime,p_role:jobRole})
       if(r.error)throw r.error;if(!live)return
       setSalesTarget(r.data?.ready?String(r.data.target):'0')
@@ -920,7 +917,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
 
       if (shown('staff_1') && closeoutHours(clockInTime, clockOutTime) === null) throw new Error('Enter your clock-out time. Shift length must be greater than zero and no more than 18 hours. A clock-out earlier than clock-in means the next day.')
 
-      if (shown('staff_14') && !moneyTurnedInTo) {
+      if (shown('staff_14') && numberValue(cashDeposit)>0 && !moneyTurnedInTo) {
         throw new Error(
           'Select who received your money.'
         )
@@ -972,35 +969,9 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
         })
 
       if (targetState.loading) throw new Error('Your automatic sales target is still loading. Try again shortly.')
-      // Peer Recognition validation
-      if (shown('staff_11') && !peerVoteEmployeeId) {
-        throw new Error(
-          'Please choose a teammate for Peer Recognition.'
-        )
-      }
+      if (peerVoteEmployeeId === user.id) throw new Error('Choose a teammate other than yourself.')
 
-      if (shown('staff_11') && peerVoteEmployeeId === user.id) {
-        throw new Error(
-          'You cannot select yourself for Peer Recognition.'
-        )
-      }
-
-      if (shown('staff_12') && !peerVoteReason) {
-        throw new Error(
-          'Please choose a Peer Recognition reason.'
-        )
-      }
-
-      if (
-        shown('staff_13') && peerVoteReason === 'Other' &&
-        !peerVoteOtherReason.trim()
-      ) {
-        throw new Error(
-          'Please enter a reason for Peer Recognition.'
-        )
-      }
-
-      const {data:closeout,error:closeoutError}=await supabase.rpc('closeout_submit_with_tables',{p_payload:{
+      const {data:closeout,error:closeoutError}=await supabase.rpc('closeout_submit_reviewed',{p_payload:{
           stock_items: reportedStockItems,
           zero_sales_confirmed: Number(netSales)===0 && zeroSalesConfirmed,
           zero_sales_reason: Number(netSales)===0 ? zeroSalesReason.trim() : null,
@@ -1082,7 +1053,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
 
           points_summary:
             finalPoints.adjustments,
-        },p_table_ids:selectedTables.map(t=>t.id),p_shift_id:floorShiftId||null,p_request_id:closeoutRequest.current})
+        },p_table_ids:selectedTables.map(t=>t.id),p_shift_id:floorShiftId||null,p_request_id:closeoutRequest.current,p_peer_user:shown('staff_11')?(peerVoteEmployeeId||null):null,p_peer_reason:peerVoteOtherReason.trim()})
 
       if (closeoutError) {
         throw closeoutError
@@ -1094,60 +1065,6 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
 
       // Automatic closeout points are saved atomically by the database.
 
-      // Save Peer Recognition award separately.
-      // This awards +2 to the selected teammate without
-      // changing the submitting employee's shift score.
-      const peerRecognitionDescription =
-        peerVoteReason === 'Other'
-          ? peerVoteOtherReason.trim()
-          : peerVoteReason
-
-      if(shown('staff_11')&&peerVoteEmployeeId){
-      const {
-        error: peerRecognitionError,
-      } = await supabase
-        .from(
-          'reward_point_transactions'
-        )
-        .insert({
-          organization_id:
-            organizationId,
-
-          location_id:
-            locationId,
-
-          user_id:
-            peerVoteEmployeeId,
-
-          closeout_id:
-            closeout.id,
-
-          business_date: closeout.closeout_date,
-
-          action_code:
-            'PEER_RECOGNITION',
-
-          description:
-            `Peer Recognition: ${peerRecognitionDescription}`,
-
-          points:
-            2,
-        })
-
-      if (
-        peerRecognitionError
-      ) {
-        console.error(
-          'Peer Recognition save error:',
-          peerRecognitionError
-        )
-
-        warnings.push(
-          'Peer Recognition points need review'
-        )
-      }
-
-      }
       const submittedScore =
         closeout.shift_score
 
@@ -1342,7 +1259,11 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
         </div>
       </div>
 
-      {shown('staff_0')&&shown('staff_3')&&netSales.trim()!==''&&(<div data-design-block="copy.af6b2df48414bca0.3" className="card"><h3 data-design-block="copy.376cc9db1049f0cb.1"><ScreenText id="CloseoutPage.7f6af06b00b0189f">Sales performance</ScreenText></h3><p data-design-block="copy.9780dbc6198cd2d5.5"><ScreenText id="CloseoutPage.14acd8d7f71380ca">Service date: </ScreenText>{closeoutDay}</p>{targetState.loading?<p data-design-block="copy.a8125c77852fab4e.1" role="status"><ScreenText id="CloseoutPage.e9770c364ebc0326">Loading your calculated target…</ScreenText></p>:targetState.ready?<p data-design-block="copy.9780dbc6198cd2d5.6">{Number(salesTarget)>0?`${((numberValue(netSales)/Number(salesTarget))*100).toFixed(1)}% of your calculated shift target${shown('staff_3') && netSales.trim()!==''?(numberValue(netSales)>=Number(salesTarget)?' · Target met':' · Below target'):''}.`:<PageWord id="copy.d95baa5b991da417.1">{"Your calculated shift target is $0; sales points do not apply."}</PageWord>}</p>:<p data-design-block="copy.a8125c77852fab4e.2" role="status"><ScreenText id="CloseoutPage.dbfc92213389d7e2">Sales comparison unavailable: </ScreenText>{targetState.reason} <ScreenText id="CloseoutPage.04f6bebaec27bdc9">Your closeout can still be submitted; no sales-target points will be applied.</ScreenText></p>}<button data-design-block="copy.85fa0ebb999781b3.1" type="button" disabled={saving||targetState.loading} onClick={()=>setTargetRefresh(v=>v+1)}><ScreenText id="CloseoutPage.e9a3dfb1035e0f72">Refresh sales comparison</ScreenText></button><p data-design-block="copy.9780dbc6198cd2d5.7"><ScreenText id="CloseoutPage.23ce0e8790ad974a">The app supplies the target automatically. Points use your configured rules and the target saved when you submit.</ScreenText></p></div>)} 
+      <section className="card"><h3>Automatic shift sales target</h3><p>Service date: {closeoutDay}</p>
+        {targetState.loading?<p role="status">Loading your target…</p>:targetState.ready?<><strong>{new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(Number(salesTarget))}</strong>{Number(salesTarget)>0&&netSales.trim()!==''&&<p>{((numberValue(netSales)/Number(salesTarget))*100).toFixed(1)}% of target</p>}</>:<p role="status">Target unavailable: {targetState.reason} No sales-target points will apply until a target is available.</p>}
+        <button type="button" disabled={saving||targetState.loading} onClick={()=>setTargetRefresh(v=>v+1)}>Refresh target</button>
+        <p>Imported from the app’s sales target allocation for your scheduled shift. No manual target entry is needed.</p>
+      </section>
 
       {shown('staff_3') && netSales.trim()!=='' && Number(netSales)===0 && <div data-design-block="copy.a49020c974bf8cb3.1" className="closeout-warning"><h3 data-design-block="copy.376cc9db1049f0cb.2"><ScreenText id="CloseoutPage.08bbbe6dfa02693c">Check your sales</ScreenText></h3><p data-design-block="copy.9780dbc6198cd2d5.8"><ScreenText id="CloseoutPage.b8864cc8785a4b68">You entered $0. Check your Toast report before continuing.</ScreenText></p><label data-design-block="copy.35bcf28795a297dd.1" className="closeout-check"><input type="checkbox" checked={zeroSalesConfirmed} onChange={e=>setZeroSalesConfirmed(e.target.checked)} /><span><ScreenText id="CloseoutPage.21209f4ceb62d671">I checked my report and $0 sales is accurate.</ScreenText></span></label><label data-design-block="copy.1d3e51bec05d6401.6"><ScreenText id="CloseoutPage.0c8ea3df31e4441b">Why were sales zero?</ScreenText><textarea rows={2} maxLength={2000} value={zeroSalesReason} onChange={e=>setZeroSalesReason(e.target.value)} placeholder="Explain why this shift had no sales." /></label></div>}
 
@@ -1646,73 +1567,16 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
       </div>
 
 
-      <div data-design-block="copy.af6b2df48414bca0.8" className="card">
-        <h2 data-design-block="copy.601726244d06e9b3.7"><ScreenText id="CloseoutPage.4064ac585c437950">⭐ Peer Recognition — +5 Points</ScreenText></h2>
-
-        <div data-design-block="copy.cd860d0c2bc6318a.3" className="form-grid">
-          {shown('staff_11') && (<label data-design-block="copy.1d3e51bec05d6401.13">
-            {questionLabel(config, 'staff_11', "Which team member contributed the most to a successful shift?")}
-
-            <select
-              value={peerVoteEmployeeId}
-              onChange={(e) => setPeerVoteEmployeeId(e.target.value)}
-            >
-              <PageOption designId="copy.7d6ba5bdb4594ad9.1" value=""><ScreenText plain id="CloseoutPage.30eeb3cde10686c0">Select a teammate</ScreenText></PageOption>
-
-              {employees.map((employee) => (
-                <option
-                  key={employee.user_id}
-                  value={employee.user_id}
-                >
-                  {employee.preferred_name ||
-                    employee.full_name ||
-                    employee.user_id}
-                </option>
-              ))}
-            </select>
-          </label>)}
-
-          {shown('staff_12') && (<label data-design-block="copy.1d3e51bec05d6401.14">
-            {questionLabel(config, 'staff_12', "Why are you recognizing them?")}
-
-            <select
-              value={peerVoteReason}
-              onChange={(e) => setPeerVoteReason(e.target.value)}
-            >
-              <PageOption designId="copy.f0106def2f52b5d3.1" value=""><ScreenText plain id="CloseoutPage.4c67cd90a32ac4a9">Select a reason</ScreenText></PageOption>
-              <PageOption designId="copy.b6ac39c86574892b.1" value="Teamwork"><ScreenText plain id="CloseoutPage.9c39771c2c349c41">Teamwork</ScreenText></PageOption>
-              <PageOption designId="copy.b67332e6c7c6a6a2.1" value="Positive Attitude / Motivation"><ScreenText plain id="CloseoutPage.ac38f5f03e1b83fb">
-                Positive Attitude / Motivation
-              </ScreenText></PageOption>
-              <PageOption designId="copy.88df4028b12ba608.1" value="Helped During a Rush"><ScreenText plain id="CloseoutPage.7341dc289f28176f">
-                Helped During a Rush
-              </ScreenText></PageOption>
-              <PageOption designId="copy.a708be69395fe6ee.1" value="Guest Support"><ScreenText plain id="CloseoutPage.b22073e733572be6">Guest Support</ScreenText></PageOption>
-              <PageOption designId="copy.4b30a80ac58c2d1b.1" value="Leadership"><ScreenText plain id="CloseoutPage.cc4feffede8ae163">Leadership</ScreenText></PageOption>
-              <PageOption designId="copy.1955cd7891443e70.1" value="Communication"><ScreenText plain id="CloseoutPage.307271de7146778c">Communication</ScreenText></PageOption>
-              <PageOption designId="copy.3385f8ac346747ff.1" value="Went Above & Beyond"><ScreenText plain id="CloseoutPage.d07f19ce73f71580">
-                Went Above &amp; Beyond
-              </ScreenText></PageOption>
-              <PageOption designId="copy.dbc44762a1f9f446.1" value="Other"><ScreenText plain id="CloseoutPage.4284cb61f89adb7f">Other</ScreenText></PageOption>
-            </select>
-          </label>)}
-
-          {shown('staff_13') && peerVoteReason === 'Other' && (
-            (shown('staff_13') && (<label data-design-block="copy.1d3e51bec05d6401.15">
-              {questionLabel(config, 'staff_13', "Tell us why you're recognizing them:")}
-
-              <PageInput designId="copy.d79b02e6a13dfe11.1"
-                type="text"
-                value={peerVoteOtherReason}
-                onChange={(e) =>
-                  setPeerVoteOtherReason(e.target.value)
-                }
-                placeholder="Enter recognition reason"
-              />
-            </label>))
-          )}
-        </div>
-      </div>
+      {shown('staff_11') && <section className="card"><h2>Peer recognition</h2>
+        <label>Who helped make this shift successful? (optional)
+          <select value={peerVoteEmployeeId} onChange={e=>setPeerVoteEmployeeId(e.target.value)}>
+            <option value="">No vote this shift</option>
+            {employees.map(employee=><option key={employee.user_id} value={employee.user_id}>{employee.preferred_name||employee.full_name||employee.user_id}</option>)}
+          </select>
+        </label>
+        {peerVoteEmployeeId && <label>What did they do? (optional)<textarea maxLength={500} value={peerVoteOtherReason} onChange={e=>setPeerVoteOtherReason(e.target.value)}/></label>}
+        <p>Your vote is saved with your closeout and appears in Peer recognition on Points and the closeout summary.</p>
+      </section>}
 
       <div data-design-block="copy.af6b2df48414bca0.9" className="card">
         <h2 data-design-block="copy.601726244d06e9b3.8"><ScreenText id="CloseoutPage.6425a625f082028a">
@@ -1721,7 +1585,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
 
         <div data-design-block="copy.cd860d0c2bc6318a.4" className="form-grid">
 
-          {shown('staff_14') && (<label data-design-block="copy.1d3e51bec05d6401.16">
+          {shown('staff_14') && numberValue(cashDeposit)>0 && (<label data-design-block="copy.1d3e51bec05d6401.16">
             {questionLabel(config, 'staff_14', "Who did you turn your money in to?")}
 
             <select
@@ -1760,7 +1624,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
             </select>
           </label>)}
 
-          {shown('staff_15') && (<label data-design-block="copy.1d3e51bec05d6401.17">
+          {shown('staff_15') && jobRole==='server' && (<label data-design-block="copy.1d3e51bec05d6401.17">
             {questionLabel(config, 'staff_15', "Who made your drinks?")}
 
             <select

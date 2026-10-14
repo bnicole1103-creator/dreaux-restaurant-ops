@@ -1,3 +1,4 @@
+import {PeerRecognition} from '../components/PeerRecognition'
 // page-designer-instrumented
 import { PageWord } from "../components/PageDesign"
 import { ScreenText } from "../components/ScreenText"
@@ -73,6 +74,7 @@ export function PointsPage() {
       <button data-design-block="copy.cc7ca8c8c6bc5a4f.1" type="button" aria-pressed={view === 'individual'} onClick={() => setView('individual')}><ScreenText id="PointsPage.c62c430488cafb76">My Points</ScreenText></button>
       <button data-design-block="copy.9b244c870e37a08a.1" type="button" aria-pressed={view === 'leaderboard'} onClick={() => setView('leaderboard')}><ScreenText id="PointsPage.deb2f609e7bc3c81">Leaderboard</ScreenText></button>
     </div>
+    {locationId && <PeerRecognition location={locationId} from={`${month}-01`} to={`${month}-${new Date(Number(month.slice(0,4)),Number(month.slice(5,7)),0).getDate()}`}/>}
     {error && <p data-design-block="copy.5c478803ca835481.1" role="alert">{error}</p>}
     {loading && <p data-design-block="copy.bbd275d649930e49.1" role="status"><ScreenText id="PointsPage.e78e48fd3cbb9452">Loading points…</ScreenText></p>}
     {!loading && !error && (view === 'individual' ? <>
