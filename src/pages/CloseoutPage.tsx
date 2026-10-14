@@ -1,3 +1,5 @@
+import { CloseoutStockQuestion } from '../components/CloseoutStockQuestion'
+import { closeoutStockItems } from '../lib/stockItems'
 // page-designer-instrumented
 import { PageWord, PageInput, PageOption } from "../components/PageDesign"
 import { StockBoard } from '../components/StockBoard'
@@ -348,6 +350,7 @@ export function CloseoutPage() {
   const { config, error: configError } = useCloseoutConfig(locationId)
   const shown=(id:string)=>questionActive(config,id)
   const [stockItems,setStockItems]=useState('')
+  const [hasStockItems,setHasStockItems]=useState<''|'yes'|'no'>('')
   function configuredShiftPoints(input: Parameters<typeof calculateShiftPoints>[0]) {
     const original = calculateShiftPoints(input)
     const adjustments = original.adjustments.filter(a=>{
@@ -876,6 +879,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
       setSaving(true)
       setError('')
       setMessage('')
+      const reportedStockItems=closeoutStockItems(hasStockItems,stockItems)
 
       const {
         data: { user },
@@ -997,7 +1001,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
       }
 
       const {data:closeout,error:closeoutError}=await supabase.rpc('closeout_submit_with_tables',{p_payload:{
-          stock_items: [...new Set(stockItems.split('\n').map(n=>n.trim()).filter(Boolean))],
+          stock_items: reportedStockItems,
           zero_sales_confirmed: Number(netSales)===0 && zeroSalesConfirmed,
           zero_sales_reason: Number(netSales)===0 ? zeroSalesReason.trim() : null,
           shift_type: shiftType || 'PM',
@@ -1148,6 +1152,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
         closeout.shift_score
 
       setStockItems('')
+      setHasStockItems('')
       setAnswers({})
       resetForm()
 
@@ -1797,7 +1802,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
         </div>
       </div>
 
-      <div data-design-block="copy.af6b2df48414bca0.10" className="card"><h2 data-design-block="copy.601726244d06e9b3.9"><ScreenText id="CloseoutPage.1c574f44136f81e1">86 Items</ScreenText></h2><p data-design-block="copy.9780dbc6198cd2d5.11"><ScreenText id="CloseoutPage.f4615f74236e8f37">Enter one unavailable item per line. These items are added to the shared board when you submit this closeout.</ScreenText></p><label data-design-block="copy.1d3e51bec05d6401.18"><ScreenText id="CloseoutPage.2392bdca27c7d9c1">Items marked 86</ScreenText><textarea rows={4} maxLength={8000} value={stockItems} disabled={saving} onChange={e=>setStockItems(e.target.value)} placeholder="One item per line"/></label></div>
+      <CloseoutStockQuestion answer={hasStockItems} items={stockItems} disabled={saving} onAnswer={value=>{setHasStockItems(value);if(value!=='yes')setStockItems('')}} onItems={setStockItems}/>
       <StockBoard location={locationId}/>
       <div data-design-block="copy.af6b2df48414bca0.11" className="card">
         <h2 data-design-block="copy.601726244d06e9b3.10"><ScreenText id="CloseoutPage.e0f8109cb9cd8aa4">
