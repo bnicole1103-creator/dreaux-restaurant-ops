@@ -1,3 +1,4 @@
+import {StaffPreviewGuard} from './components/StaffPreviewGuard'
 import { PageDesignLoader } from './components/PageDesign'
 import { ScreenWordingLoader } from './components/ScreenText'
 import { StrictMode } from 'react'
@@ -15,7 +16,7 @@ if (!rootElement) {
 createRoot(rootElement).render(
   <StrictMode>
     <BrowserRouter>
-      <ScreenWordingLoader />
+      <StaffPreviewGuard/><ScreenWordingLoader />
       <PageDesignLoader /><App />
     </BrowserRouter>
   </StrictMode>,

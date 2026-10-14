@@ -1,4 +1,5 @@
 // page-designer-instrumented
+import {StaffViewPage} from './pages/StaffViewPage'
 import { PageWord } from "./components/PageDesign"
 import { ScreenWordingPage } from './pages/ScreenWordingPage'
 import { TrainingPage } from './pages/TrainingPage'
@@ -133,6 +134,7 @@ export default function App() {
     <SignupGate key={session.user.id} userId={session.user.id}>
     <AppShell session={session}>
       <Routes>
+        <Route path="/settings/staff-view" element={<ManagementOnly gmOnly><StaffViewPage/></ManagementOnly>}/>
         <Route path="/inventory" element={<InventoryPage />} />
         <Route path="/reservation-inquiries" element={<ReservationInquiryPage />} />
         <Route path="/inquiry-studio" element={<ManagementOnly><InquiryStudioPage /></ManagementOnly>} />
