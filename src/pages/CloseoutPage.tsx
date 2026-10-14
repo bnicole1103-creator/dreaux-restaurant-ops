@@ -1667,7 +1667,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
       </div>
 
       <CloseoutStockQuestion answer={hasStockItems} items={stockItems} disabled={saving} onAnswer={value=>{setHasStockItems(value);if(value!=='yes')setStockItems('')}} onItems={setStockItems}/>
-      <StockBoard location={locationId}/>
+      
       <div data-design-block="copy.af6b2df48414bca0.11" className="card">
         <h2 data-design-block="copy.601726244d06e9b3.10"><ScreenText id="CloseoutPage.e0f8109cb9cd8aa4">
           Notes
