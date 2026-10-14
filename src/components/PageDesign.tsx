@@ -10,7 +10,8 @@ if(typeof window!=='undefined'&&editorPreviewActive(window.location.search,windo
  const blockPreviewAction=(event:Event)=>{if(event.cancelable&&preventPreviewDefault(event.type))event.preventDefault();event.stopImmediatePropagation()}
  blockedPreviewEvents.forEach(type=>document.addEventListener(type,blockPreviewAction,{capture:true,passive:false}))
 }
-export type DesignChange={text?:string;hidden?:boolean;x?:number;y?:number;order?:number;parent?:string}
+import {appFonts,type FontName} from '../lib/appearance'
+export type DesignChange={font?:FontName;text?:string;hidden?:boolean;x?:number;y?:number;order?:number;parent?:string}
 export type Design={version:number;changes:Record<string,DesignChange>}
 let current:Design={version:0,changes:{}}
 const subscribers=new Set<()=>void>()
@@ -37,7 +38,16 @@ export function PageDesignLoader(){
  return()=>{live=false;seq++;clearInterval(timer);window.removeEventListener('focus',focus);subscription.unsubscribe()}},[pathname])
  let css='';const preview=(new URLSearchParams(window.location.search).has('wording-preview')||staffLayoutPreview())
  for(const [id,value] of Object.entries(design.changes)){if(!/^[A-Za-z0-9_.-]+$/.test(id))continue;const selector='[data-design-block="'+id+'"]';if(value.hidden)css+=selector+'{'+(preview?'opacity:.4;':'display:none!important;')+'}';if(value.order!==undefined&&value.parent&&/^[A-Za-z0-9_.-]+$/.test(value.parent)){css+='[data-design-block="'+value.parent+'"]{display:flex!important;flex-direction:column!important;}'+selector+'{order:'+value.order+'!important;}'}if(value.x||value.y)css+=selector+'{position:relative;left:'+(value.x??0)+'px;top:'+(value.y??0)+'px;}'}
- return <style>{css}</style>
+const fontRules:string[]=[],wordRules:string[]=[]
+ const depth=(id:string)=>{if(!/^[A-Za-z0-9_.-]+$/.test(id))return 0;let node=document.querySelector('[data-design-block="'+id+'"],[data-design-word="'+id+'"]'),n=0;while(node){n++;node=node.parentElement}return n}
+ for(const [id,value] of Object.entries(design.changes).sort(([a],[b])=>depth(a)-depth(b))){
+  if(!/^[A-Za-z0-9_.-]+$/.test(id)||!value.font||!Object.prototype.hasOwnProperty.call(appFonts,value.font))continue
+  const family=appFonts[value.font].css
+  const block='[data-design-block="'+id+'"]',word='[data-design-word="'+id+'"]'
+  fontRules.push(block+','+block+' *{font-family:'+family+'!important;}')
+  wordRules.push(word+','+word+' *{font-family:'+family+'!important;}')
+ }
+ return <style>{css+fontRules.join('')+wordRules.join('')}</style>
 }
 
 export function PageInput({designId,...props}:import('react').InputHTMLAttributes<HTMLInputElement>&{designId:string}){
