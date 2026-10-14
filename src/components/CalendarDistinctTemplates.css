@@ -1,0 +1,36 @@
+/* Distinct layouts share accessible day buttons and day dialogs. */
+.poster-template-choices{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+.poster-template-choice .template-label{font:600 .85rem system-ui!important}
+.poster-template-choice .template-swatch{display:block;width:100%;padding:10px;background:var(--calendar-paper);color:var(--calendar-ink);border:var(--calendar-outline);box-sizing:border-box;font:1rem var(--calendar-font)}
+.template-swatch b{font:1.5rem var(--calendar-font)}
+.template-dates{display:grid!important;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px;margin-top:12px}
+.template-dates i{font:normal .65rem system-ui;text-align:center;padding:5px 1px;border:1px solid var(--calendar-color);min-width:0}
+.sample-dates{max-width:560px;margin:20px auto 0}
+.poster-deco .calendar-poster-masthead,.poster-deco.poster-look-sample,.template-swatch.poster-deco{border:6px double var(--calendar-color);border-radius:0;background:linear-gradient(135deg,var(--calendar-tint),transparent 45%),var(--calendar-paper);padding:24px}
+.poster-deco .calendar-grid{border:4px double var(--calendar-color)}
+.poster-deco .calendar-grid>strong{letter-spacing:.25em;background:var(--calendar-color);color:white}
+.poster-deco .calendar-cell{border:1px solid var(--calendar-color)}
+.poster-polaroid .calendar-poster-masthead{text-align:left;border:0;transform:rotate(-1deg)}
+.poster-polaroid .calendar-grid{gap:14px;border:0;padding:14px;background:var(--calendar-tint)}
+.poster-polaroid .calendar-cell{background:var(--calendar-paper);border:0;box-shadow:2px 5px 8px #0002;padding:12px 10px 24px;transform:rotate(-1deg)}
+.poster-polaroid .calendar-cell:nth-child(2n){transform:rotate(1deg)}
+.poster-polaroid .calendar-cell.today{outline:3px solid var(--calendar-color)}
+.poster-polaroid.poster-look-sample,.template-swatch.poster-polaroid{border:0;background:var(--calendar-tint);box-shadow:4px 6px 0 #0002;transform:rotate(-1deg)}
+.poster-polaroid .template-dates i{border:0;background:var(--calendar-paper);box-shadow:1px 3px 3px #0002;transform:rotate(-3deg);padding-bottom:10px}
+.poster-blocks .calendar-poster-masthead{background:var(--calendar-color);color:white;text-align:left;padding:30px;border:0;border-radius:0}
+.poster-blocks .calendar-grid{gap:8px;border:0}
+.poster-blocks .calendar-cell{border:2px solid var(--calendar-color);border-radius:0;background:var(--calendar-tint)}
+.poster-blocks .calendar-cell.today{background:var(--calendar-paper);outline:3px solid var(--calendar-color)}
+.poster-blocks.poster-look-sample,.template-swatch.poster-blocks{border:0;border-top:18px solid var(--calendar-color);text-align:left}
+.poster-blocks .template-dates i{background:var(--calendar-tint);border:2px solid var(--calendar-color)}
+/* Planner is a dated agenda: no misleading seven-column header. */
+.poster-planner .calendar-grid{display:flex;flex-direction:column;min-width:0;border:0;gap:8px}
+.poster-planner .calendar-grid>strong,.poster-planner .calendar-cell.outside{display:none}
+.poster-planner .calendar-cell{display:grid;grid-template-columns:60px 1fr;min-height:84px;border:0;border-bottom:1px solid var(--calendar-color);border-left:5px solid var(--calendar-color);padding:12px;gap:8px;background:var(--calendar-paper)}
+.poster-planner .calendar-cell>button:first-child{grid-row:1/5;font-size:1.8rem;align-self:start}
+.poster-planner .calendar-cell>:not(:first-child){grid-column:2}
+.poster-planner .calendar-poster-masthead{text-align:left;border-bottom:4px solid var(--calendar-color)}
+.poster-planner .template-dates{grid-template-columns:1fr!important}
+.poster-planner .template-dates i{border:0;border-bottom:1px solid var(--calendar-color);border-left:4px solid var(--calendar-color);text-align:left}
+.poster-planner .template-dates i:nth-child(n+5){display:none}
+.calendar-poster .calendar-reservations{min-width:0;max-width:100%;white-space:normal;overflow-wrap:anywhere}
