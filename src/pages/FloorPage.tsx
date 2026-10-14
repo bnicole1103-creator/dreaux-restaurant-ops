@@ -331,9 +331,10 @@ const [partySize, setPartySize] = useState(1)
         setActiveShiftId(nextShifts[0]?.id ?? '')
       } catch (caughtError) {
         setError(
-          caughtError instanceof Error
-            ? caughtError.message
-            : 'Unable to load the floor.',
+          String(
+            (caughtError as { message?: string })?.message
+            || 'Unable to load the floor.'
+          ),
         )
       } finally {
         setLoading(false)
