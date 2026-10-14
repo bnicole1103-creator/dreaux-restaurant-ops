@@ -1,0 +1,40 @@
+/* Keep reservation labels and counts inside their date cards, including large text. */
+.polished-app .app-content :is(.home-week-calendar,.calendar-poster) .calendar-reservations,
+:is(.home-week-calendar,.calendar-poster) .calendar-reservations{
+ display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:4px 6px;box-sizing:border-box;
+ width:100%;max-width:100%;min-width:0;min-height:44px;margin-inline:0;padding:8px 5px;white-space:normal;
+ font-size:.72rem;line-height:1.25;text-align:center;overflow-wrap:anywhere;
+}
+.calendar-reservation-label{min-width:0;max-width:100%;flex:1 1 72px}
+:is(.home-week-calendar,.calendar-poster) .calendar-reservations strong{flex:0 0 auto;max-width:100%;padding:2px 5px;border-radius:6px;background:var(--calendar-tint,#4930240a);font-size:.75rem;overflow-wrap:anywhere}
+.home-week-calendar .calendar-week-day{min-width:0;box-sizing:border-box}
+.polished-app .poster-template-choices,.poster-template-choices{grid-template-columns:repeat(auto-fit,minmax(125px,1fr));align-items:stretch}
+.poster-template-choice{min-width:0;white-space:normal!important}
+.poster-template-choice>.calendar-template-mini{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:2px;width:100%;font:normal .55rem system-ui!important}
+.calendar-template-mini i{font-style:normal;min-width:0;padding:4px 0;border:1px solid #79523235;background:#fffaf4}
+/* Minimal: generous white space and fine horizontal rules. */
+.polished-app .app-content .poster-minimal.calendar-poster{border:1px solid var(--calendar-color);border-radius:4px;box-shadow:none}
+.poster-minimal .calendar-poster-masthead,.poster-look-sample.poster-minimal{text-align:center;border-bottom:1px solid var(--calendar-color);background:var(--calendar-paper)}
+.calendar-poster.poster-minimal .calendar-grid{border:0;gap:8px}
+.calendar-poster.poster-minimal .calendar-cell{border:0;border-top:1px solid var(--calendar-color);min-height:145px}
+.poster-template-choice.minimal .calendar-template-mini i{border-width:1px 0 0;background:transparent}
+/* Ledger: a left-aligned masthead and clean ruled day cells. */
+.poster-ledger .calendar-poster-masthead,.poster-look-sample.poster-ledger{text-align:left;border-radius:0;border-bottom:3px solid var(--calendar-color)}
+.calendar-poster.poster-ledger .calendar-grid{border:2px solid var(--calendar-color);gap:0}
+.calendar-poster.poster-ledger .calendar-cell{background:repeating-linear-gradient(transparent 0 27px,var(--calendar-tint) 28px 29px);border-right:1px solid var(--calendar-color);border-bottom:1px solid var(--calendar-color);border-radius:0}
+.poster-template-choice.ledger .calendar-template-mini{gap:0}
+.poster-template-choice.ledger .calendar-template-mini i{background:linear-gradient(transparent 70%,#79523220 70% 75%,transparent 75%)}
+/* Scrapbook: distinct rounded day tiles and a soft paper-like header. */
+.poster-scrapbook .calendar-poster-masthead,.poster-look-sample.poster-scrapbook{background:var(--calendar-tint);border:2px dashed var(--calendar-color);border-radius:24px 8px 24px 8px;padding:24px 12px}
+.calendar-poster.poster-scrapbook .calendar-grid{border:0;gap:9px}
+.calendar-poster.poster-scrapbook .calendar-cell{border:1px dashed var(--calendar-color);border-radius:18px 5px 18px 5px;background:var(--calendar-paper);box-shadow:3px 3px 0 var(--calendar-tint)}
+.poster-template-choice.scrapbook .calendar-template-mini{gap:3px}
+.poster-template-choice.scrapbook .calendar-template-mini i{border-style:dashed;border-radius:5px 1px;background:#f4e9dc}
+/* Spotlight: a prominent framed title and spacious rounded date cards. */
+.poster-spotlight .calendar-poster-masthead,.poster-look-sample.poster-spotlight{border:var(--calendar-outline);border-left:8px solid var(--calendar-color);border-radius:18px;background:linear-gradient(110deg,var(--calendar-tint),var(--calendar-paper));padding:30px 12px}
+.calendar-poster.poster-spotlight .calendar-grid{gap:8px;border:0}
+.calendar-poster.poster-spotlight .calendar-cell{border:1px solid var(--calendar-color);border-radius:12px;min-height:150px;background:var(--calendar-paper)}
+.calendar-poster.poster-spotlight .calendar-cell.today{border:3px solid var(--calendar-color);box-shadow:none}
+.poster-template-choice.spotlight .calendar-template-mini i{border-top:3px solid #795232;border-radius:4px}
+.poster-look-sample.poster-minimal{border:1px solid var(--calendar-color);border-radius:2px;box-shadow:none}
+@media(max-width:650px){.poster-template-choices{grid-template-columns:repeat(2,minmax(0,1fr))}.poster-template-choice{padding:10px!important}.calendar-poster.calendar-poster.poster-scrapbook .calendar-grid{gap:6px}}

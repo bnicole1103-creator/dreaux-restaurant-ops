@@ -1,0 +1,6 @@
+.workflow-tabs{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0;padding:6px;border:1px solid var(--app-border,#d4c1b0);border-radius:16px;background:var(--app-background,#f7f1e9)}
+.polished-app .app-content .workflow-tabs>button,.workflow-tabs>button{flex:1 1 110px;min-width:0;min-height:44px;margin:0;padding:10px 12px;white-space:normal;font-size:.85rem;border-radius:11px;border:1px solid transparent;background:transparent;color:var(--app-text,#493024)}
+.polished-app .app-content .workflow-tabs>button[aria-selected=true],.workflow-tabs>button[aria-selected=true]{background:var(--app-card,#fff8ef);border-color:var(--app-border,#d4c1b0);box-shadow:0 2px 8px #49302410;font-weight:700}
+.workflow-tabs>button:focus-visible{outline:3px solid var(--app-text,#493024);outline-offset:2px}
+.quiz-workspace [role=tabpanel][hidden],.quiz-source-workflow [role=tabpanel][hidden],.quiz-workspace .quiz-tab-content[hidden]{display:none!important}
+.quiz-publish-summary{border:1px solid var(--app-border,#d4c1b0);border-radius:12px;padding:14px;margin:10px 0}

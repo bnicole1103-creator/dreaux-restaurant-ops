@@ -1,6 +1,6 @@
 import type {CSSProperties} from 'react'
 import {appFonts,type FontName} from './appearance'
-export type CalendarLook={color:string;font:FontName;template?:'poster'|'editorial'|'playful';outline?:'thin'|'double'|'dashed'|'none';paper?:string}
+export type CalendarLook={color:string;font:FontName;template?:'poster'|'editorial'|'playful'|'minimal'|'ledger'|'scrapbook'|'spotlight';outline?:'thin'|'double'|'dashed'|'none';paper?:string}
 export const defaultCalendarLook:CalendarLook={color:'#cc4b84',font:'script',template:'poster',outline:'double',paper:'#fff8ef'}
 export const calendarPalettes={Pumpkin:'#d56b24',Pink:'#cc4b84',Lilac:'#8d69c1',Sage:'#4d8367',Ocean:'#347e9c',Espresso:'#795232'}
 export function calendarLook(value?:CalendarLook):CSSProperties{

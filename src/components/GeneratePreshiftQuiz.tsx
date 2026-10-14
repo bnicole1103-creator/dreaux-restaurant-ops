@@ -6,6 +6,7 @@ import { QuizBuilderPage } from '../pages/QuizBuilderPage'
 import { validGeneratedQuiz } from '../lib/generatedQuiz'
 import type { GeneratedQuiz } from '../lib/generatedQuiz'
 import './GeneratedQuizModal.css'
+import { WorkflowTabs } from './WorkflowTabs'
 export function QuizDraftModal({draft,onClose}:{draft:GeneratedQuiz;onClose:()=>void}) {
  const dialog=useRef<HTMLDialogElement>(null)
  const state=useRef({dirty:false,busy:true})
@@ -34,6 +35,7 @@ export function GeneratePreshiftQuiz({location,date,title,body,disabled,allowPas
 }) {
  const [busy,setBusy]=useState(false),[count,setCount]=useState(10),[error,setError]=useState('')
  const [draft,setDraft]=useState<GeneratedQuiz|null>(null)
+ const [generatorTab,setGeneratorTab]=useState('content')
  const [content,setContent]=useState(''),[quizDate,setQuizDate]=useState(date),[topic,setTopic]=useState('')
  const request=useRef<string|null>(null)
  const actualBody=allowPaste?content:body
@@ -59,13 +61,21 @@ export function GeneratePreshiftQuiz({location,date,title,body,disabled,allowPas
   finally{setBusy(false)}
  }
  function changed(){request.current=null}
- return <article className="feed-card">
+ return <article className="feed-card quiz-source-workflow">
   <h3>{allowPaste?'Create a quiz from any content':'Generate a quiz from this pre-shift'}</h3>
   <p>Paste pre-shift notes, recipes, menu details, or training content. Choose a question count; the editor opens with the questions already added.</p>
+  {allowPaste&&<WorkflowTabs id="quiz-source" label="Generate quiz steps" tabs={[{key:'content',label:'1 · Content'},{key:'generate',label:'2 · Generate'}]} active={generatorTab} disabled={busy} onChange={setGeneratorTab}/>}
+  <div role="tabpanel" id="quiz-source-content-panel" aria-labelledby="quiz-source-content-tab" hidden={allowPaste&&generatorTab!=='content'}>
+  {allowPaste&&<fieldset disabled={busy||disabled}>
+   {/* quiz-source-settings-moved */}
+   <label>Content to turn into questions<textarea rows={9} maxLength={30000} value={content} onChange={e=>{setContent(e.target.value);changed()}} placeholder="Paste any content here. Only the facts in this box will be used."/></label>
+  </fieldset>}
+  {allowPaste&&<button type="button" disabled={busy||disabled||actualBody.trim().length<30} onClick={()=>setGeneratorTab('generate')}>Continue to quiz setup →</button>}
+  </div>
+  <div role="tabpanel" id="quiz-source-generate-panel" aria-labelledby="quiz-source-generate-tab" hidden={allowPaste&&generatorTab!=='generate'}>
   {allowPaste&&<fieldset disabled={busy||disabled}>
    <label>Quiz date<input type="date" value={quizDate} onChange={e=>{setQuizDate(e.target.value);changed()}}/></label>
    <label>Topic / title<input maxLength={160} value={topic} placeholder="Cocktail recipes, Tuesday specials, guest service…" onChange={e=>{setTopic(e.target.value);changed()}}/></label>
-   <label>Content to turn into questions<textarea rows={9} maxLength={30000} value={content} onChange={e=>{setContent(e.target.value);changed()}} placeholder="Paste any content here. Only the facts in this box will be used."/></label>
   </fieldset>}
   <label>How many questions?<input type="number" min={1} max={30} step={1} value={count}
    disabled={disabled||busy} onChange={e=>{setCount(Number(e.target.value));changed()}}/></label>
@@ -73,6 +83,7 @@ export function GeneratePreshiftQuiz({location,date,title,body,disabled,allowPas
    disabled={disabled||busy||!location||!actualDate||actualBody.trim().length<30||!Number.isInteger(count)||count<1||count>30}
    onClick={()=>void generate()}>{busy?'Generating quiz…':'Generate quiz'}</button>
   <p>Generated questions are saved automatically to the question bank by subject and source date. The quiz itself remains a draft until you save or publish. Limited source material may produce fewer questions.</p>
+  </div>
   {error&&<p role="alert">{error}</p>}
   {draft&&<QuizDraftModal draft={draft} onClose={()=>{setDraft(null);onSaved?.()}}/>}
  </article>

@@ -7,6 +7,7 @@ import {calendarToday,dateLabel,weekDays} from '../lib/calendarDates'
 import {useCalendarData} from './CalendarData'
 import './Calendar.css'
 import './CompactCalendar.css'
+import './CalendarLayoutExtras.css'
 export function WeeklyCalendar({location}:{location:string}){
  const [today,setToday]=useState(calendarToday)
  useEffect(()=>{const update=()=>setToday(calendarToday());const timer=setInterval(update,60000);window.addEventListener('focus',update);return()=>{clearInterval(timer);window.removeEventListener('focus',update)}},[])
@@ -21,7 +22,7 @@ export function WeeklyCalendar({location}:{location:string}){
    return <article key={date} className={'calendar-week-day'+(date===today?' today':'')} aria-label={dateLabel(date)}>
     <h3><button type="button" onClick={()=>setOpen({date,view:'day'})} aria-current={date===today?'date':undefined}><span>{['Mon','Tue','Wed','Thu','Fri','Sat','Sun'][index]}</span><span>{new Intl.DateTimeFormat('en-US',{timeZone:'UTC',month:'short',day:'numeric'}).format(new Date(date+'T12:00:00Z'))}</span></button></h3>
     <button type="button" className={'calendar-week-event'+(!event?' muted':'')} onClick={()=>setOpen({date,view:'day'})} title={event?.title}>{event?event.title:day?.posts?day.posts+' post'+(day.posts===1?'':'s'):'No updates'}{events.length>1&&<small>+{events.length-1} more</small>}</button>
-    <button type="button" className="calendar-reservations" onClick={()=>setOpen({date,view:'reservations'})}>Reservations <strong>{day?day.reservations:'—'}</strong></button>
+    <button type="button" className="calendar-reservations" onClick={()=>setOpen({date,view:'reservations'})}><span className="calendar-reservation-label">Reservations</span><strong>{day?day.reservations:'—'}</strong></button>
    </article>
   })}</div></div>
  </section>{open&&<CalendarDayPopup key={open.date} location={location} date={open.date} initialView={open.view} onClose={()=>setOpen(null)}/>}</>
