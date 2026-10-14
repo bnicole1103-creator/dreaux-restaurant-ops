@@ -296,7 +296,6 @@ const [partySize, setPartySize] = useState(1)
               location_id,
               room_id,
               table_name,
-          table_ids,
               seat_count,
               shape,
               position_x,
