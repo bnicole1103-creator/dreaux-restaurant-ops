@@ -144,6 +144,7 @@ export default function App() {
         <Route path="/inquiry-inbox" element={<ManagementOnly><InquiryInboxPage /></ManagementOnly>} />
         <Route path="/training" element={<TrainingPage />} />
         <Route path="/training/cocktails" element={<CocktailTrainingPage />} />
+        <Route path="/training/food" element={<CocktailTrainingPage key="food" kind="food" />} />
         <Route path="/settings/sales-targets" element={<ManagementOnly gmOnly><SalesTargetsPage /></ManagementOnly>} />
         <Route path="/settings/wording" element={<ManagementOnly gmOnly><ScreenWordingPage /></ManagementOnly>} />
         <Route path="/guest-feedback" element={<ManagementOnly><GuestFeedbackInbox /></ManagementOnly>} />
