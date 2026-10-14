@@ -1,3 +1,4 @@
+import './PageFormat.css'
 import { disconnectPush } from './PushPreferences'
 // page-designer-instrumented
 import { PageWord } from "./PageDesign"

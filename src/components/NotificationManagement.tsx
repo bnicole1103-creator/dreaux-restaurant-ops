@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { loadTenantData } from '../lib/tenant'
 import { useManagementAccess } from './ManagementAccess'
-import { PushPreferences } from './PushPreferences'
 import { Link } from 'react-router-dom'
 import { MyWorkRequirements } from './MyWorkRequirements'
 import { serviceDay } from '../lib/serviceDay'
@@ -63,7 +62,7 @@ export function NotificationManagement() {
  const unmatched = rows.filter(s => !data?.staff.some(p => p.employee_key === s.employee_key))
  if (!location) return error ? <p role="alert">{error}</p> : null
  return <div className="notification-management">
-  <PushPreferences/>
+  <p><Link to="/">Open My notifications on Home</Link> to enable or turn off notifications for this device. One setting covers the whole app.</p>
   <MyWorkRequirements location={location}/>
   <article className="task-card">
    <h2>Required work and points</h2>

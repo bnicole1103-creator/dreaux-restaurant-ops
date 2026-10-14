@@ -3,7 +3,7 @@ import { PageWord } from "../components/PageDesign"
 import { ScreenText } from "../components/ScreenText"
 import { submissionLabel } from '../lib/submissionTime'
 import { useEffect, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate,useSearchParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { loadTenantData } from '../lib/tenant'
 import { useManagementAccess } from '../components/ManagementAccess'
@@ -33,6 +33,8 @@ function CompletedQuiz({title,date,result,running,monthly,submittedAt,earned}:{t
  </details>
 }
 export function QuizzesPage(){
+ const [params]=useSearchParams();const view=params.get("view")??"today"
+
  const access=useManagementAccess();const navigate=useNavigate()
  const [location,setLocation]=useState('');const [date,setDate]=useState(quizToday)
  const [month,setMonth]=useState(()=>quizToday().slice(0,7));const [refresh,setRefresh]=useState(0)
@@ -62,8 +64,10 @@ export function QuizzesPage(){
  const ownToday=monthly?.attempts.find(a=>a.quiz_date===date)
  const otherAttempts=monthly?.attempts.filter(a=>!(quiz && result && a.quiz_date===date)) ?? []
  return <section data-design-block="copy.2ad13fdb7d598282.1" className="mod-page quiz-page"><p data-design-block="copy.55e941dd4b788dbb.1" className="eyebrow"><ScreenText id="QuizzesPage.15c8c5ead821decf">Pre-shift preparation</ScreenText></p><h1 data-design-block="copy.a5c87383cd4dd950.1"><ScreenText id="QuizzesPage.38584cb9f2b57db7">Daily Quizzes</ScreenText></h1>
-  <div data-design-block="copy.fd220dea04adf686.1" className="quiz-actions">{access.manager && <Link className="quiz-builder-link" to="/quizzes/build"><ScreenText id="QuizzesPage.84f911a877a2c179">Build Future Quizzes / Question Bank →</ScreenText></Link>}<button data-design-block="copy.c3690562b77222d5.1" type="button" disabled={busy} onClick={()=>{if(Object.keys(answers).length && !result && !window.confirm('Discard your answers and reload the quiz?'))return;setRefresh(v=>v+1)}}><ScreenText id="QuizzesPage.879f2447f6bb95b8">Refresh</ScreenText></button></div>
-  {access.manager&&<GeneratePreshiftQuiz allowPaste location={location} date={date} title="" body="" disabled={!location} onSaved={()=>setRefresh(v=>v+1)}/>}
+  <nav className="workspace-actions" aria-label="Quiz tools"><Link to="/quizzes">Today's quizzes</Link><Link to="/quizzes?view=scores">My scores</Link><button type="button" disabled={busy} onClick={()=>{if(Object.keys(answers).length&&!result&&!window.confirm("Discard answers and refresh?"))return;setRefresh(v=>v+1)}}>Refresh quizzes</button>{access.manager&&<><Link to="/quizzes?view=generate">Generate quiz</Link><Link to="/quizzes/build">Build / question bank</Link><Link to="/quizzes?view=manage">Published quizzes / team scores</Link></>}</nav>
+  {access.manager&&view==='generate'&&<GeneratePreshiftQuiz allowPaste location={location} date={date} title="" body="" disabled={!location} onSaved={()=>setRefresh(v=>v+1)}/>}
+  {view==='today'&&<>
+
   <h2 data-design-block="copy.b5e32943f8cdadea.1"><ScreenText id="QuizzesPage.6e4f183331ca689e">Today · </ScreenText>{quizDateLabel(date)}</h2>
   {error && <p data-design-block="copy.33f8f18b9f66c5f9.1" role="alert">{error}</p>}{busy && <p data-design-block="copy.dce6c33edff70b50.1" role="status"><ScreenText id="QuizzesPage.6799e69e289fa08d">Loading…</ScreenText></p>}
   {!busy && !quiz && !error && <article data-design-block="copy.b40784f5607731b4.2" className="mod-review"><h3 data-design-block="copy.26f1d34ac8687bbf.2"><ScreenText id="QuizzesPage.1d72b99728971f78">No quiz published for today</ScreenText></h3><p data-design-block="copy.854e1d9db292679b.6"><ScreenText id="QuizzesPage.21286979d56c5fd7">Your manager will publish today’s pre-shift quiz here.</ScreenText></p>{access.manager && <Link to={'/quizzes/manage?date='+date}><ScreenText id="QuizzesPage.0904328e9a0b32e1">Create / Publish Today’s Quiz →</ScreenText></Link>}</article>}
@@ -71,15 +75,16 @@ export function QuizzesPage(){
   {quiz && (result?<CompletedQuiz title={quiz.title} date={date} result={result} submittedAt={ownToday?.submitted_at} earned={ownToday?.earned_points} running={ownToday?.running_score} monthly={month===date.slice(0,7)?monthly?.points:undefined} />:<article data-design-block="copy.b40784f5607731b4.3" className="mod-review"><h3 data-design-block="copy.26f1d34ac8687bbf.3"><ScreenText id="QuizzesPage.3780149cd908fc4d">Pre-Shift Quiz · </ScreenText>{quizDateLabel(date)}</h3><p data-design-block="copy.854e1d9db292679b.8">{quiz.title}</p>{quiz.instructions && <p data-design-block="copy.cc40ed17908bb9de.1" className="quiz-instructions">{quiz.instructions}</p>}
    <form data-design-block="copy.692054f5293a5327.1" onSubmit={e=>{e.preventDefault();void submit()}}>{quiz.questions.map((q,i)=><fieldset data-design-block="copy.ec41fe4a6ad1b2dc.1" className="quiz-question" key={i} disabled={busy}><legend>{i+1}<PageWord id="copy.df6b29a90fc3e15f.3">. </PageWord>{q.prompt}</legend><p data-design-block="copy.0aeb08dc70bfacea.1" className="muted">{q.category}</p>{q.options.map((option,n)=><label data-design-block="copy.139d6f3521a3495a.1" className="quiz-choice" key={n}><input type="radio" name={'question-'+i} checked={answers[i]===n} required onChange={()=>setAnswers(v=>({...v,[i]:n}))} /><span>{option}</span></label>)}</fieldset>)}<button data-design-block="copy.363a45e6868b8983.1" className="primary-button" disabled={busy || quiz.questions.some((_,i)=>answers[i]===undefined)}><ScreenText id="QuizzesPage.b60395f153d3e55e">Submit Quiz</ScreenText></button></form>
   </article>)}
-  <article data-design-block="copy.b40784f5607731b4.4" className="mod-review"><h2 data-design-block="copy.b5e32943f8cdadea.2"><ScreenText id="QuizzesPage.0cb69b9dbee3b5dd">My Monthly Quiz Scores</ScreenText></h2><label data-design-block="copy.45940bda03775ba8.1"><ScreenText id="QuizzesPage.76488090a5a6664f">Month</ScreenText><input type="month" value={month} max={date.slice(0,7)} onChange={e=>{if(e.target.value)setMonth(e.target.value)}} /></label>
+  </>}
+  {view==='scores'&&  <article data-design-block="copy.b40784f5607731b4.4" className="mod-review"><h2 data-design-block="copy.b5e32943f8cdadea.2"><ScreenText id="QuizzesPage.0cb69b9dbee3b5dd">My Monthly Quiz Scores</ScreenText></h2><label data-design-block="copy.45940bda03775ba8.1"><ScreenText id="QuizzesPage.76488090a5a6664f">Month</ScreenText><input type="month" value={month} max={date.slice(0,7)} onChange={e=>{if(e.target.value)setMonth(e.target.value)}} /></label>
    {monthError && <p data-design-block="copy.33f8f18b9f66c5f9.2" role="alert">{monthError}</p>}{monthBusy && <p data-design-block="copy.dce6c33edff70b50.2" role="status"><ScreenText id="QuizzesPage.2932d9f524945dc5">Loading quiz points…</ScreenText></p>}
    {monthly && <><p data-design-block="copy.8b6a36984e3d7399.1" className="quiz-month-total"><strong>{monthly.correct}<PageWord id="copy.398a3a3d69b591bc.3">/ </PageWord>{monthly.possible}</strong><ScreenText id="QuizzesPage.c867c300a82de4b2"> correct answers</ScreenText></p><p data-design-block="copy.854e1d9db292679b.9">{monthly.completed}<ScreenText id="QuizzesPage.e88d2571ca0c7ec0"> quizzes completed · </ScreenText>{monthly.points}<ScreenText id="QuizzesPage.8e8d6815000b8987"> reward points</ScreenText></p></>}
    
    {monthly?.penalties.map(p=><p data-design-block="copy.72a30871d613c28b.1" key={p.entry_key}>{p.business_date}<PageWord id="copy.2ed637b647c3b26f.2">· </PageWord>{p.description}<PageWord id="copy.bd4414c718fd417f.1">: </PageWord>{p.points}<ScreenText id="QuizzesPage.630cf41c7a0e6dc8"> points</ScreenText></p>)}
    <h3 data-design-block="copy.26f1d34ac8687bbf.4"><ScreenText id="QuizzesPage.3c438183031c1c95">Completed quizzes</ScreenText></h3>{monthly && otherAttempts.length===0 && <p data-design-block="copy.854e1d9db292679b.10">{ownToday && quiz && result?<PageWord id="copy.21889ed57431a966.1">{"Today’s completed quiz is shown above."}</PageWord>:<PageWord id="copy.152f8eb485ee5a01.1">{"No other quizzes completed this month."}</PageWord>}</p>}
    {otherAttempts.map(a=><CompletedQuiz key={a.quiz_id} title={a.title} date={a.quiz_date} result={a.result} submittedAt={a.submitted_at} earned={a.earned_points} running={a.running_score} monthly={monthly?.points} />)}
-  </article>
-  {access.manager && <details><summary><ScreenText id="QuizzesPage.26d09c58d141e83c">Manage Published Quizzes / Team Scores</ScreenText></summary><PublishedQuizzes location={location} refresh={refresh} disabled={busy || !location} throughDate={date} onEdit={d=>navigate('/quizzes/manage?date='+d)} onRemove={remove} /></details>}
+  </article>}
+  {access.manager && view==='manage'&&<details open><summary><ScreenText id="QuizzesPage.26d09c58d141e83c">Manage Published Quizzes / Team Scores</ScreenText></summary><PublishedQuizzes location={location} refresh={refresh} disabled={busy || !location} throughDate={date} onEdit={d=>navigate('/quizzes/manage?date='+d)} onRemove={remove} /></details>}
  </section>
 }
 

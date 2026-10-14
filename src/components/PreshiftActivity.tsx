@@ -6,19 +6,28 @@ export function PreshiftOpenTracker({location,postId,version,source}:{location:s
  useEffect(()=>{
   if(!location||!postId||!version||new URLSearchParams(window.location.search).has('wording-preview'))return
   const details=source==='home'?anchor.current?.closest('details'):null
-  const target=source==='home'?details:anchor.current?.closest('article')?.querySelector('.feed-body')
+  const target=source==='home'?(details?.querySelector('.home-post-body')??details):anchor.current?.closest('article')?.querySelector('.feed-body')
   if(!target)return
-  let live=true,busy=false,recorded=false,inView=false
-  async function record(){if(!live||busy||recorded||document.visibilityState!=='visible'||(details&&!details.open))return;busy=true;try{const r=await supabase.rpc('preshift_record_open',{p_location_id:location,p_post_id:postId,p_version:version,p_source:source});if(r.error)throw r.error;recorded=true;if(live)setError('')}catch(e){if(live)setError('Could not record this opening: '+String((e as {message?:string})?.message??e))}finally{busy=false}}
-  const toggle=()=>{if(details?.open)void record();else recorded=false}
-  const visible=()=>{if(document.visibilityState==='visible'&&(details?.open||(!details&&inView)))void record()}
-  const observer=!details?new IntersectionObserver(entries=>{inView=entries.some(e=>e.isIntersecting);if(inView)void record()},{threshold:0.1}):null
-  if(observer)observer.observe(target)
-  details?.addEventListener('toggle',toggle);document.addEventListener('visibilitychange',visible);window.addEventListener('focus',visible)
-  if(details?.open)void record()
-  return()=>{live=false;observer?.disconnect();details?.removeEventListener('toggle',toggle);document.removeEventListener('visibilitychange',visible);window.removeEventListener('focus',visible)}
+  const session=crypto.randomUUID()
+  let live=true,inView=false,activeAt:number|null=null,total=0,sending=false,pending=false,opened=false
+  const eligible=()=>inView&&document.visibilityState==='visible'&&document.hasFocus()&&(!details||details.open)
+  function sample(){const now=performance.now();if(activeAt!==null)total+=Math.max(0,now-activeAt);activeAt=eligible()?now:null}
+  async function flush(){sample();if(sending){pending=true;return}if(!opened&&total===0&&!eligible())return;sending=true
+   try{
+    if(!opened){const r=await supabase.rpc('preshift_record_open',{p_location_id:location,p_post_id:postId,p_version:version,p_source:source});if(r.error)throw r.error;opened=true}
+    const r=await supabase.rpc('preshift_record_view_time',{p_location_id:location,p_post_id:postId,p_version:version,p_session:session,p_source:source,p_visible_ms:Math.floor(total)});if(r.error)throw r.error
+    if(live)setError('')
+   }catch(e){if(live)setError('Viewing receipt could not save: '+String((e as {message?:string})?.message??e))}
+   finally{sending=false;if(pending){pending=false;void flush()}}
+  }
+  const change=()=>{sample();void flush()}
+  const observer=new IntersectionObserver(entries=>{sample();inView=entries.some(e=>e.isIntersecting);change()},{threshold:0})
+  observer.observe(target)
+  details?.addEventListener('toggle',change);document.addEventListener('visibilitychange',change);window.addEventListener('focus',change);window.addEventListener('blur',change);window.addEventListener('pagehide',change)
+  const timer=setInterval(()=>{if(eligible()||activeAt!==null)void flush()},10000)
+  return()=>{sample();inView=false;activeAt=null;live=false;void flush();clearInterval(timer);observer.disconnect();details?.removeEventListener('toggle',change);document.removeEventListener('visibilitychange',change);window.removeEventListener('focus',change);window.removeEventListener('blur',change);window.removeEventListener('pagehide',change)}
  },[location,postId,version,source])
- return <span ref={anchor}>{error&&<span role="alert">{error} Close and reopen the post or refresh to retry.</span>}</span>
+ return <span ref={anchor}>{error&&<span role="alert">{error}</span>}</span>
 }
 export function HomePreshiftRead({location,postId,version}:{location:string;postId:string;version:number}){
  const reads=usePreshiftReadReceipts(location,[{id:postId,version}])

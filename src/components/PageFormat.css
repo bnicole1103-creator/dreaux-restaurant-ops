@@ -1,0 +1,19 @@
+.polished-app .app-content {max-width:1180px;padding-top:40px}
+.polished-app .app-content :is(.page,.mod-page,.preshift-feed,.training-page,.appearance-page) {max-width:1000px;margin-inline:auto;padding:0}
+.polished-app .app-content h1 {font-size:clamp(1.9rem,4vw,2.6rem);line-height:1.2;letter-spacing:-.025em;margin:10px 0 24px}
+.polished-app .app-content .eyebrow {letter-spacing:.12em;font-weight:800;text-transform:uppercase;color:var(--app-muted);margin-bottom:8px}
+.polished-app .app-content :is(.feed-card,.task-card,.mod-review,.inventory-card,.home-section,.gf-entry,.settings-cards>a,.training-link) {border:1px solid var(--app-border);border-radius:20px;background:var(--app-card);padding:24px;box-shadow:0 6px 24px rgb(48 32 25 / 3%)}
+.workspace-actions,.polished-app :is(.summary-tabs,.inventory-tabs,.settings-cards,.closeout-hub-actions) {display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin:24px 0}
+.workspace-actions :is(a,button),.polished-app :is(.summary-tabs,.inventory-tabs) :is(a,button),.closeout-hub-actions>a {display:flex;align-items:center;justify-content:center;min-height:72px;padding:16px;text-align:center;font:inherit;font-weight:700;text-decoration:none;color:var(--app-text);background:var(--app-card);border:1px solid var(--app-border);border-radius:14px}
+.workspace-actions [aria-current=page],.workspace-actions [aria-pressed=true] {border:2px solid var(--app-accent)}
+.polished-app .app-content button,.polished-app .app-content input:not([type=checkbox]):not([type=radio]),.polished-app .app-content select {min-height:44px}
+.polished-app .app-content :is(button,a):focus-visible {outline:3px solid var(--app-accent);outline-offset:3px}
+.workspace-back {display:inline-block;margin:0 0 16px;font-weight:700;color:var(--app-text)}
+.closeout-hub-actions>a {flex-direction:column;gap:8px}
+.closeout-hub-actions span {font-size:.9rem;font-weight:400}
+@media(max-width:650px){.polished-app .app-content{padding:24px 16px calc(100px + env(safe-area-inset-bottom))}.workspace-actions,.polished-app :is(.summary-tabs,.inventory-tabs,.settings-cards,.closeout-hub-actions){grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.workspace-actions :is(a,button){font-size:.95rem}.polished-app .app-content :is(.feed-card,.task-card,.mod-review,.inventory-card,.home-section){padding:18px}}
+
+.polished-app .app-content :is(.home-post,.panel,.section-panel,.training-link,.gf-qr){border-radius:20px}
+.closeout-hub-actions>.mod-review{margin:0;display:flex;flex-direction:column;gap:8px}
+.closeout-hub-actions>.mod-review>a{margin-top:auto;padding:14px;border:1px solid var(--app-border);border-radius:12px;text-align:center;font-weight:700;color:var(--app-text)}
+.polished-app .app-content textarea{box-sizing:border-box;width:100%;max-width:100%;border:1px solid var(--app-border);border-radius:12px;padding:12px;font:inherit;background:var(--app-card);color:var(--app-text)}

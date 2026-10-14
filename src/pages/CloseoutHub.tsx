@@ -6,8 +6,8 @@ import { useManagementAccess } from '../components/ManagementAccess'
 import './ManagerCloseoutPage.css'
 export function CloseoutHub() {
   const access = useManagementAccess()
-  return <section data-design-block="copy.ef7fd73ecbc29435.1" className="mod-page"><h1 data-design-block="copy.705692e005f05abc.1"><ScreenText id="CloseoutHub.150b399557d01236">Closeout</ScreenText></h1><p data-design-block="copy.fceacfa9b27cce96.1"><ScreenText id="CloseoutHub.fe9d0dce579ca5c9">Choose the form for your shift.</ScreenText></p>
-    <article data-design-block="copy.50a508630fea3a91.1" className="mod-review"><h2 data-design-block="copy.d4d53e66fa01d794.1"><ScreenText id="CloseoutHub.09b2f0ed3310116a">Staff Closeout</ScreenText></h2><p data-design-block="copy.fceacfa9b27cce96.2"><ScreenText id="CloseoutHub.679f9fd98658d2fc">Complete your sales, cash, tips, and shift questions.</ScreenText></p><Link to="/closeout/staff"><ScreenText id="CloseoutHub.3d3d6a8ac79389ec">Open Staff Closeout →</ScreenText></Link></article>
+  return <section data-design-block="copy.ef7fd73ecbc29435.1" className="mod-page closeout-hub"><h1 data-design-block="copy.705692e005f05abc.1"><ScreenText id="CloseoutHub.150b399557d01236">Closeout</ScreenText></h1><p data-design-block="copy.fceacfa9b27cce96.1"><ScreenText id="CloseoutHub.fe9d0dce579ca5c9">Choose the form for your shift.</ScreenText></p>
+    <div className="closeout-hub-actions"><article data-design-block="copy.50a508630fea3a91.1" className="mod-review"><h2 data-design-block="copy.d4d53e66fa01d794.1"><ScreenText id="CloseoutHub.09b2f0ed3310116a">Staff Closeout</ScreenText></h2><p data-design-block="copy.fceacfa9b27cce96.2"><ScreenText id="CloseoutHub.679f9fd98658d2fc">Complete your sales, cash, tips, and shift questions.</ScreenText></p><Link to="/closeout/staff"><ScreenText id="CloseoutHub.3d3d6a8ac79389ec">Open Staff Closeout →</ScreenText></Link></article>
     <article data-design-block="copy.50a508630fea3a91.2" className="mod-review"><h2 data-design-block="copy.d4d53e66fa01d794.2"><ScreenText id="CloseoutHub.c5974b145fd52498">Closeout Summary</ScreenText></h2><p data-design-block="copy.fceacfa9b27cce96.3">{access.manager ? <PageWord id="copy.465fc6df4a72b3d2.1">{"View all staff closeouts and the team recap."}</PageWord> : <PageWord id="copy.32eec4139bbcb647.1">{"View your own closeouts."}</PageWord>}</p><Link to="/closeout-summary"><ScreenText id="CloseoutHub.8b80a7ed4ed96752">Open Summary →</ScreenText></Link></article>
     <article className="mod-review"><h2>Disposal count sheet</h2><p>Record disposed bottles and review submitted sheets.</p><Link to="/inventory">Open Disposal →</Link></article>
     {access.manager && <>
@@ -16,6 +16,6 @@ export function CloseoutHub() {
     </>}
     
     
-    {access.error && <p data-design-block="copy.941b3329913922fd.1" role="alert">{access.error}</p>}
+    </div>{access.error && <p data-design-block="copy.941b3329913922fd.1" role="alert">{access.error}</p>}
   </section>
 }
