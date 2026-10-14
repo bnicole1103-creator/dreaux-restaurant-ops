@@ -20,7 +20,7 @@ type Submission={user_id:string;name:string;submitted_at:string;result:QuizResul
 type DraftQuestion=Question&{editorKey:string}
 const draftQuestion=(q:Question):DraftQuestion=>({...q,options:[...q.options],editorKey:crypto.randomUUID()})
 const emptyQuestion=():DraftQuestion=>draftQuestion({prompt:'',category:'Guest service',options:['','','',''],correct:0,explanation:''})
-export function QuizBuilderPage({publishedView=false,initialDate,generatedDraft}:{publishedView?:boolean;initialDate?:string;generatedDraft?:GeneratedQuiz}) {
+export function QuizBuilderPage({publishedView=false,initialDate,generatedDraft,onStateChange}:{publishedView?:boolean;initialDate?:string;generatedDraft?:GeneratedQuiz;onStateChange?:(state:{dirty:boolean;busy:boolean})=>void}) {
  const [params]=useSearchParams()
  const [location,setLocation]=useState('')
  const [date,setDate]=useState(()=>{const d=initialDate??params.get('date')??'';return publishedView?(/^\d{4}-\d{2}-\d{2}$/.test(d) && d<=quizToday()?d:quizToday()):(/^\d{4}-\d{2}-\d{2}$/.test(d)&&d>=quizTomorrow()?d:quizTomorrow())})
@@ -40,6 +40,17 @@ export function QuizBuilderPage({publishedView=false,initialDate,generatedDraft}
  const [addMenu,setAddMenu]=useState(false),[bankOpen,setBankOpen]=useState(false)
  const [generated,setGenerated]=useState<GeneratedQuiz|null>(null)
  const [loadFailed,setLoadFailed]=useState(false)
+ const importedDraft=useRef<GeneratedQuiz|null>(null)
+ useEffect(()=>{onStateChange?.({dirty,busy})},[dirty,busy])
+ useEffect(()=>{
+  if(!generatedDraft||generatedDraft.location!==location||generatedDraft.date!==date||busy||loadFailed||importedDraft.current===generatedDraft)return
+  importedDraft.current=generatedDraft
+  if(questions.length+generatedDraft.questions.length>50){setError('These questions exceed the 50-question quiz limit. Choose Add or Replace below.');return}
+  setQuestions(v=>[...v,...generatedDraft.questions.map(draftQuestion)])
+  if(!questions.length)setTitle(generatedDraft.title)
+  setGenerated(null);setDirty(true)
+  setMessage('Generated questions added automatically. Review and edit, then save or publish.')
+ },[generatedDraft,location,date,busy,loadFailed])
  useEffect(()=>{if(generatedDraft?.location===location&&generatedDraft.date===date)setGenerated(generatedDraft);else setGenerated(null)},[generatedDraft,location,date])
  function importGenerated(append:boolean){if(!generated||loadFailed)return;if(append&&questions.length+generated.questions.length>50){setError('A quiz can contain up to 50 questions.');return}if(!append&&questions.length&&!window.confirm('Replace the current questions with generated questions? This stays unsaved until you save or publish.'))return;setQuestions(v=>append?[...v,...generated.questions.map(draftQuestion)]:generated.questions.map(draftQuestion));if(!append)setTitle(generated.title);setDirty(true);setRemoved(null);setGenerated(null);setMessage('Generated questions added. Review the answers, edit, or add bank questions before saving or publishing.')}
  const [removed,setRemoved]=useState<{question:DraftQuestion;index:number}|null>(null)
@@ -56,7 +67,7 @@ export function QuizBuilderPage({publishedView=false,initialDate,generatedDraft}
  function update(i:number,patch:Partial<Question>){setQuestions(q=>q.map((x,n)=>n===i?{...x,...patch}:x));setDirty(true)}
  function move(i:number,delta:number){setQuestions(q=>{const next=[...q];[next[i],next[i+delta]]=[next[i+delta],next[i]];return next});setDirty(true)}
  async function save(publish:boolean){if(!publishedView && date<quizTomorrow()){setError('Choose a future date. Manage today’s quiz from the main Quizzes page.');return}setBusy(true);setError('');setMessage('');try{
-  const {data,error}=await supabase.rpc('quiz_manager_save',{p_location_id:location,p_date:date,p_title:title,p_instructions:instructions,p_questions:questions.map(({editorKey,...question})=>question),p_publish:publish,p_version:version});if(error)throw error;apply(data);setListRefresh(v=>v+1);setMessage(publish?(publishedView?'Published changes saved.':'Quiz scheduled. Staff can open it on its quiz date.'):'Draft saved. Staff cannot see it.')
+  const {data,error}=await supabase.rpc('quiz_manager_save',{p_location_id:location,p_date:date,p_title:title,p_instructions:instructions,p_questions:questions.map(({editorKey,...question})=>question),p_publish:publish,p_version:version});if(error)throw error;apply(data);onStateChange?.({dirty:false,busy:false});setListRefresh(v=>v+1);setMessage(publish?(publishedView?'Published changes saved.':'Quiz scheduled. Staff can open it on its quiz date.'):'Draft saved. Staff cannot see it.')
  }catch(e){setError(quizError(e))}finally{setBusy(false)}}
  function openPublished(nextDate:string){if(dirty && !window.confirm('Discard unsaved edits and open this published quiz?'))return;setDate(nextDate);setEditorReload(v=>v+1)}
  async function removePublished(q:PublishedQuiz){

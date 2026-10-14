@@ -1,4 +1,4 @@
-export type RecipeData={name:string;category:string;build:string;method:string;finish:string;notes:string}
+export type RecipeData={name:string;category:string;build:string;method:string;finish:string;notes:string;photo?:string}
 export const emptyRecipe=(category="JusTini's Signatures"):RecipeData=>({name:'',category,build:'',method:'',finish:'',notes:''})
 export const recipeKey=(name:string)=>name.trim().replace(/\s+/g,' ').toLowerCase()
 export function parseCocktails(text:string,category:string):RecipeData[]{

@@ -1,34 +1,112 @@
-// page-designer-instrumented
-import { PageWord, PageOption } from "./PageDesign"
-import { ScreenText } from "./ScreenText"
-import { useEffect, useState } from 'react'
+import { useEffect,useState } from 'react'
 import { supabase } from '../lib/supabase'
 import type { Question } from '../pages/QuizzesPage'
 import { quizError } from '../pages/QuizzesPage'
 import './QuizQuestionBank.css'
-import '../pages/Appearance.css'
-type Entry={id:string;source:string;quiz_date:string|null;review:boolean;question:Question}
-const normalize=(s:string)=>s.trim().toLocaleLowerCase()
-const dateLabel=(s:string)=>s==='Undated'?'Older questions without a date':new Intl.DateTimeFormat('en-US',{timeZone:'UTC',month:'long',day:'numeric',year:'numeric'}).format(new Date(s+'T12:00:00Z'))
-export function QuizQuestionBank({location,disabled,questions,onAdd,open,onOpenChange}:{location:string;disabled:boolean;questions:Question[];onAdd:(questions:Question[])=>void;open?:boolean;onOpenChange?:(open:boolean)=>void}) {
- const [expanded,setExpanded]=useState(false)
- const [bank,setBank]=useState<Entry[]>([]),[busy,setBusy]=useState(false),[error,setError]=useState(''),[search,setSearch]=useState(''),[category,setCategory]=useState('All'),[day,setDay]=useState('All'),[selected,setSelected]=useState<string[]>([]),[reviewed,setReviewed]=useState(false),[message,setMessage]=useState(''),[refresh,setRefresh]=useState(0)
- const [importDate,setImportDate]=useState(''),[importTitle,setImportTitle]=useState('Pre-Shift Quiz'),[importing,setImporting]=useState(false),[importQuestions,setImportQuestions]=useState<Question[]>([])
- useEffect(()=>{if(!location)return;let live=true;setBusy(true);setError('');setSelected([]);setReviewed(false);void(async()=>{try{const r=await supabase.rpc('quiz_question_bank_by_day',{p_location_id:location});if(r.error)throw r.error;if(live)setBank(r.data??[])}catch(e){if(live)setError(quizError(e))}finally{if(live)setBusy(false)}})();return()=>{live=false}},[location,refresh])
- const existing=new Set(questions.map(q=>normalize(q.prompt))),seen=new Set<string>()
- const chosen=bank.filter(e=>{const key=normalize(e.question.prompt);if(!selected.includes(e.id)||existing.has(key)||seen.has(key))return false;seen.add(key);return true})
- const requiresReview=chosen.some(e=>e.review)
- const filtered=bank.filter(e=>(category==='All'||e.question.category===category)&&(day==='All'||(e.quiz_date??'Undated')===day)&&normalize(e.question.prompt+' '+e.question.category+' '+e.source).includes(normalize(search)))
- const days=[...new Set(bank.map(e=>e.quiz_date??'Undated'))].sort((a,b)=>a==='Undated'?1:b==='Undated'?-1:b.localeCompare(a))
- function add(){if(!chosen.length||chosen.length+questions.length>50||(requiresReview&&!reviewed))return;onAdd(chosen.map(e=>({...e.question,options:[...e.question.options]})));setMessage(`${chosen.length} questions added. Edit them below before publishing.`);setSelected([]);setReviewed(false)}
- async function importFile(file:File){try{if(file.size>1000000)throw new Error('Choose a JSON file smaller than 1 MB.');const parsed=JSON.parse(await file.text());const list=Array.isArray(parsed)?parsed:parsed.questions;if(!Array.isArray(list)||!list.length||list.length>50)throw new Error('The file needs 1 to 50 questions.');const prepared=list.map(q=>({...q,category:q.category??'Pre-Shift',explanation:q.explanation??''}));if(prepared.some(q=>typeof q.prompt!=='string'||!Array.isArray(q.options)||!Number.isInteger(q.correct)))throw new Error('Each question needs prompt, options and a zero-based correct answer.');setImportQuestions(prepared);if(!Array.isArray(parsed)){if(typeof parsed.quiz_date==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(parsed.quiz_date))setImportDate(parsed.quiz_date);if(typeof parsed.title==='string')setImportTitle(parsed.title.slice(0,200))}setError('')}catch(e){setImportQuestions([]);setError(quizError(e))}}
- async function importSet(){setImporting(true);try{const r=await supabase.rpc('quiz_bank_import',{p_location_id:location,p_date:importDate,p_title:importTitle,p_questions:importQuestions});if(r.error)throw r.error;setImportQuestions([]);setMessage('Questions imported under '+dateLabel(importDate)+'.');setRefresh(v=>v+1)}catch(e){setError(quizError(e))}finally{setImporting(false)}}
- return <details className="quiz-bank" open={open??expanded} onToggle={e=>{const next=e.currentTarget.open;setExpanded(next);if(next!==open)onOpenChange?.(next)}}><summary><strong><ScreenText id="QuizQuestionBank.c2266270f6b43e98">＋ Question Bank (</ScreenText>{bank.length}<ScreenText id="QuizQuestionBank.ea96d5e5a2d9fd42">) — by day</ScreenText></strong></summary><p data-design-block="copy.bef22cb74a7bbcdf.1"><ScreenText id="QuizQuestionBank.89a1438d47709fa4">Every quiz saved in this app appears under its quiz date. Select one question or the whole day’s set. Copies can be edited before publishing.</ScreenText></p>{busy&&<p data-design-block="copy.800d52ded43d3124.1" role="status"><ScreenText id="QuizQuestionBank.1f9d1106a75d5c62">Loading question bank…</ScreenText></p>}{error&&<p data-design-block="copy.ff073cbd52205119.1" role="alert">{error}</p>}
- <fieldset data-design-block="copy.6f462f297049a433.1" disabled={disabled||busy||importing||!location} className="quiz-bank-controls"><label data-design-block="copy.add83423d21368b7.1"><ScreenText id="QuizQuestionBank.eea41b687fbeb818">Search</ScreenText><input type="search" value={search} onChange={e=>setSearch(e.target.value)} /></label><div data-design-block="copy.4fa0209caf07346d.1" className="quiz-bank-filters"><label data-design-block="copy.add83423d21368b7.2"><ScreenText id="QuizQuestionBank.a6306e2dee3beaf3">Quiz day</ScreenText><select value={day} onChange={e=>setDay(e.target.value)}><PageOption designId="copy.7d1afd9a9a4cbe7a.1"><ScreenText plain id="QuizQuestionBank.75f7596a7a9f4104">All</ScreenText></PageOption>{days.map(d=><option key={d} value={d}>{dateLabel(d)}</option>)}</select></label><label data-design-block="copy.add83423d21368b7.3"><ScreenText id="QuizQuestionBank.6ebee72f93250359">Category</ScreenText><select value={category} onChange={e=>setCategory(e.target.value)}><PageOption designId="copy.b1460369897c2eb8.1"><ScreenText plain id="QuizQuestionBank.50e544df8c5e981f">All</ScreenText></PageOption>{[...new Set(bank.map(e=>e.question.category))].sort().map(c=><option key={c}>{c}</option>)}</select></label></div>
- <div data-design-block="copy.7662032de94e2c70.1" className="quiz-bank-add-bar"><button data-design-block="copy.b1acb3822a04722b.1" type="button" disabled={!chosen.length||chosen.length+questions.length>50||(requiresReview&&!reviewed)} onClick={add}><ScreenText id="QuizQuestionBank.d8778ebf21a3f41d">Add selected (</ScreenText>{chosen.length}<PageWord id="copy.3f58ca58335948d5.1">)</PageWord></button></div>
- {days.filter(d=>filtered.some(e=>(e.quiz_date??'Undated')===d)).map(d=>{const entries=filtered.filter(e=>(e.quiz_date??'Undated')===d);return <details className="quiz-day-group" key={d}><summary>{dateLabel(d)}<PageWord id="copy.67b57acbcbe323ae.1">· </PageWord>{entries.length}<ScreenText id="QuizQuestionBank.d10e458258825abc"> questions</ScreenText></summary><button data-design-block="copy.7e1057fc8d04cbfb.1" type="button" onClick={()=>{setSelected(v=>[...new Set([...v,...entries.filter(e=>!existing.has(normalize(e.question.prompt))).map(e=>e.id)])]);setReviewed(false)}}><ScreenText id="QuizQuestionBank.d4f12e433e8289ab">Select this day’s questions</ScreenText></button>{entries.map(e=>{const added=existing.has(normalize(e.question.prompt));return <article data-design-block="copy.898741a80d0b225c.1" className="quiz-bank-item" key={e.id}><label data-design-block="copy.ef741915739e523a.1" className="quiz-choice"><input type="checkbox" checked={selected.includes(e.id)&&!added} disabled={added} onChange={()=>{setSelected(v=>v.includes(e.id)?v.filter(id=>id!==e.id):[...v,e.id]);setReviewed(false)}} /><span>{e.question.prompt}{added?<PageWord id="copy.a352744898e02040.1">{" — Already added"}</PageWord>:<PageWord id="copy.358c49abebda1d6b.1">{""}</PageWord>}</span></label><p data-design-block="copy.29162b0e18efcc7b.1" className="muted">{e.question.category}<PageWord id="copy.67b57acbcbe323ae.2">· </PageWord>{e.source}</p><details><summary><ScreenText id="QuizQuestionBank.2c33d13a364e39b8">Preview choices and answer</ScreenText></summary><ul>{e.question.options.map((o,i)=><li key={i}>{o}{i===e.question.correct?<PageWord id="copy.da30db46862da69d.1">{" — Correct"}</PageWord>:<PageWord id="copy.358c49abebda1d6b.2">{""}</PageWord>}</li>)}</ul>{e.question.explanation&&<p data-design-block="copy.bef22cb74a7bbcdf.2">{e.question.explanation}</p>}</details></article>})}</details>})}
- {!busy&&!filtered.length&&<p data-design-block="copy.bef22cb74a7bbcdf.3"><ScreenText id="QuizQuestionBank.4206cfb972af9a6e">No matching questions.</ScreenText></p>}{requiresReview&&<label data-design-block="copy.ef741915739e523a.2" className="quiz-choice"><input type="checkbox" checked={reviewed} onChange={e=>setReviewed(e.target.checked)} /><span><ScreenText id="QuizQuestionBank.29432acab14e0dec">I will check these older recipes, prices and policies before publishing.</ScreenText></span></label>}{chosen.length+questions.length>50&&<p data-design-block="copy.ff073cbd52205119.2" role="alert"><ScreenText id="QuizQuestionBank.b5e8b71e76b8daff">Choose fewer questions. The limit is 50 per quiz.</ScreenText></p>}
- <details><summary><ScreenText id="QuizQuestionBank.48aad5738d9c5b36">Import an older quiz from a JSON file</ScreenText></summary><p data-design-block="copy.bef22cb74a7bbcdf.4"><ScreenText id="QuizQuestionBank.3721b90fb7c0f755">Use the original questions and correct answers. Importing the same date and title replaces that imported set.</ScreenText></p><label data-design-block="copy.add83423d21368b7.4"><ScreenText id="QuizQuestionBank.6e2b36f6f5356c07">Quiz date</ScreenText><input type="date" value={importDate} onChange={e=>setImportDate(e.target.value)} /></label><label data-design-block="copy.add83423d21368b7.5"><ScreenText id="QuizQuestionBank.7f320b8eed13f1bd">Quiz title</ScreenText><input value={importTitle} maxLength={200} onChange={e=>setImportTitle(e.target.value)} /></label><label data-design-block="copy.add83423d21368b7.6"><ScreenText id="QuizQuestionBank.b9b7485d72361ade">Questions file</ScreenText><input type="file" accept=".json,application/json" onChange={e=>{if(e.target.files?.[0])void importFile(e.target.files[0]);e.target.value=''}} /></label><p data-design-block="copy.bef22cb74a7bbcdf.5">{importQuestions.length}<ScreenText id="QuizQuestionBank.ab6870a996cd92f8"> questions ready</ScreenText></p><button data-design-block="copy.e56005924ad6087f.1" type="button" disabled={!importDate||!importTitle.trim()||!importQuestions.length} onClick={()=>void importSet()}><ScreenText id="QuizQuestionBank.6b34a1b5d05242c8">Import dated set</ScreenText></button></details>
- </fieldset>{message&&<p data-design-block="copy.800d52ded43d3124.2" role="status">{message}</p>}</details>
+type Entry={id:string;source:string;quiz_date:string|null;review:boolean;version:number;question:Question}
+export function QuizQuestionBank({location,disabled,questions,onAdd,open,onOpenChange}:{
+ location:string;disabled:boolean;questions:Question[];onAdd:(questions:Question[])=>void;open?:boolean;onOpenChange?:(open:boolean)=>void
+}){
+ const [expanded,setExpanded]=useState(false),[bank,setBank]=useState<Entry[]>([])
+ const [busy,setBusy]=useState(false),[error,setError]=useState(''),[message,setMessage]=useState('')
+ const [search,setSearch]=useState(''),[category,setCategory]=useState('All'),[day,setDay]=useState('All')
+ const [selected,setSelected]=useState<string[]>([]),[refresh,setRefresh]=useState(0)
+ const [editing,setEditing]=useState<Entry|null>(null),[edit,setEdit]=useState<Question|null>(null)
+ const [importDate,setImportDate]=useState(''),[importTitle,setImportTitle]=useState('Imported quiz'),[importQuestions,setImportQuestions]=useState<Question[]>([])
+ useEffect(()=>{
+  if(!location)return
+  let live=true;setBusy(true);setError('')
+  void supabase.rpc('quiz_question_bank_by_day',{p_location_id:location}).then(r=>{
+   if(!live)return
+   if(r.error)setError(quizError(r.error));else setBank(r.data??[])
+   setBusy(false)
+  })
+  return()=>{live=false}
+ },[location,refresh])
+ const filtered=bank.filter(e=>(category==='All'||e.question.category===category)&&(day==='All'||(e.quiz_date??'Undated')===day)&&
+  (e.question.prompt+' '+e.question.category+' '+e.source).toLowerCase().includes(search.trim().toLowerCase()))
+ const chosen=bank.filter(e=>selected.includes(e.id))
+ function add(items:Entry[]){
+  if(items.length+questions.length>50){setError('A quiz can contain up to 50 questions. Add fewer bank questions.');return}
+  onAdd(items.map(e=>({...e.question,options:[...e.question.options]})))
+  setSelected([]);setMessage(items.length+' question(s) added. Edit the copies in your quiz.')
+ }
+ async function save(){
+  if(!editing||!edit)return
+  setBusy(true);setError('')
+  try{
+   const r=await supabase.rpc('quiz_bank_edit_entry',{p_location_id:location,p_id:editing.id,p_version:editing.version,p_question:edit})
+   if(r.error)throw r.error
+   setEditing(null);setEdit(null);setRefresh(v=>v+1);setMessage('Bank question saved. Existing quiz copies stay unchanged.')
+  }catch(e){setError(quizError(e))}finally{setBusy(false)}
+ }
+ async function importFile(file:File){
+  try{
+   if(file.size>1000000)throw Error('Choose a JSON file smaller than 1 MB.')
+   const parsed=JSON.parse(await file.text()),list=Array.isArray(parsed)?parsed:parsed.questions
+   if(!Array.isArray(list)||!list.length||list.length>50)throw Error('Use a file with 1–50 questions.')
+   setImportQuestions(list.map((q:Question)=>({...q,category:q.category||'Training',explanation:q.explanation||''})))
+   if(parsed.quiz_date)setImportDate(parsed.quiz_date)
+   if(parsed.title)setImportTitle(String(parsed.title).slice(0,200))
+  }catch(e){setImportQuestions([]);setError(quizError(e))}
+ }
+ async function importSet(){
+  setBusy(true);setError('')
+  try{
+   const r=await supabase.rpc('quiz_bank_import',{p_location_id:location,p_date:importDate,p_title:importTitle,p_questions:importQuestions})
+   if(r.error)throw r.error
+   setImportQuestions([]);setRefresh(v=>v+1);setMessage('Dated questions imported.')
+  }catch(e){setError(quizError(e))}finally{setBusy(false)}
+ }
+ return <details className="quiz-bank" open={open??expanded} onToggle={e=>{
+  const next=e.currentTarget.open;setExpanded(next);if(next!==open)onOpenChange?.(next)
+ }}>
+  <summary><strong>Question Bank ({bank.length}) — subject and day</strong></summary>
+  <p>Every entry can be added and edited. Edit a bank question to update the reusable original; edit its copy in a quiz to change only that quiz.</p>
+  {error&&<p role="alert">{error}</p>}{message&&<p role="status">{message}</p>}
+  <fieldset disabled={busy||disabled||!location}>
+   <label>Search<input type="search" value={search} onChange={e=>setSearch(e.target.value)}/></label>
+   <div className="quiz-bank-filters">
+    <label>Subject<select value={category} onChange={e=>setCategory(e.target.value)}>
+     <option>All</option>{[...new Set(bank.map(e=>e.question.category))].sort().map(c=><option key={c}>{c}</option>)}
+    </select></label>
+    <label>Source day<select value={day} onChange={e=>setDay(e.target.value)}>
+     <option>All</option>{[...new Set(bank.map(e=>e.quiz_date??'Undated'))].sort().reverse().map(d=><option key={d}>{d}</option>)}
+    </select></label>
+   </div>
+   <div className="quiz-actions">
+    <button type="button" onClick={()=>setSelected(filtered.map(e=>e.id))}>Select filtered questions</button>
+    <button type="button" disabled={!chosen.length} onClick={()=>add(chosen)}>Add selected ({chosen.length})</button>
+    <button type="button" onClick={()=>setRefresh(v=>v+1)}>Refresh bank</button>
+   </div>
+   {!bank.length&&<p>{busy?'Loading bank…':'No questions in the bank yet.'}</p>}
+   {filtered.map(e=><article className="quiz-bank-item" key={e.id}>
+    <label className="quiz-choice"><input type="checkbox" checked={selected.includes(e.id)}
+     onChange={()=>setSelected(v=>v.includes(e.id)?v.filter(id=>id!==e.id):[...v,e.id])}/><span>{e.question.prompt}</span></label>
+    <p className="muted">{e.question.category} · {e.quiz_date??'Undated'} · {e.source}</p>
+    {e.review&&<p className="muted">Review source facts, recipes, prices and policies before publishing.</p>}
+    <details><summary>Choices and correct answer</summary><ol type="A">{e.question.options.map((o,i)=><li key={i}>{o}{i===e.question.correct?' — Correct':''}</li>)}</ol><p>{e.question.explanation}</p></details>
+    <button type="button" onClick={()=>add([e])}>Add this question</button>
+    <button type="button" onClick={()=>{
+     if(editing&&!window.confirm('Discard the unsaved bank edit?'))return
+     setEditing(e);setEdit({...e.question,options:[...e.question.options]})
+    }}>Edit bank question</button>
+    {editing?.id===e.id&&edit&&<div className="mod-review">
+     <label>Question<textarea rows={3} maxLength={2000} value={edit.prompt} onChange={x=>setEdit({...edit,prompt:x.target.value})}/></label>
+     <label>Subject<input maxLength={100} value={edit.category} onChange={x=>setEdit({...edit,category:x.target.value})}/></label>
+     {edit.options.map((option,i)=><label key={i}>{String.fromCharCode(65+i)}<input maxLength={1000} value={option} onChange={x=>setEdit({...edit,options:edit.options.map((v,n)=>n===i?x.target.value:v)})}/></label>)}
+     <label>Correct answer<select value={edit.correct} onChange={x=>setEdit({...edit,correct:Number(x.target.value)})}>{edit.options.map((o,i)=><option key={i} value={i}>{String.fromCharCode(65+i)} · {o}</option>)}</select></label>
+     <label>Explanation<textarea rows={3} maxLength={2000} value={edit.explanation} onChange={x=>setEdit({...edit,explanation:x.target.value})}/></label>
+     <button type="button" onClick={()=>void save()}>Save bank question</button>
+     <button type="button" onClick={()=>{setEditing(null);setEdit(null)}}>Cancel bank edit</button>
+    </div>}
+   </article>)}
+   <details><summary>Import an older quiz from JSON</summary>
+    <label>Quiz date<input type="date" value={importDate} onChange={e=>setImportDate(e.target.value)}/></label>
+    <label>Title<input maxLength={200} value={importTitle} onChange={e=>setImportTitle(e.target.value)}/></label>
+    <label>Questions file<input type="file" accept=".json,application/json" onChange={e=>{if(e.target.files?.[0])void importFile(e.target.files[0]);e.target.value=''}}/></label>
+    <button type="button" disabled={!importQuestions.length||!importDate||!importTitle.trim()} onClick={()=>void importSet()}>Import {importQuestions.length} questions</button>
+   </details>
+  </fieldset>
+ </details>
 }
-

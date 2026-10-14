@@ -7,6 +7,8 @@ import { SectionEmployeePicker } from '../components/SectionEmployeePicker'
 import { SectionSchedule, type SectionPlan } from '../components/SectionSchedule'
 import { floorRoomRatio, floorTableGeometry } from '../lib/floorPhotoLayout'
 import './FloorMap.css'
+import './ReservationTables.css'
+import { serviceDay } from '../lib/serviceDay'
 import { recommendSections } from '../lib/smartSections'
 import { ReservationEditor } from '../components/ReservationEditor'
 import { useEffect, useMemo, useRef, useState } from 'react'
@@ -72,6 +74,7 @@ type ActiveTableSession = {
 
 
 type ReservationRecord = {
+  table_ids: string[]
   assigned_server_id: string | null
   edit_version: number
   id: string
@@ -135,7 +138,15 @@ export function FloorPage() {
   const [locationId, setLocationId] = useState('')
   const [locationName, setLocationName] = useState('')
 
+  const swipeStart=useRef<{x:number;y:number}|null>(null)
+  const suppressTableClick=useRef(false)
   const [rooms, setRooms] = useState<Room[]>([])
+  function switchRoom(direction:number){
+    if(arrangeMode||rooms.length<2)return
+    const index=rooms.findIndex(r=>r.id===activeRoomId)
+    const next=Math.max(0,Math.min(rooms.length-1,index+direction))
+    setActiveRoomId(rooms[next].id)
+  }
   const [tables, setTables] = useState<FloorTable[]>([])
   const [team, setTeam] = useState<TeamMember[]>([])
   const [shifts, setShifts] = useState<Shift[]>([])
@@ -232,6 +243,9 @@ const [partySize, setPartySize] = useState(1)
     useState(false)
 
   const [sectionName, setSectionName] = useState('')
+  const [editingSection,setEditingSection]=useState<(typeof baseSectionCards)[number]|null>(null)
+  const [reassignPlan,setReassignPlan]=useState<SectionPlan|null>(null)
+  const [scheduleEditRequest,setScheduleEditRequest]=useState<{id:string;nonce:number}|undefined>()
 
   const [sectionGuestName,setSectionGuestName]=useState('')
   const [selectedServerId, setSelectedServerId] =
@@ -282,6 +296,7 @@ const [partySize, setPartySize] = useState(1)
               location_id,
               room_id,
               table_name,
+          table_ids,
               seat_count,
               shape,
               position_x,
@@ -355,9 +370,7 @@ const [partySize, setPartySize] = useState(1)
   }, [activeShiftId, locationId])
 
   async function loadFloorShifts(loc: string): Promise<Shift[]> {
-    const parts=new Intl.DateTimeFormat('en-CA',{timeZone:'America/Chicago',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date())
-    const get=(key:string)=>parts.find(p=>p.type===key)?.value
-    const date=`${get('year')}-${get('month')}-${get('day')}`
+    const date=serviceDay()
     const r=await supabase.from('shifts').select('id,organization_id,location_id,shift_date,shift_name,status').eq('location_id',loc).eq('shift_date',date).in('status',['scheduled','open','closed']).order('created_at')
     if(r.error)throw r.error
     return ((r.data ?? []) as Shift[]).sort((a,b)=>({open:0,scheduled:1,closed:2,cancelled:3}[a.status]-{open:0,scheduled:1,closed:2,cancelled:3}[b.status]))
@@ -567,6 +580,7 @@ const [partySize, setPartySize] = useState(1)
           email,
           table_id,
           table_name,
+          table_ids,
           status,
           occasion,
           is_birthday,
@@ -903,7 +917,7 @@ const [partySize, setPartySize] = useState(1)
     return (
       reservations.find(
         (reservation) =>
-          reservation.table_id === tableId &&
+          (reservation.table_ids??(reservation.table_id?[reservation.table_id]:[])).includes(tableId) &&
           !['cancelled', 'canceled', 'seated'].includes(
             reservation.status.toLowerCase(),
           ),
@@ -1670,6 +1684,7 @@ const [partySize, setPartySize] = useState(1)
             location_id,
             room_id,
             table_name,
+          table_ids,
             seat_count,
             shape,
             position_x,
@@ -1739,6 +1754,18 @@ const [partySize, setPartySize] = useState(1)
       setSelectedTableIds([]);setFloorNotice(all?'Section assignments cleared. Select tables to build new sections.':'Selected table assignments cleared.')
     }catch(e){setError(String((e as {message?:string}).message??e))}finally{setSaving(false)}
   }
+  function openSectionEditor(card?:typeof sectionCards[number],tableIds=selectedTableIds){
+    setError('');setShowTablePanel(false);setReassignPlan(null)
+    if(card){const plan=activePlans.find(p=>p.id===card.id);if(plan){setSelectedTableIds(plan.table_ids);setScheduleEditRequest({id:plan.id,nonce:Date.now()});return}}
+    const original=card?baseSectionCards.find(c=>c.id===card.id):undefined
+    setEditingSection(original??null);setSelectedTableIds(original?.tableIds??tableIds)
+    const assignment=assignments.find(a=>tableIds.includes(a.table_id))
+    setSectionName(original?.name??card?.name??'')
+    const employeeId=original?.employeeId??assignment?.server_id
+    const person=original?.guestName??assignment?.guest_name??''
+    setSelectedServerId(employeeId??(person?'__name__':''));setSectionGuestName(person)
+    setShowSectionPanel(true)
+  }
   async function handleCreateSection() {
     if (
       (!selectedServerId || (selectedServerId==='__name__'&&!sectionGuestName.trim())) ||
@@ -1757,18 +1784,21 @@ const [partySize, setPartySize] = useState(1)
       setSaving(true)
       setError('')
 
-      const r=await supabase.rpc('floor_assign_section_person',{
+      const r=await supabase.rpc(reassignPlan?'floor_reassign_active_tables':editingSection?'floor_edit_section_person':'floor_assign_section_person',{
+        ...(reassignPlan?{p_plan_id:reassignPlan.id,p_version:reassignPlan.version}:{}),
+        ...(editingSection?{p_section_id:editingSection.id,p_expected:{name:editingSection.name,employee_id:editingSection.employeeId,guest_name:editingSection.guestName??null,table_ids:[...editingSection.tableIds].sort()}}:{}),
         p_location_id:locationId,p_shift_id:activeShiftId || null,p_shift_name:newShiftName,
         p_name:finalSectionName,p_server_id:selectedServerId==='__name__'?null:selectedServerId,p_guest_name:selectedServerId==='__name__'?sectionGuestName.trim():null,p_table_ids:selectedTableIds,
       })
       if(r.error)throw r.error
-      const shiftId=String(r.data.shift_id)
+      const shiftId=r.data.shift_id?String(r.data.shift_id):activeShiftId
       setShifts(await loadFloorShifts(locationId));setActiveShiftId(shiftId)
-      await Promise.all([loadAssignments(shiftId),loadSections(shiftId)])
+      const planned=await supabase.rpc('floor_schedule_list',{p_location_id:locationId});if(planned.error)throw planned.error;setSectionPlans(planned.data.plans??[]);setScheduleRefresh(v=>v+1)
+      if(shiftId)await Promise.all([loadAssignments(shiftId),loadSections(shiftId)])
       setFloorNotice('Section assigned. '+(r.data.status==='scheduled'?'Shift is scheduled; service has not opened.':''))
       setSelectedTableIds([])
       setSelectedServerId('');setSectionGuestName('')
-      setSectionName('')
+      setSectionName('');setEditingSection(null)
       setShowSectionPanel(false)
     } catch (caughtError) {
       setError(
@@ -1857,8 +1887,8 @@ const [partySize, setPartySize] = useState(1)
       {pendingWalkin&&<div data-design-block="copy.eb305b57f537aed6.1" className="wt-card" role="status"><strong><ScreenText id="FloorPage.72ad81f5e33ac981">Seating </ScreenText>{pendingWalkin.guest_name}<ScreenText id="FloorPage.0e1b1fe85997c7d1"> · party of </ScreenText>{pendingWalkin.party_size}</strong><p data-design-block="copy.0cae27057d8f304b.1"><ScreenText id="FloorPage.aaf48aa3abcc020d">Select their tables, then press Seat. Their check-in is marked seated when seating succeeds.</ScreenText></p><button data-design-block="copy.b1a3fd87f11bd6fb.1" type="button" disabled={saving} onClick={()=>{setPendingWalkin(null);setGuestName('');setGuestPhone('');setGuestEmail('');setPartySize(1)}}><ScreenText id="FloorPage.a3bf126804af00d4">Cancel walk-in selection</ScreenText></button></div>}
 
       {/* FLOOR SECTIONS AT TOP */}
-      <SectionSchedule refreshKey={scheduleRefresh} locationId={locationId} selectedTableIds={selectedTableIds} tables={tables} employees={team.map(m=>({id:m.user_id,name:memberName(m.user_id)}))} onLoaded={(plans,offset)=>{setSectionPlans(plans);setServerClockOffset(offset)}} onSelect={setSelectedTableIds} />
-      {sectionCards.length>0 && <section data-design-block="copy.12756fa73e4e31ea.1" className="floor-section-summary"><p data-design-block="copy.b78f32efa3eeed28.2" className="eyebrow"><ScreenText id="FloorPage.2e081cd59ce390e4">Current Floor</ScreenText></p><h2 data-design-block="copy.2e495f44a1c1f630.1"><ScreenText id="FloorPage.773db4a763e3d6a3">Assigned sections</ScreenText></h2><button data-design-block="copy.dbe356ad805f296d.1" type="button" disabled={saving||arrangeMode} onClick={()=>void clearSectionAssignments(true)}><ScreenText id="FloorPage.abe16c2c033d7292">Clear all sections</ScreenText></button><div data-design-block="copy.542b94986fcaef05.1">{sectionCards.map(c=><button data-design-block="copy.e57c5b6f760b6b51.1" key={c.id} onClick={()=>setSelectedTableIds(c.tableIds)}><strong>{c.name}</strong><span className="section-server">{c.guestName || memberName(c.employeeId)}</span><span>{tables.filter(t=>c.tableIds.includes(t.id)).map(t=>t.table_name).join(', ')}</span><span>{c.tableIds.length}<ScreenText id="FloorPage.7b01d68c1fbd4367"> tables · </ScreenText>{c.totalSeats}<ScreenText id="FloorPage.5a8f27d4d02c6b32"> seats</ScreenText></span></button>)}</div></section>}
+      <SectionSchedule editRequest={scheduleEditRequest} refreshKey={scheduleRefresh} locationId={locationId} selectedTableIds={selectedTableIds} tables={tables} employees={team.map(m=>({id:m.user_id,name:memberName(m.user_id)}))} onLoaded={(plans,offset)=>{setSectionPlans(plans);setServerClockOffset(offset)}} onSelect={setSelectedTableIds} />
+      {sectionCards.length>0 && <section data-design-block="copy.12756fa73e4e31ea.1" className="floor-section-summary"><p data-design-block="copy.b78f32efa3eeed28.2" className="eyebrow"><ScreenText id="FloorPage.2e081cd59ce390e4">Current Floor</ScreenText></p><h2 data-design-block="copy.2e495f44a1c1f630.1"><ScreenText id="FloorPage.773db4a763e3d6a3">Assigned sections</ScreenText></h2><button data-design-block="copy.dbe356ad805f296d.1" type="button" disabled={saving||arrangeMode} onClick={()=>void clearSectionAssignments(true)}><ScreenText id="FloorPage.abe16c2c033d7292">Clear all sections</ScreenText></button><div data-design-block="copy.542b94986fcaef05.1">{sectionCards.map(c=><button data-design-block="copy.e57c5b6f760b6b51.1" key={c.id} onClick={()=>openSectionEditor(c,c.tableIds)}><strong>{c.name}</strong><span className="section-server">{c.guestName || memberName(c.employeeId)}</span><span>{tables.filter(t=>c.tableIds.includes(t.id)).map(t=>t.table_name).join(', ')}</span><span>{c.tableIds.length}<ScreenText id="FloorPage.7b01d68c1fbd4367"> tables · </ScreenText>{c.totalSeats}<ScreenText id="FloorPage.5a8f27d4d02c6b32"> seats</ScreenText></span></button>)}</div></section>}
 
       <div data-design-block="copy.4502244f66f4abcd.1" className="shift-toolbar">
         {shifts.length > 0 ? (
@@ -1998,17 +2028,22 @@ const [partySize, setPartySize] = useState(1)
       <section data-design-block="copy.324b51b1153c4928.1" className="floor-section-tools" aria-label="Section assignment">
         <div data-design-block="copy.542b94986fcaef05.2"><strong><ScreenText id="FloorPage.7ae0af4dfe409f5d">Sections & tables</ScreenText></strong><p data-design-block="copy.0cae27057d8f304b.2"><ScreenText id="FloorPage.4ac45f2a6bb70ad0">Tap tables to select them. Switch rooms to include more tables.</ScreenText></p></div>
         <div data-design-block="copy.c68b2a1ad42b0b85.1" className="floor-selection-list">{selectedTables.length?selectedTables.map(t=><button data-design-block="copy.9af7597dafc26b77.1" type="button" key={t.id} onClick={()=>toggleTable(t.id)}>{t.table_name}<PageWord id="copy.c20d59400a2510cd.1">×</PageWord></button>):<span><ScreenText id="FloorPage.f8add3ec5d2c9bb7">No tables selected</ScreenText></span>}</div>
-        <div data-design-block="copy.f878dc5ab1a1444d.1" className="floor-selection-actions"><button data-design-block="copy.e67ad1dc8c087646.1" type="button" disabled={!selectedTableIds.length || smartLoading || saving || arrangeMode} onClick={()=>void handleSmartSection()}>{smartLoading?<PageWord id="copy.27e48bc48b13bca4.1">{"Analyzing…"}</PageWord>:<PageWord id="copy.cae5e560b5f3e2ab.1">{"✨ Smart Section"}</PageWord>}</button><button data-design-block="copy.e8620a9be264f089.1" type="button" disabled={!selectedTableIds.length || saving || arrangeMode} onClick={()=>setShowSectionPanel(true)}><ScreenText id="FloorPage.3df282d311f231b2">Assign section</ScreenText></button><button data-design-block="copy.539b53736d89f9b4.1" type="button" disabled={!selectedTableIds.length || saving || arrangeMode} onClick={openSeating}><ScreenText id="FloorPage.ec891dc9c52cf729">Seat selected tables</ScreenText></button><button data-design-block="copy.d859f8f24a8250d7.1" type="button" disabled={!selectedTableIds.length} onClick={()=>setSelectedTableIds([])}><ScreenText id="FloorPage.2a943581190c3312">Clear selection</ScreenText></button><button data-design-block="copy.25c73b70cd111940.1" type="button" disabled={!selectedTableIds.length||saving||arrangeMode} onClick={()=>void clearSectionAssignments()}><ScreenText id="FloorPage.310acd98ecea24b1">Clear assignments</ScreenText></button></div>
+        <div data-design-block="copy.f878dc5ab1a1444d.1" className="floor-selection-actions"><button data-design-block="copy.e67ad1dc8c087646.1" type="button" disabled={!selectedTableIds.length || smartLoading || saving || arrangeMode} onClick={()=>void handleSmartSection()}>{smartLoading?<PageWord id="copy.27e48bc48b13bca4.1">{"Analyzing…"}</PageWord>:<PageWord id="copy.cae5e560b5f3e2ab.1">{"✨ Smart Section"}</PageWord>}</button><button data-design-block="copy.e8620a9be264f089.1" type="button" disabled={!selectedTableIds.length || saving || arrangeMode} onClick={()=>openSectionEditor()}><ScreenText id="FloorPage.3df282d311f231b2">Assign section</ScreenText></button><button data-design-block="copy.539b53736d89f9b4.1" type="button" disabled={!selectedTableIds.length || saving || arrangeMode} onClick={openSeating}><ScreenText id="FloorPage.ec891dc9c52cf729">Seat selected tables</ScreenText></button><button data-design-block="copy.d859f8f24a8250d7.1" type="button" disabled={!selectedTableIds.length} onClick={()=>setSelectedTableIds([])}><ScreenText id="FloorPage.2a943581190c3312">Clear selection</ScreenText></button><button data-design-block="copy.25c73b70cd111940.1" type="button" disabled={!selectedTableIds.length||saving||arrangeMode} onClick={()=>void clearSectionAssignments()}><ScreenText id="FloorPage.310acd98ecea24b1">Clear assignments</ScreenText></button></div>
 
         {floorNotice && <p data-design-block="copy.d70411190a777647.1" role="status">{floorNotice}</p>}
       </section>
       
-       <p data-design-block="copy.47e8f14106004bf5.1" className="floor-map-hint"><ScreenText id="FloorPage.f3780ffe48f2e882">Swipe sideways on the map to view the whole room. Tap multiple tables to select them.</ScreenText></p>
+       <p data-design-block="copy.47e8f14106004bf5.1" className="floor-map-hint"><ScreenText id="FloorPage.f3780ffe48f2e882">Swipe left or right to switch floor plans. Tap multiple tables to select them.</ScreenText></p>
        {/* LIVE FLOOR */}
-       <div data-design-block="copy.04d68e17bc6f50c2.1" className="floor-map-scroll">
+       <div data-design-block="copy.04d68e17bc6f50c2.1" className="floor-map-scroll" style={arrangeMode?undefined:{touchAction:'pan-y',overflowX:'hidden'}}
+        onTouchStart={e=>{suppressTableClick.current=false;swipeStart.current=!arrangeMode&&e.touches.length===1?{x:e.touches[0].clientX,y:e.touches[0].clientY}:null}}
+        onTouchMove={e=>{const start=swipeStart.current;if(start&&e.touches.length===1&&Math.abs(e.touches[0].clientX-start.x)>20)suppressTableClick.current=true;else if(e.touches.length!==1)swipeStart.current=null}}
+        onTouchCancel={()=>{swipeStart.current=null}}
+        onTouchEnd={e=>{const start=swipeStart.current;swipeStart.current=null;if(!start||arrangeMode||!e.changedTouches.length)return;const dx=e.changedTouches[0].clientX-start.x,dy=e.changedTouches[0].clientY-start.y;if(Math.abs(dx)>70&&Math.abs(dx)>Math.abs(dy)*1.5){suppressTableClick.current=true;switchRoom(dx<0?1:-1)}}}>
       <div data-design-block="copy.8f9ba52002845c31.1"
         className="floor-canvas"
         ref={floorCanvasRef}
+        data-swipe-enabled={!arrangeMode}
         style={
           arrangeMode
             ? {
@@ -2073,7 +2108,7 @@ const [partySize, setPartySize] = useState(1)
                     : undefined,
               }}
               onClick={() =>
-                toggleTable(table.id)
+                (suppressTableClick.current?undefined:toggleTable(table.id))
               }
               onPointerDown={(event) =>
                 handleTablePointerDown(
@@ -2281,6 +2316,8 @@ const [partySize, setPartySize] = useState(1)
               />
             </label>
 
+            <p>{editingSection?'Edit this section. Unselected tables will be released; other sections stay in place.':'Selected tables will move to this section. Seated parties keep their server.'}</p>
+            <fieldset disabled={saving}><legend>Section tables</legend><div className="closeout-table-grid">{(reassignPlan?tables.filter(t=>reassignPlan.table_ids.includes(t.id)):tables).map(t=><label key={t.id}><input type="checkbox" checked={selectedTableIds.includes(t.id)} onChange={e=>setSelectedTableIds(ids=>e.target.checked?[...ids,t.id]:ids.filter(id=>id!==t.id))}/>{t.table_name}</label>)}</div></fieldset>
             <SectionEmployeePicker employees={team.map(m=>({id:m.user_id,name:memberName(m.user_id)}))} employeeId={selectedServerId==='__name__'?null:selectedServerId} guestName={sectionGuestName} disabled={saving} onChange={(id,name)=>{setSelectedServerId(id===null?'__name__':id);setSectionGuestName(name)}}/>
 
             <div data-design-block="copy.f0960e9d89953dad.1"
@@ -2462,9 +2499,7 @@ const [partySize, setPartySize] = useState(1)
                 {selectedSeatCount}<ScreenText id="FloorPage.1e21c88bc28cc5d3"> seats ·</ScreenText>{' '}
                 {reservations
                   .filter((reservation) =>
-                    selectedTableIds.includes(
-                      reservation.table_id ?? '',
-                    ),
+                    (reservation.table_ids??(reservation.table_id?[reservation.table_id]:[])).some(id=>selectedTableIds.includes(id)),
                   )
                   .reduce(
                     (total, reservation) =>
@@ -3362,6 +3397,7 @@ const [partySize, setPartySize] = useState(1)
               )}
             </div>
 
+            <button type="button" disabled={saving||arrangeMode} onClick={()=>{openSectionEditor(undefined,[selectedTable.id]);const plan=activePlans.find(p=>p.table_ids.includes(selectedTable.id));setReassignPlan(plan??null)}}>Change section assignment</button>
             <div data-design-block="copy.add593ba59bb8ba3.1"
               style={{
                 display: 'grid',

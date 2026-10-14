@@ -1,4 +1,5 @@
 import { supabase } from './supabase'
+import { serviceDay } from './serviceDay'
 
 export type Shift = {
   id: string
@@ -24,7 +25,7 @@ export async function loadTodayShifts(
       'id, organization_id, location_id, shift_date, shift_name, status',
     )
     .eq('location_id', locationId)
-    .eq('shift_date', todayDate())
+    .eq('shift_date', serviceDay())
     .in('status', ['scheduled', 'open'])
     .order('created_at')
 
@@ -55,7 +56,7 @@ export async function createShift({
     .insert({
       organization_id: organizationId,
       location_id: locationId,
-      shift_date: todayDate(),
+      shift_date: serviceDay(),
       shift_name: shiftName,
       status: 'open',
       opened_by: user.id,

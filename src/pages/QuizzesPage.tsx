@@ -7,6 +7,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { loadTenantData } from '../lib/tenant'
 import { useManagementAccess } from '../components/ManagementAccess'
+import { GeneratePreshiftQuiz } from '../components/GeneratePreshiftQuiz'
 import { PublishedQuizzes } from '../components/PublishedQuizzes'
 import type { PublishedQuiz } from '../components/PublishedQuizzes'
 import './ManagerCloseoutPage.css'
@@ -62,6 +63,7 @@ export function QuizzesPage(){
  const otherAttempts=monthly?.attempts.filter(a=>!(quiz && result && a.quiz_date===date)) ?? []
  return <section data-design-block="copy.2ad13fdb7d598282.1" className="mod-page quiz-page"><p data-design-block="copy.55e941dd4b788dbb.1" className="eyebrow"><ScreenText id="QuizzesPage.15c8c5ead821decf">Pre-shift preparation</ScreenText></p><h1 data-design-block="copy.a5c87383cd4dd950.1"><ScreenText id="QuizzesPage.38584cb9f2b57db7">Daily Quizzes</ScreenText></h1>
   <div data-design-block="copy.fd220dea04adf686.1" className="quiz-actions">{access.manager && <Link className="quiz-builder-link" to="/quizzes/build"><ScreenText id="QuizzesPage.84f911a877a2c179">Build Future Quizzes / Question Bank →</ScreenText></Link>}<button data-design-block="copy.c3690562b77222d5.1" type="button" disabled={busy} onClick={()=>{if(Object.keys(answers).length && !result && !window.confirm('Discard your answers and reload the quiz?'))return;setRefresh(v=>v+1)}}><ScreenText id="QuizzesPage.879f2447f6bb95b8">Refresh</ScreenText></button></div>
+  {access.manager&&<GeneratePreshiftQuiz allowPaste location={location} date={date} title="" body="" disabled={!location} onSaved={()=>setRefresh(v=>v+1)}/>}
   <h2 data-design-block="copy.b5e32943f8cdadea.1"><ScreenText id="QuizzesPage.6e4f183331ca689e">Today · </ScreenText>{quizDateLabel(date)}</h2>
   {error && <p data-design-block="copy.33f8f18b9f66c5f9.1" role="alert">{error}</p>}{busy && <p data-design-block="copy.dce6c33edff70b50.1" role="status"><ScreenText id="QuizzesPage.6799e69e289fa08d">Loading…</ScreenText></p>}
   {!busy && !quiz && !error && <article data-design-block="copy.b40784f5607731b4.2" className="mod-review"><h3 data-design-block="copy.26f1d34ac8687bbf.2"><ScreenText id="QuizzesPage.1d72b99728971f78">No quiz published for today</ScreenText></h3><p data-design-block="copy.854e1d9db292679b.6"><ScreenText id="QuizzesPage.21286979d56c5fd7">Your manager will publish today’s pre-shift quiz here.</ScreenText></p>{access.manager && <Link to={'/quizzes/manage?date='+date}><ScreenText id="QuizzesPage.0904328e9a0b32e1">Create / Publish Today’s Quiz →</ScreenText></Link>}</article>}

@@ -143,6 +143,10 @@ export default function App() {
         <Route path="/settings/wording" element={<ManagementOnly gmOnly><ScreenWordingPage /></ManagementOnly>} />
         <Route path="/guest-feedback" element={<ManagementOnly><GuestFeedbackInbox /></ManagementOnly>} />
         <Route path="/settings" element={<SettingsPage />} />
+        <Route path="/settings/points" element={<PointsPage />} />
+        <Route path="/settings/points-adjustments" element={<ManagementOnly><CloseoutSettingsPage key="settings-awards" awardsOnly /></ManagementOnly>} />
+        <Route path="/settings/forms" element={<ManagementOnly gmOnly><CloseoutSettingsPage key="settings-forms" /></ManagementOnly>} />
+        <Route path="/settings/permissions" element={<ManagementOnly gmOnly><PermissionsPage /></ManagementOnly>} />
         <Route path="/settings/point-rules" element={<ManagementOnly gmOnly><CloseoutSettingsPage key="point-rules" initialTab="points" /></ManagementOnly>} />
         <Route path="/closeout-summary/cash" element={<SummaryPage cash />} />
         <Route path="/appearance" element={<AppearanceGuard gmOnly><LocationAppearancePage /></AppearanceGuard>} />

@@ -10,7 +10,7 @@ import { submissionLabel } from '../lib/submissionTime'
 import { Link } from 'react-router-dom'
 import { CloseoutQuestions, useCloseoutConfig, checkAnswers, questionLabel, questionActive } from '../components/CloseoutConfig'
 import type { Answers } from '../components/CloseoutConfig'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState , useRef } from 'react'
 import { supabase } from '../lib/supabase'
 import { loadTenantData } from '../lib/tenant'
 
@@ -339,6 +339,11 @@ export function CloseoutPage() {
 
   const [locationId, setLocationId] =
     useState('')
+
+  const closeoutRequest=useRef(crypto.randomUUID())
+  const [floorShiftId,setFloorShiftId]=useState(''),[floorShifts,setFloorShifts]=useState<{id:string;shift_name:string;status:string}[]>([]),[floorTablesNotice,setFloorTablesNotice]=useState('')
+  useEffect(()=>{if(!locationId)return;let live=true;void supabase.from('shifts').select('id,shift_name,status').eq('location_id',locationId).eq('shift_date',serviceDay()).in('status',['scheduled','open','closed']).then(r=>{if(live&&!r.error)setFloorShifts(r.data??[])});return()=>{live=false}},[locationId])
+  async function pullFloorTables(){setFloorTablesNotice('');try{const u=await supabase.auth.getUser();if(u.error)throw u.error;const r=await supabase.rpc('floor_sections_for_day',{p_location_id:locationId,p_date:serviceDay(),p_only_me:true});if(r.error)throw r.error;const rows=(r.data??[]) as {table_ids:string[];id:string;starts_at:string|null;ends_at:string|null}[];const ids=[...new Set(rows.filter(row=>row.starts_at!==null||!floorShiftId||row.id===floorShiftId).flatMap(row=>row.table_ids))];setSelectedTableIds(ids.filter(id=>tables.some(t=>t.id===id)));setFloorTablesNotice(ids.length?'Floor assignments loaded. Confirm every table you actually worked, including any changes during your shift.':'No assigned tables found. Select the tables you actually worked below.')}catch(e){setFloorTablesNotice(String((e as {message?:string}).message??e))}}
 
   const { config, error: configError } = useCloseoutConfig(locationId)
   const shown=(id:string)=>questionActive(config,id)
@@ -991,15 +996,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
         )
       }
 
-      const {
-        data: closeout,
-        error:
-          closeoutError,
-      } = await supabase
-        .from(
-          'daily_closeouts'
-        )
-        .insert({
+      const {data:closeout,error:closeoutError}=await supabase.rpc('closeout_submit_with_tables',{p_payload:{
           stock_items: [...new Set(stockItems.split('\n').map(n=>n.trim()).filter(Boolean))],
           zero_sales_confirmed: Number(netSales)===0 && zeroSalesConfirmed,
           zero_sales_reason: Number(netSales)===0 ? zeroSalesReason.trim() : null,
@@ -1081,64 +1078,15 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
 
           points_summary:
             finalPoints.adjustments,
-        })
-        .select('id,submitted_at,shift_score,closeout_date,automatic_target_snapshot')
-        .single()
+        },p_table_ids:selectedTables.map(t=>t.id),p_shift_id:floorShiftId||null,p_request_id:closeoutRequest.current})
 
       if (closeoutError) {
         throw closeoutError
       }
 
+      closeoutRequest.current=crypto.randomUUID()
       const warnings:
         string[] = []
-
-      /*
-       * Save tables worked.
-       */
-
-      if (
-        closeout?.id &&
-        selectedTables.length >
-          0
-      ) {
-        const tableRows =
-          selectedTables.map(
-            (table) => ({
-              closeout_id:
-                closeout.id,
-
-              table_id:
-                table.id,
-
-              table_name:
-                table.table_name,
-            })
-          )
-
-        const {
-          error:
-            tableSaveError,
-        } = await supabase
-          .from(
-            'daily_closeout_tables'
-          )
-          .insert(
-            tableRows
-          )
-
-        if (
-          tableSaveError
-        ) {
-          console.error(
-            'Table save error:',
-            tableSaveError
-          )
-
-          warnings.push(
-            'table history needs review'
-          )
-        }
-      }
 
       // Automatic closeout points are saved atomically by the database.
 
@@ -1601,6 +1549,9 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
           Tables Worked
         </ScreenText></h2>
 
+        <label>Floor shift (optional)<select value={floorShiftId} onChange={e=>setFloorShiftId(e.target.value)}><option value="">Choose the shift worked</option>{floorShifts.map(shift=><option key={shift.id} value={shift.id}>{shift.shift_name} · {shift.status}</option>)}</select></label>
+        <button type="button" disabled={saving} onClick={()=>void pullFloorTables()}>Load my Floor tables</button>
+        <p role="status">{floorTablesNotice||'Select the tables you actually worked. These are the same table records used on Floor; saving preserves them for Smart Sections.'}</p>
         {Object.entries(
           groupedTables
         ).map(
