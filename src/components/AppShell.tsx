@@ -7,6 +7,7 @@ import { AppearanceHeader } from './AppearanceHeader'
 import '../pages/WarmTheme.css'
 import { useEffect, useRef, useState, type PropsWithChildren } from 'react'
 import { useLocation } from 'react-router-dom'
+import {AppStickerDecorations} from './StickerDecorations'
 import { PageRecovery } from './PageRecovery'
 import './AppPolish.css'
 import type { Session } from '@supabase/supabase-js'
@@ -160,6 +161,7 @@ export function AppShell({
       <main ref={content} id="app-main" tabIndex={-1} data-design-block="copy.60535db1b6f53b61.1" className="app-content">
         {offline && <p role="status">You’re offline. Reconnect before saving or refreshing.</p>}
         {signOutError && <p role="alert">{signOutError}</p>}
+        <AppStickerDecorations />
         <PageRecovery key={pathname.startsWith('/preshift/')?'/preshift':pathname}>{children}</PageRecovery>
       </main>
 
