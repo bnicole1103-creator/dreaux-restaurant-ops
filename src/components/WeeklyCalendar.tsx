@@ -1,3 +1,5 @@
+import {scheduledPeople} from '../lib/scheduledPeople'
+import './PosterCalendar.css'
 import {useEffect,useState} from 'react'
 import {CalendarDayPopup} from './CalendarDayPopup'
 import {calendarLook} from '../lib/calendarLook'
@@ -12,7 +14,7 @@ export function WeeklyCalendar({location}:{location:string}){
  useEffect(()=>{const update=()=>setToday(calendarToday());const timer=setInterval(update,60000);window.addEventListener('focus',update);return()=>{clearInterval(timer);window.removeEventListener('focus',update)}},[])
  const [open,setOpen]=useState<{date:string;view:string}|null>(null)
  const days=weekDays(today),calendar=useCalendarData(location,days[0],days[6])
- return <><section style={calendarLook(calendar.data.styles?.[today.slice(0,7)]?.config)} className="home-section home-week-calendar calendar-studio-week" aria-label="This week's calendar">
+ return <><section style={calendarLook(calendar.data.styles?.[today.slice(0,7)]?.config)} className="home-section home-week-calendar calendar-studio-week poster-week" aria-label="This week's calendar">
   <div className="home-section-heading"><h2>This week</h2><div className="calendar-week-actions"><Link to="/calendar">Full calendar →</Link><button type="button" disabled={calendar.loading} onClick={calendar.reload}>Refresh</button></div></div>
   <p className="calendar-week-range">{dateLabel(days[0],true)}–{dateLabel(days[6],true)} · Central time</p>
   {calendar.error&&<p role="alert">{calendar.error}</p>}{calendar.scheduleError&&<p role="alert">{calendar.scheduleError}</p>}{calendar.loading&&<p role="status">Loading the week…</p>}
@@ -21,7 +23,7 @@ export function WeeklyCalendar({location}:{location:string}){
    return <article key={date} className={'calendar-week-day'+(date===today?' today':'')} aria-label={dateLabel(date)}>
     <h3><button type="button" onClick={()=>setOpen({date,view:'day'})} aria-current={date===today?'date':undefined}><span>{['Mon','Tue','Wed','Thu','Fri','Sat','Sun'][index]}</span><span>{new Intl.DateTimeFormat('en-US',{timeZone:'UTC',month:'short',day:'numeric'}).format(new Date(date+'T12:00:00Z'))}</span></button></h3>
     <button type="button" className={'calendar-week-event'+(!event?' muted':'')} onClick={()=>setOpen({date,view:'day'})} title={event?.title}>{event?event.title:day?.posts?day.posts+' post'+(day.posts===1?'':'s'):'No updates'}{events.length>1&&<small>+{events.length-1} more</small>}</button>
-    <button type="button" className="calendar-week-schedule" onClick={()=>setOpen({date,view:'schedule'})}>Schedule <strong>{day?.synced_at?day.rows.length:'—'}</strong></button>
+    <div className="week-staff-names" aria-label="Scheduled staff">{scheduledPeople(day?.rows??[]).slice(0,4).map(s=><span key={s.id} title={s.name}>{s.name}</span>)}{scheduledPeople(day?.rows??[]).length>4&&<Link to={'/floor?date='+date}>+{scheduledPeople(day?.rows??[]).length-4} more</Link>}{!day?.synced_at&&<small>Not synced</small>}</div>
     <button type="button" className="calendar-reservations" onClick={()=>setOpen({date,view:'reservations'})}>Reservations <strong>{day?day.reservations:'—'}</strong></button>
    </article>
   })}</div></div>

@@ -3,7 +3,7 @@ import {useEffect,useState} from 'react'
 import {supabase} from '../lib/supabase'
 export type CalendarEvent={id:string;date:string;title:string;body:string;time:string|null;category:string;version:number;media?:CalendarFlyer[];style?:CalendarLook}
 export type CalendarFlyer={path:string;name:string;caption:string}
-export type CalendarShift={id:string;name:string;role:string;station:string;start:string;end:string;close:boolean;business_decline:boolean}
+export type CalendarShift={id:string;name:string;role:string;station:string;start:string;end:string;close:boolean;business_decline:boolean;employee_key?:string;assigned?:boolean}
 export type CalendarDay={rows:CalendarShift[];synced_at:string|null;error:string|null;reservations:number;posts?:number}
 export type CalendarData={events:CalendarEvent[];days:Record<string,CalendarDay>;styles?:Record<string,{config:CalendarLook;version:number}>}
 export function useCalendarData(location:string,from:string,to:string){

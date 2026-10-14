@@ -3,7 +3,8 @@ import { PageWord, PageInput, PageOption } from "../components/PageDesign"
 import { ManualReservation, reservationToday } from '../components/ManualReservation'
 import { ScreenText } from "../components/ScreenText"
 import { WalkinPanel, type Walkin } from '../components/WalkinPanel'
-import { SectionEmployeePicker } from '../components/SectionEmployeePicker'
+import { FloorScheduleBox } from '../components/FloorScheduleBox'
+import { ScheduledSectionEmployeePicker } from '../components/ScheduledSectionEmployeePicker'
 import { SectionSchedule, type SectionPlan } from '../components/SectionSchedule'
 import { floorRoomRatio, floorTableGeometry } from '../lib/floorPhotoLayout'
 import './FloorMap.css'
@@ -1883,6 +1884,7 @@ const [partySize, setPartySize] = useState(1)
       </div>
 
 
+      <FloorScheduleBox location={locationId} date={activeShift?.shift_date??serviceDay()}/>
       <WalkinPanel locationId={locationId} refreshKey={walkinRefresh} onSeat={row=>{setPendingWalkin(row);setGuestName(row.guest_name);setGuestPhone(row.phone);setGuestEmail(row.email);setPartySize(row.party_size);if(selectedTableIds.length)openSeating()}} />
       {pendingWalkin&&<div data-design-block="copy.eb305b57f537aed6.1" className="wt-card" role="status"><strong><ScreenText id="FloorPage.72ad81f5e33ac981">Seating </ScreenText>{pendingWalkin.guest_name}<ScreenText id="FloorPage.0e1b1fe85997c7d1"> · party of </ScreenText>{pendingWalkin.party_size}</strong><p data-design-block="copy.0cae27057d8f304b.1"><ScreenText id="FloorPage.aaf48aa3abcc020d">Select their tables, then press Seat. Their check-in is marked seated when seating succeeds.</ScreenText></p><button data-design-block="copy.b1a3fd87f11bd6fb.1" type="button" disabled={saving} onClick={()=>{setPendingWalkin(null);setGuestName('');setGuestPhone('');setGuestEmail('');setPartySize(1)}}><ScreenText id="FloorPage.a3bf126804af00d4">Cancel walk-in selection</ScreenText></button></div>}
 
@@ -2318,7 +2320,7 @@ const [partySize, setPartySize] = useState(1)
 
             <p>{editingSection?'Edit this section. Unselected tables will be released; other sections stay in place.':'Selected tables will move to this section. Seated parties keep their server.'}</p>
             <fieldset disabled={saving}><legend>Section tables</legend><div className="closeout-table-grid">{(reassignPlan?tables.filter(t=>reassignPlan.table_ids.includes(t.id)):tables).map(t=><label key={t.id}><input type="checkbox" checked={selectedTableIds.includes(t.id)} onChange={e=>setSelectedTableIds(ids=>e.target.checked?[...ids,t.id]:ids.filter(id=>id!==t.id))}/>{t.table_name}</label>)}</div></fieldset>
-            <SectionEmployeePicker employees={team.map(m=>({id:m.user_id,name:memberName(m.user_id)}))} employeeId={selectedServerId==='__name__'?null:selectedServerId} guestName={sectionGuestName} disabled={saving} onChange={(id,name)=>{setSelectedServerId(id===null?'__name__':id);setSectionGuestName(name)}}/>
+            <ScheduledSectionEmployeePicker location={locationId} date={activeShift?.shift_date??serviceDay()} employees={team.map(m=>({id:m.user_id,name:memberName(m.user_id)}))} employeeId={selectedServerId==='__name__'?null:selectedServerId} guestName={sectionGuestName} disabled={saving} onChange={(id,name)=>{setSelectedServerId(id===null?'__name__':id);setSectionGuestName(name)}}/>
 
             <div data-design-block="copy.f0960e9d89953dad.1"
               style={{

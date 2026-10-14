@@ -1,0 +1,13 @@
+.polished-app .app-content .floor-schedule-box {border:1px solid var(--app-border);border-radius:16px;background:var(--app-card);padding:12px 16px;margin:14px 0}
+.floor-schedule-box header {display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.floor-schedule-box header h2 {font-size:1rem;margin:0}
+.floor-schedule-box .eyebrow {font-size:.65rem;margin:0}
+.floor-schedule-box header label {margin-left:auto;font-size:.7rem;display:flex;align-items:center;gap:8px}
+.polished-app .floor-schedule-box header input {padding:6px;min-height:44px;font-size:.8rem}
+.floor-schedule-chips {display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.floor-schedule-chips details {background:var(--app-background);border:1px solid var(--app-border);padding:6px 10px;border-radius:10px;font-size:.75rem}
+.floor-schedule-chips summary {cursor:pointer;font-weight:650}
+.floor-schedule-chips details span {display:block;padding-top:6px}
+.scheduled-section-picker {border:1px solid var(--app-border);padding:12px;border-radius:12px;background:var(--app-card)}
+.scheduled-section-roster {display:flex;flex-direction:column;gap:4px;font-size:.75rem;margin:8px 0;max-height:180px;overflow:auto}
+.scheduled-section-picker select {max-width:100%}
