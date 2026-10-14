@@ -1,0 +1,11 @@
+import {useEffect,useState} from 'react'
+import {Link} from 'react-router-dom'
+import {calendarToday,dateLabel,weekDays,shiftClock} from '../lib/calendarDates'
+import {useCalendarData} from './CalendarData'
+import './Calendar.css'
+export function WeeklyCalendar({location}:{location:string}){
+ const [today,setToday]=useState(calendarToday)
+ useEffect(()=>{const update=()=>setToday(calendarToday());const timer=setInterval(update,60000);window.addEventListener('focus',update);return()=>{clearInterval(timer);window.removeEventListener('focus',update)}},[])
+ const days=weekDays(today),calendar=useCalendarData(location,days[0],days[6])
+ return <section className="home-section"><div className="home-section-heading"><h2>This week · Monday–Sunday</h2><Link to="/calendar">Full calendar →</Link></div><p>{dateLabel(days[0],true)}–{dateLabel(days[6],true)} · Central time</p>{calendar.error&&<p role="alert">{calendar.error}</p>}{calendar.scheduleError&&<p role="alert">{calendar.scheduleError}</p>}{calendar.loading&&<p role="status">Loading the week…</p>}<div className="calendar-week">{days.map(date=>{const day=calendar.data.days[date],events=calendar.data.events.filter(e=>e.date===date);return <article key={date} className={'calendar-week-day'+(date===today?' today':'')}><h3><Link to={'/calendar?date='+date+'&view=day'}>{dateLabel(date,true)}</Link></h3>{events.map(e=><p key={e.id}>{e.time?((Number(e.time.slice(0,2))%12||12)+':'+e.time.slice(3,5)+' '+(Number(e.time.slice(0,2))>=12?'PM':'AM')+' · '):''}{e.title}</p>)}{!events.length&&<p className="muted">No events added</p>}<details><summary>Staff schedule · {day?.rows.length??0}</summary>{day?.rows.map(s=><p key={s.id}><strong>{s.name}</strong><br/>{s.role} · {shiftClock(s.start)}–{s.close?'Close':s.business_decline?'Business decline':shiftClock(s.end)}</p>)}{!day?.synced_at?<p>Schedule not synced yet.</p>:!day.rows.length?<p>No published shifts.</p>:null}{day?.error&&<p role="alert">{day.error}</p>}</details><Link className="calendar-reservations" to={'/calendar?date='+date+'&view=reservations'}>Reservations{day?' · '+day.reservations:''}</Link></article>})}</div><button type="button" disabled={calendar.loading} onClick={calendar.reload}>Refresh week</button></section>
+}

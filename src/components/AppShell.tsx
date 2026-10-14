@@ -68,6 +68,7 @@ const links = [
     label: 'Team',
     icon: Users,
   },
+  { to: '/calendar', label: 'Calendar', icon: CalendarDays },
   { to: '/preshift', label: 'Pre-Shift', icon: Newspaper },
   { to: '/quizzes', label: 'Quizzes', icon: BookOpen },
   { to: '/training', label: 'Training', icon: GraduationCap },

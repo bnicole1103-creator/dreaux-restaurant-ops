@@ -1,5 +1,6 @@
 // page-designer-instrumented
 import {StaffViewPage} from './pages/StaffViewPage'
+import { CalendarPage } from './pages/CalendarPage'
 import { PageWord } from "./components/PageDesign"
 import { ScreenWordingPage } from './pages/ScreenWordingPage'
 import { TrainingPage } from './pages/TrainingPage'
@@ -136,6 +137,7 @@ export default function App() {
       <Routes>
         <Route path="/settings/staff-view" element={<ManagementOnly gmOnly><StaffViewPage/></ManagementOnly>}/>
         <Route path="/inventory" element={<InventoryPage />} />
+        <Route path="/calendar" element={<CalendarPage />} />
         <Route path="/reservation-inquiries" element={<ReservationInquiryPage />} />
         <Route path="/inquiry-studio" element={<ManagementOnly><InquiryStudioPage /></ManagementOnly>} />
         <Route path="/inquiry-inbox" element={<ManagementOnly><InquiryInboxPage /></ManagementOnly>} />
