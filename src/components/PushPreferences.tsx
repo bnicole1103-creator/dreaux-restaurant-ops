@@ -1,3 +1,4 @@
+import { ScreenText } from './ScreenText'
 import { useEffect,useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { loadTenantData } from '../lib/tenant'
@@ -11,6 +12,7 @@ export async function disconnectPush(){
  localStorage.removeItem('justinis-push-owner')
 }
 export function PushPreferences(){
+ const preview=window.parent!==window && new URLSearchParams(window.location.search).has('wording-preview')
  const access=useManagementAccess()
  const [location,setLocation]=useState(''),[enabled,setEnabled]=useState(false),[busy,setBusy]=useState(false),[loaded,setLoaded]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState('')
  async function load(){setError('');setLoaded(false);try{const tenant=await loadTenantData(),loc=tenant.locations[0]?.id;if(!loc)throw Error('No active location found.');setLocation(loc);const r=await supabase.rpc('push_preferences',{p_location_id:loc});if(r.error)throw r.error;if(supported()){const reg=await navigator.serviceWorker.getRegistration('/');setEnabled(!!(await reg?.pushManager.getSubscription()))}setLoaded(true)}catch(e){setError(String((e as {message?:string}).message??e))}}
@@ -29,5 +31,17 @@ export function PushPreferences(){
  }catch(e){if(created)await subscription?.unsubscribe();setError(String((e as {message?:string}).message??e))}finally{setBusy(false)}}
  async function disable(){setBusy(true);setError('');setNotice('');try{await disconnectPush();setEnabled(false);setNotice('Notifications turned off on this device.')}catch(e){setError(String((e as {message?:string}).message??e))}finally{setBusy(false)}}
  async function test(){setBusy(true);setError('');setNotice('');try{const reg=await navigator.serviceWorker.getRegistration('/'),sub=await reg?.pushManager.getSubscription();if(!sub)throw Error('Enable notifications first.');const r=await supabase.rpc('push_test',{p_location_id:location,p_endpoint:sub.endpoint});if(r.error)throw r.error;setNotice('Test queued. It should arrive within about a minute.')}catch(e){setError(String((e as {message?:string}).message??e))}finally{setBusy(false)}}
- return <details className="home-section"><summary>My notifications</summary><p>Enable or turn off notifications on this device. The GM chooses which posts send an alert and who receives them.</p>{!supported()&&<p>On iPhone or iPad: open the app in Safari → Share → Add to Home Screen. Open the new Home Screen icon, sign in, then enable notifications here.</p>}{supported()&&<p>{enabled?'Enabled on this device.':'Not enabled on this device.'}</p>}<fieldset disabled={busy||!loaded}>{supported()&&<button type="button" onClick={()=>void(enabled?disable():enable())}>{enabled?'Turn off on this device':'Enable notifications'}</button>}{enabled&&access.gm&&<button type="button" onClick={()=>void test()}>Send test notification</button>}</fieldset>{busy&&<p role="status">Working…</p>}{notice&&<p role="status">{notice}</p>}{error&&<p role="alert">{error} <button type="button" onClick={()=>void load()}>Retry loading settings</button></p>}</details>
+ return <details className="home-section" data-design-block="copy.PushPreferences.section">
+  <summary data-design-block="copy.PushPreferences.title"><ScreenText id="PushPreferences.title">My notifications</ScreenText></summary>
+  <p data-design-block="copy.PushPreferences.description"><ScreenText id="PushPreferences.description">Enable or turn off notifications on this device. The GM chooses which posts send an alert and who receives them.</ScreenText></p>
+  {!supported()&&<p data-design-block="copy.PushPreferences.install"><ScreenText id="PushPreferences.install">On iPhone or iPad: open the app in Safari → Share → Add to Home Screen. Open the new Home Screen icon, sign in, then enable notifications here.</ScreenText></p>}
+  {supported()&&<p data-design-block="copy.PushPreferences.status">{enabled?<ScreenText id="PushPreferences.enabled">Enabled on this device.</ScreenText>:<ScreenText id="PushPreferences.disabled">Not enabled on this device.</ScreenText>}</p>}
+  {(supported()||preview)&&<fieldset disabled={busy||!loaded} data-design-block="copy.PushPreferences.controls">
+   {preview?<><button type="button"><ScreenText id="PushPreferences.enable">Enable notifications</ScreenText></button><button type="button"><ScreenText id="PushPreferences.disable">Turn off on this device</ScreenText></button></>:<button type="button" onClick={()=>void(enabled?disable():enable())}>{enabled?<ScreenText id="PushPreferences.disable">Turn off on this device</ScreenText>:<ScreenText id="PushPreferences.enable">Enable notifications</ScreenText>}</button>}
+   {(enabled||preview)&&access.gm&&<button type="button" onClick={preview?undefined:()=>void test()}><ScreenText id="PushPreferences.test">Send test notification</ScreenText></button>}
+  </fieldset>}
+  {busy&&<p role="status"><ScreenText id="PushPreferences.working">Working…</ScreenText></p>}
+  {notice&&<p role="status">{notice}</p>}
+  {error&&<p role="alert">{error} <button type="button" onClick={()=>void load()}><ScreenText id="PushPreferences.retry">Retry loading settings</ScreenText></button></p>}
+ </details>
 }
