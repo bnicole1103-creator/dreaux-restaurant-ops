@@ -150,7 +150,7 @@ export default function App() {
         <Route path="/settings/point-rules" element={<ManagementOnly gmOnly><CloseoutSettingsPage key="point-rules" initialTab="points" /></ManagementOnly>} />
         <Route path="/closeout-summary/cash" element={<SummaryPage cash />} />
         <Route path="/appearance" element={<AppearanceGuard gmOnly><LocationAppearancePage /></AppearanceGuard>} />
-        <Route path="/preshift" element={<PreshiftFeedPage />} />
+        <Route path="/preshift/*" element={<PreshiftFeedPage />} />
         <Route path="/quizzes" element={<QuizzesPage />} />
         <Route path="/quizzes/build" element={<ManagementOnly><QuizBuilderPage key="future" /></ManagementOnly>} />
         <Route path="/quizzes/manage" element={<ManagementOnly><QuizBuilderPage key="published" publishedView /></ManagementOnly>} />

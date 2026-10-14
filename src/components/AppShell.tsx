@@ -158,7 +158,7 @@ export function AppShell({
       <main ref={content} id="app-main" tabIndex={-1} data-design-block="copy.60535db1b6f53b61.1" className="app-content">
         {offline && <p role="status">You’re offline. Reconnect before saving or refreshing.</p>}
         {signOutError && <p role="alert">{signOutError}</p>}
-        <PageRecovery key={pathname}>{children}</PageRecovery>
+        <PageRecovery key={pathname.startsWith('/preshift/')?'/preshift':pathname}>{children}</PageRecovery>
       </main>
 
       <nav data-design-block="copy.7cb60e4ed1acdcd5.1" className="bottom-nav" aria-label="Main navigation">
