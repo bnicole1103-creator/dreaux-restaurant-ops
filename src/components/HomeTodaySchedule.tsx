@@ -1,0 +1,7 @@
+import {useCalendarData,type CalendarShift} from './CalendarData'
+import {dateLabel,shiftClock} from '../lib/calendarDates'
+import {Link} from 'react-router-dom'
+export function HomeTodaySchedule({location,date}:{location:string;date:string}){
+ const calendar=useCalendarData(location,date,date),day=calendar.data.days[date],rows=(day?.rows??[]).filter(s=>(s as CalendarShift&{assigned?:boolean}).assigned!==false&&!/^open shift$|^unassigned$|^team member$/i.test(s.name.trim()))
+ return <section className="home-section home-today-schedule"><div className="home-section-heading"><h2>Today’s 7shifts schedule</h2><Link to={'/floor?date='+date}>Open Floor →</Link><button type="button" disabled={calendar.loading} onClick={calendar.reload}>Refresh</button></div><p className="muted">{dateLabel(date)} · Central time</p>{calendar.error&&<p role="alert">{calendar.error}</p>}{calendar.scheduleError&&<p role="alert">{calendar.scheduleError}</p>}{calendar.loading&&<p role="status">Refreshing schedule…</p>}{!calendar.loading&&!day?.synced_at&&<p>Schedule has not synced yet.</p>}{!calendar.loading&&day?.synced_at&&!rows.length&&<p>No assigned, published shifts today.</p>}<div className="home-today-shifts">{rows.map(s=><article key={s.id}><strong>{s.name}</strong><span>{s.role}{s.station?' · '+s.station:''}</span><time>{shiftClock(s.start)}–{s.close?'Close':s.business_decline?'Business decline':shiftClock(s.end)}</time></article>)}</div></section>
+}

@@ -1,5 +1,3 @@
-import {scheduledPeople} from '../lib/scheduledPeople'
-import './PosterCalendar.css'
 import {useEffect,useState} from 'react'
 import {CalendarDayPopup} from './CalendarDayPopup'
 import {calendarLook} from '../lib/calendarLook'
@@ -23,7 +21,6 @@ export function WeeklyCalendar({location}:{location:string}){
    return <article key={date} className={'calendar-week-day'+(date===today?' today':'')} aria-label={dateLabel(date)}>
     <h3><button type="button" onClick={()=>setOpen({date,view:'day'})} aria-current={date===today?'date':undefined}><span>{['Mon','Tue','Wed','Thu','Fri','Sat','Sun'][index]}</span><span>{new Intl.DateTimeFormat('en-US',{timeZone:'UTC',month:'short',day:'numeric'}).format(new Date(date+'T12:00:00Z'))}</span></button></h3>
     <button type="button" className={'calendar-week-event'+(!event?' muted':'')} onClick={()=>setOpen({date,view:'day'})} title={event?.title}>{event?event.title:day?.posts?day.posts+' post'+(day.posts===1?'':'s'):'No updates'}{events.length>1&&<small>+{events.length-1} more</small>}</button>
-    <div className="week-staff-names" aria-label="Scheduled staff">{scheduledPeople(day?.rows??[]).slice(0,4).map(s=><span key={s.id} title={s.name}>{s.name}</span>)}{scheduledPeople(day?.rows??[]).length>4&&<Link to={'/floor?date='+date}>+{scheduledPeople(day?.rows??[]).length-4} more</Link>}{!day?.synced_at&&<small>Not synced</small>}</div>
     <button type="button" className="calendar-reservations" onClick={()=>setOpen({date,view:'reservations'})}>Reservations <strong>{day?day.reservations:'—'}</strong></button>
    </article>
   })}</div></div>
