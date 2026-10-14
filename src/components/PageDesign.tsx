@@ -3,6 +3,12 @@ import type { ReactNode } from 'react'
 import { useLocation } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { loadTenantData } from '../lib/tenant'
+import { blockedPreviewEvents,editorPreviewActive,preventPreviewDefault } from '../lib/screenEditorSelection'
+// Install before the preview app mounts. The parent editor captures at window.
+if(typeof window!=='undefined'&&editorPreviewActive(window.location.search,window.parent!==window)){
+ const blockPreviewAction=(event:Event)=>{if(event.cancelable&&preventPreviewDefault(event.type))event.preventDefault();event.stopImmediatePropagation()}
+ blockedPreviewEvents.forEach(type=>document.addEventListener(type,blockPreviewAction,{capture:true,passive:false}))
+}
 export type DesignChange={text?:string;hidden?:boolean;x?:number;y?:number;order?:number;parent?:string}
 export type Design={version:number;changes:Record<string,DesignChange>}
 let current:Design={version:0,changes:{}}
