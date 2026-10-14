@@ -1,6 +1,6 @@
 import {createClient} from 'npm:@supabase/supabase-js@2.57.4'
 import postgres from 'npm:postgres@3.4.7'
-import {identifier,READ_RPCS,tableRead} from './query.ts'
+import {identifier,READ_RPCS,READ_TABLES,tableRead} from './query.ts'
 const cors={'Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers':'authorization,apikey,content-type,x-client-info','Access-Control-Allow-Methods':'POST,OPTIONS'}
 const json=(data:unknown,status=200)=>new Response(JSON.stringify(data),{status,headers:{...cors,'Content-Type':'application/json','Cache-Control':'no-store'}})
 const errorMessage=(e:unknown)=>e instanceof Error?e.message:'Preview request failed.'
@@ -34,8 +34,13 @@ Deno.serve(async request=>{
    const isolation=await tx.unsafe("SELECT current_user AS role,current_setting('transaction_read_only') AS readonly,auth.uid() AS uid")
    if(isolation[0].role!=='authenticated'||isolation[0].readonly!=='on'||isolation[0].uid!==context.target_id)throw Error('Preview isolation check failed.')
    if(body.kind==='table'){
-    const q=tableRead(name,String(body.query??''),context.location_id,context.organization_id,context.target_id)
-    const rows=await tx.unsafe(q.sql,q.params as string[])
+    if(!READ_TABLES.has(name))throw Error('This table is not supported in staff preview.')
+    // Postgres.js serializes boolean parameters using strict true/false checks.
+    // URL filters are strings, so convert them using the actual column type.
+    const columns=await tx.unsafe("SELECT a.attname FROM pg_catalog.pg_attribute a JOIN pg_catalog.pg_class c ON c.oid=a.attrelid JOIN pg_catalog.pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname='public' AND c.relname=$1 AND a.attnum>0 AND NOT a.attisdropped AND a.atttypid=16",[name])
+    const booleanColumns=new Set<string>(columns.map(c=>String(c.attname)))
+    const q=tableRead(name,String(body.query??''),context.location_id,context.organization_id,context.target_id,booleanColumns)
+    const rows=await tx.unsafe(q.sql,q.params as (string|boolean)[])
     if(body.single&&rows.length!==1)return {status:406,data:{message:'Expected one visible row in staff preview.',code:'PGRST116'}}
     return {status:200,data:body.single?rows[0]:Array.from(rows)}
    }

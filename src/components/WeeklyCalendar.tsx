@@ -1,11 +1,29 @@
 import {useEffect,useState} from 'react'
+import {CalendarDayPopup} from './CalendarDayPopup'
+import {calendarLook} from '../lib/calendarLook'
+import './CalendarStudio.css'
 import {Link} from 'react-router-dom'
-import {calendarToday,dateLabel,weekDays,shiftClock} from '../lib/calendarDates'
+import {calendarToday,dateLabel,weekDays} from '../lib/calendarDates'
 import {useCalendarData} from './CalendarData'
 import './Calendar.css'
+import './CompactCalendar.css'
 export function WeeklyCalendar({location}:{location:string}){
  const [today,setToday]=useState(calendarToday)
  useEffect(()=>{const update=()=>setToday(calendarToday());const timer=setInterval(update,60000);window.addEventListener('focus',update);return()=>{clearInterval(timer);window.removeEventListener('focus',update)}},[])
+ const [open,setOpen]=useState<{date:string;view:string}|null>(null)
  const days=weekDays(today),calendar=useCalendarData(location,days[0],days[6])
- return <section className="home-section"><div className="home-section-heading"><h2>This week · Monday–Sunday</h2><Link to="/calendar">Full calendar →</Link></div><p>{dateLabel(days[0],true)}–{dateLabel(days[6],true)} · Central time</p>{calendar.error&&<p role="alert">{calendar.error}</p>}{calendar.scheduleError&&<p role="alert">{calendar.scheduleError}</p>}{calendar.loading&&<p role="status">Loading the week…</p>}<div className="calendar-week">{days.map(date=>{const day=calendar.data.days[date],events=calendar.data.events.filter(e=>e.date===date);return <article key={date} className={'calendar-week-day'+(date===today?' today':'')}><h3><Link to={'/calendar?date='+date+'&view=day'}>{dateLabel(date,true)}</Link></h3>{events.map(e=><p key={e.id}>{e.time?((Number(e.time.slice(0,2))%12||12)+':'+e.time.slice(3,5)+' '+(Number(e.time.slice(0,2))>=12?'PM':'AM')+' · '):''}{e.title}</p>)}{!events.length&&<p className="muted">No events added</p>}<details><summary>Staff schedule · {day?.rows.length??0}</summary>{day?.rows.map(s=><p key={s.id}><strong>{s.name}</strong><br/>{s.role} · {shiftClock(s.start)}–{s.close?'Close':s.business_decline?'Business decline':shiftClock(s.end)}</p>)}{!day?.synced_at?<p>Schedule not synced yet.</p>:!day.rows.length?<p>No published shifts.</p>:null}{day?.error&&<p role="alert">{day.error}</p>}</details><Link className="calendar-reservations" to={'/calendar?date='+date+'&view=reservations'}>Reservations{day?' · '+day.reservations:''}</Link></article>})}</div><button type="button" disabled={calendar.loading} onClick={calendar.reload}>Refresh week</button></section>
+ return <><section style={calendarLook(calendar.data.styles?.[today.slice(0,7)]?.config)} className="home-section home-week-calendar calendar-studio-week" aria-label="This week's calendar">
+  <div className="home-section-heading"><h2>This week</h2><div className="calendar-week-actions"><Link to="/calendar">Full calendar →</Link><button type="button" disabled={calendar.loading} onClick={calendar.reload}>Refresh</button></div></div>
+  <p className="calendar-week-range">{dateLabel(days[0],true)}–{dateLabel(days[6],true)} · Central time</p>
+  {calendar.error&&<p role="alert">{calendar.error}</p>}{calendar.scheduleError&&<p role="alert">{calendar.scheduleError}</p>}{calendar.loading&&<p role="status">Loading the week…</p>}
+  <div className="calendar-week-scroll" role="region" aria-label="Monday through Sunday; scroll horizontally on smaller screens" tabIndex={0}><div className="calendar-week">{days.map((date,index)=>{
+   const day=calendar.data.days[date],events=calendar.data.events.filter(e=>e.date===date),event=events[0]
+   return <article key={date} className={'calendar-week-day'+(date===today?' today':'')} aria-label={dateLabel(date)}>
+    <h3><button type="button" onClick={()=>setOpen({date,view:'day'})} aria-current={date===today?'date':undefined}><span>{['Mon','Tue','Wed','Thu','Fri','Sat','Sun'][index]}</span><span>{new Intl.DateTimeFormat('en-US',{timeZone:'UTC',month:'short',day:'numeric'}).format(new Date(date+'T12:00:00Z'))}</span></button></h3>
+    <button type="button" className={'calendar-week-event'+(!event?' muted':'')} onClick={()=>setOpen({date,view:'day'})} title={event?.title}>{event?event.title:day?.posts?day.posts+' post'+(day.posts===1?'':'s'):'No updates'}{events.length>1&&<small>+{events.length-1} more</small>}</button>
+    <button type="button" className="calendar-week-schedule" onClick={()=>setOpen({date,view:'schedule'})}>Schedule <strong>{day?.synced_at?day.rows.length:'—'}</strong></button>
+    <button type="button" className="calendar-reservations" onClick={()=>setOpen({date,view:'reservations'})}>Reservations <strong>{day?day.reservations:'—'}</strong></button>
+   </article>
+  })}</div></div>
+ </section>{open&&<CalendarDayPopup key={open.date} location={location} date={open.date} initialView={open.view} onClose={()=>setOpen(null)}/>}</>
 }

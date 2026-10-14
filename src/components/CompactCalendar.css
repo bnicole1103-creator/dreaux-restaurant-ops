@@ -1,0 +1,21 @@
+.polished-app .app-content .home-calendar-heading {margin:12px 0 18px}
+.polished-app .app-content .home-calendar-heading h1 {margin:0 0 8px}
+.polished-app .app-content .home-calendar-heading p {margin:0;color:var(--app-muted)}
+.polished-app .app-content .home-week-calendar {padding:16px;border-radius:16px;margin-top:12px}
+.home-week-calendar .home-section-heading {justify-content:space-between;gap:8px}
+.polished-app .app-content .home-week-calendar h2 {font-size:1.1rem;margin:0}
+.home-week-calendar .calendar-week-actions {display:flex;gap:12px;align-items:center;font-size:.85rem}
+.polished-app .home-week-calendar .calendar-week-actions button {padding:6px 10px;font-size:.8rem}
+.polished-app .app-content .home-week-calendar .calendar-week-range {font-size:.8rem;margin:4px 0 12px;color:var(--app-muted)}
+.home-week-calendar .calendar-week-scroll {overflow-x:auto;padding:2px}
+.home-week-calendar .calendar-week {grid-template-columns:repeat(7,minmax(90px,1fr));gap:8px;margin:0;min-width:678px}
+.home-week-calendar .calendar-week-day {padding:10px 8px;border-radius:10px;display:flex;flex-direction:column;gap:8px;font-size:.75rem}
+.polished-app .app-content .home-week-calendar .calendar-week-day h3 {font-size:.85rem;line-height:1.3;margin:0}
+.home-week-calendar .calendar-week-day h3 a {display:flex;flex-direction:column;text-decoration:none;min-height:44px}
+.home-week-calendar .calendar-week-day h3 span:last-child {font-size:.75rem;font-weight:500;color:var(--app-muted)}
+.home-week-calendar .calendar-week-event {min-height:36px;line-height:1.4;overflow-wrap:anywhere;text-decoration:none;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.home-week-calendar .calendar-week-event small {display:block}
+.home-week-calendar .calendar-week-schedule,.home-week-calendar .calendar-reservations {display:flex;align-items:center;justify-content:space-between;gap:4px;min-height:44px;padding:6px;font-size:.7rem;line-height:1.25;text-decoration:none;border:1px solid var(--app-border);border-radius:8px;background:var(--app-card)}
+.home-week-calendar .calendar-week-schedule {margin-top:auto}
+.home-week-calendar .calendar-week-day.today {box-shadow:inset 0 0 0 1px var(--app-accent)}
+@media(max-width:650px){.polished-app .app-content .home-week-calendar {padding:12px}.home-week-calendar .calendar-week-actions {gap:8px}.home-week-calendar .calendar-week {grid-template-columns:repeat(7,minmax(100px,1fr));min-width:748px}}
