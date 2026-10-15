@@ -1,3 +1,6 @@
+import {StaffFeedComposer} from '../components/StaffFeedComposer'
+import {SalesTargetPreview} from '../components/SalesTargetPreview'
+import {mergePostTargets,clearPostTargets} from '../lib/postTargets'
 import {AccessSection} from '../components/AppAccess'
 import {PosterStyleControls} from '../components/PosterStyleControls'
 import {defaultCalendarLook,type CalendarLook} from '../lib/calendarLook'
@@ -33,7 +36,9 @@ const day=(value:string)=>new Intl.DateTimeFormat('en-US',{timeZone:'UTC',month:
 const message=(e:unknown)=>String((e as {message?:string})?.message ?? e)
 export function PreshiftFeedPage(){
  const navigate=useNavigate(),route=useLocation()
- const view=route.pathname.split('/')[2]??'feed'
+ const requestedView=route.pathname.split('/').filter(Boolean)[1]??'feed'
+ const view=['feed','write','generate','presets','drafts','archive'].includes(requestedView)?requestedView:'feed'
+ const requestedPost=new URLSearchParams(route.search).get('post')
  const workspace=['write','generate','presets','drafts'].includes(view)
  const heading=useRef<HTMLHeadingElement>(null)
  useEffect(()=>{requestAnimationFrame(()=>{heading.current?.scrollIntoView({block:'start'});heading.current?.focus()})},[view])
@@ -89,7 +94,7 @@ export function PreshiftFeedPage(){
  function changeServiceDay(next:string){
   if(!next)return
   setDate(next);setSectionChanges(null);setDraftSections(null);setScheduleTime('')
-  setBuilderKey(v=>v+1);setBody(v=>mergeReservationNotes(v,''));setNotice('Service day changed. Review the post wording and reload any Floor sections for this date.')
+  setBuilderKey(v=>v+1);setBody(v=>mergeReservationNotes(clearPostTargets(v),''));setNotice('Service day changed. Review the post wording and reload any Floor sections for this date.')
  }
  function openTool(destination:string){
   if(saving||uploading||generating)return
@@ -97,9 +102,20 @@ export function PreshiftFeedPage(){
   if(compose || destination==='drafts' || destination==='archive')navigate('/preshift/'+destination)
   else void start(null,destination)
  }
+ const editorRoute=useRef('')
  useEffect(()=>{
-  if(access.manager&&location&&['write','generate','presets'].includes(view)&&!compose&&!saving)void start(null,view)
- },[view,access.manager,location])
+  if(compose){editorRoute.current=route.key;return}
+  if(editorRoute.current===route.key)return
+  if(!access.manager||!location||compose||saving)return
+  if(view==='write'&&requestedPost){
+   if(loading)return
+   const target=posts.find(p=>p.id===requestedPost)
+   if(!target&&total>posts.length&&limit<1000){setLoading(true);setLimit(1000);return}
+   if(!target){setFormError('This post could not be loaded. Refresh the feed, check access, or confirm it has not been removed.');return}
+   editorRoute.current=route.key;void start(target,'write');return
+  }
+  if(['write','generate','presets'].includes(view)){editorRoute.current=route.key;void start(null,view)}
+ },[route.key,view,requestedPost,access.manager,location,compose,saving,loading,posts,total,limit])
  const titles:Record<string,string>={feed:'Posts',write:editing?'Edit post':draft?'Edit draft':'Write a post',generate:'Pre-shift builder',presets:'Use a preset',drafts:'Drafts & scheduled posts',archive:'Past posts'}
  if(workspace&&!access.loading&&!access.manager)return <section data-design-block="section.ea91af1b0f85cac04d73" className="preshift-feed"><h1><PageWord id="sectioncopy.97a68cb6c70f8a3fbe8b">{"Manager access required"}</PageWord></h1><p>{access.error||'Only managers can create and manage posts.'}</p><Link to="/preshift"><PageWord id="sectioncopy.eed51547249dc621c8e1">{"Back to feed"}</PageWord></Link></section>
  if(!['feed','write','generate','presets','drafts','archive'].includes(view))return <section data-design-block="section.c0a4bd54ba885df4e940" className="preshift-feed"><h1><PageWord id="sectioncopy.8af7175354c19d8c0504">{"Page not found"}</PageWord></h1><Link to="/preshift"><PageWord id="sectioncopy.2285fc80040b9a3f685d">{"Back to feed"}</PageWord></Link></section>
@@ -108,12 +124,14 @@ export function PreshiftFeedPage(){
   <h1 data-design-block={view==='feed'?'copy.54da1f51649c1c8c.1':'copy.PreshiftWorkspace.title.'+view} ref={heading} tabIndex={-1}><ScreenText id={view==='feed'?'PostsFeed.title':'PostsTools.title.'+view}>{titles[view]}</ScreenText></h1>
   {view==='feed'?<>
    <p><ScreenText id="PostsFeed.intro">Announcements, flyers, shift updates, and everything the team needs to know.</ScreenText></p>
+   {location&&<AccessSection page="posts" section="feed"><StaffFeedComposer location={location} onPublished={()=>{setNotice('Post published.');setRefresh(v=>v+1)}}/></AccessSection>}
    {access.manager&&<nav className="preshift-tools" aria-label="Post tools" data-design-block="copy.PreshiftWorkspace.tools">
     {([['write',compose?'Continue post':'Write a post'],['generate','Pre-shift builder'],['presets','Use a preset'],['drafts','Drafts & scheduled posts']] as const).map(([destination,label])=><button key={destination} type="button" disabled={saving||uploading||generating||!location} onClick={()=>openTool(destination)}><ScreenText id={'PostsTools.button.'+destination}>{label}</ScreenText></button>)}
    </nav>}
    <div className="feed-actions"><Link to="/quizzes"><ScreenText id="PreshiftFeedPage.530b78d4332310fb">Take today’s quiz →</ScreenText></Link><button type="button" onClick={()=>setRefresh(v=>v+1)}><ScreenText id="PreshiftFeedPage.e5e12a67d3fe28f9">Refresh feed</ScreenText></button><Link to="/preshift/archive"><ScreenText id="PostsFeed.archive">Past posts</ScreenText></Link></div>
   </>:<nav data-design-block="section.c463f53c45b4ed27a713" className="feed-actions" aria-label="Posts navigation"><button type="button" disabled={saving||uploading||generating} onClick={()=>navigate('/preshift')}><ScreenText id="PreshiftWorkspace.back">← Back to feed</ScreenText></button>{compose&&view!=='write'&&access.manager&&<button type="button" disabled={saving||uploading||generating} onClick={()=>navigate('/preshift/write')}><ScreenText id="PreshiftWorkspace.continue">Continue editing post</ScreenText></button>}</nav>}
   {access.error && <p data-design-block="copy.661fa37c9faf5162.1" role="alert">{access.error}</p>}{error && <p data-design-block="copy.661fa37c9faf5162.2" role="alert">{error}</p>}{notice && <p data-design-block="copy.f365d770b3e83532.1" role="status" className="preshift-confirmation">{notice}</p>}
+  {!compose&&formError&&<p role="alert">{formError}</p>}
   {view==='write' && compose && access.manager && <form data-design-block="copy.7e5b7cd584f90a97.1" className="feed-card feed-editor" onSubmit={e=>{e.preventDefault();void save('publish')}}><h2 data-design-block="copy.1073053cd87771f1.1" ref={editor} tabIndex={-1}>{editing?<PageWord id="copy.5966bf049fff20ad.1">{"Edit post"}</PageWord>:draft?<PageWord id="copy.823ce04784e004ce.1">{"Edit draft"}</PageWord>:<PageWord id="copy.6be9566af0baa318.1">{"New post"}</PageWord>}</h2>
    <label data-design-block="copy.7297067b09724b8b.1"><ScreenText id="PreshiftFeedPage.c893d3f335bc3d7f">Post date</ScreenText><input type="date" required value={date} disabled={saving||uploading||generating} onChange={e=>changeServiceDay(e.target.value)} /></label><p data-design-block="copy.810e8272d4819441.2"><ScreenText id="PreshiftFeedPage.640ad606e6e0e07a">The post date connects this post with that day on the calendar. Save a draft, publish now, or choose a separate publication time below.</ScreenText></p>
    <label data-design-block="copy.7297067b09724b8b.2"><ScreenText id="PreshiftFeedPage.421ea77bd55d50ed">Title</ScreenText><input required maxLength={160} value={title} disabled={saving||uploading||generating} onChange={e=>setTitle(e.target.value)} /></label>
@@ -125,6 +143,7 @@ export function PreshiftFeedPage(){
    <div data-design-block="copy.5061e3328d3ab076.2" className="post-color-tools">{([['Title font',titleFont,setTitleFont],['Post font',textFont,setTextFont]] as const).map(([label,value,setter])=><label data-design-block="copy.c2cb24672705f7ec.2" key={label}>{label}<select value={value} disabled={saving||uploading||generating} onChange={e=>setter(e.target.value as FontName)}>{Object.entries(appFonts).map(([key,font])=><option key={key} value={key}>{font.label}</option>)}</select></label>)}</div>
    <div data-design-block="copy.640b425a1c9959aa.1" className="emoji-tools" aria-label="Add an emoji to the post">{['✨','🍸','🥂','🍽️','🔥','🎉','💋','✅','🚨','🤝','⏰','📣','🦞','🌮'].map(emoji=><button data-design-block="copy.2d6790dc376a3801.1" type="button" key={emoji} disabled={saving||uploading||generating} aria-label={'Insert '+emoji} onClick={()=>{const input=bodyInput.current;const start=input?.selectionStart ?? body.length;const end=input?.selectionEnd ?? start;setBody(v=>(v.slice(0,start)+emoji+v.slice(end)).slice(0,12000));requestAnimationFrame(()=>{input?.focus();input?.setSelectionRange(start+emoji.length,start+emoji.length)})}}>{emoji}</button>)}</div>
    </details>
+   <AccessSection page="settings" section="sales"><details className="preshift-extra"><summary>Add sales targets to post</summary><SalesTargetPreview location={location} date={date} disabled={saving||uploading||generating} onAdd={text=>{setBody(mergePostTargets(body,text));setNotice('Sales targets added. Review the post, then save or publish.')}}/></details></AccessSection>
    <details className="preshift-extra"><summary><ScreenText id="PreshiftWorkspace.reservations">Reservation notes</ScreenText></summary>
    <ReservationPostNotes key={builderKey} location={location} date={date} disabled={saving||uploading||generating} editing={!!editing||!!draft||!!body.trim()} onLoading={setReservationsLoading} onChange={text=>setBody(mergeReservationNotes(body,text))}/>
    </details>
