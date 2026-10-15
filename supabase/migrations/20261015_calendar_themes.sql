@@ -16,7 +16,8 @@ begin
  'poster','editorial','playful','minimal','ledger','scrapbook','spotlight',
  'deco','polaroid','blocks','planner',
  'floral','botanical','gameday','courtside','coquette','disco',
- 'spring','summer','autumn','winter','halloween','christmas','valentine','mardigras') then return false; end if;
+ 'spring','summer','autumn','winter','halloween','christmas','valentine','mardigras',
+ 'roseatelier','daisydays','wildflower','blackgold','matchpoint','clubhouse','cherryclub','pearlribbon','champagnesocial','midnightmuse','citruscoast','goldenhour','cozycabin','aprilrain','newyear','thanksgiving','easter','fourth') then return false; end if;
  if p_style ? 'outline' and coalesce(p_style->>'outline','') not in ('thin','double','dashed','none') then return false; end if;
  return true;
 end; $$;

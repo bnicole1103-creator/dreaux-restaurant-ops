@@ -1,4 +1,4 @@
-import {themeFor,motifSvg,type CalendarThemeId} from './calendarThemes'
+import {themeFor,motifSvg,compositionFor,type CalendarThemeId} from './calendarThemes'
 import type {CSSProperties} from 'react'
 import {appFonts,type FontName} from './appearance'
 export type CalendarLook={color:string;font:FontName;template?:CalendarThemeId|'poster'|'editorial'|'playful'|'minimal'|'ledger'|'scrapbook'|'spotlight'|'deco'|'polaroid'|'blocks'|'planner';outline?:'thin'|'double'|'dashed'|'none';paper?:string}
@@ -10,6 +10,10 @@ export function calendarLook(value?:CalendarLook):CSSProperties{
  const light=[1,3,5].map(i=>parseInt(paper.slice(i,i+2),16)/255);const ink=.2126*light[0]+.7152*light[1]+.0722*light[2]>.45?'#35251f':'#fff8ef'
  const outline=value?.outline??'double'
  const theme=themeFor(value?.template)
- const art=theme?'url("data:image/svg+xml,'+encodeURIComponent(motifSvg(theme.motif,color))+'")':'none'
- return {'--calendar-art':art,'--calendar-color':color,'--calendar-tint':color+'16','--calendar-paper':paper,'--calendar-ink':ink,'--calendar-font':appFonts[value?.font??defaultCalendarLook.font]?.css??appFonts.script.css,'--calendar-outline':outline==='none'?'0':outline==='double'?'4px double '+color:outline==='dashed'?'2px dashed '+color:'1px solid '+color} as CSSProperties
+ const composition=compositionFor(value?.template)
+ const accentLight=[1,3,5].map(i=>parseInt(color.slice(i,i+2),16)/255)
+ const heroInk=composition==='ribbon'?(accentLight.reduce((n,v,i)=>n+v*[.2126,.7152,.0722][i],0)>.5?'#25251f':'#ffffff'):ink
+ const artColor=composition==='ribbon'?heroInk:color
+ const art=theme?'url("data:image/svg+xml,'+encodeURIComponent(motifSvg(theme.motif,artColor))+'")':'none'
+ return {'--calendar-hero-ink':heroInk,'--calendar-art':art,'--calendar-color':color,'--calendar-tint':color+'16','--calendar-paper':paper,'--calendar-ink':ink,'--calendar-font':appFonts[value?.font??defaultCalendarLook.font]?.css??appFonts.script.css,'--calendar-outline':outline==='none'?'0':outline==='double'?'4px double '+color:outline==='dashed'?'2px dashed '+color:'1px solid '+color} as CSSProperties
 }

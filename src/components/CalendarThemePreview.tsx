@@ -1,19 +1,27 @@
-import {themeFor,motifSvg} from '../lib/calendarThemes'
+import {themeFor,motifSvg,compositionFor} from '../lib/calendarThemes'
 import {calendarLook,type CalendarLook} from '../lib/calendarLook'
 import {appFonts} from '../lib/appearance'
-export function CalendarThemePreview({look,title='October'}:{look:CalendarLook;title?:string}){
- const t=themeFor(look.template),ink=String(calendarLook(look)['--calendar-ink' as keyof ReturnType<typeof calendarLook>]),accent=look.color,paper=look.paper??'#fff8ef'
- const art=t?'data:image/svg+xml,'+encodeURIComponent(motifSvg(t.motif,['gameday','courtside'].includes(t.id)?'#ffffff':accent)):null
- const planner=look.template==='planner'
- return <svg className="calendar-theme-preview" viewBox="0 0 240 204" aria-hidden="true" focusable="false">
- <rect width="240" height="204" rx="12" fill={paper}/>
- {['blocks','gameday','courtside'].includes(look.template??'')&&<rect width="240" height="62" fill={accent}/>}
- {look.template==='deco'&&<><rect x="8" y="8" width="224" height="188" fill="none" stroke={accent}/><rect x="12" y="12" width="216" height="180" fill="none" stroke={accent}/></>}
- {art&&<><image href={art} x="8" y="6" width="36" height="36"/><image href={art} x="196" y="6" width="36" height="36"/></>}
- <text x="120" y="43" textAnchor="middle" fill={['blocks','gameday','courtside'].includes(look.template??'')?'white':ink} style={{fontFamily:appFonts[look.font].css,fontSize:title.length>8?25:29,fontWeight:400}}>{title}</text>
- {planner?Array.from({length:5},(_,i)=><g key={i}><rect x="20" y={72+i*23} width="4" height="16" fill={accent}/><path d={'M30 '+(87+i*23)+'H220'} stroke={accent} opacity=".4"/><text x="33" y={83+i*23} fontSize="9" fill={ink}>{['Mon','Tue','Wed','Thu','Fri'][i]}</text></g>):<>
- {['M','T','W','T','F','S','S'].map((d,i)=><text key={i} x={30+i*30} y="77" textAnchor="middle" fontSize="8" fontFamily="system-ui" fill={accent}>{d}</text>)}
- {Array.from({length:28},(_,i)=><g key={i}><rect x={16+i%7*30} y={85+Math.floor(i/7)*25} width="27" height="22" rx={['playful','coquette','floral'].includes(look.template??'')?6:1} fill={look.template==='polaroid'?'white':accent+'0d'} stroke={accent} strokeOpacity=".22"/><text x={30+i%7*30} y={99+Math.floor(i/7)*25} textAnchor="middle" fontSize="8" fontFamily="system-ui" fill={ink}>{i+1}</text></g>)}
+export function CalendarThemePreview({look,title='October',month='2026-10'}:{look:CalendarLook;title?:string;month?:string}){
+ const t=themeFor(look.template),style=calendarLook(look) as Record<string,string>,ink=style['--calendar-ink'],accent=look.color,paper=look.paper??'#fff8ef',heroInk=style['--calendar-hero-ink'],composition=compositionFor(look.template)
+ const art=t?'data:image/svg+xml,'+encodeURIComponent(motifSvg(t.motif,composition==='ribbon'?heroInk:accent)):null
+ const planner=look.template==='planner',monthDate=new Date(month+'-01T12:00:00Z'),valid=Number.isFinite(monthDate.getTime()),offset=valid?(monthDate.getUTCDay()+6)%7:3,days=valid?new Date(Date.UTC(monthDate.getUTCFullYear(),monthDate.getUTCMonth()+1,0)).getUTCDate():31
+ const frame=look.outline==='double'?3:look.outline==='none'?0:1,dashed=look.outline==='dashed'?'4 4':undefined
+ return <svg className="calendar-theme-preview" viewBox="0 0 360 330" aria-hidden="true" focusable="false">
+ <rect width="360" height="330" rx="16" fill={paper}/>
+ {composition==='ribbon'&&<rect x="8" y="8" width="344" height="96" rx="10" fill={accent}/>}
+ {composition==='stripe'&&Array.from({length:12},(_,i)=><rect key={i} x={i*32} y="0" width="16" height="100" fill={accent} opacity=".07"/>)}
+ {composition==='split'&&<path d="M0 0H360V84Q180 124 0 84Z" fill={accent} opacity=".13"/>}
+ {composition==='arch'&&<path d="M12 101V70Q12 12 90 12H270Q348 12 348 70V101" fill="none" stroke={accent} strokeWidth="1"/>}
+ {composition==='frame'&&<rect x="8" y="8" width="344" height="314" rx="3" fill="none" stroke={accent} strokeWidth={frame||1}/>}
+ {look.outline!=='none'&&<rect x="14" y="14" width="332" height="302" rx="10" fill="none" stroke={composition==='ribbon'?ink:accent} strokeOpacity=".25" strokeWidth={frame} strokeDasharray={dashed}/>}
+ {art&&<><image href={art} x="22" y="24" width="38" height="38"/><image href={art} x="300" y="24" width="38" height="38"/></>}
+ <text x="180" y="30" textAnchor="middle" fontFamily="system-ui" fontSize="6.5" letterSpacing="2" fill={heroInk} opacity=".7">JUS TINI’S · NEW ORLEANS</text>
+ <text x="180" y="76" textAnchor="middle" fill={heroInk} style={{fontFamily:appFonts[look.font].css,fontSize:title.length>8?38:44,fontWeight:400}}>{title}</text>
+ <path d="M30 104H330" stroke={accent} strokeOpacity=".25"/>
+ {planner?Array.from({length:7},(_,i)=><g key={i}><rect x="28" y={119+i*25} width="3" height="19" fill={accent}/><path d={'M40 '+(138+i*25)+'H330'} stroke={accent} strokeOpacity=".2"/><text x="43" y={132+i*25} fontFamily="system-ui" fontSize="10" fill={ink}>{['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'][i]}</text></g>):<>
+ {['M','T','W','T','F','S','S'].map((d,i)=><text key={i} x={48+i*44} y="120" textAnchor="middle" fontSize="8" fontFamily="system-ui" fill={ink} opacity=".6">{d}</text>)}
+ {Array.from({length:42},(_,i)=>{const date=i-offset+1,inMonth=date>0&&date<=days;return <g key={i}><rect x={28+i%7*44} y={130+Math.floor(i/7)*27} width="40" height="24" rx={composition==='arch'||composition==='airy'?5:2} fill={accent} fillOpacity={inMonth?.055:.015} stroke={accent} strokeOpacity=".12"/>{inMonth&&<text x={48+i%7*44} y={146+Math.floor(i/7)*27} textAnchor="middle" fontSize="9" fontFamily="system-ui" fill={ink}>{date}</text>}</g>})}
  </>}
+ <text x="180" y="310" textAnchor="middle" fontSize="6.5" fontFamily="system-ui" letterSpacing="1.5" fill={ink} opacity=".55">{t?.label.toUpperCase()??'MAKE ROOM FOR GOOD THINGS'}</text>
  </svg>
 }
