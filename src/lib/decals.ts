@@ -1,7 +1,8 @@
+import {stickerBank} from './stickerBank'
 import {themeFor,motifSvg} from './calendarThemes'
 export type DecalSettings={decal?:string;decalSize?:number;decalOpacity?:number;decalPlacement?:'corners'|'garland'|'center'|'off'}
 const line=(path:string)=>'<g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">'+path+'</g>'
-export const decalBank=[
+const vectorDecals=[
  {id:'magnolia',label:'Magnolia bloom',category:'Botanical',shape:line('<path d="M50 64C7 70 14 29 45 48C18 6 65 4 56 44C81 9 107 48 65 57C103 72 65 101 54 70C36 102 7 76 42 64Z"/><path d="M50 61L54 92M53 80Q77 64 85 80Q71 91 53 80"/>')},
  {id:'orchid',label:'Orchid stems',category:'Botanical',shape:line('<path d="M25 96Q70 48 44 8M46 27Q14 10 24 35Q39 44 48 32Q72 5 79 30Q78 52 51 36M45 52Q7 39 19 65Q32 76 43 57Q70 32 77 58Q71 79 44 65"/>')},
  {id:'olive',label:'Olive branches',category:'Botanical',shape:line('<path d="M15 91Q67 61 72 7M29 81Q5 68 20 53Q41 63 29 81M43 67Q79 81 85 56Q60 49 43 67M59 45Q29 41 39 21Q65 24 59 45M68 28Q90 30 91 9Q73 6 68 28"/>')},
@@ -31,6 +32,7 @@ export const decalBank=[
  {id:'heart',label:'Romantic hearts',category:'Seasonal',motif:'heart'},
  {id:'rose',label:'Pressed rose',category:'Botanical',motif:'rose'}
 ] as const
+export const decalBank=[...vectorDecals,...stickerBank.map(([id,emoji,category,label])=>({id:'sticker-'+id,label,category:'Stickers · '+category,shape:'<text x="50" y="76" text-anchor="middle" font-size="76" font-family="Apple Color Emoji,Segoe UI Emoji,Noto Color Emoji,sans-serif">'+emoji+'</text>'}))]
 export const decalGroups=[...new Set(decalBank.map(d=>d.category))]
 export function decalSvg(id:string,color:string,fallback?:string,opacity=1):string|null{
  const safe=/^#[a-f\d]{6}$/i.test(color)?color:'#795232';if(id==='none')return null

@@ -1,9 +1,10 @@
+import {type DecalSettings,decalValues} from './decals'
 import {calendarThemes,type CalendarThemeId} from './calendarThemes'
 import {themePreset,readableInk,type ThemeTokens} from './appTheme'
 import type {FontName} from './appearance'
 import type {CalendarLook} from './calendarLook'
 export const generatorCollections=[...new Set(calendarThemes.map(t=>t.category))]
-export type GeneratorOptions={collection:string;description:string;mood:'soft'|'rich'|'night';accent?:string;paper?:string;titleFont?:FontName;bodyFont:FontName;decoration:boolean;outline:NonNullable<CalendarLook['outline']>;radius:number}
+export type GeneratorOptions=DecalSettings&{collection:string;description:string;mood:'soft'|'rich'|'night';accent?:string;paper?:string;titleFont?:FontName;bodyFont:FontName;decoration:boolean;outline:NonNullable<CalendarLook['outline']>;radius:number}
 export type GeneratedTheme={id:string;name:string;tokens:ThemeTokens;calendar:CalendarLook;matchedCollection:string}
 const words:Record<string,string[]>={
  'Botanical & Floral':['floral','flower','garden','botanical','rose','bloom'],
@@ -39,6 +40,7 @@ function secondaryInk(ink:string,paper:string,card:string):string{
  return ink
 }
 export function generateThemes(o:GeneratorOptions,round=0):GeneratedTheme[]{
+ const decoration=decalValues(o)
  const collection=matchCollection(o.description,o.collection),pool=calendarThemes.filter(t=>t.category===collection),seeds=pool.length?pool:calendarThemes
  const text=o.description.toLowerCase(),night=o.mood==='night'||/\b(dark|noir|after dark)\b/.test(text)
  const inferredFont=/\b(script|cursive)\b/.test(text)?'allura':/\b(serif|editorial)\b/.test(text)?'editorial':undefined
@@ -47,9 +49,9 @@ export function generateThemes(o:GeneratorOptions,round=0):GeneratedTheme[]{
   const accent=o.accent??mixColor(base.accent,o.mood==='rich'?'#33292b':'#8d7763',weight)
   const paper=o.paper??(night?mixColor('#25242b',base.accent,.035+i*.025):mixColor(base.background,'#fffaf3',.22+i*.17+(round%4)*.025))
   const ink=safeInk(paper),dark=ink==='#fffaf4'||ink==='#ffffff',candidateCard=dark?mixColor(paper,'#ffffff',.055):mixColor(paper,'#ffffff',.7),card=contrastRatio(ink,candidateCard)>=4.5?candidateCard:paper
-  const tokens:ThemeTokens={...base,background:paper,card,text:ink,muted:secondaryInk(ink,paper,card),accent,accentText:safeInk(accent),border:mixColor(paper,ink,.17),titleFont:o.titleFont??inferredFont??base.titleFont,font:o.bodyFont,headingFont:'system',labelFont:'system',buttonFont:'system',radius:o.radius,borderWidth:o.outline==='none'?0:1,shadow:i===1?'none':'soft',surface:'solid',art:o.decoration?seed.id:'none',decal:'theme',decalPlacement:o.decoration?'corners':'off'}
+  const tokens:ThemeTokens={...base,background:paper,card,text:ink,muted:secondaryInk(ink,paper,card),accent,accentText:safeInk(accent),border:mixColor(paper,ink,.17),titleFont:o.titleFont??inferredFont??base.titleFont,font:o.bodyFont,headingFont:'system',labelFont:'system',buttonFont:'system',radius:o.radius,borderWidth:o.outline==='none'?0:1,shadow:i===1?'none':'soft',surface:'solid',art:o.decoration?seed.id:'none',decal:decoration.decal,decalPlacement:o.decoration?decoration.decalPlacement:'off',decalSize:decoration.decalSize,decalOpacity:decoration.decalOpacity}
   const layout:CalendarLook['template']=o.decoration?seed.id as CalendarThemeId:(['editorial','minimal','poster'] as const)[i]
-  const calendar:CalendarLook={color:accent,paper,font:tokens.titleFont,template:layout,outline:o.outline,decal:'theme',decalPlacement:o.decoration?'corners':'off',decalSize:88,decalOpacity:.65}
+  const calendar:CalendarLook={color:accent,paper,font:tokens.titleFont,template:layout,outline:o.outline,decal:decoration.decal,decalPlacement:o.decoration?decoration.decalPlacement:'off',decalSize:decoration.decalSize,decalOpacity:decoration.decalOpacity}
   return {id:seed.id+'-'+round+'-'+i,name:seed.label+' · '+['Quiet','Editorial','Signature'][i],tokens,calendar,matchedCollection:collection}
  })
 }
