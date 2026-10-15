@@ -1,6 +1,7 @@
+import {themeFor,motifSvg,type CalendarThemeId} from './calendarThemes'
 import type {CSSProperties} from 'react'
 import {appFonts,type FontName} from './appearance'
-export type CalendarLook={color:string;font:FontName;template?:'poster'|'editorial'|'playful'|'minimal'|'ledger'|'scrapbook'|'spotlight'|'deco'|'polaroid'|'blocks'|'planner'|'minimal'|'ledger'|'scrapbook'|'spotlight';outline?:'thin'|'double'|'dashed'|'none';paper?:string}
+export type CalendarLook={color:string;font:FontName;template?:CalendarThemeId|'poster'|'editorial'|'playful'|'minimal'|'ledger'|'scrapbook'|'spotlight'|'deco'|'polaroid'|'blocks'|'planner';outline?:'thin'|'double'|'dashed'|'none';paper?:string}
 export const defaultCalendarLook:CalendarLook={color:'#cc4b84',font:'script',template:'poster',outline:'double',paper:'#fff8ef'}
 export const calendarPalettes={Pumpkin:'#d56b24',Pink:'#cc4b84',Lilac:'#8d69c1',Sage:'#4d8367',Ocean:'#347e9c',Espresso:'#795232'}
 export function calendarLook(value?:CalendarLook):CSSProperties{
@@ -8,5 +9,7 @@ export function calendarLook(value?:CalendarLook):CSSProperties{
  const paper=/^#[0-9a-fA-F]{6}$/.test(value?.paper??'')?value!.paper!:defaultCalendarLook.paper!
  const light=[1,3,5].map(i=>parseInt(paper.slice(i,i+2),16)/255);const ink=.2126*light[0]+.7152*light[1]+.0722*light[2]>.45?'#35251f':'#fff8ef'
  const outline=value?.outline??'double'
- return {'--calendar-color':color,'--calendar-tint':color+'16','--calendar-paper':paper,'--calendar-ink':ink,'--calendar-font':appFonts[value?.font??defaultCalendarLook.font]?.css??appFonts.script.css,'--calendar-outline':outline==='none'?'0':outline==='double'?'4px double '+color:outline==='dashed'?'2px dashed '+color:'1px solid '+color} as CSSProperties
+ const theme=themeFor(value?.template)
+ const art=theme?'url("data:image/svg+xml,'+encodeURIComponent(motifSvg(theme.motif,color))+'")':'none'
+ return {'--calendar-art':art,'--calendar-color':color,'--calendar-tint':color+'16','--calendar-paper':paper,'--calendar-ink':ink,'--calendar-font':appFonts[value?.font??defaultCalendarLook.font]?.css??appFonts.script.css,'--calendar-outline':outline==='none'?'0':outline==='double'?'4px double '+color:outline==='dashed'?'2px dashed '+color:'1px solid '+color} as CSSProperties
 }
