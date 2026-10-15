@@ -1,6 +1,6 @@
 export type TargetGroup='bar'|'floor'|'exclude'
 export type SalesShift={id:string;employee_key?:string;assigned?:boolean;name:string;role:string;station:string;start:string;end:string;close:boolean;business_decline:boolean}
-export type TargetInputs={locked_day?:{ready:boolean;date:string;through_date:string;weekday_total:number;team_target:number;bar_target:number;floor_target:number;rows:{employee_key:string;group:TargetGroup;hours:number;target:number}[]}|null;weekday_totals?:{weekday:number;total:number|null;through_date:string}[];settings:{version:number;bar_percent:number;growth_percent:number;role_groups:Record<string,TargetGroup>};history:{date:string;amount:number}[];overrides:Record<string,{group:TargetGroup;hours?:number|null}>}
+export type TargetInputs={locked_day?:{ready:boolean;date:string;through_date:string;weekday_total:number;team_target:number;bar_target:number;floor_target:number;rows:{employee_key:string;name?:string;group:TargetGroup;hours:number;target:number}[]}|null;weekday_totals?:{weekday:number;total:number|null;through_date:string}[];settings:{version:number;bar_percent:number;growth_percent:number;role_groups:Record<string,TargetGroup>};history:{date:string;amount:number}[];overrides:Record<string,{group:TargetGroup;hours?:number|null}>}
 export const salesMoney=(n:number)=>new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(n)
 export function precedingDays(date:string){const at=new Date(date+'T12:00:00Z');return Array.from({length:42},(_,i)=>{const d=new Date(at);d.setUTCDate(d.getUTCDate()-42+i);return d.toISOString().slice(0,10)})}
 export function shiftGroup(s:SalesShift,inputs:TargetInputs):TargetGroup {return inputs.overrides[s.id]?.group??inputs.settings.role_groups[s.role.trim().toLowerCase()]??(/\bbartender\b/i.test(s.role)?'bar':/\bserver\b/i.test(s.role)?'floor':'exclude')}
@@ -10,7 +10,7 @@ export function calculateTargets(date:string,inputs:TargetInputs,shifts:SalesShi
  const fixed=inputs.locked_day
  if(fixed?.ready&&fixed.date===date){
   const people=new Map<string,{key:string;name:string;group:TargetGroup;hours:number;target:number}>()
-  for(const s of fixed.rows){const id=s.group+':'+s.employee_key;const p=people.get(id)??{key:s.employee_key,name:shifts.find(x=>x.employee_key===s.employee_key)?.name??'Employee '+s.employee_key,group:s.group,hours:0,target:0};p.hours+=Number(s.hours);p.target=Math.round((p.target+Number(s.target))*100)/100;people.set(id,p)}
+  for(const s of fixed.rows){const id=s.group+':'+s.employee_key;const p=people.get(id)??{key:s.employee_key,name:s.name??shifts.find(x=>x.employee_key===s.employee_key)?.name??'Employee '+s.employee_key,group:s.group,hours:0,target:0};p.hours+=Number(s.hours);p.target=Math.round((p.target+Number(s.target))*100)/100;people.set(id,p)}
   return {days:precedingDays(date).filter((_,i)=>i%7===0),missing:[],average:Number(fixed.weekday_total)/6,basisThrough:fixed.through_date,total:Number(fixed.team_target),bar:Number(fixed.bar_target),floor:Number(fixed.floor_target),rows:[...people.values()],issues:[],ready:true}
  }
  const weekday=new Date(date+'T12:00:00Z').getUTCDay(),entry=inputs.weekday_totals?.find(t=>t.weekday===weekday&&t.total!=null);

@@ -1,3 +1,4 @@
+import {salesMoney} from '../lib/salesTargets'
 import {AccessSection} from '../components/AppAccess'
 import {PeerRecognition} from '../components/PeerRecognition'
 // page-designer-instrumented
@@ -219,6 +220,7 @@ function CloseoutDay({selectedDate,refresh,onDeleted,locationId,locationName,cur
   const [error, setError] =
     useState('')
 
+  const [dayTargets,setDayTargets]=useState<{ready?:boolean;reason?:string;team_target?:number;rows?:{employee_key:string;name?:string;group:string;target:number}[]}|null>(null)
   const [closeouts, setCloseouts] =
     useState<CloseoutRow[]>([])
 
@@ -263,12 +265,12 @@ function CloseoutDay({selectedDate,refresh,onDeleted,locationId,locationName,cur
   useEffect(()=>{void loadSummary(locationId,selectedDate);return()=>{request.current+=1}},[locationId,selectedDate,refresh])
   async function loadSummary(targetLocationId:string,businessDate:string) {
     const ticket=++request.current
-    setLoading(true);setError('');setCloseouts([]);setProfiles([]);setCloseoutTables([]);setManagerCloseouts([]);setIsManager(false)
+    setLoading(true);setError('');setDayTargets(null);setCloseouts([]);setProfiles([]);setCloseoutTables([]);setManagerCloseouts([]);setIsManager(false)
     try {
       const {data,error}=await supabase.rpc('closeout_summary_day',{p_location_id:targetLocationId,p_day:businessDate})
       if(error)throw error
       if(ticket!==request.current)return
-      setIsManager(!!data.manager);setCloseouts(data.closeouts ?? []);setProfiles(data.profiles ?? []);setCloseoutTables(data.tables ?? []);setManagerCloseouts(data.manager_closeouts ?? [])
+      setDayTargets(data.sales_targets??null);setIsManager(!!data.manager);setCloseouts(data.closeouts ?? []);setProfiles(data.profiles ?? []);setCloseoutTables(data.tables ?? []);setManagerCloseouts(data.manager_closeouts ?? [])
     } catch(e) {if(ticket===request.current)setError(String((e as {message?:string})?.message ?? e))}
     finally {if(ticket===request.current)setLoading(false)}
   }
@@ -310,7 +312,7 @@ function CloseoutDay({selectedDate,refresh,onDeleted,locationId,locationName,cur
         )
 
       const totalTarget =
-        closeouts.reduce(
+        isManager&&dayTargets?.ready===true?Number(dayTargets.team_target):closeouts.reduce(
           (total, closeout) =>
             total +
             Number(
@@ -375,7 +377,7 @@ function CloseoutDay({selectedDate,refresh,onDeleted,locationId,locationName,cur
       const teamPercent =
         totalTarget > 0
           ? (
-              closeouts.filter(c=>hasTarget(c)&&Number(c.sales_target)>0).reduce((sum,c)=>sum+Number(c.net_sales||0),0) /
+              closeouts.filter(c=>isManager&&dayTargets?.ready===true||hasTarget(c)&&Number(c.sales_target)>0).reduce((sum,c)=>sum+Number(c.net_sales||0),0) /
               totalTarget
             ) *
             100
@@ -391,7 +393,7 @@ function CloseoutDay({selectedDate,refresh,onDeleted,locationId,locationName,cur
         averageScore,
         teamPercent,
       }
-    }, [closeouts])
+    }, [closeouts,isManager,dayTargets])
 
   const recap = useMemo(() => {
     const over = closeouts.filter(c=>Number(c.sales_target)>0 && Number(c.net_sales)>=Number(c.sales_target)).length
@@ -614,6 +616,7 @@ function CloseoutDay({selectedDate,refresh,onDeleted,locationId,locationName,cur
       </div>
 
       {locationId && <PeerRecognition location={locationId} from={selectedDate} to={selectedDate}/>}
+      {isManager&&dayTargets&&<section className="card" aria-label="Daily sales targets"><h2>Sales targets · {serviceDateLabel(selectedDate)}</h2>{dayTargets.ready?<><p>Team goal: <strong>{salesMoney(Number(dayTargets.team_target))}</strong></p><ul>{Object.values((dayTargets.rows??[]).reduce<Record<string,{name:string;group:string;target:number}>>((all,r)=>{const key=r.group+':'+r.employee_key;const row=all[key]??{name:r.name??'Employee '+r.employee_key,group:r.group,target:0};row.target+=Number(r.target);all[key]=row;return all},{})).map((r,i)=><li key={i}>{r.name} · {r.group==='bar'?'Bar':'Floor'} · {salesMoney(r.target)}</li>)}</ul><p>Loaded automatically from app sales targets. Closeouts are not required for targets to appear.</p></>:<p role="status">{dayTargets.reason??'Sales targets are not available for this date.'}</p>}</section>}
       {closeouts.some(c=>!hasTarget(c))&&<p role="status"><PageWord id="sectioncopy.2837ea3ec6c11338de09">{"Some closeouts have no saved target. Target percentages include only closeouts with available positive targets."}</PageWord></p>}
       {locationId&&<StockBoard location={locationId} readOnly date={selectedDate}/>}
       {error && (
@@ -683,7 +686,7 @@ function CloseoutDay({selectedDate,refresh,onDeleted,locationId,locationName,cur
                 </span>
 
                 <strong>
-                  {closeouts.some(hasTarget)?money(totals.totalTarget):'Not available'}
+                  {(isManager&&dayTargets?.ready===true)||closeouts.some(hasTarget)?money(totals.totalTarget):'Not available'}
                 </strong>
               </div>
             )}
