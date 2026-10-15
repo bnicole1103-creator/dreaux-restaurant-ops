@@ -1030,10 +1030,10 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
             ),
 
           money_turned_in_to:
-            moneyTurnedInTo,
+            moneyTurnedInTo.trim() || null,
 
           drinks_made_by:
-            drinkMaker ||
+            drinkMaker.trim() ||
             null,
 
           notes:
