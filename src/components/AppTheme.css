@@ -64,3 +64,9 @@
 .theme-preview button{font-size:.8rem;letter-spacing:.015em;min-height:44px}
 .theme-preview-art{width:36px;height:36px;opacity:.3}
 @media(prefers-reduced-motion:reduce){.theme-studio .theme-tile{transition:none}.theme-studio .theme-tile:hover{transform:none}}
+
+/* The theme artwork has its own space above content, never over controls. */
+.app-shell:has(style[data-app-theme=active]) #app-main::before{content:"";display:block;height:var(--decal-height,0px);background-image:var(--decal-band,none);background-position:var(--decal-positions,center);background-size:min(var(--decal-size,88px),20vw) auto;background-repeat:no-repeat;pointer-events:none;margin:12px clamp(16px,3vw,48px) 0}
+.app-shell:has(style[data-app-theme=active]) #app-main .page>h1::after{display:none}
+.theme-preview::before,.generator-specimen::before{content:"";display:block;height:var(--decal-height,0px);background-image:var(--decal-band,none);background-position:var(--decal-positions,center);background-size:min(var(--decal-size,88px),20vw) auto;background-repeat:no-repeat;pointer-events:none}
+.theme-preview-art,.generator-art{display:none}

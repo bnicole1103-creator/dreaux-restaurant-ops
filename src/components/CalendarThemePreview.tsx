@@ -1,9 +1,11 @@
+import {decalSvg,decalValues} from '../lib/decals'
 import {themeFor,motifSvg,compositionFor} from '../lib/calendarThemes'
 import {calendarLook,type CalendarLook} from '../lib/calendarLook'
 import {appFonts} from '../lib/appearance'
 export function CalendarThemePreview({look,title='October',month='2026-10'}:{look:CalendarLook;title?:string;month?:string}){
  const t=themeFor(look.template),style=calendarLook(look) as Record<string,string>,ink=style['--calendar-ink'],accent=look.color,paper=look.paper??'#fff8ef',heroInk=style['--calendar-hero-ink'],composition=compositionFor(look.template)
- const art=t?'data:image/svg+xml,'+encodeURIComponent(motifSvg(t.motif,composition==='ribbon'?heroInk:accent)):null
+ const d=decalValues(look),svg=decalSvg(d.decal,composition==='ribbon'?heroInk:accent,look.template,d.decalOpacity),art=svg&&d.decalPlacement!=='off'?'data:image/svg+xml,'+encodeURIComponent(svg):null
+
  const planner=look.template==='planner',monthDate=new Date(month+'-01T12:00:00Z'),valid=Number.isFinite(monthDate.getTime()),offset=valid?(monthDate.getUTCDay()+6)%7:3,days=valid?new Date(Date.UTC(monthDate.getUTCFullYear(),monthDate.getUTCMonth()+1,0)).getUTCDate():31
  const frame=look.outline==='double'?3:look.outline==='none'?0:1,dashed=look.outline==='dashed'?'4 4':undefined
  return <svg className="calendar-theme-preview" viewBox="0 0 360 330" aria-hidden="true" focusable="false">
@@ -14,7 +16,7 @@ export function CalendarThemePreview({look,title='October',month='2026-10'}:{loo
  {composition==='arch'&&<path d="M12 101V70Q12 12 90 12H270Q348 12 348 70V101" fill="none" stroke={accent} strokeWidth="1"/>}
  {composition==='frame'&&<rect x="8" y="8" width="344" height="314" rx="3" fill="none" stroke={accent} strokeWidth={frame||1}/>}
  {look.outline!=='none'&&<rect x="14" y="14" width="332" height="302" rx="10" fill="none" stroke={composition==='ribbon'?ink:accent} strokeOpacity=".25" strokeWidth={frame} strokeDasharray={dashed}/>}
- {art&&<><image href={art} x="22" y="24" width="38" height="38"/><image href={art} x="300" y="24" width="38" height="38"/></>}
+ {art&&(d.decalPlacement==='garland'?[35,105,175,245,315]:d.decalPlacement==='center'?[180]:[40,320]).map((x,i)=><image key={i} href={art} x={x-Math.min(48,d.decalSize*.4)/2} y={d.decalPlacement==='corners'?37:82} width={Math.min(48,d.decalSize*.4)} height={Math.min(48,d.decalSize*.4)}/>)}
  <text x="180" y="30" textAnchor="middle" fontFamily="system-ui" fontSize="6.5" letterSpacing="2" fill={heroInk} opacity=".7">JUS TINI’S · NEW ORLEANS</text>
  <text x="180" y="76" textAnchor="middle" fill={heroInk} style={{fontFamily:appFonts[look.font].css,fontSize:title.length>8?38:44,fontWeight:400}}>{title}</text>
  <path d="M30 104H330" stroke={accent} strokeOpacity=".25"/>

@@ -47,9 +47,9 @@ export function generateThemes(o:GeneratorOptions,round=0):GeneratedTheme[]{
   const accent=o.accent??mixColor(base.accent,o.mood==='rich'?'#33292b':'#8d7763',weight)
   const paper=o.paper??(night?mixColor('#25242b',base.accent,.035+i*.025):mixColor(base.background,'#fffaf3',.22+i*.17+(round%4)*.025))
   const ink=safeInk(paper),dark=ink==='#fffaf4'||ink==='#ffffff',candidateCard=dark?mixColor(paper,'#ffffff',.055):mixColor(paper,'#ffffff',.7),card=contrastRatio(ink,candidateCard)>=4.5?candidateCard:paper
-  const tokens:ThemeTokens={...base,background:paper,card,text:ink,muted:secondaryInk(ink,paper,card),accent,accentText:safeInk(accent),border:mixColor(paper,ink,.17),titleFont:o.titleFont??inferredFont??base.titleFont,font:o.bodyFont,headingFont:'system',labelFont:'system',buttonFont:'system',radius:o.radius,borderWidth:o.outline==='none'?0:1,shadow:i===1?'none':'soft',surface:'solid',art:o.decoration?seed.id:'none'}
+  const tokens:ThemeTokens={...base,background:paper,card,text:ink,muted:secondaryInk(ink,paper,card),accent,accentText:safeInk(accent),border:mixColor(paper,ink,.17),titleFont:o.titleFont??inferredFont??base.titleFont,font:o.bodyFont,headingFont:'system',labelFont:'system',buttonFont:'system',radius:o.radius,borderWidth:o.outline==='none'?0:1,shadow:i===1?'none':'soft',surface:'solid',art:o.decoration?seed.id:'none',decal:'theme',decalPlacement:o.decoration?'corners':'off'}
   const layout:CalendarLook['template']=o.decoration?seed.id as CalendarThemeId:(['editorial','minimal','poster'] as const)[i]
-  const calendar:CalendarLook={color:accent,paper,font:tokens.titleFont,template:layout,outline:o.outline}
+  const calendar:CalendarLook={color:accent,paper,font:tokens.titleFont,template:layout,outline:o.outline,decal:'theme',decalPlacement:o.decoration?'corners':'off',decalSize:88,decalOpacity:.65}
   return {id:seed.id+'-'+round+'-'+i,name:seed.label+' · '+['Quiet','Editorial','Signature'][i],tokens,calendar,matchedCollection:collection}
  })
 }
