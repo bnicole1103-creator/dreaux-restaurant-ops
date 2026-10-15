@@ -5,7 +5,7 @@ import { PreshiftReadReceipt,usePreshiftReadReceipts } from './PreshiftReadRecei
 export function PreshiftOpenTracker({location,postId,version,source}:{location:string;postId:string;version:number;source:'home'|'feed'}){
  const anchor=useRef<HTMLSpanElement>(null),[error,setError]=useState('')
  useEffect(()=>{
-  if(!location||!postId||!version||new URLSearchParams(window.location.search).has('wording-preview'))return
+  if(!location||!postId||!version||(new URLSearchParams(window.location.search).has('wording-preview')||new URLSearchParams(window.location.search).has('staff-preview')))return
   const details=source==='home'?anchor.current?.closest('details'):null
   const target=source==='home'?(details?.querySelector('.home-post-body')??details):anchor.current?.closest('article')?.querySelector('.feed-body')
   if(!target)return
