@@ -1,3 +1,4 @@
+import {AppThemeRuntime} from './AppThemeRuntime'
 import {useAppAccess} from './AppAccess'
 import {accessPage} from '../lib/accessCatalog'
 import './PageFormat.css'
@@ -137,7 +138,7 @@ export function AppShell({
       <a className="skip-link" href="#app-main"><PageWord id="sectioncopy.814ff0c2cb2ec5ecee02">{"Skip to content"}</PageWord></a>
 
       <header data-design-block="copy.edeb9250004ef168.1" className="app-header">
-        <AppearanceHeader />
+        <AppearanceHeader /><AppThemeRuntime />
 
         <div data-design-block="copy.4440213bd6ff846f.1" className="app-brand">
           <strong><ScreenText id="AppShell.262da4df982b420d">

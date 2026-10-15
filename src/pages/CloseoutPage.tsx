@@ -1,3 +1,4 @@
+import {closeoutErrorMessage} from '../lib/closeoutError'
 import { CloseoutStockQuestion } from '../components/CloseoutStockQuestion'
 import { closeoutStockItems } from '../lib/stockItems'
 // page-designer-instrumented
@@ -1101,9 +1102,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
       )
 
       setError(
-        caughtError instanceof Error
-          ? caughtError.message
-          : 'Unable to submit closeout.'
+        closeoutErrorMessage(caughtError)
       )
 
       window.scrollTo({
