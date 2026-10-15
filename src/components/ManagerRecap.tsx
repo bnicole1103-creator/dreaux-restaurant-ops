@@ -1,3 +1,4 @@
+import {PageWord} from './PageDesign'
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { ScreenText } from './ScreenText'
@@ -18,10 +19,10 @@ export function ManagerRecap({location,day,refresh,title,lines}:{location:string
   const disposals=reports?.disposals.flatMap(s=>s.lines.map(l=>`${l.brand} · ${l.size} · ${l.quantity} bottle${l.quantity===1?'':'s'} — ${s.employee}, ${submissionLabel(s.submitted_at)}`))??[]
   const total=reports?.disposals.reduce((n,s)=>n+s.lines.reduce((v,l)=>v+Number(l.quantity),0),0)??0
   async function copy(){try{await navigator.clipboard.writeText([title,...lines.map(l=>'• '+l),'• 86 items:',...(stock.length?stock:['No outstanding 86 items.']).map(l=>'  • '+l),`• Disposal report: ${total} bottles`,...(disposals.length?disposals:['No disposal sheets submitted.']).map(l=>'  • '+l)].join('\n'));setNotice('Recap copied.')}catch{setNotice('Copy was unavailable. Select and copy the recap text.')}}
-  return <section className="card"><div style={{display:'flex',justifyContent:'space-between',gap:12,flexWrap:'wrap'}}><h2>{title}</h2><button type="button" disabled={!reports||!!error} onClick={()=>void copy()}><ScreenText id="CloseoutSummary.2f68c5951f51442a">Copy Recap</ScreenText></button></div>
+  return <section data-design-block="section.f604fa6409361379fcc2" className="card"><div style={{display:'flex',justifyContent:'space-between',gap:12,flexWrap:'wrap'}}><h2>{title}</h2><button type="button" disabled={!reports||!!error} onClick={()=>void copy()}><ScreenText id="CloseoutSummary.2f68c5951f51442a">Copy Recap</ScreenText></button></div>
     <ul style={{lineHeight:1.7}}>{lines.map((l,i)=><li key={i}>{l}</li>)}
-      <li><strong><ScreenText id="ManagerRecap.stock">86 items</ScreenText></strong>{reports&&<ul>{stock.length?stock.map((l,i)=><li key={i}>{l}</li>):<li>No outstanding 86 items.</li>}</ul>}</li>
-      <li><strong><ScreenText id="ManagerRecap.disposals">Disposal report</ScreenText></strong>{reports&&<>: {total} bottles across {reports.disposals.length} submitted sheets<ul>{disposals.length?disposals.map((l,i)=><li key={i}>{l}</li>):<li>No disposal sheets submitted.</li>}</ul></>}</li>
-    </ul>{!reports&&!error&&<p role="status">Loading 86 items and disposals…</p>}{error&&<p role="alert">86 and disposal reports could not load: {error}</p>}{notice&&<p role="status">{notice}</p>}
+      <li><strong><ScreenText id="ManagerRecap.stock">86 items</ScreenText></strong>{reports&&<ul>{stock.length?stock.map((l,i)=><li key={i}>{l}</li>):<li><PageWord id="sectioncopy.aab43bcd7ab14676cfa0">{"No outstanding 86 items."}</PageWord></li>}</ul>}</li>
+      <li><strong><ScreenText id="ManagerRecap.disposals">Disposal report</ScreenText></strong>{reports&&<><PageWord id="sectioncopy.71bcf087d4bdf8d8e0c3">{": "}</PageWord>{total}<PageWord id="sectioncopy.558b02c78f84cdfab6a0">{" bottles across "}</PageWord>{reports.disposals.length}<PageWord id="sectioncopy.952649a018c662eff02a">{" submitted sheets"}</PageWord><ul>{disposals.length?disposals.map((l,i)=><li key={i}>{l}</li>):<li><PageWord id="sectioncopy.582fdf1ec038fbf54d71">{"No disposal sheets submitted."}</PageWord></li>}</ul></>}</li>
+    </ul>{!reports&&!error&&<p role="status"><PageWord id="sectioncopy.d429d83f0641627596e3">{"Loading 86 items and disposals…"}</PageWord></p>}{error&&<p role="alert"><PageWord id="sectioncopy.6a8756cfa3aa6e11e555">{"86 and disposal reports could not load: "}</PageWord>{error}</p>}{notice&&<p role="status">{notice}</p>}
   </section>
 }

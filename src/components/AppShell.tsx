@@ -1,3 +1,5 @@
+import {useAppAccess} from './AppAccess'
+import {accessPage} from '../lib/accessCatalog'
 import './PageFormat.css'
 import { disconnectPush } from './PushPreferences'
 // page-designer-instrumented
@@ -74,7 +76,7 @@ const links = [
   { to: '/quizzes', label: 'Quizzes', icon: BookOpen },
   { to: '/training', label: 'Training', icon: GraduationCap },
   { to: '/inventory', label: 'Inventory', icon: Package },
-  { to: '/inquiry-inbox', label: 'Inquiries', icon: CalendarDays },
+  { to: '/inquiry-inbox', label: 'Guest Services', icon: CalendarDays },
   { to: '/settings', label: 'Settings', icon: Settings },
 ]
 
@@ -83,6 +85,7 @@ export function AppShell({
   children,
 }: Props) {
   const { pathname } = useLocation()
+  const pageAccess=useAppAccess()
   const [more, setMore] = useState(false)
   const [signingOut, setSigningOut] = useState(false)
   const [signOutError, setSignOutError] = useState('')
@@ -111,6 +114,7 @@ export function AppShell({
     return () => {window.removeEventListener('online', update); window.removeEventListener('offline', update)}
   }, [])
   function navItem({to, label, icon: Icon}: typeof links[number]) {
+    if(!pageAccess.can(accessPage(to)))return null
     return <NavLink key={to} to={to} end={to === '/'} onClick={() => setMore(false)} className={({isActive}) => isActive ? 'nav-item active' : 'nav-item'}><Icon size={20} aria-hidden="true"/><span><PageWord instance id={`AppShell.nav.${label.replace(/\s+/g, '')}`}>{label}</PageWord></span></NavLink>
   }
   async function signOut() {
@@ -130,7 +134,7 @@ export function AppShell({
 
   return (
     <div data-design-block="copy.45d24048ce7bc1e6.1" className="app-shell polished-app">
-      <a className="skip-link" href="#app-main">Skip to content</a>
+      <a className="skip-link" href="#app-main"><PageWord id="sectioncopy.814ff0c2cb2ec5ecee02">{"Skip to content"}</PageWord></a>
 
       <header data-design-block="copy.edeb9250004ef168.1" className="app-header">
         <AppearanceHeader />
@@ -157,9 +161,9 @@ export function AppShell({
 
       </header>
 
-      <nav className="desktop-nav" aria-label="Main navigation"><p className="nav-section-label">Your shift</p>{primary.map(navItem)}<p className="nav-section-label">Workspace</p>{extras.map(navItem)}</nav>
+      <nav data-design-block="section.c1754735109ac4f13c9e" className="desktop-nav" aria-label="Main navigation"><p className="nav-section-label"><PageWord id="sectioncopy.caee5cd3478c41a41029">{"Your shift"}</PageWord></p>{primary.map(navItem)}<p className="nav-section-label"><PageWord id="sectioncopy.20c5d63d03cf302ecd1a">{"Workspace"}</PageWord></p>{extras.map(navItem)}</nav>
       <main ref={content} id="app-main" tabIndex={-1} data-design-block="copy.60535db1b6f53b61.1" className="app-content">
-        {offline && <p role="status">You’re offline. Reconnect before saving or refreshing.</p>}
+        {offline && <p role="status"><PageWord id="sectioncopy.bf2a7186a2c1ce67fd80">{"You’re offline. Reconnect before saving or refreshing."}</PageWord></p>}
         {signOutError && <p role="alert">{signOutError}</p>}
         <AppStickerDecorations />
         <PageRecovery key={pathname.startsWith('/preshift/')?'/preshift':pathname}>{children}</PageRecovery>
@@ -173,7 +177,7 @@ export function AppShell({
       </nav>
       <dialog ref={dialog} id="workspace-menu" className="workspace-menu" aria-labelledby="workspace-menu-title" onCancel={() => setMore(false)} onClose={() => setMore(false)}>
         <div className="workspace-menu-heading"><h2 id="workspace-menu-title"><ScreenText id="AppShell.workspace">Workspace</ScreenText></h2><button type="button" aria-label="Close menu" onClick={() => setMore(false)}><X size={20}/></button></div>
-        <nav aria-label="More pages">{extras.map(navItem)}</nav>
+        <nav data-design-block="section.e7e3f0725c6512fd5af5" aria-label="More pages">{extras.map(navItem)}</nav>
       </dialog>
 
     </div>

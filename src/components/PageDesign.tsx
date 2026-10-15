@@ -1,3 +1,4 @@
+import {managementWording} from '../lib/managementWording'
 import {mergeStaffChanges,staffLayoutPreview} from '../lib/staffLayout'
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
 import type { ReactNode } from 'react'
@@ -20,9 +21,10 @@ export function setPageDesign(value:Design){current=value;subscribers.forEach(fn
 export function PageWord({id:baseId,children,instance=false}:{id:string;children:ReactNode;instance?:boolean}){
  const design=useSyncExternalStore(subscribe,()=>current,()=>current)
  const id=instance?baseId+'.v'+Array.from(String(children)).reduce((h,c)=>Math.imul(h^c.charCodeAt(0),16777619)>>>0,2166136261).toString(16):baseId
+ children=typeof children==='string'?managementWording(children):children
  const change=design.changes[id],preview=(new URLSearchParams(window.location.search).has('wording-preview')||staffLayoutPreview())
  if(change?.hidden&&!preview)return null
- return <span data-design-word={id} data-design-hidden={change?.hidden?'true':undefined} style={{display:change?.x||change?.y?'inline-block':undefined,position:change?.x||change?.y?'relative':undefined,left:change?.x||undefined,top:change?.y||undefined,opacity:change?.hidden ? .4 : undefined}}>{typeof (change?.text??children)==='string'?String(change?.text??children).split(/(\s+)/).map((word,index)=>{if(!word.trim())return word;const tokenId=id+'.w'+index,token=design.changes[tokenId];if(token?.hidden&&!preview)return null;return <span key={tokenId} data-design-word={tokenId} style={{display:token?.x||token?.y?'inline-block':undefined,position:token?.x||token?.y?'relative':undefined,left:token?.x||undefined,top:token?.y||undefined,opacity:token?.hidden ? .4 : undefined}}>{token?.text??word}</span>}):change?.text??children}</span>
+ return <span data-design-word={id} data-design-hidden={change?.hidden?'true':undefined} style={{display:change?.x||change?.y?'inline-block':undefined,position:change?.x||change?.y?'relative':undefined,left:change?.x||undefined,top:change?.y||undefined,opacity:change?.hidden ? .4 : undefined}}>{typeof (change?.text??children)==='string'?managementWording(String(change?.text??children)).split(/(\s+)/).map((word,index)=>{if(!word.trim())return word;const tokenId=id+'.w'+index,token=design.changes[tokenId];if(token?.hidden&&!preview)return null;return <span key={tokenId} data-design-word={tokenId} style={{display:token?.x||token?.y?'inline-block':undefined,position:token?.x||token?.y?'relative':undefined,left:token?.x||undefined,top:token?.y||undefined,opacity:token?.hidden ? .4 : undefined}}>{token?.text??word}</span>}):change?.text??children}</span>
 }
 export function PageDesignLoader(){
  const {pathname}=useLocation(),[design,setDesign]=useState<Design>({version:0,changes:{}})

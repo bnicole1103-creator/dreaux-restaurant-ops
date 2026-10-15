@@ -253,12 +253,12 @@ export function ReservationInquiryPage() {
     : ''
 
   return (
-    <section className="page guest-feedback-inbox">
+    <section data-design-block="section.cde1dd811c1825f07323" className="page guest-feedback-inbox">
       <p className="eyebrow">{locationName}</p>
       <h1>
         <ScreenText id="ReservationInquiryPage.title">Reservation inquiry form</ScreenText>
       </h1>
-      {canManage && <p><Link to="/inquiry-inbox">Open shared inquiry inbox</Link></p>}
+      {canManage && <p><Link to="/inquiry-inbox"><PageWord id="sectioncopy.c1397930d735b54c3683">{"Open shared inquiry inbox"}</PageWord></Link></p>}
       <p>
         <ScreenText id="ReservationInquiryPage.intro">Hosts can capture the inquiry, route parties of 15 or fewer into table seating, and route parties over 15 into private party follow-up.</ScreenText>
       </p>
@@ -269,7 +269,7 @@ export function ReservationInquiryPage() {
       {!loading && (
         <>
           <form className="gf-entry" onSubmit={submit}>
-            <fieldset disabled={saving}>
+            <fieldset data-design-block="section.a2c3cacddd029af6fb74" disabled={saving}>
               <label>
                 <ScreenText id="ReservationInquiryPage.guestName">Guest name</ScreenText>
                 <input required maxLength={200} value={guestName} onChange={(event) => setGuestName(event.target.value)} />
@@ -288,7 +288,7 @@ export function ReservationInquiryPage() {
               </label>
 
               {isLargeParty ? (
-                <section className="gf-entry">
+                <section data-design-block="section.926b40180d996ab24b0a" className="gf-entry">
                   <h2>
                     <ScreenText id="ReservationInquiryPage.privateParty">Private party follow-up</ScreenText>
                   </h2>
@@ -311,7 +311,7 @@ export function ReservationInquiryPage() {
                   )}
                 </section>
               ) : (
-                <section className="gf-entry">
+                <section data-design-block="section.20398bc828ee443e3a46" className="gf-entry">
                   <h2>
                     <ScreenText id="ReservationInquiryPage.tableSeating">Traditional table seating</ScreenText>
                   </h2>
@@ -352,7 +352,7 @@ export function ReservationInquiryPage() {
           </form>
 
           {success && (
-            <section className="gf-entry" role="status">
+            <section data-design-block="section.6c2df08cb898c2f91ffc" className="gf-entry" role="status">
               <h2>
                 <ScreenText id="ReservationInquiryPage.saved">Inquiry saved</ScreenText>
               </h2>
@@ -366,7 +366,7 @@ export function ReservationInquiryPage() {
           )}
 
           {canManage && (
-            <section className="gf-entry">
+            <section data-design-block="section.93a02a59b6f54cf2b55b" className="gf-entry">
               <div className="gf-actions">
                 <h2>
                   <ScreenText id="ReservationInquiryPage.presets">Private party presets</ScreenText>
@@ -378,7 +378,7 @@ export function ReservationInquiryPage() {
               {editingPresets && (
                 <>
                   {draftPresets.map((preset, index) => (
-                    <article className="gf-entry" key={preset.id}>
+                    <article data-design-block="section.a7272150904705afe5a5" className="gf-entry" key={preset.id}>
                       <label>
                         <ScreenText id="ReservationInquiryPage.presetLabel">Preset label</ScreenText>
                         <input value={preset.label} onChange={(event) => updatePreset(index, { label: event.target.value })} />
@@ -410,7 +410,7 @@ export function ReservationInquiryPage() {
             </section>
           )}
 
-          <section className="gf-entry">
+          <section data-design-block="section.6c1615807acd095010d2" className="gf-entry">
             <h2>
               <ScreenText id="ReservationInquiryPage.recent">Recent inquiries</ScreenText>
             </h2>
@@ -418,12 +418,12 @@ export function ReservationInquiryPage() {
               <p><ScreenText id="ReservationInquiryPage.noRecent">No inquiries saved yet.</ScreenText></p>
             ) : (
               recent.map((row) => (
-                <article className="gf-entry" key={row.id}>
-                  <h3>{row.guest_name} · {row.party_size} guests</h3>
-                  <p>{row.inquiry_type === 'private_party' ? 'Private party' : 'Table seating'} · {row.status}</p>
-                  <p>{new Date(row.created_at).toLocaleString('en-US', { timeZone: 'America/Chicago' })} Central</p>
+                <article data-design-block="section.577616ec714396313121" className="gf-entry" key={row.id}>
+                  <h3>{row.guest_name}<PageWord id="sectioncopy.664f55c1bf30f4479ac6">{" · "}</PageWord>{row.party_size}<PageWord id="sectioncopy.c35ce2c112ef3aa8144f">{" guests"}</PageWord></h3>
+                  <p>{row.inquiry_type === 'private_party' ? 'Private party' : 'Table seating'}<PageWord id="sectioncopy.0d070e2831979e704a81">{" · "}</PageWord>{row.status}</p>
+                  <p>{new Date(row.created_at).toLocaleString('en-US', { timeZone: 'America/Chicago' })}<PageWord id="sectioncopy.5024fcdf97b20a4624ea">{" Central"}</PageWord></p>
                   {(row.phone || row.email) && <p>{[row.phone, row.email].filter(Boolean).join(' · ')}</p>}
-                  {row.preferred_date && <p>{row.preferred_date} · {[timeLabel(row.preferred_time ?? ''), timeLabel(row.second_preferred_time ?? ''), timeLabel(row.third_preferred_time ?? '')].filter(Boolean).join(' / ')}</p>}
+                  {row.preferred_date && <p>{row.preferred_date}<PageWord id="sectioncopy.ca8208864a7e20457497">{" · "}</PageWord>{[timeLabel(row.preferred_time ?? ''), timeLabel(row.second_preferred_time ?? ''), timeLabel(row.third_preferred_time ?? '')].filter(Boolean).join(' / ')}</p>}
                   {row.guest_notes && <p className="gf-message">{row.guest_notes}</p>}
                 </article>
               ))

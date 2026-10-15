@@ -1,15 +1,19 @@
+import {useAppAccess} from '../components/AppAccess'
+import {PageWord} from '../components/PageDesign'
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { loadTenantData } from '../lib/tenant'
 const studio='https://justinis-inquiry-studio.tealguppy.chatgpt.site'
 export function InquiryStudioPage(){
+ const appAccess=useAppAccess()
  const frame=useRef<HTMLIFrameElement>(null)
  const [error,setError]=useState('')
  useEffect(()=>{
   let live=true
   async function connect(){try{
    const [{data,error:sessionError},tenant]=await Promise.all([supabase.auth.getSession(),loadTenantData()])
+   if(!appAccess.can('guests','studio'))throw Error('Guest form editing is restricted by management.');
    if(sessionError||!data.session)throw Error('Please sign in again.')
    const location=tenant.locations[0]?.id
    if(!location)throw Error('No active location found.')
@@ -20,6 +24,6 @@ export function InquiryStudioPage(){
   const {data:listener}=supabase.auth.onAuthStateChange(()=>{window.setTimeout(()=>{if(live)void connect()},0)})
   const timer=window.setInterval(()=>{if(document.visibilityState==='visible')void connect()},60000)
   return()=>{live=false;window.removeEventListener('message',receive);listener.subscription.unsubscribe();window.clearInterval(timer)}
- },[])
- return <section className="page"><p><Link to="/inquiry-inbox">Back to shared inquiry inbox</Link></p>{error&&<p role="alert">{error}</p>}<iframe ref={frame} src={studio+'/admin'} title="Inquiry Studio management" style={{width:'100%',height:'calc(100dvh - 190px)',minHeight:600,border:0,borderRadius:16}} /></section>
+ },[appAccess.ready])
+ return <section data-design-block="section.cc9a126508481ea76516" className="page"><p><Link to="/inquiry-inbox"><PageWord id="sectioncopy.9d70d8ab2ae22d185275">{"Back to shared inquiry inbox"}</PageWord></Link></p>{error&&<p role="alert">{error}</p>}<iframe ref={frame} src={studio+'/admin'} title="Inquiry Studio management" style={{width:'100%',height:'calc(100dvh - 190px)',minHeight:600,border:0,borderRadius:16}} /></section>
 }

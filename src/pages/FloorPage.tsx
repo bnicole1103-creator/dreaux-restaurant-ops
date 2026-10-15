@@ -1,3 +1,4 @@
+import {AccessSection} from '../components/AppAccess'
 // page-designer-instrumented
 import { PageWord, PageInput, PageOption } from "../components/PageDesign"
 import { ManualReservation, reservationToday } from '../components/ManualReservation'
@@ -1884,13 +1885,13 @@ const [partySize, setPartySize] = useState(1)
       </div>
 
 
-      <FloorScheduleBox location={locationId} date={activeShift?.shift_date??serviceDay()}/>
+      <AccessSection page="floor" section="schedule"><FloorScheduleBox location={locationId} date={activeShift?.shift_date??serviceDay()}/></AccessSection>
       <WalkinPanel locationId={locationId} refreshKey={walkinRefresh} onSeat={row=>{setPendingWalkin(row);setGuestName(row.guest_name);setGuestPhone(row.phone);setGuestEmail(row.email);setPartySize(row.party_size);if(selectedTableIds.length)openSeating()}} />
       {pendingWalkin&&<div data-design-block="copy.eb305b57f537aed6.1" className="wt-card" role="status"><strong><ScreenText id="FloorPage.72ad81f5e33ac981">Seating </ScreenText>{pendingWalkin.guest_name}<ScreenText id="FloorPage.0e1b1fe85997c7d1"> · party of </ScreenText>{pendingWalkin.party_size}</strong><p data-design-block="copy.0cae27057d8f304b.1"><ScreenText id="FloorPage.aaf48aa3abcc020d">Select their tables, then press Seat. Their check-in is marked seated when seating succeeds.</ScreenText></p><button data-design-block="copy.b1a3fd87f11bd6fb.1" type="button" disabled={saving} onClick={()=>{setPendingWalkin(null);setGuestName('');setGuestPhone('');setGuestEmail('');setPartySize(1)}}><ScreenText id="FloorPage.a3bf126804af00d4">Cancel walk-in selection</ScreenText></button></div>}
 
       {/* FLOOR SECTIONS AT TOP */}
       <SectionSchedule editRequest={scheduleEditRequest} refreshKey={scheduleRefresh} locationId={locationId} selectedTableIds={selectedTableIds} tables={tables} employees={team.map(m=>({id:m.user_id,name:memberName(m.user_id)}))} onLoaded={(plans,offset)=>{setSectionPlans(plans);setServerClockOffset(offset)}} onSelect={setSelectedTableIds} />
-      {sectionCards.length>0 && <section data-design-block="copy.12756fa73e4e31ea.1" className="floor-section-summary"><p data-design-block="copy.b78f32efa3eeed28.2" className="eyebrow"><ScreenText id="FloorPage.2e081cd59ce390e4">Current Floor</ScreenText></p><h2 data-design-block="copy.2e495f44a1c1f630.1"><ScreenText id="FloorPage.773db4a763e3d6a3">Assigned sections</ScreenText></h2><button data-design-block="copy.dbe356ad805f296d.1" type="button" disabled={saving||arrangeMode} onClick={()=>void clearSectionAssignments(true)}><ScreenText id="FloorPage.abe16c2c033d7292">Clear all sections</ScreenText></button><div data-design-block="copy.542b94986fcaef05.1">{sectionCards.map(c=><button data-design-block="copy.e57c5b6f760b6b51.1" key={c.id} onClick={()=>openSectionEditor(c,c.tableIds)}><strong>{c.name}</strong><span className="section-server">{c.guestName || memberName(c.employeeId)}</span><span>{tables.filter(t=>c.tableIds.includes(t.id)).map(t=>t.table_name).join(', ')}</span><span>{c.tableIds.length}<ScreenText id="FloorPage.7b01d68c1fbd4367"> tables · </ScreenText>{c.totalSeats}<ScreenText id="FloorPage.5a8f27d4d02c6b32"> seats</ScreenText></span></button>)}</div></section>}
+      {sectionCards.length>0 && <AccessSection page="floor" section="sections"><section data-design-block="copy.12756fa73e4e31ea.1" className="floor-section-summary"><p data-design-block="copy.b78f32efa3eeed28.2" className="eyebrow"><ScreenText id="FloorPage.2e081cd59ce390e4">Current Floor</ScreenText></p><h2 data-design-block="copy.2e495f44a1c1f630.1"><ScreenText id="FloorPage.773db4a763e3d6a3">Assigned sections</ScreenText></h2><button data-design-block="copy.dbe356ad805f296d.1" type="button" disabled={saving||arrangeMode} onClick={()=>void clearSectionAssignments(true)}><ScreenText id="FloorPage.abe16c2c033d7292">Clear all sections</ScreenText></button><div data-design-block="copy.542b94986fcaef05.1">{sectionCards.map(c=><button data-design-block="copy.e57c5b6f760b6b51.1" key={c.id} onClick={()=>openSectionEditor(c,c.tableIds)}><strong>{c.name}</strong><span className="section-server">{c.guestName || memberName(c.employeeId)}</span><span>{tables.filter(t=>c.tableIds.includes(t.id)).map(t=>t.table_name).join(', ')}</span><span>{c.tableIds.length}<ScreenText id="FloorPage.7b01d68c1fbd4367"> tables · </ScreenText>{c.totalSeats}<ScreenText id="FloorPage.5a8f27d4d02c6b32"> seats</ScreenText></span></button>)}</div></section></AccessSection>}
 
       <div data-design-block="copy.4502244f66f4abcd.1" className="shift-toolbar">
         {shifts.length > 0 ? (
@@ -2027,13 +2028,13 @@ const [partySize, setPartySize] = useState(1)
         ))}
       </div>
 
-      <section data-design-block="copy.324b51b1153c4928.1" className="floor-section-tools" aria-label="Section assignment">
+      <AccessSection page="floor" section="sections"><section data-design-block="copy.324b51b1153c4928.1" className="floor-section-tools" aria-label="Section assignment">
         <div data-design-block="copy.542b94986fcaef05.2"><strong><ScreenText id="FloorPage.7ae0af4dfe409f5d">Sections & tables</ScreenText></strong><p data-design-block="copy.0cae27057d8f304b.2"><ScreenText id="FloorPage.4ac45f2a6bb70ad0">Tap tables to select them. Switch rooms to include more tables.</ScreenText></p></div>
         <div data-design-block="copy.c68b2a1ad42b0b85.1" className="floor-selection-list">{selectedTables.length?selectedTables.map(t=><button data-design-block="copy.9af7597dafc26b77.1" type="button" key={t.id} onClick={()=>toggleTable(t.id)}>{t.table_name}<PageWord id="copy.c20d59400a2510cd.1">×</PageWord></button>):<span><ScreenText id="FloorPage.f8add3ec5d2c9bb7">No tables selected</ScreenText></span>}</div>
         <div data-design-block="copy.f878dc5ab1a1444d.1" className="floor-selection-actions"><button data-design-block="copy.e67ad1dc8c087646.1" type="button" disabled={!selectedTableIds.length || smartLoading || saving || arrangeMode} onClick={()=>void handleSmartSection()}>{smartLoading?<PageWord id="copy.27e48bc48b13bca4.1">{"Analyzing…"}</PageWord>:<PageWord id="copy.cae5e560b5f3e2ab.1">{"✨ Smart Section"}</PageWord>}</button><button data-design-block="copy.e8620a9be264f089.1" type="button" disabled={!selectedTableIds.length || saving || arrangeMode} onClick={()=>openSectionEditor()}><ScreenText id="FloorPage.3df282d311f231b2">Assign section</ScreenText></button><button data-design-block="copy.539b53736d89f9b4.1" type="button" disabled={!selectedTableIds.length || saving || arrangeMode} onClick={openSeating}><ScreenText id="FloorPage.ec891dc9c52cf729">Seat selected tables</ScreenText></button><button data-design-block="copy.d859f8f24a8250d7.1" type="button" disabled={!selectedTableIds.length} onClick={()=>setSelectedTableIds([])}><ScreenText id="FloorPage.2a943581190c3312">Clear selection</ScreenText></button><button data-design-block="copy.25c73b70cd111940.1" type="button" disabled={!selectedTableIds.length||saving||arrangeMode} onClick={()=>void clearSectionAssignments()}><ScreenText id="FloorPage.310acd98ecea24b1">Clear assignments</ScreenText></button></div>
 
         {floorNotice && <p data-design-block="copy.d70411190a777647.1" role="status">{floorNotice}</p>}
-      </section>
+      </section></AccessSection>
       
        <p data-design-block="copy.47e8f14106004bf5.1" className="floor-map-hint"><ScreenText id="FloorPage.f3780ffe48f2e882">Swipe left or right to switch floor plans. Tap multiple tables to select them.</ScreenText></p>
        {/* LIVE FLOOR */}
@@ -2319,7 +2320,7 @@ const [partySize, setPartySize] = useState(1)
             </label>
 
             <p>{editingSection?'Edit this section. Unselected tables will be released; other sections stay in place.':'Selected tables will move to this section. Seated parties keep their server.'}</p>
-            <fieldset disabled={saving}><legend>Section tables</legend><div className="closeout-table-grid">{(reassignPlan?tables.filter(t=>reassignPlan.table_ids.includes(t.id)):tables).map(t=><label key={t.id}><input type="checkbox" checked={selectedTableIds.includes(t.id)} onChange={e=>setSelectedTableIds(ids=>e.target.checked?[...ids,t.id]:ids.filter(id=>id!==t.id))}/>{t.table_name}</label>)}</div></fieldset>
+            <fieldset data-design-block="section.649adba4c561e0db5c90" disabled={saving}><legend><PageWord id="sectioncopy.b47e177ee23cbb0da3b6">{"Section tables"}</PageWord></legend><div className="closeout-table-grid">{(reassignPlan?tables.filter(t=>reassignPlan.table_ids.includes(t.id)):tables).map(t=><label key={t.id}><input type="checkbox" checked={selectedTableIds.includes(t.id)} onChange={e=>setSelectedTableIds(ids=>e.target.checked?[...ids,t.id]:ids.filter(id=>id!==t.id))}/>{t.table_name}</label>)}</div></fieldset>
             <ScheduledSectionEmployeePicker location={locationId} date={activeShift?.shift_date??serviceDay()} employees={team.map(m=>({id:m.user_id,name:memberName(m.user_id)}))} employeeId={selectedServerId==='__name__'?null:selectedServerId} guestName={sectionGuestName} disabled={saving} onChange={(id,name)=>{setSelectedServerId(id===null?'__name__':id);setSectionGuestName(name)}}/>
 
             <div data-design-block="copy.f0960e9d89953dad.1"
@@ -2391,10 +2392,10 @@ const [partySize, setPartySize] = useState(1)
       )}
 
       {showReservationsPanel && (
-        <div data-design-block="copy.4c37ee59da8684e0.3" className="modal-backdrop">
+        <AccessSection page="floor" section="reservations"><div data-design-block="copy.4c37ee59da8684e0.3" className="modal-backdrop">
           <div data-design-block="copy.7d0744713f5fc9bb.3" className="modal-card">
             <p data-design-block="copy.b78f32efa3eeed28.3" className="eyebrow"><ScreenText id="FloorPage.58f3288ba914ecb7">Reservations</ScreenText></p>
-            <h2 data-design-block="copy.2e495f44a1c1f630.4"><ScreenText id="FloorPage.def1336055c8be14">Today's Reservations</ScreenText></h2>
+            <AccessSection page="floor" section="reservations"><h2 data-design-block="copy.2e495f44a1c1f630.4"><ScreenText id="FloorPage.def1336055c8be14">Today's Reservations</ScreenText></h2></AccessSection>
 
             {reservationUploadMessage && (
               <div data-design-block="copy.ab88a71bfee5c3c5.1"
@@ -2455,7 +2456,7 @@ const [partySize, setPartySize] = useState(1)
                       {reservation.is_vip ? <PageWord id="copy.f33e31ed72695421.1">{"⭐ VIP "}</PageWord> : <PageWord id="copy.d8faa01e919cbb07.4">{""}</PageWord>}
                       {reservation.occasion || ''}
                     </div>
-                    {reservation.assigned_server_id && <p>Server: {memberName(reservation.assigned_server_id)}</p>}
+                    {reservation.assigned_server_id && <p><PageWord id="sectioncopy.4322959eecd190a1ccfd">{"Server: "}</PageWord>{memberName(reservation.assigned_server_id)}</p>}
                     {reservation.notes && <p>{reservation.notes}</p>}
                     <ReservationEditor reservation={reservation} locationId={locationId} tables={tables} team={team} onSaved={()=>{void loadReservations(locationId)}} />
                   </div>
@@ -2474,14 +2475,14 @@ const [partySize, setPartySize] = useState(1)
               Close
             </ScreenText></button>
           </div>
-        </div>
+        </div></AccessSection>
       )}
 
       {showSmartPanel && (
-        <div data-design-block="copy.4c37ee59da8684e0.4" className="modal-backdrop">
+        <AccessSection page="floor" section="sections"><div data-design-block="copy.4c37ee59da8684e0.4" className="modal-backdrop">
           <div data-design-block="copy.7d0744713f5fc9bb.4" className="modal-card">
             <p data-design-block="copy.b78f32efa3eeed28.4" className="eyebrow"><ScreenText id="FloorPage.0c90f34dd45cb5c2">SectionIQ</ScreenText></p>
-            <h2 data-design-block="copy.2e495f44a1c1f630.5"><ScreenText id="FloorPage.a17e164e8984911a">Smart Section</ScreenText></h2>{smartLoading&&<p data-design-block="copy.d70411190a777647.2" role="status"><ScreenText id="FloorPage.3cc5f5f9eee5793a">Checking history and assigned capacity…</ScreenText></p>}{smartNotice&&<p data-design-block="copy.d70411190a777647.3" role="status">{smartNotice}</p>}
+            <AccessSection page="floor" section="sections"><h2 data-design-block="copy.2e495f44a1c1f630.5"><ScreenText id="FloorPage.a17e164e8984911a">Smart Section</ScreenText></h2></AccessSection>{smartLoading&&<p data-design-block="copy.d70411190a777647.2" role="status"><ScreenText id="FloorPage.3cc5f5f9eee5793a">Checking history and assigned capacity…</ScreenText></p>}{smartNotice&&<p data-design-block="copy.d70411190a777647.3" role="status">{smartNotice}</p>}
 
             <div data-design-block="copy.9d44ed5cc078bb68.1"
               style={{
@@ -2616,7 +2617,7 @@ const [partySize, setPartySize] = useState(1)
               Close
             </ScreenText></button>
           </div>
-        </div>
+        </div></AccessSection>
       )}
 
 
@@ -3399,7 +3400,7 @@ const [partySize, setPartySize] = useState(1)
               )}
             </div>
 
-            <button type="button" disabled={saving||arrangeMode} onClick={()=>{openSectionEditor(undefined,[selectedTable.id]);const plan=activePlans.find(p=>p.table_ids.includes(selectedTable.id));setReassignPlan(plan??null)}}>Change section assignment</button>
+            <button type="button" disabled={saving||arrangeMode} onClick={()=>{openSectionEditor(undefined,[selectedTable.id]);const plan=activePlans.find(p=>p.table_ids.includes(selectedTable.id));setReassignPlan(plan??null)}}><PageWord id="sectioncopy.bf60b3bd041cd37c2dd6">{"Change section assignment"}</PageWord></button>
             <div data-design-block="copy.add593ba59bb8ba3.1"
               style={{
                 display: 'grid',

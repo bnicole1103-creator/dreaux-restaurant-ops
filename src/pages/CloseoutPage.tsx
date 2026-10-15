@@ -65,7 +65,7 @@ const ROLE_LABELS: Record<JobRole, string> = {
   busser: 'Busser',
   manager: 'Manager',
   assistant_manager: 'Assistant Manager',
-  general_manager: 'General Manager',
+  general_manager: 'Management',
 }
 
 const ROLE_DESCRIPTIONS: Record<JobRole, string> = {
@@ -1259,10 +1259,10 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
         </div>
       </div>
 
-      <section className="card"><h3>Automatic shift sales target</h3><p>Service date: {closeoutDay}</p>
-        {targetState.loading?<p role="status">Loading your target…</p>:targetState.ready?<><strong>{new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(Number(salesTarget))}</strong>{Number(salesTarget)>0&&netSales.trim()!==''&&<p>{((numberValue(netSales)/Number(salesTarget))*100).toFixed(1)}% of target</p>}</>:<p role="status">Target unavailable: {targetState.reason} No sales-target points will apply until a target is available.</p>}
-        <button type="button" disabled={saving||targetState.loading} onClick={()=>setTargetRefresh(v=>v+1)}>Refresh target</button>
-        <p>Imported from the app’s sales target allocation for your scheduled shift. No manual target entry is needed.</p>
+      <section data-design-block="section.066b9e23763c84f5534d" className="card"><h3><PageWord id="sectioncopy.6132d19813ed058f2f03">{"Automatic shift sales target"}</PageWord></h3><p><PageWord id="sectioncopy.928778e98e7523dc12b1">{"Service date: "}</PageWord>{closeoutDay}</p>
+        {targetState.loading?<p role="status"><PageWord id="sectioncopy.e14c065a02252931b83b">{"Loading your target…"}</PageWord></p>:targetState.ready?<><strong>{new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(Number(salesTarget))}</strong>{Number(salesTarget)>0&&netSales.trim()!==''&&<p>{((numberValue(netSales)/Number(salesTarget))*100).toFixed(1)}<PageWord id="sectioncopy.b6d9b4837e5cba9dd08f">{"% of target"}</PageWord></p>}</>:<p role="status"><PageWord id="sectioncopy.aaa172256f72059d5e98">{"Target unavailable: "}</PageWord>{targetState.reason}<PageWord id="sectioncopy.d0a3a7b935da59473ffb">{" No sales-target points will apply until a target is available."}</PageWord></p>}
+        <button type="button" disabled={saving||targetState.loading} onClick={()=>setTargetRefresh(v=>v+1)}><PageWord id="sectioncopy.54a46bb5baeae12ee093">{"Refresh target"}</PageWord></button>
+        <p><PageWord id="sectioncopy.e935547e2ca910b3f216">{"Imported from the app’s sales target allocation for your scheduled shift. No manual target entry is needed."}</PageWord></p>
       </section>
 
       {shown('staff_3') && netSales.trim()!=='' && Number(netSales)===0 && <div data-design-block="copy.a49020c974bf8cb3.1" className="closeout-warning"><h3 data-design-block="copy.376cc9db1049f0cb.2"><ScreenText id="CloseoutPage.08bbbe6dfa02693c">Check your sales</ScreenText></h3><p data-design-block="copy.9780dbc6198cd2d5.8"><ScreenText id="CloseoutPage.b8864cc8785a4b68">You entered $0. Check your Toast report before continuing.</ScreenText></p><label data-design-block="copy.35bcf28795a297dd.1" className="closeout-check"><input type="checkbox" checked={zeroSalesConfirmed} onChange={e=>setZeroSalesConfirmed(e.target.checked)} /><span><ScreenText id="CloseoutPage.21209f4ceb62d671">I checked my report and $0 sales is accurate.</ScreenText></span></label><label data-design-block="copy.1d3e51bec05d6401.6"><ScreenText id="CloseoutPage.0c8ea3df31e4441b">Why were sales zero?</ScreenText><textarea rows={2} maxLength={2000} value={zeroSalesReason} onChange={e=>setZeroSalesReason(e.target.value)} placeholder="Explain why this shift had no sales." /></label></div>}
@@ -1475,8 +1475,8 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
           Tables Worked
         </ScreenText></h2>
 
-        <label>Floor shift (optional)<select value={floorShiftId} onChange={e=>setFloorShiftId(e.target.value)}><option value="">Choose the shift worked</option>{floorShifts.map(shift=><option key={shift.id} value={shift.id}>{shift.shift_name} · {shift.status}</option>)}</select></label>
-        <button type="button" disabled={saving} onClick={()=>void pullFloorTables()}>Load my Floor tables</button>
+        <label><PageWord id="sectioncopy.3e696ab1db70fb6dad89">{"Floor shift (optional)"}</PageWord><select value={floorShiftId} onChange={e=>setFloorShiftId(e.target.value)}><option value="">Choose the shift worked</option>{floorShifts.map(shift=><option key={shift.id} value={shift.id}>{shift.shift_name} · {shift.status}</option>)}</select></label>
+        <button type="button" disabled={saving} onClick={()=>void pullFloorTables()}><PageWord id="sectioncopy.c11818c96a3a9822ba8f">{"Load my Floor tables"}</PageWord></button>
         <p role="status">{floorTablesNotice||'Select the tables you actually worked. These are the same table records used on Floor; saving preserves them for Smart Sections.'}</p>
         {Object.entries(
           groupedTables
@@ -1567,15 +1567,14 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
       </div>
 
 
-      {shown('staff_11') && <section className="card"><h2>Peer recognition</h2>
-        <label>Who helped make this shift successful? (optional)
-          <select value={peerVoteEmployeeId} onChange={e=>setPeerVoteEmployeeId(e.target.value)}>
+      {shown('staff_11') && <section data-design-block="section.805c77d6a2b0a3367ff7" className="card"><h2><PageWord id="sectioncopy.bbffc818a3ca4bccdeed">{"Peer recognition"}</PageWord></h2>
+        <label><PageWord id="sectioncopy.bedb1af5b32500cdfb9f">{"Who helped make this shift successful? (optional) "}</PageWord><select value={peerVoteEmployeeId} onChange={e=>setPeerVoteEmployeeId(e.target.value)}>
             <option value="">No vote this shift</option>
             {employees.map(employee=><option key={employee.user_id} value={employee.user_id}>{employee.preferred_name||employee.full_name||employee.user_id}</option>)}
           </select>
         </label>
-        {peerVoteEmployeeId && <label>What did they do? (optional)<textarea maxLength={500} value={peerVoteOtherReason} onChange={e=>setPeerVoteOtherReason(e.target.value)}/></label>}
-        <p>Your vote is saved with your closeout and appears in Peer recognition on Points and the closeout summary.</p>
+        {peerVoteEmployeeId && <label><PageWord id="sectioncopy.cd099ea09c18cb1f3b0e">{"What did they do? (optional)"}</PageWord><textarea maxLength={500} value={peerVoteOtherReason} onChange={e=>setPeerVoteOtherReason(e.target.value)}/></label>}
+        <p><PageWord id="sectioncopy.2493b428984dcdfa398f">{"Your vote is saved with your closeout and appears in Peer recognition on Points and the closeout summary."}</PageWord></p>
       </section>}
 
       <div data-design-block="copy.af6b2df48414bca0.9" className="card">

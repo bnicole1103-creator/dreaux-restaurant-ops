@@ -320,7 +320,7 @@ export function ManagerCloseoutPage() {
             onChange={e => setConfirmed(e.target.checked)} /><ScreenText id="ManagerCloseoutPage.9978865bd56536f3">I included everyone I supervised who worked this shift.</ScreenText></label>
           <button data-design-block="copy.8cb3e942b1ad10b7.1" type="submit" disabled={!reviews.length || !confirmed}>{saving ? <PageWord id="copy.0f556bfd5560fe2d.1">{"Saving…"}</PageWord> : <PageWord id="copy.f13061703e4e7e97.1">{"Submit Manager Closeout"}</PageWord>}</button>
         </fieldset>}
-        {shiftId && !reviewLoading && !canEdit && <p data-design-block="copy.0441952f380976f4.9"><ScreenText id="ManagerCloseoutPage.30caf0d1c89056fc">Only the submitting MOD, owner, or GM can edit this saved closeout.</ScreenText></p>}
+        {shiftId && !reviewLoading && !canEdit && <p data-design-block="copy.0441952f380976f4.9"><ScreenText id="ManagerCloseoutPage.30caf0d1c89056fc">Only the submitting MOD, owner, or Management can edit this saved closeout.</ScreenText></p>}
       </form>
     </>}
   </section>

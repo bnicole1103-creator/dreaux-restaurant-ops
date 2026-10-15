@@ -1,3 +1,6 @@
+import {AccessSection} from './components/AppAccess'
+import {GuestServicesPage} from './pages/GuestServicesPage'
+import {AppAccessProvider,AppPageAccess} from './components/AppAccess'
 // page-designer-instrumented
 import {StaffViewPage} from './pages/StaffViewPage'
 import { CalendarPage } from './pages/CalendarPage'
@@ -47,7 +50,7 @@ import { TeamPage } from './pages/TeamPage'
 import { CloseoutPage } from './pages/CloseoutPage'
 import { ReservationInquiryPage } from './pages/ReservationInquiryPage'
 import { InquiryStudioPage } from './pages/InquiryStudioPage'
-import { InquiryInboxPage } from './pages/InquiryInboxPage'
+
 
 export default function App() {
   const walkinPath=useLocation().pathname
@@ -134,17 +137,17 @@ export default function App() {
 
   return (
     <SignupGate key={session.user.id} userId={session.user.id}>
-    <AppShell session={session}>
+    <AppAccessProvider><AppShell session={session}><AppPageAccess>
       <Routes>
         <Route path="/settings/staff-view" element={<ManagementOnly gmOnly><StaffViewPage/></ManagementOnly>}/>
         <Route path="/inventory" element={<InventoryPage />} />
         <Route path="/calendar" element={<CalendarPage />} />
         <Route path="/reservation-inquiries" element={<ReservationInquiryPage />} />
         <Route path="/inquiry-studio" element={<ManagementOnly><InquiryStudioPage /></ManagementOnly>} />
-        <Route path="/inquiry-inbox" element={<ManagementOnly><InquiryInboxPage /></ManagementOnly>} />
+        <Route path="/inquiry-inbox" element={<GuestServicesPage />} />
         <Route path="/training" element={<TrainingPage />} />
-        <Route path="/training/cocktails" element={<CocktailTrainingPage />} />
-        <Route path="/training/food" element={<CocktailTrainingPage key="food" kind="food" />} />
+        <Route path="/training/cocktails" element={<AccessSection page="training" section="cocktails"><CocktailTrainingPage /></AccessSection>} />
+        <Route path="/training/food" element={<AccessSection page="training" section="food"><CocktailTrainingPage key="food" kind="food" /></AccessSection>} />
         <Route path="/settings/sales-targets" element={<ManagementOnly gmOnly><SalesTargetsPage /></ManagementOnly>} />
         <Route path="/settings/wording" element={<ManagementOnly gmOnly><ScreenWordingPage /></ManagementOnly>} />
         <Route path="/guest-feedback" element={<ManagementOnly><GuestFeedbackInbox /></ManagementOnly>} />
@@ -224,7 +227,7 @@ export default function App() {
         />
 
       </Routes>
-    </AppShell>
+    </AppPageAccess></AppShell></AppAccessProvider>
     </SignupGate>
   )
 }

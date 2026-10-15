@@ -1,3 +1,4 @@
+import {PageWord} from './PageDesign'
 import { useEffect,useState } from 'react'
 import { supabase } from '../lib/supabase'
 import type { Question } from '../pages/QuizzesPage'
@@ -61,51 +62,51 @@ export function QuizQuestionBank({location,disabled,questions,onAdd,open,onOpenC
  return <details className="quiz-bank" open={open??expanded} onToggle={e=>{
   const next=e.currentTarget.open;setExpanded(next);if(next!==open)onOpenChange?.(next)
  }}>
-  <summary><strong>Question Bank ({bank.length}) — subject and day</strong></summary>
-  <p>Every entry can be added and edited. Edit a bank question to update the reusable original; edit its copy in a quiz to change only that quiz.</p>
+  <summary><strong><PageWord id="sectioncopy.a4643affd4e3c87f5cdd">{"Question Bank ("}</PageWord>{bank.length}<PageWord id="sectioncopy.56dbcab1ed951d28baca">{") — subject and day"}</PageWord></strong></summary>
+  <p><PageWord id="sectioncopy.c6d045c30c179475d7d9">{"Every entry can be added and edited. Edit a bank question to update the reusable original; edit its copy in a quiz to change only that quiz."}</PageWord></p>
   {error&&<p role="alert">{error}</p>}{message&&<p role="status">{message}</p>}
-  <fieldset disabled={busy||disabled||!location}>
-   <label>Search<input type="search" value={search} onChange={e=>setSearch(e.target.value)}/></label>
+  <fieldset data-design-block="section.3c7490630fa0002431b6" disabled={busy||disabled||!location}>
+   <label><PageWord id="sectioncopy.c0e1dec158f6bcf509c3">{"Search"}</PageWord><input type="search" value={search} onChange={e=>setSearch(e.target.value)}/></label>
    <div className="quiz-bank-filters">
-    <label>Subject<select value={category} onChange={e=>setCategory(e.target.value)}>
+    <label><PageWord id="sectioncopy.7cd75a89d7f4f971da2c">{"Subject"}</PageWord><select value={category} onChange={e=>setCategory(e.target.value)}>
      <option>All</option>{[...new Set(bank.map(e=>e.question.category))].sort().map(c=><option key={c}>{c}</option>)}
     </select></label>
-    <label>Source day<select value={day} onChange={e=>setDay(e.target.value)}>
+    <label><PageWord id="sectioncopy.13f49ce9a7450612fc91">{"Source day"}</PageWord><select value={day} onChange={e=>setDay(e.target.value)}>
      <option>All</option>{[...new Set(bank.map(e=>e.quiz_date??'Undated'))].sort().reverse().map(d=><option key={d}>{d}</option>)}
     </select></label>
    </div>
    <div className="quiz-actions">
-    <button type="button" onClick={()=>setSelected(filtered.map(e=>e.id))}>Select filtered questions</button>
-    <button type="button" disabled={!chosen.length} onClick={()=>add(chosen)}>Add selected ({chosen.length})</button>
-    <button type="button" onClick={()=>setRefresh(v=>v+1)}>Refresh bank</button>
+    <button type="button" onClick={()=>setSelected(filtered.map(e=>e.id))}><PageWord id="sectioncopy.afc8bc0b4f88d2396070">{"Select filtered questions"}</PageWord></button>
+    <button type="button" disabled={!chosen.length} onClick={()=>add(chosen)}><PageWord id="sectioncopy.cc98a82082a28c5e71d8">{"Add selected ("}</PageWord>{chosen.length}<PageWord id="sectioncopy.b599e68b3cb68aa7291e">{")"}</PageWord></button>
+    <button type="button" onClick={()=>setRefresh(v=>v+1)}><PageWord id="sectioncopy.12f140aaf333079cfcd5">{"Refresh bank"}</PageWord></button>
    </div>
    {!bank.length&&<p>{busy?'Loading bank…':'No questions in the bank yet.'}</p>}
-   {filtered.map(e=><article className="quiz-bank-item" key={e.id}>
+   {filtered.map(e=><article data-design-block="section.3c7a5f385d33c9f682e3" className="quiz-bank-item" key={e.id}>
     <label className="quiz-choice"><input type="checkbox" checked={selected.includes(e.id)}
      onChange={()=>setSelected(v=>v.includes(e.id)?v.filter(id=>id!==e.id):[...v,e.id])}/><span>{e.question.prompt}</span></label>
-    <p className="muted">{e.question.category} · {e.quiz_date??'Undated'} · {e.source}</p>
-    {e.review&&<p className="muted">Review source facts, recipes, prices and policies before publishing.</p>}
-    <details><summary>Choices and correct answer</summary><ol type="A">{e.question.options.map((o,i)=><li key={i}>{o}{i===e.question.correct?' — Correct':''}</li>)}</ol><p>{e.question.explanation}</p></details>
-    <button type="button" onClick={()=>add([e])}>Add this question</button>
+    <p className="muted">{e.question.category}<PageWord id="sectioncopy.551eb41eaf384e4262a0">{" · "}</PageWord>{e.quiz_date??'Undated'}<PageWord id="sectioncopy.f16ee50a64fc5118b2bc">{" · "}</PageWord>{e.source}</p>
+    {e.review&&<p className="muted"><PageWord id="sectioncopy.a7312579162bbabfc30c">{"Review source facts, recipes, prices and policies before publishing."}</PageWord></p>}
+    <details><summary><PageWord id="sectioncopy.2549f1bfe9b55977ff4e">{"Choices and correct answer"}</PageWord></summary><ol type="A">{e.question.options.map((o,i)=><li key={i}>{o}{i===e.question.correct?' — Correct':''}</li>)}</ol><p>{e.question.explanation}</p></details>
+    <button type="button" onClick={()=>add([e])}><PageWord id="sectioncopy.0765ee130f985fc902d8">{"Add this question"}</PageWord></button>
     <button type="button" onClick={()=>{
      if(editing&&!window.confirm('Discard the unsaved bank edit?'))return
      setEditing(e);setEdit({...e.question,options:[...e.question.options]})
-    }}>Edit bank question</button>
+    }}><PageWord id="sectioncopy.8057278ef65fcb3b4a77">{"Edit bank question"}</PageWord></button>
     {editing?.id===e.id&&edit&&<div className="mod-review">
-     <label>Question<textarea rows={3} maxLength={2000} value={edit.prompt} onChange={x=>setEdit({...edit,prompt:x.target.value})}/></label>
-     <label>Subject<input maxLength={100} value={edit.category} onChange={x=>setEdit({...edit,category:x.target.value})}/></label>
+     <label><PageWord id="sectioncopy.240c11ffbd8921432ec5">{"Question"}</PageWord><textarea rows={3} maxLength={2000} value={edit.prompt} onChange={x=>setEdit({...edit,prompt:x.target.value})}/></label>
+     <label><PageWord id="sectioncopy.1c01bf79cc36ab38dd23">{"Subject"}</PageWord><input maxLength={100} value={edit.category} onChange={x=>setEdit({...edit,category:x.target.value})}/></label>
      {edit.options.map((option,i)=><label key={i}>{String.fromCharCode(65+i)}<input maxLength={1000} value={option} onChange={x=>setEdit({...edit,options:edit.options.map((v,n)=>n===i?x.target.value:v)})}/></label>)}
-     <label>Correct answer<select value={edit.correct} onChange={x=>setEdit({...edit,correct:Number(x.target.value)})}>{edit.options.map((o,i)=><option key={i} value={i}>{String.fromCharCode(65+i)} · {o}</option>)}</select></label>
-     <label>Explanation<textarea rows={3} maxLength={2000} value={edit.explanation} onChange={x=>setEdit({...edit,explanation:x.target.value})}/></label>
-     <button type="button" onClick={()=>void save()}>Save bank question</button>
-     <button type="button" onClick={()=>{setEditing(null);setEdit(null)}}>Cancel bank edit</button>
+     <label><PageWord id="sectioncopy.a9f48ae9ba69e15ef8dd">{"Correct answer"}</PageWord><select value={edit.correct} onChange={x=>setEdit({...edit,correct:Number(x.target.value)})}>{edit.options.map((o,i)=><option key={i} value={i}>{String.fromCharCode(65+i)} · {o}</option>)}</select></label>
+     <label><PageWord id="sectioncopy.d60aba1a4ac1aca2c2f0">{"Explanation"}</PageWord><textarea rows={3} maxLength={2000} value={edit.explanation} onChange={x=>setEdit({...edit,explanation:x.target.value})}/></label>
+     <button type="button" onClick={()=>void save()}><PageWord id="sectioncopy.dc6324e7171892094cd2">{"Save bank question"}</PageWord></button>
+     <button type="button" onClick={()=>{setEditing(null);setEdit(null)}}><PageWord id="sectioncopy.eeec30e59694257da57b">{"Cancel bank edit"}</PageWord></button>
     </div>}
    </article>)}
-   <details><summary>Import an older quiz from JSON</summary>
-    <label>Quiz date<input type="date" value={importDate} onChange={e=>setImportDate(e.target.value)}/></label>
-    <label>Title<input maxLength={200} value={importTitle} onChange={e=>setImportTitle(e.target.value)}/></label>
-    <label>Questions file<input type="file" accept=".json,application/json" onChange={e=>{if(e.target.files?.[0])void importFile(e.target.files[0]);e.target.value=''}}/></label>
-    <button type="button" disabled={!importQuestions.length||!importDate||!importTitle.trim()} onClick={()=>void importSet()}>Import {importQuestions.length} questions</button>
+   <details><summary><PageWord id="sectioncopy.525e84c5fe8c521803a8">{"Import an older quiz from JSON"}</PageWord></summary>
+    <label><PageWord id="sectioncopy.e28bd4dec9304415c9eb">{"Quiz date"}</PageWord><input type="date" value={importDate} onChange={e=>setImportDate(e.target.value)}/></label>
+    <label><PageWord id="sectioncopy.79f945015534b9bb0a8a">{"Title"}</PageWord><input maxLength={200} value={importTitle} onChange={e=>setImportTitle(e.target.value)}/></label>
+    <label><PageWord id="sectioncopy.33dc24c826495f8ebbb5">{"Questions file"}</PageWord><input type="file" accept=".json,application/json" onChange={e=>{if(e.target.files?.[0])void importFile(e.target.files[0]);e.target.value=''}}/></label>
+    <button type="button" disabled={!importQuestions.length||!importDate||!importTitle.trim()} onClick={()=>void importSet()}><PageWord id="sectioncopy.8e547d6c9c359696d5f2">{"Import "}</PageWord>{importQuestions.length}<PageWord id="sectioncopy.c60e0d48acd08cad1039">{" questions"}</PageWord></button>
    </details>
   </fieldset>
  </details>

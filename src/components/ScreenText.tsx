@@ -1,3 +1,4 @@
+import {managementWording} from '../lib/managementWording'
 import { PageWord } from './PageDesign'
 import { useEffect, useSyncExternalStore } from 'react'
 import type { ReactNode } from 'react'
@@ -10,7 +11,7 @@ const subscribe=(f:()=>void)=>{listeners.add(f);return()=>{listeners.delete(f)}}
 export function setScreenWording(next:Record<string,string>){values=next;listeners.forEach(f=>f())}
 export function ScreenText({id,children,plain=false}:{id:string;children:ReactNode;plain?:boolean}){
  const text=useSyncExternalStore(subscribe,()=>values[id],()=>undefined)
- return plain ? <>{text===undefined?children:text}</> : <PageWord id={id}>{text===undefined?children:text}</PageWord>
+ return plain ? <>{typeof (text??children)==='string'?managementWording(String(text??children)):text??children}</> : <PageWord id={id}>{typeof (text??children)==='string'?managementWording(String(text??children)):text??children}</PageWord>
 }
 export function ScreenWordingLoader(){
  const {pathname}=useLocation()

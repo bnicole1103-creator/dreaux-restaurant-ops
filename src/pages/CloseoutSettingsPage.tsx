@@ -31,7 +31,7 @@ export function CloseoutSettingsPage({awardsOnly = false, initialTab = 'staff'}:
       if(!loc) throw new Error('No active location found.')
       const permission=await supabase.rpc(awardsOnly ? 'mod_is_manager' : 'closeout_is_gm',{p_location_id:loc.id})
       if(permission.error) throw permission.error
-      if(!permission.data) throw new Error(awardsOnly ? 'Manager access required.' : 'General manager access required.')
+      if(!permission.data) throw new Error(awardsOnly ? 'Manager access required.' : 'Management access required.')
       const response=await supabase.rpc('closeout_get_config',{p_location_id:loc.id})
       if(response.error) throw response.error
       const user=await supabase.auth.getUser(); if(user.error) throw user.error

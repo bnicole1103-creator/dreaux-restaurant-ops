@@ -1,4 +1,4 @@
 export type CalendarAudience={mode:'all'|'selected';roles:string[];users:string[]}
-export const calendarRoles=[['bartender','Bartenders'],['server','Servers'],['host','Hosts'],['busser','Bussers'],['kitchen','Kitchen'],['employee','Employees'],['assistant_manager','Assistant managers'],['manager','Managers'],['general_manager','General managers'],['owner','Owners']] as const
+export const calendarRoles=[['bartender','Bartenders'],['server','Servers'],['host','Hosts'],['busser','Bussers'],['kitchen','Kitchen'],['employee','Employees'],['assistant_manager','Assistant managers'],['manager','Managers'],['general_manager','Managements'],['owner','Owners']] as const
 export const everyoneCalendarAudience=():CalendarAudience=>({mode:'all',roles:[],users:[]})
 export function audienceLabel(audience?:CalendarAudience|null){if(!audience||audience.mode==='all')return 'Everyone at this location';const groups=audience.roles.map(role=>calendarRoles.find(([id])=>id===role)?.[1]??role.replace(/_/g,' '));if(audience.users.length)groups.push(audience.users.length+' selected '+(audience.users.length===1?'person':'people'));return groups.join(' + ')||'Choose an audience'}

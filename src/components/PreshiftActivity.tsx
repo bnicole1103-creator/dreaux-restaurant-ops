@@ -1,3 +1,4 @@
+import {AccessSection} from './AppAccess'
 import { useEffect, useRef, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { PreshiftReadReceipt,usePreshiftReadReceipts } from './PreshiftReadReceipts'
@@ -31,5 +32,5 @@ export function PreshiftOpenTracker({location,postId,version,source}:{location:s
 }
 export function HomePreshiftRead({location,postId,version}:{location:string;postId:string;version:number}){
  const reads=usePreshiftReadReceipts(location,[{id:postId,version}])
- return <><PreshiftOpenTracker location={location} postId={postId} version={version} source="home"/>{reads.error&&<p role="alert">{reads.error}</p>}<PreshiftReadReceipt location={location} postId={postId} version={version} status={reads.rows[postId]} manager={reads.manager} onChange={reads.reload}/></>
+ return <><PreshiftOpenTracker location={location} postId={postId} version={version} source="home"/>{reads.error&&<p role="alert">{reads.error}</p>}<AccessSection page="posts" section="receipts"><PreshiftReadReceipt location={location} postId={postId} version={version} status={reads.rows[postId]} manager={reads.manager} onChange={reads.reload}/></AccessSection></>
 }

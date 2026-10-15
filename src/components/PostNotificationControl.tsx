@@ -1,3 +1,4 @@
+import {PageWord} from './PageDesign'
 import { useEffect, useRef, useState } from 'react'
 import { supabase } from '../lib/supabase'
 type Audience = 'off' | 'scheduled' | 'all'
@@ -25,10 +26,10 @@ export function PostNotificationControl({location,category,objectId,version,serv
   }catch(e){setError(message(e))}finally{setBusy(false)}
  }
  return <div className="gm-post-notification" style={{borderTop:'1px solid #c8b59f',marginTop:16,paddingTop:12}}>
-  <strong>GM notification</strong><p>Service day: {serviceDate}. Publishing or editing sends no alert until you choose Send.</p>
-  <label>Audience <select value={audience} disabled={busy||!loaded} onChange={e=>{setAudience(e.target.value as Audience);request.current=null;setNotice('')}}><option value="off">No alert</option><option value="scheduled">Staff scheduled for this service day</option><option value="all">All active staff</option></select></label>{' '}
+  <strong><PageWord id="sectioncopy.708033304218e21a2659">{"Management notification"}</PageWord></strong><p><PageWord id="sectioncopy.cc7ac2822c0aed6cfb3a">{"Service day: "}</PageWord>{serviceDate}<PageWord id="sectioncopy.c80dcfd27d85e39bbc3b">{". Publishing or editing sends no alert until you choose Send."}</PageWord></p>
+  <label><PageWord id="sectioncopy.c8357915c4ed5656232b">{"Audience "}</PageWord><select value={audience} disabled={busy||!loaded} onChange={e=>{setAudience(e.target.value as Audience);request.current=null;setNotice('')}}><option value="off">No alert</option><option value="scheduled">Staff scheduled for this service day</option><option value="all">All active staff</option></select></label>{' '}
   <button type="button" disabled={busy||!loaded} onClick={()=>void send()}>{busy?'Saving…':audience==='off'?'Save no alert':'Send notification'}</button>
-  {audience==='scheduled'&&<p>Confirm this date’s roster in Settings first. Off-duty staff will not receive this alert.</p>}
+  {audience==='scheduled'&&<p><PageWord id="sectioncopy.2f742b8b585cb2e705a5">{"Confirm this date’s roster in Settings first. Off-duty staff will not receive this alert."}</PageWord></p>}
   {notice&&<p role="status">{notice}</p>}{error&&<p role="alert">{error}</p>}
  </div>
 }

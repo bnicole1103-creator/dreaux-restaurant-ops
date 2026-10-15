@@ -12,7 +12,7 @@ export function createStaffPreviewClient(normal:SupabaseClient,url:string,key:st
  let identityPromise:Promise<{user:User;location_id:string;organization_id:string;target_id:string;expires_at:string}>|null=null
  const report=(message:string)=>{window.dispatchEvent(new CustomEvent('staff-preview-error',{detail:message}))}
  async function call(body:Record<string,unknown>){
-  const session=await normal.auth.getSession();if(!session.data.session)throw Error('Sign in as a general manager before starting Staff View.')
+  const session=await normal.auth.getSession();if(!session.data.session)throw Error('Sign in as a Management before starting Staff View.')
   const response=await nativeFetch(url+'/functions/v1/staff-preview',{method:'POST',headers:{Authorization:'Bearer '+session.data.session.access_token,apikey:key,'Content-Type':'application/json'},body:JSON.stringify({...body,session:staffPreviewId}),cache:'no-store'})
   return response
  }

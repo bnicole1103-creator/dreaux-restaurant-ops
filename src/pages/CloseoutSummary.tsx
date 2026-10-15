@@ -1,3 +1,4 @@
+import {AccessSection} from '../components/AppAccess'
 import {PeerRecognition} from '../components/PeerRecognition'
 // page-designer-instrumented
 import { ManagerRecap } from "../components/ManagerRecap"
@@ -191,7 +192,7 @@ function roleLabel(role: string) {
     busser: 'Busser',
     manager: 'Manager',
     assistant_manager: 'Assistant Manager',
-    general_manager: 'General Manager',
+    general_manager: 'Management',
   }
 
   return (
@@ -613,7 +614,7 @@ function CloseoutDay({selectedDate,refresh,onDeleted,locationId,locationName,cur
       </div>
 
       {locationId && <PeerRecognition location={locationId} from={selectedDate} to={selectedDate}/>}
-      {closeouts.some(c=>!hasTarget(c))&&<p role="status">Some closeouts have no saved target. Target percentages include only closeouts with available positive targets.</p>}
+      {closeouts.some(c=>!hasTarget(c))&&<p role="status"><PageWord id="sectioncopy.2837ea3ec6c11338de09">{"Some closeouts have no saved target. Target percentages include only closeouts with available positive targets."}</PageWord></p>}
       {locationId&&<StockBoard location={locationId} readOnly date={selectedDate}/>}
       {error && (
         <div data-design-block="copy.7928f50964d7a778.1"
@@ -813,8 +814,8 @@ function CloseoutDay({selectedDate,refresh,onDeleted,locationId,locationName,cur
           )}
 
           {isManager && (
-          <ManagerRecap location={locationId} day={selectedDate} refresh={refresh}
-            title={current ? 'Today’s Manager Recap' : 'Manager Recap'} lines={recap}/>
+          <AccessSection page="summary" section="reviews"><ManagerRecap location={locationId} day={selectedDate} refresh={refresh}
+            title={current ? 'Today’s Manager Recap' : 'Manager Recap'} lines={recap}/></AccessSection>
 
           )}
 

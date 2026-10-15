@@ -1,0 +1,8 @@
+import {PageWord} from '../components/PageDesign'
+import {useState} from 'react'
+import {Link} from 'react-router-dom'
+import {AppearancePage as LocationAppearancePage} from './AppearancePage'
+import {StickerBankPage} from './StickerBankPage'
+import {ScreenWordingPage} from './ScreenWordingPage'
+import '../components/AccessServices.css'
+export function StylingPage(){const [tab,setTab]=useState('appearance');return <section data-design-block="section.08cb7292ef23f8b71fc9" className="page"><Link to="/settings"><PageWord id="sectioncopy.ce647ff3b91e82e3862f">{"← Settings"}</PageWord></Link><h1><PageWord id="sectioncopy.247e2aef673179c8486f">{"Styling"}</PageWord></h1><nav data-design-block="section.b477a46353c4d140d2e8" className="styling-tabs" aria-label="Styling tools">{[['appearance','Colors & fonts'],['decorations','Stickers'],['editor','Edit screen sections']].map(([id,label])=><button type="button" key={id} aria-pressed={id===tab} onClick={()=>setTab(id)}>{label}</button>)}<Link to="/settings/staff-view"><PageWord id="sectioncopy.744df0ec0300fd30e3d7">{"Staff layout preview →"}</PageWord></Link><Link to="/calendar"><PageWord id="sectioncopy.eea46565e9a88da6344b">{"Calendar templates & month styles →"}</PageWord></Link></nav>{tab==='appearance'?<LocationAppearancePage/>:tab==='decorations'?<StickerBankPage/>:<ScreenWordingPage/>}</section>}

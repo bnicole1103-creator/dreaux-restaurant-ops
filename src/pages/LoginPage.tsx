@@ -34,7 +34,7 @@ export function LoginPage() {
       : await supabase.auth.signInWithPassword({ email, password })
 
     setMessage(result.error?.message ?? (mode === 'signup'
-      ? 'Check your email to confirm your account. Then sign in and wait for GM approval.'
+      ? 'Check your email to confirm your account. Then sign in and wait for Management approval.'
       : 'Signed in.'))
     } catch (e) {
       setMessage(e instanceof Error ? e.message : 'Could not connect. Please try again.')
@@ -50,7 +50,7 @@ export function LoginPage() {
         <h1 data-design-block="copy.1e8e41bc62d95308.1"><ScreenText id="LoginPage.3148730a11c9bc5a">Restaurant Operations</ScreenText></h1>
         <p data-design-block="copy.0d1ff4ea27de07af.1" className="muted"><ScreenText id="LoginPage.52160d77f0dfc05a">Floor, cash, tasks, rewards, and reporting.</ScreenText></p>
 
-        {mode === 'signup' && <p data-design-block="copy.60252d15d462e4e3.1"><ScreenText id="LoginPage.aa65239e06fea8f7">Your GM must approve location access after signup.</ScreenText></p>}
+        {mode === 'signup' && <p data-design-block="copy.60252d15d462e4e3.1"><ScreenText id="LoginPage.aa65239e06fea8f7">Your Management must approve location access after signup.</ScreenText></p>}
         {mode === 'signup' && (
           <label data-design-block="copy.09d513ec68a5798b.1"><ScreenText id="LoginPage.cd3c2c8d0734931c">Full name
             </ScreenText><input autoComplete="name" disabled={submitting} value={fullName} onChange={(e) => setFullName(e.target.value)} required />

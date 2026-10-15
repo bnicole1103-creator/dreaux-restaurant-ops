@@ -35,7 +35,7 @@ const roleOptions: Array<{
   label: string
 }> = [
   { value: 'owner', label: 'Owner' },
-  { value: 'general_manager', label: 'General Manager' },
+  { value: 'general_manager', label: 'Management' },
   { value: 'manager', label: 'Manager' },
   { value: 'assistant_manager', label: 'Assistant Manager' },
   { value: 'host', label: 'Host' },

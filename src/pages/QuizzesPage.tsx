@@ -1,3 +1,4 @@
+import {AccessSection} from '../components/AppAccess'
 // page-designer-instrumented
 import { PageWord } from "../components/PageDesign"
 import { ScreenText } from "../components/ScreenText"
@@ -64,8 +65,8 @@ export function QuizzesPage(){
  const ownToday=monthly?.attempts.find(a=>a.quiz_date===date)
  const otherAttempts=monthly?.attempts.filter(a=>!(quiz && result && a.quiz_date===date)) ?? []
  return <section data-design-block="copy.2ad13fdb7d598282.1" className="mod-page quiz-page"><p data-design-block="copy.55e941dd4b788dbb.1" className="eyebrow"><ScreenText id="QuizzesPage.15c8c5ead821decf">Pre-shift preparation</ScreenText></p><h1 data-design-block="copy.a5c87383cd4dd950.1"><ScreenText id="QuizzesPage.38584cb9f2b57db7">Daily Quizzes</ScreenText></h1>
-  <nav className="workspace-actions" aria-label="Quiz tools"><Link to="/quizzes">Today's quizzes</Link><Link to="/quizzes?view=scores">My scores</Link><button type="button" disabled={busy} onClick={()=>{if(Object.keys(answers).length&&!result&&!window.confirm("Discard answers and refresh?"))return;setRefresh(v=>v+1)}}>Refresh quizzes</button>{access.manager&&<><Link to="/quizzes?view=generate">Generate quiz</Link><Link to="/quizzes/build">Build / question bank</Link><Link to="/quizzes?view=manage">Published quizzes / team scores</Link></>}</nav>
-  {access.manager&&view==='generate'&&<GeneratePreshiftQuiz allowPaste location={location} date={date} title="" body="" disabled={!location} onSaved={()=>setRefresh(v=>v+1)}/>}
+  <nav data-design-block="section.ceb12dc9375bffa771a4" className="workspace-actions" aria-label="Quiz tools"><Link to="/quizzes"><PageWord id="sectioncopy.d4417b3e7bb7a967dc89">{"Today's quizzes"}</PageWord></Link><Link to="/quizzes?view=scores"><PageWord id="sectioncopy.f068a59b5eeab6666e68">{"My scores"}</PageWord></Link><button type="button" disabled={busy} onClick={()=>{if(Object.keys(answers).length&&!result&&!window.confirm("Discard answers and refresh?"))return;setRefresh(v=>v+1)}}><PageWord id="sectioncopy.d4bfa52c801449ac87aa">{"Refresh quizzes"}</PageWord></button>{access.manager&&<><Link to="/quizzes?view=generate"><PageWord id="sectioncopy.4c65231936d43a5f56c0">{"Generate quiz"}</PageWord></Link><Link to="/quizzes/build"><PageWord id="sectioncopy.ba52ba963af755154d28">{"Build / question bank"}</PageWord></Link><Link to="/quizzes?view=manage"><PageWord id="sectioncopy.430a6fbcab3788e2f243">{"Published quizzes / team scores"}</PageWord></Link></>}</nav>
+  {access.manager&&view==='generate'&&<AccessSection page="posts" section="builder"><GeneratePreshiftQuiz allowPaste location={location} date={date} title="" body="" disabled={!location} onSaved={()=>setRefresh(v=>v+1)}/></AccessSection>}
   {view==='today'&&<>
 
   <h2 data-design-block="copy.b5e32943f8cdadea.1"><ScreenText id="QuizzesPage.6e4f183331ca689e">Today · </ScreenText>{quizDateLabel(date)}</h2>

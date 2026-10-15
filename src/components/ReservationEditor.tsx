@@ -1,3 +1,4 @@
+import {PageWord} from './PageDesign'
 import { useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { ScreenText } from './ScreenText'
@@ -24,9 +25,9 @@ export function ReservationEditor({reservation,locationId,tables,team,onSaved}:{
   }
   if(!editing)return <button type="button" onClick={open}><ScreenText id="ReservationEditor.edit">Edit reservation</ScreenText></button>
   return <form onSubmit={e=>{e.preventDefault();void save()}}>
-    <fieldset disabled={busy}>
+    <fieldset data-design-block="section.f8a0b20ec90bec1bfef5" disabled={busy}>
       <label><ScreenText id="ReservationEditor.size">Party size (number of guests)</ScreenText><input required type="number" min={1} max={500} step={1} value={size} onChange={e=>setSize(e.target.value)}/></label>
-      <fieldset><legend>Tables (select any number)</legend><button type="button" onClick={()=>setTableIds([])}>Clear tables</button><div className="closeout-table-grid">{tables.map(t=><label key={t.id}><input type="checkbox" checked={tableIds.includes(t.id)} onChange={e=>setTableIds(ids=>e.target.checked?[...ids,t.id]:ids.filter(id=>id!==t.id))}/>{t.table_name}</label>)}</div></fieldset>
+      <fieldset data-design-block="section.e8efffeff8601455f9c9"><legend><PageWord id="sectioncopy.d9402e7947020969a019">{"Tables (select any number)"}</PageWord></legend><button type="button" onClick={()=>setTableIds([])}><PageWord id="sectioncopy.1b61200f7b799cb0fa2e">{"Clear tables"}</PageWord></button><div className="closeout-table-grid">{tables.map(t=><label key={t.id}><input type="checkbox" checked={tableIds.includes(t.id)} onChange={e=>setTableIds(ids=>e.target.checked?[...ids,t.id]:ids.filter(id=>id!==t.id))}/>{t.table_name}</label>)}</div></fieldset>
       <label><ScreenText id="ReservationEditor.server">Server</ScreenText><select value={server} onChange={e=>setServer(e.target.value)}><option value="">Unassigned</option>{team.map(m=><option key={m.user_id} value={m.user_id}>{m.profile?.preferred_name||m.profile?.full_name||m.role}</option>)}</select></label>
       <label><ScreenText id="ReservationEditor.notes">Notes and guest requests</ScreenText><textarea rows={3} maxLength={4000} value={notes} onChange={e=>setNotes(e.target.value)}/></label>
       <button type="submit"><ScreenText id="ReservationEditor.save">Save changes</ScreenText></button>
