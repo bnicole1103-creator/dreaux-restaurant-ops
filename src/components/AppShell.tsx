@@ -167,7 +167,7 @@ export function AppShell({
         {offline && <p role="status"><PageWord id="sectioncopy.bf2a7186a2c1ce67fd80">{"You’re offline. Reconnect before saving or refreshing."}</PageWord></p>}
         {signOutError && <p role="alert">{signOutError}</p>}
         <AppStickerDecorations />
-        <PageRecovery key={pathname.startsWith('/preshift/')?'/preshift':pathname}>{children}</PageRecovery>
+        <div className="app-sticker-content"><PageRecovery key={pathname.startsWith('/preshift/')?'/preshift':pathname}>{children}</PageRecovery></div>
       </main>
 
       <nav data-design-block="copy.7cb60e4ed1acdcd5.1" className="bottom-nav" aria-label="Main navigation">
