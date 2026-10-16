@@ -1,3 +1,4 @@
+import {HeaderChatPreview} from './HeaderChatPreview'
 import {AppThemeRuntime} from './AppThemeRuntime'
 import {useAppAccess} from './AppAccess'
 import {accessPage} from '../lib/accessCatalog'
@@ -162,6 +163,7 @@ export function AppShell({
           <LogOut size={24} />
         </button>
 
+        <HeaderChatPreview enabled={pageAccess.can('schedule','chat')}/>
       </header>
 
       <nav data-design-block="section.c1754735109ac4f13c9e" className="desktop-nav" aria-label="Main navigation"><p className="nav-section-label"><PageWord id="sectioncopy.caee5cd3478c41a41029">{"Your shift"}</PageWord></p>{primary.map(navItem)}<p className="nav-section-label"><PageWord id="sectioncopy.20c5d63d03cf302ecd1a">{"Workspace"}</PageWord></p>{extras.map(navItem)}</nav>
