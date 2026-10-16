@@ -1,3 +1,4 @@
+import { DisposalRequirements } from './DisposalRequirements'
 import { RequiredWorkRoster } from './RequiredWorkRoster'
 import {PageWord} from './PageDesign'
 import { useEffect, useState } from 'react'
@@ -58,6 +59,15 @@ export function NotificationManagement() {
  return <div className="notification-management">
   <p><Link to="/"><PageWord id="sectioncopy.0d8d3dfdc4f7818a6875">{"Open My notifications on Home"}</PageWord></Link><PageWord id="sectioncopy.7859ef1a7d9482137183">{" to enable or turn off notifications for this device. One setting covers the whole app."}</PageWord></p>
   <MyWorkRequirements key={data?.confirmed_at ?? day} location={location}/>
+
+  <section className="task-card">
+    <nav className="workspace-actions" aria-label="Disposal forms">
+      <Link to="/inventory">Open disposal form</Link>
+      <Link to="/inventory?view=history">Disposal history</Link>
+    </nav>
+    <DisposalRequirements location={location} refreshKey={0}/>
+  </section>
+
   <article data-design-block="section.cc57b0dece248baa7334" className="task-card">
    <h2><PageWord id="sectioncopy.8c50f9314c3fc79b2dfd">{"Required work and points"}</PageWord></h2>
    <p><PageWord id="sectioncopy.30eca7c7d8ff71e3f79e">{"Everyone on the saved required-work roster must complete each published daily quiz: −5 points per missed quiz."}</PageWord></p>
