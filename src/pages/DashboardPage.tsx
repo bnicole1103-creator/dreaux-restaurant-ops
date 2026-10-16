@@ -1,3 +1,4 @@
+import {PersonalHome} from '../components/PersonalSpace'
 import { ReceiptWalletHome } from '../components/ReceiptWallet'
 import {DashboardPostPreview} from '../components/DashboardPostPreview'
 import {PreshiftMinuteRule} from '../components/PreshiftMinuteRule'
@@ -41,7 +42,7 @@ export function DashboardPage(){
  if(feed.status==='fulfilled'&&!feed.value.error){setPosts((feed.value.data?.posts??[]).filter((p:Post)=>p.shift_date===today));setPostError('')}else{setPostError(String(feed.status==='rejected'?feed.reason:feed.value.error?.message));setPosts([])}
  if(quizData.status==='fulfilled'&&!quizData.value.error){setQuiz(quizData.value.data?.quiz??null);setResult(quizData.value.data?.result??null);setQuizError('')}else{setQuizError(String(quizData.status==='rejected'?quizData.reason:quizData.value.error?.message));setQuiz(null);setResult(null)}setLoading(false)
  })();return()=>{live=false}},[location,today,refresh])
- return <section data-design-block="copy.223f06d26dbefc1c.1" className="page staff-home"><p data-design-block="copy.7ee3c1a7b2ddf9eb.1" className="eyebrow"><ScreenText id="DashboardPage.bc6d13d141d31c9c">Your shift starts here</ScreenText></p><div className="home-top-row"><header data-design-block="section.5ac222737cf1d689251f" className="home-calendar-heading"><h1 data-design-block="home.calendar.title">{name||'Home'}</h1><p data-design-block="home.calendar.date">{quizDateLabel(today)}</p></header>{location&&<AccessSection page="home" section="stock"><CompactStockBoard location={location}/></AccessSection>}</div>{error&&<p data-design-block="copy.62d9558d8b2361ee.1" role="alert">{error}</p>}{!location&&!error&&<p data-design-block="copy.e04a9fe2c54afaaf.1" role="status"><ScreenText id="DashboardPage.a1d1c867053fcd8f">Loading your restaurant…</ScreenText></p>}
+ return <PersonalHome location={location}><section data-design-block="copy.223f06d26dbefc1c.1" className="page staff-home"><p data-design-block="copy.7ee3c1a7b2ddf9eb.1" className="eyebrow"><ScreenText id="DashboardPage.bc6d13d141d31c9c">Your shift starts here</ScreenText></p><div className="home-top-row"><header data-design-block="section.5ac222737cf1d689251f" className="home-calendar-heading"><h1 data-design-block="home.calendar.title">{name||'My shift'}</h1><p data-design-block="home.calendar.date">{quizDateLabel(today)}</p></header>{location&&<AccessSection page="home" section="stock"><CompactStockBoard location={location}/></AccessSection>}</div>{error&&<p data-design-block="copy.62d9558d8b2361ee.1" role="alert">{error}</p>}{!location&&!error&&<p data-design-block="copy.e04a9fe2c54afaaf.1" role="status"><ScreenText id="DashboardPage.a1d1c867053fcd8f">Loading your restaurant…</ScreenText></p>}
  {location&&<>
 <ReceiptWalletHome location={location}/>
 <AccessSection page="home" section="notifications"><PushPreferences/></AccessSection>
@@ -53,6 +54,6 @@ export function DashboardPage(){
 <AccessSection page="home" section="sections"><MySections location={location} date={day} refresh={refresh}/></AccessSection><AccessSection page="home" section="tasks"><section data-design-block="copy.35efbb545f9f8cb4.3" className="home-section"><div data-design-block="copy.efd3004cc2315182.3" className="home-section-heading"><h2 data-design-block="copy.8290a0356f6f55fd.3"><ScreenText id="DashboardPage.983f4f14a77a4ee8">My Task Lists</ScreenText></h2><Link to="/tasks"><ScreenText id="DashboardPage.5bd7afd0d47d85c7">All lists / Assign tasks →</ScreenText></Link></div><p data-design-block="copy.10c78c4c8d297098.1" className="muted"><ScreenText id="DashboardPage.eab2baa316a5794f">Service day: </ScreenText>{serviceDateLabel(day)}</p><AccessSection page="tasks" section="mine"><AssignedTaskLists location={location} day={day} refresh={refresh}/></AccessSection></section></AccessSection>
 {/* home-no-reservation-section */}
 </>}
- </section>
+ </section></PersonalHome>
 }
 
