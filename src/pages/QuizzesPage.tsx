@@ -3,7 +3,7 @@ import {AccessSection} from '../components/AppAccess'
 import { PageWord } from "../components/PageDesign"
 import { ScreenText } from "../components/ScreenText"
 import { submissionLabel } from '../lib/submissionTime'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate,useSearchParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { loadTenantData } from '../lib/tenant'
@@ -41,20 +41,48 @@ export function QuizzesPage(){
  const [month,setMonth]=useState(()=>quizToday().slice(0,7));const [refresh,setRefresh]=useState(0)
  const [quiz,setQuiz]=useState<Quiz|null>(null);const [result,setResult]=useState<QuizResult|null>(null)
  const [monthly,setMonthly]=useState<Monthly|null>(null);const [answers,setAnswers]=useState<Record<number,number>>({})
+ const [submitting,setSubmitting]=useState(false);const [confirmSubmit,setConfirmSubmit]=useState(false);const [submitError,setSubmitError]=useState('');const [submitted,setSubmitted]=useState(false)
+ const submissionLock=useRef(false);const submitFeedback=useRef<HTMLDivElement>(null)
+ const [scoresRefresh,setScoresRefresh]=useState(0)
  const [busy,setBusy]=useState(true);const [monthBusy,setMonthBusy]=useState(true);const [error,setError]=useState('');const [monthError,setMonthError]=useState('')
  useEffect(()=>{let live=true;void loadTenantData().then(t=>{if(!t.locations[0])throw new Error('No active location.');if(live)setLocation(t.locations[0].id)}).catch(e=>{if(live){setError(quizError(e));setBusy(false);setMonthBusy(false)}});return()=>{live=false}},[])
  useEffect(()=>{const check=()=>setDate(quizToday());const visible=()=>{if(document.visibilityState==='visible')check()};const timer=setInterval(check,30000);window.addEventListener('focus',check);document.addEventListener('visibilitychange',visible);return()=>{clearInterval(timer);window.removeEventListener('focus',check);document.removeEventListener('visibilitychange',visible)}},[])
  useEffect(()=>{setMonth(date.slice(0,7))},[date])
- useEffect(()=>{if(!location)return;let live=true;setBusy(true);setError('');setQuiz(null);setResult(null);setAnswers({});void (async()=>{
+ useEffect(()=>{if(!location)return;let live=true;setBusy(true);setError('');setQuiz(null);setResult(null);setAnswers({});setConfirmSubmit(false);setSubmitError('');setSubmitted(false);void (async()=>{
   try{const {data,error}=await supabase.rpc('quiz_staff_load',{p_location_id:location,p_date:date});if(error)throw error;if(live){setQuiz(data.quiz);setResult(data.result)}}catch(e){if(live)setError(quizError(e))}finally{if(live)setBusy(false)}
  })();return()=>{live=false}},[location,date,refresh])
  useEffect(()=>{if(!location)return;let live=true;setMonthBusy(true);setMonthError('');setMonthly(null);void (async()=>{
   try{const {data,error}=await supabase.rpc('quiz_staff_month',{p_location_id:location,p_month:month+'-01'});if(error)throw error;if(live)setMonthly(data)}catch(e){if(live)setMonthError(quizError(e))}finally{if(live)setMonthBusy(false)}
- })();return()=>{live=false}},[location,month,refresh])
+ })();return()=>{live=false}},[location,month,refresh,scoresRefresh])
+ const unanswered=quiz?.questions.flatMap((q,i)=>Number.isInteger(answers[i]) && answers[i]>=0 && answers[i]<q.options.length?[]:[i+1]) ?? []
+ function prepareSubmit(){
+  if(!quiz || busy || submissionLock.current)return
+  setSubmitError('')
+  if(unanswered.length){
+   setConfirmSubmit(false)
+   setSubmitError('Answer question'+(unanswered.length===1?' ':'s ')+unanswered.join(', ')+' before submitting.')
+   requestAnimationFrame(()=>submitFeedback.current?.focus())
+   return
+  }
+  setConfirmSubmit(true)
+ }
  async function submit(){
-  if(!quiz || !window.confirm('Submit your answers? You can submit this quiz once.'))return
-  setBusy(true);setError('')
-  try{const {data,error}=await supabase.rpc('quiz_staff_submit',{p_quiz_id:quiz.id,p_version:quiz.version,p_answers:quiz.questions.map((_,i)=>answers[i] ?? null)});if(error)throw error;setResult(data);setRefresh(v=>v+1)}catch(e){setError(quizError(e))}finally{setBusy(false)}
+  if(!quiz || !confirmSubmit || unanswered.length || submissionLock.current)return
+  submissionLock.current=true;setSubmitting(true);setSubmitError('');setConfirmSubmit(false)
+  const controller=new AbortController()
+  let timeout:ReturnType<typeof setTimeout>|undefined
+  try{
+   // Race the entire operation as well as aborting fetch: an auth refresh can stall before fetch starts.
+   const request=supabase.rpc('quiz_staff_submit',{p_quiz_id:quiz.id,p_version:quiz.version,p_answers:quiz.questions.map((_,i)=>answers[i])}).abortSignal(controller.signal)
+   const {data,error}=await Promise.race([
+    request,
+    new Promise<never>((_,reject)=>{timeout=setTimeout(()=>{reject(new Error('The server did not confirm your submission. Your answers are still here. Try submitting again; if it already saved, your existing result will be returned.'));controller.abort()},30000)})
+   ])
+   if(error)throw error
+   if(!data || !Array.isArray(data.questions) || typeof data.score!=='number')throw new Error('The server did not return a quiz result. Your answers are still here. Try submitting again to check whether it saved.')
+   setResult(data);setSubmitted(true);setScoresRefresh(v=>v+1)
+  }catch(e){setSubmitError(quizError(e));requestAnimationFrame(()=>submitFeedback.current?.focus())}
+  finally{if(timeout)clearTimeout(timeout);submissionLock.current=false;setSubmitting(false)}
  }
  async function remove(q:PublishedQuiz){
   if(Object.keys(answers).length && !result && !window.confirm('Discard your unsaved quiz answers?'))return
@@ -65,7 +93,7 @@ export function QuizzesPage(){
  const ownToday=monthly?.attempts.find(a=>a.quiz_date===date)
  const otherAttempts=monthly?.attempts.filter(a=>!(quiz && result && a.quiz_date===date)) ?? []
  return <section data-design-block="copy.2ad13fdb7d598282.1" className="mod-page quiz-page"><p data-design-block="copy.55e941dd4b788dbb.1" className="eyebrow"><ScreenText id="QuizzesPage.15c8c5ead821decf">Pre-shift preparation</ScreenText></p><h1 data-design-block="copy.a5c87383cd4dd950.1"><ScreenText id="QuizzesPage.38584cb9f2b57db7">Daily Quizzes</ScreenText></h1>
-  <nav data-design-block="section.ceb12dc9375bffa771a4" className="workspace-actions" aria-label="Quiz tools"><Link to="/quizzes"><PageWord id="sectioncopy.d4417b3e7bb7a967dc89">{"Today's quizzes"}</PageWord></Link><Link to="/quizzes?view=scores"><PageWord id="sectioncopy.f068a59b5eeab6666e68">{"My scores"}</PageWord></Link><button type="button" disabled={busy} onClick={()=>{if(Object.keys(answers).length&&!result&&!window.confirm("Discard answers and refresh?"))return;setRefresh(v=>v+1)}}><PageWord id="sectioncopy.d4bfa52c801449ac87aa">{"Refresh quizzes"}</PageWord></button>{access.manager&&<><Link to="/quizzes?view=generate"><PageWord id="sectioncopy.4c65231936d43a5f56c0">{"Generate quiz"}</PageWord></Link><Link to="/quizzes/build"><PageWord id="sectioncopy.ba52ba963af755154d28">{"Build / question bank"}</PageWord></Link><Link to="/quizzes?view=manage"><PageWord id="sectioncopy.430a6fbcab3788e2f243">{"Published quizzes / team scores"}</PageWord></Link></>}</nav>
+  <nav data-design-block="section.ceb12dc9375bffa771a4" className="workspace-actions" aria-label="Quiz tools"><Link to="/quizzes"><PageWord id="sectioncopy.d4417b3e7bb7a967dc89">{"Today's quizzes"}</PageWord></Link><Link to="/quizzes?view=scores"><PageWord id="sectioncopy.f068a59b5eeab6666e68">{"My scores"}</PageWord></Link><button type="button" disabled={busy || submitting} onClick={()=>{if(Object.keys(answers).length&&!result&&!window.confirm("Discard answers and refresh?"))return;setRefresh(v=>v+1)}}><PageWord id="sectioncopy.d4bfa52c801449ac87aa">{"Refresh quizzes"}</PageWord></button>{access.manager&&<><Link to="/quizzes?view=generate"><PageWord id="sectioncopy.4c65231936d43a5f56c0">{"Generate quiz"}</PageWord></Link><Link to="/quizzes/build"><PageWord id="sectioncopy.ba52ba963af755154d28">{"Build / question bank"}</PageWord></Link><Link to="/quizzes?view=manage"><PageWord id="sectioncopy.430a6fbcab3788e2f243">{"Published quizzes / team scores"}</PageWord></Link></>}</nav>
   {access.manager&&view==='generate'&&<AccessSection page="posts" section="builder"><GeneratePreshiftQuiz allowPaste location={location} date={date} title="" body="" disabled={!location} onSaved={()=>setRefresh(v=>v+1)}/></AccessSection>}
   {view==='today'&&<>
 
@@ -73,8 +101,14 @@ export function QuizzesPage(){
   {error && <p data-design-block="copy.33f8f18b9f66c5f9.1" role="alert">{error}</p>}{busy && <p data-design-block="copy.dce6c33edff70b50.1" role="status"><ScreenText id="QuizzesPage.6799e69e289fa08d">Loading…</ScreenText></p>}
   {!busy && !quiz && !error && <article data-design-block="copy.b40784f5607731b4.2" className="mod-review"><h3 data-design-block="copy.26f1d34ac8687bbf.2"><ScreenText id="QuizzesPage.1d72b99728971f78">No quiz published for today</ScreenText></h3><p data-design-block="copy.854e1d9db292679b.6"><ScreenText id="QuizzesPage.21286979d56c5fd7">Your manager will publish today’s pre-shift quiz here.</ScreenText></p>{access.manager && <Link to={'/quizzes/manage?date='+date}><ScreenText id="QuizzesPage.0904328e9a0b32e1">Create / Publish Today’s Quiz →</ScreenText></Link>}</article>}
   {quiz && monthly?.requirements?.find(r=>r.quiz_id===quiz.id) && <p data-design-block="copy.854e1d9db292679b.7"><ScreenText id="QuizzesPage.cf3a03ebcb629cd4">This quiz is required for you. Deadline: </ScreenText>{submissionLabel(monthly.requirements.find(r=>r.quiz_id===quiz.id)?.due_at)}<PageWord id="copy.df6b29a90fc3e15f.2">.</PageWord></p>}
+  {submitted && <p role="status">Quiz submitted successfully. Your score is saved.</p>}
   {quiz && (result?<CompletedQuiz title={quiz.title} date={date} result={result} submittedAt={ownToday?.submitted_at} earned={ownToday?.earned_points} running={ownToday?.running_score} monthly={month===date.slice(0,7)?monthly?.points:undefined} />:<article data-design-block="copy.b40784f5607731b4.3" className="mod-review"><h3 data-design-block="copy.26f1d34ac8687bbf.3"><ScreenText id="QuizzesPage.3780149cd908fc4d">Pre-Shift Quiz · </ScreenText>{quizDateLabel(date)}</h3><p data-design-block="copy.854e1d9db292679b.8">{quiz.title}</p>{quiz.instructions && <p data-design-block="copy.cc40ed17908bb9de.1" className="quiz-instructions">{quiz.instructions}</p>}
-   <form data-design-block="copy.692054f5293a5327.1" onSubmit={e=>{e.preventDefault();void submit()}}>{quiz.questions.map((q,i)=><fieldset data-design-block="copy.ec41fe4a6ad1b2dc.1" className="quiz-question" key={i} disabled={busy}><legend>{i+1}<PageWord id="copy.df6b29a90fc3e15f.3">. </PageWord>{q.prompt}</legend><p data-design-block="copy.0aeb08dc70bfacea.1" className="muted">{q.category}</p>{q.options.map((option,n)=><label data-design-block="copy.139d6f3521a3495a.1" className="quiz-choice" key={n}><input type="radio" name={'question-'+i} checked={answers[i]===n} required onChange={()=>setAnswers(v=>({...v,[i]:n}))} /><span>{option}</span></label>)}</fieldset>)}<button data-design-block="copy.363a45e6868b8983.1" className="primary-button" disabled={busy || quiz.questions.some((_,i)=>answers[i]===undefined)}><ScreenText id="QuizzesPage.b60395f153d3e55e">Submit Quiz</ScreenText></button></form>
+   <form data-design-block="copy.692054f5293a5327.1" noValidate aria-busy={submitting} onSubmit={e=>{e.preventDefault();prepareSubmit()}}>{quiz.questions.map((q,i)=><fieldset data-design-block="copy.ec41fe4a6ad1b2dc.1" className="quiz-question" key={i} disabled={busy || submitting}><legend>{i+1}<PageWord id="copy.df6b29a90fc3e15f.3">. </PageWord>{q.prompt}</legend><p data-design-block="copy.0aeb08dc70bfacea.1" className="muted">{q.category}</p>{q.options.map((option,n)=><label data-design-block="copy.139d6f3521a3495a.1" className="quiz-choice" key={n}><input type="radio" name={'question-'+i} checked={answers[i]===n} required onChange={()=>{setAnswers(v=>({...v,[i]:n}));setConfirmSubmit(false);setSubmitError('')}} /><span>{option}</span></label>)}</fieldset>)}<div className="quiz-submit-feedback" ref={submitFeedback} tabIndex={-1}>
+    <p role="status">{Object.keys(answers).length} of {quiz.questions.length} questions answered.</p>
+    {submitError && <p role="alert">{submitError}</p>}
+    {submitting && <p role="status">Submitting your quiz… Please keep this page open.</p>}
+    {confirmSubmit?<div className="quiz-submit-confirm" role="group" aria-label="Confirm quiz submission"><p>Submit your answers? You can submit this quiz once.</p><div className="quiz-actions"><button type="button" className="primary-button" onClick={()=>void submit()}>Yes, submit quiz</button><button type="button" onClick={()=>setConfirmSubmit(false)}>Keep reviewing</button></div></div>:<button data-design-block="copy.363a45e6868b8983.1" type="submit" className="primary-button" disabled={busy || submitting}>{submitting?'Submitting…':<ScreenText id="QuizzesPage.b60395f153d3e55e">Submit Quiz</ScreenText>}</button>}
+   </div></form>
   </article>)}
   </>}
   {view==='scores'&&  <article data-design-block="copy.b40784f5607731b4.4" className="mod-review"><h2 data-design-block="copy.b5e32943f8cdadea.2"><ScreenText id="QuizzesPage.0cb69b9dbee3b5dd">My Monthly Quiz Scores</ScreenText></h2><label data-design-block="copy.45940bda03775ba8.1"><ScreenText id="QuizzesPage.76488090a5a6664f">Month</ScreenText><input type="month" value={month} max={date.slice(0,7)} onChange={e=>{if(e.target.value)setMonth(e.target.value)}} /></label>

@@ -30,3 +30,7 @@
 .quiz-page .quiz-choice>span{display:block;flex:1 1 0%;min-width:0;max-width:100%;white-space:normal;overflow-wrap:anywhere}
 .quiz-page .quiz-question{max-width:100%;box-sizing:border-box;overflow-wrap:anywhere}
 .quiz-page .quiz-question legend{max-width:100%;box-sizing:border-box;white-space:normal;line-height:1.5}
+
+.quiz-submit-feedback { margin-top: 20px; scroll-margin-block: 24px; }
+.quiz-submit-feedback [role=alert] { border: 2px solid currentColor; border-radius: 9px; padding: 12px; font-weight: 700; overflow-wrap: anywhere; }
+.quiz-submit-confirm { border: 1px solid var(--app-border); border-radius: 12px; padding: 16px; }

@@ -1,4 +1,6 @@
 export const accessCatalog={
+ "reports": {"label":"Reports","path":"/reports","sections":["builder"]},
+ "schedule": {"label":"Schedule","path":"/schedule","sections":["crew","chat","manage"]},
  "home": {
   "label": "Home",
   "path": "/",

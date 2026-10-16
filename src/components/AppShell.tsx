@@ -41,6 +41,8 @@ type Props = PropsWithChildren<{
 }>
 
 const links = [
+  { to: '/reports', label: 'Reports', icon: BarChart3 },
+  { to: '/schedule', label: 'Schedule', icon: CalendarDays },
   { to: '/rewards', label: 'Points', icon: BarChart3 },
   {
     to: '/',
@@ -115,7 +117,7 @@ export function AppShell({
     return () => {window.removeEventListener('online', update); window.removeEventListener('offline', update)}
   }, [])
   function navItem({to, label, icon: Icon}: typeof links[number]) {
-    if(!pageAccess.can(accessPage(to)))return null
+    if(!pageAccess.can(accessPage(to))||(to==='/reports'&&!pageAccess.admin))return null
     return <NavLink key={to} to={to} end={to === '/'} onClick={() => setMore(false)} className={({isActive}) => isActive ? 'nav-item active' : 'nav-item'}><Icon size={20} aria-hidden="true"/><span><PageWord instance id={`AppShell.nav.${label.replace(/\s+/g, '')}`}>{label}</PageWord></span></NavLink>
   }
   async function signOut() {

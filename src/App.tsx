@@ -1,3 +1,5 @@
+import {CrewSchedulePage} from './pages/CrewSchedulePage'
+import {ReportsPage} from './pages/ReportsPage'
 import {AccessSection} from './components/AppAccess'
 import {GuestServicesPage} from './pages/GuestServicesPage'
 import {AppAccessProvider,AppPageAccess} from './components/AppAccess'
@@ -141,6 +143,8 @@ export default function App() {
       <Routes>
         <Route path="/settings/staff-view" element={<ManagementOnly gmOnly><StaffViewPage/></ManagementOnly>}/>
         <Route path="/inventory" element={<InventoryPage />} />
+        <Route path="/schedule" element={<CrewSchedulePage />} />
+        <Route path="/reports" element={<ManagementOnly gmOnly><ReportsPage /></ManagementOnly>} />
         <Route path="/calendar" element={<CalendarPage />} />
         <Route path="/reservation-inquiries" element={<ReservationInquiryPage />} />
         <Route path="/inquiry-studio" element={<ManagementOnly><InquiryStudioPage /></ManagementOnly>} />
