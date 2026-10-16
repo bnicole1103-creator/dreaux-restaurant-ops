@@ -1,3 +1,4 @@
+import { TeamProfileName } from './TeamProfileName'
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 
@@ -54,7 +55,7 @@ export function RequiredWorkRoster({ location, day, data, onSaved }: { location:
     <label>Team member <select value={r.user_id} onChange={e => change(r.shift_key, {user_id: e.target.value})}>
      <option value="">Choose the app account</option>{data.staff.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
     </select></label>
-    <label>Position <input value={r.role_name} maxLength={100} onChange={e => change(r.shift_key,{role_name:e.target.value})}/></label>
+    <p><TeamProfileName locationId={location} userId={r.user_id} name={data.staff.find(p=>p.id===r.user_id)?.name??'Choose employee'}/></p><label>Position <input value={r.role_name} maxLength={100} onChange={e => change(r.shift_key,{role_name:e.target.value})}/></label>
     <div style={{display:'flex',flexWrap:'wrap',gap:16}}>
      <label>Start time <input type="time" value={r.start} onChange={e => change(r.shift_key,{start:e.target.value})}/></label>
      <label>End time <input type="time" value={r.end} onChange={e => change(r.shift_key,{end:e.target.value})}/></label>

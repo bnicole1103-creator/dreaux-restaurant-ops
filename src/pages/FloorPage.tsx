@@ -1,3 +1,4 @@
+import { TeamProfileName } from '../components/TeamProfileName'
 import {AccessSection} from '../components/AppAccess'
 // page-designer-instrumented
 import { PageWord, PageInput, PageOption } from "../components/PageDesign"
@@ -1415,7 +1416,7 @@ const [partySize, setPartySize] = useState(1)
     const table = tables.find((item) => item.id === tableId)
 
     if (!table) {
-      setError(`Choose a table for ${server.display_name}.`)
+      setError(`Choose a table for $<TeamProfileName userId={server.user_id} locationId={locationId} name={server.display_name}/>.`)
       return
     }
 
@@ -1891,7 +1892,7 @@ const [partySize, setPartySize] = useState(1)
 
       {/* FLOOR SECTIONS AT TOP */}
       <SectionSchedule editRequest={scheduleEditRequest} refreshKey={scheduleRefresh} locationId={locationId} selectedTableIds={selectedTableIds} tables={tables} employees={team.map(m=>({id:m.user_id,name:memberName(m.user_id)}))} onLoaded={(plans,offset)=>{setSectionPlans(plans);setServerClockOffset(offset)}} onSelect={setSelectedTableIds} />
-      {sectionCards.length>0 && <AccessSection page="floor" section="sections"><section data-design-block="copy.12756fa73e4e31ea.1" className="floor-section-summary"><p data-design-block="copy.b78f32efa3eeed28.2" className="eyebrow"><ScreenText id="FloorPage.2e081cd59ce390e4">Current Floor</ScreenText></p><h2 data-design-block="copy.2e495f44a1c1f630.1"><ScreenText id="FloorPage.773db4a763e3d6a3">Assigned sections</ScreenText></h2><button data-design-block="copy.dbe356ad805f296d.1" type="button" disabled={saving||arrangeMode} onClick={()=>void clearSectionAssignments(true)}><ScreenText id="FloorPage.abe16c2c033d7292">Clear all sections</ScreenText></button><div data-design-block="copy.542b94986fcaef05.1">{sectionCards.map(c=><button data-design-block="copy.e57c5b6f760b6b51.1" key={c.id} onClick={()=>openSectionEditor(c,c.tableIds)}><strong>{c.name}</strong><span className="section-server">{c.guestName || memberName(c.employeeId)}</span><span>{tables.filter(t=>c.tableIds.includes(t.id)).map(t=>t.table_name).join(', ')}</span><span>{c.tableIds.length}<ScreenText id="FloorPage.7b01d68c1fbd4367"> tables · </ScreenText>{c.totalSeats}<ScreenText id="FloorPage.5a8f27d4d02c6b32"> seats</ScreenText></span></button>)}</div></section></AccessSection>}
+      {sectionCards.length>0 && <AccessSection page="floor" section="sections"><section data-design-block="copy.12756fa73e4e31ea.1" className="floor-section-summary"><p data-design-block="copy.b78f32efa3eeed28.2" className="eyebrow"><ScreenText id="FloorPage.2e081cd59ce390e4">Current Floor</ScreenText></p><h2 data-design-block="copy.2e495f44a1c1f630.1"><ScreenText id="FloorPage.773db4a763e3d6a3">Assigned sections</ScreenText></h2><button data-design-block="copy.dbe356ad805f296d.1" type="button" disabled={saving||arrangeMode} onClick={()=>void clearSectionAssignments(true)}><ScreenText id="FloorPage.abe16c2c033d7292">Clear all sections</ScreenText></button><div data-design-block="copy.542b94986fcaef05.1">{sectionCards.map(c=><div data-design-block="copy.e57c5b6f760b6b51.1" key={c.id} onClick={()=>openSectionEditor(c,c.tableIds)}><strong>{c.name}</strong><span className="section-server">{c.employeeId?<TeamProfileName locationId={locationId} userId={c.employeeId} name={memberName(c.employeeId)}/>:c.guestName||'Unlinked team member'}</span><span>{tables.filter(t=>c.tableIds.includes(t.id)).map(t=>t.table_name).join(', ')}</span><span>{c.tableIds.length}<ScreenText id="FloorPage.7b01d68c1fbd4367"> tables · </ScreenText>{c.totalSeats}<ScreenText id="FloorPage.5a8f27d4d02c6b32"> seats</ScreenText></span><button type="button">Edit section</button></div>)}</div></section></AccessSection>}
 
       <div data-design-block="copy.4502244f66f4abcd.1" className="shift-toolbar">
         {shifts.length > 0 ? (
@@ -2536,7 +2537,7 @@ const [partySize, setPartySize] = useState(1)
                     >
                       <strong>
                         {index === 0 ? <PageWord id="copy.3b9b597229a99dd2.1">{"⭐ "}</PageWord> : <PageWord id="copy.d8faa01e919cbb07.5">{""}</PageWord>}
-                        {recommendation.employeeName}
+                        <TeamProfileName userId={recommendation.employeeId} locationId={locationId} name={recommendation.employeeName}/>
                       </strong>
 
                       <strong>
@@ -2875,7 +2876,7 @@ const [partySize, setPartySize] = useState(1)
                             }}
                           >
                             <strong style={{ fontSize: '17px' }}>
-                              {server.display_name}
+                              <TeamProfileName userId={server.user_id} locationId={locationId} name={server.display_name}/>
                             </strong>
 
                             <strong
@@ -3112,7 +3113,7 @@ const [partySize, setPartySize] = useState(1)
                   </div>
 
                   <div data-design-block="copy.542b94986fcaef05.5">
-                    <strong>{entry.display_name}</strong>
+                    <strong><TeamProfileName userId={entry.user_id} locationId={locationId} name={entry.display_name}/></strong>
                     <div data-design-block="copy.ce270456ef8dd440.1"
                       style={{
                         marginTop: '2px',

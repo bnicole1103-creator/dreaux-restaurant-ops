@@ -1,3 +1,4 @@
+import { TeamProfileName } from '../components/TeamProfileName'
 import {AccessSection} from '../components/AppAccess'
 import {PeerRecognition} from '../components/PeerRecognition'
 // page-designer-instrumented
@@ -94,7 +95,7 @@ export function PointsPage() {
       <p data-design-block="copy.ba8f526071f4b63b.4" className="muted"><ScreenText id="PointsPage.4380866cc0b528a9">Tied totals share a rank. Final prize ties require manager review.</ScreenText></p>
       <div data-design-block="copy.46595f88b74ad3d3.2" className="points-table-wrap"><table className="points-table"><caption><ScreenText id="PointsPage.d445873f8049aaa4">Monthly team standings</ScreenText></caption>
         <thead><tr><th><ScreenText id="PointsPage.febf9850512da3b5">Rank</ScreenText></th><th><ScreenText id="PointsPage.29018cc18c7e2d93">Team Member</ScreenText></th><th><ScreenText id="PointsPage.0e216e68dda20f0b">Points</ScreenText></th></tr></thead>
-        <tbody>{dashboard.standings.map(s => <tr key={s.user_id}><td>{s.rank}</td><td>{s.name}</td><td>{s.total}</td></tr>)}</tbody>
+        <tbody>{dashboard.standings.map(s => <tr key={s.user_id}><td>{s.rank}</td><td><TeamProfileName userId={s.user_id} locationId={locationId} name={s.name}/></td><td>{s.total}</td></tr>)}</tbody>
       </table></div></article></AccessSection>)}
     {gm && <PointEntryEditor location={locationId} month={month} onChanged={()=>setRefresh(v=>v+1)} />}
   </section>

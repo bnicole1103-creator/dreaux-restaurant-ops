@@ -1,3 +1,4 @@
+import { TeamProfileName } from '../components/TeamProfileName'
 import {salesMoney} from '../lib/salesTargets'
 import {AccessSection} from '../components/AppAccess'
 import {PeerRecognition} from '../components/PeerRecognition'
@@ -790,7 +791,7 @@ function CloseoutDay({selectedDate,refresh,onDeleted,locationId,locationName,cur
                     <div data-design-block="copy.manager-closeouts-summary.6" className="closeout-summary-header">
                       <div data-design-block="copy.manager-closeouts-summary.7">
                         <strong>{row.shift_name}</strong>
-                        <div>{row.submitted_by_name || 'Manager'}</div>
+                        <div><TeamProfileName locationId={locationId} userId={row.submitted_by} name={row.submitted_by_name||'Manager'}/></div>
                       </div>
                       <div data-design-block="copy.manager-closeouts-summary.8">
                         <strong>{money(row.cash_deposit)}</strong>
@@ -806,7 +807,7 @@ function CloseoutDay({selectedDate,refresh,onDeleted,locationId,locationName,cur
                       <div data-design-block="copy.manager-closeouts-summary.12"><span><ScreenText id="CloseoutSummary.managerRegister">Register</ScreenText></span><strong>{row.register_balanced == null ? 'Not recorded' : row.register_balanced ? 'Balanced' : `Off by ${money(row.register_difference)}`}</strong></div>
                       <div data-design-block="copy.manager-closeouts-summary.13"><span><ScreenText id="CloseoutSummary.managerCashLeft">Cash left at</ScreenText></span><strong>{row.cash_left_at || 'Not recorded'}</strong></div>
                       <div data-design-block="copy.manager-closeouts-summary.14"><span><ScreenText id="CloseoutSummary.managerAverageRating">Average rating</ScreenText></span><strong>{row.average_rating == null ? '—' : row.average_rating.toFixed(1)}</strong></div>
-                      <div data-design-block="copy.manager-closeouts-summary.15"><span><ScreenText id="CloseoutSummary.managerMvp">Shift MVP</ScreenText></span><strong>{row.shift_mvp_name || 'Not selected'}</strong></div>
+                      <div data-design-block="copy.manager-closeouts-summary.15"><span><ScreenText id="CloseoutSummary.managerMvp">Shift MVP</ScreenText></span><strong>{row.shift_mvp?<TeamProfileName locationId={locationId} userId={row.shift_mvp} name={row.shift_mvp_name||'Team member'}/>:'Not selected'}</strong></div>
                       {row.register_notes && <div data-design-block="copy.manager-closeouts-summary.16" style={{gridColumn:'1 / -1'}}><span><ScreenText id="CloseoutSummary.managerRegisterNotes">Register notes</ScreenText></span><strong>{row.register_notes}</strong></div>}
                     </div>
                   </article>
@@ -913,8 +914,7 @@ function CloseoutDay({selectedDate,refresh,onDeleted,locationId,locationName,cur
                       id={'closeout-'+closeout.id}
                       className="closeout-summary-row"
                     >
-                      <button data-design-block="copy.c0214d47108c2e71.1"
-                        type="button"
+                      <div data-design-block="copy.c0214d47108c2e71.1"
                         className="closeout-summary-header"
                         onClick={() =>
                           setExpandedId(
@@ -926,9 +926,7 @@ function CloseoutDay({selectedDate,refresh,onDeleted,locationId,locationName,cur
                       >
                         <div data-design-block="copy.504686d723f6f4b4.1">
                           <strong>
-                            {
-                              employee
-                            }
+                            <TeamProfileName locationId={locationId} userId={closeout.user_id} name={employee}/>
                           </strong>
 
                           <div data-design-block="copy.504686d723f6f4b4.2">
@@ -964,7 +962,7 @@ function CloseoutDay({selectedDate,refresh,onDeleted,locationId,locationName,cur
                               : <PageWord id="copy.643535fe4b22d9c9.1">{"View"}</PageWord>}
                           </div>
                         </div>
-                      </button>
+                      <button type="button" aria-expanded={isExpanded} aria-label={'Toggle closeout for '+employee}>View / hide closeout</button></div>
 
                       <p data-design-block="copy.1d73108071987a91.4"><ScreenText id="CloseoutSummary.4a8b61e30f851cb7">Submitted </ScreenText>{submissionLabel(closeout.submitted_at ?? closeout.created_at)}</p>
                       {closeout.net_sales===0 && <p data-design-block="copy.83d683900e4d92b1.1" className="closeout-warning">{closeout.zero_sales_confirmed?'Zero sales confirmed: '+(closeout.zero_sales_reason ?? ''):<PageWord id="copy.e05ba21245a9a42f.1">{"$0 sales — needs manager verification."}</PageWord>}</p>}

@@ -1,3 +1,4 @@
+import { TeamProfileName } from '../components/TeamProfileName'
 import {AccessSection} from '../components/AppAccess'
 import {PageAccessEditor} from '../components/PageAccessEditor'
 // page-designer-instrumented
@@ -46,7 +47,7 @@ export function PermissionsPage() {
  {location && !loading && <AccessSection page="settings" section="permissions"><PageAccessEditor location={location} members={members}/></AccessSection>}
  {location && <SignupApprovals location={location} />}
  {loading ? <p data-design-block="copy.61f98721237f9747.6"><ScreenText id="PermissionsPage.6663fb06ab55cf4f">Loading permissions…</ScreenText></p> : members.map(m=><article data-design-block="copy.b278d5a76355cf38.1" className="mod-review" key={m.user_id}>
- <h2 data-design-block="copy.00f6a5b15d5288da.1">{m.name}</h2><p data-design-block="copy.61f98721237f9747.7"><ScreenText id="PermissionsPage.d3d9fc4260ebd42e">Job role: </ScreenText>{m.job_role==='general_manager'?'Management':m.job_role.replace(/_/g,' ')}</p>
+ <h2 data-design-block="copy.00f6a5b15d5288da.1"><TeamProfileName userId={m.user_id} locationId={location} name={m.name}/></h2><p data-design-block="copy.61f98721237f9747.7"><ScreenText id="PermissionsPage.d3d9fc4260ebd42e">Job role: </ScreenText>{m.job_role==='general_manager'?'Management':m.job_role.replace(/_/g,' ')}</p>
  <label data-design-block="copy.6d99f4603abaaf0b.1"><ScreenText id="PermissionsPage.b2d9b93ee36796d9">Access</ScreenText><select disabled={!!saving} value={drafts[m.user_id] ?? m.access_level} onChange={e=>setDrafts(d=>({...d,[m.user_id]:e.target.value as Access}))}>
  <PageOption designId="copy.f6ee65661bb4b3c8.1" value="staff"><ScreenText plain id="PermissionsPage.175d78737a59a4d4">Staff</ScreenText></PageOption><PageOption designId="copy.931190b030c2f061.1" value="manager"><ScreenText plain id="PermissionsPage.937330689bcbced3">Manager</ScreenText></PageOption><PageOption designId="copy.d39f3e9c93c0919b.1" value="general_manager"><ScreenText plain id="PermissionsPage.9c4a744e3bd4548e">Management</ScreenText></PageOption><PageOption designId="copy.d33e95fae857988b.1" value="owner"><ScreenText plain id="PermissionsPage.7d46bc1460e96051">Owner</ScreenText></PageOption></select></label>
  <button data-design-block="copy.e0e629aa52424fa8.1" disabled={!!saving || drafts[m.user_id]===m.access_level} onClick={()=>void save(m)}>{saving===m.user_id?<PageWord id="copy.1959386350ffdcd5.1">{"Saving…"}</PageWord>:<PageWord id="copy.6c8260e00e331275.1">{"Save Access"}</PageWord>}</button></article>)}

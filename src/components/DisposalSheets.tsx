@@ -1,3 +1,4 @@
+import { TeamProfileName } from './TeamProfileName'
 import {AccessSection} from './AppAccess'
 import {PageWord} from './PageDesign'
 import { useEffect, useRef, useState } from 'react'
@@ -72,7 +73,7 @@ export function DisposalSheets({locationId, sheets, brands, manager, onRefresh}:
   {error && <p role="alert">{error}</p>}
   {success && <p role="status">{success}</p>}
   {sheets.map(sheet => <article data-design-block="section.443d0b5472d4f7d18cf5" className="inventory-card" key={sheet.id}>
-   <strong>{sheet.employee}</strong>
+   <strong><TeamProfileName userId={sheet.user_id} locationId={locationId} name={sheet.employee}/></strong>
    <p><PageWord id="sectioncopy.d32512aa507b65b8338b">{"Submitted "}</PageWord>{timestamp(sheet.submitted_at)}<PageWord id="sectioncopy.a71b0f075df1f4297f60">{" · "}</PageWord>{sheet.lines.reduce((n,line)=>n+Number(line.quantity),0)}<PageWord id="sectioncopy.d8c51e6f7fffc726bd1f">{" bottles"}</PageWord></p>
    {sheet.updated_at && <p><PageWord id="sectioncopy.247b2b4c3c7af27842ca">{"Edited "}</PageWord>{timestamp(sheet.updated_at)}</p>}
    <details><summary><PageWord id="sectioncopy.737cfd83f44ebb656ef0">{"View disposal sheet"}</PageWord></summary>

@@ -1,3 +1,4 @@
+import { TeamProfileName } from '../components/TeamProfileName'
 // page-designer-instrumented
 import { PageWord, PageInput } from "../components/PageDesign"
 import { ScreenText } from "../components/ScreenText"
@@ -435,8 +436,7 @@ export function TeamPage() {
                     fontSize: '17px',
                   }}
                 >
-                  {member.preferred_name ||
-                    member.full_name}
+                  <TeamProfileName locationId={locationId} userId={member.user_id} name={member.preferred_name||member.full_name}/>
                 </strong>
 
                 {member.preferred_name &&
@@ -449,7 +449,7 @@ export function TeamPage() {
                         fontSize: '12px',
                       }}
                     >
-                      {member.full_name}
+                      <TeamProfileName locationId={locationId} userId={member.user_id} name={member.full_name}/>
                     </div>
                   )}
 

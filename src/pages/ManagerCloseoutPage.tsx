@@ -1,3 +1,4 @@
+import { TeamProfileName } from '../components/TeamProfileName'
 // page-designer-instrumented
 import { PageWord, PageInput, PageOption } from "../components/PageDesign"
 import { ScreenText } from "../components/ScreenText"
@@ -268,7 +269,7 @@ export function ManagerCloseoutPage() {
             const id = review.user_id
             const member = team.find(m => m.user_id === id)
             const name = member?.profile?.preferred_name || member?.profile?.full_name || 'Former team member'
-            return <article data-design-block="copy.5fd1f2f695380fa0.1" className="mod-review" key={id}><h3 data-design-block="copy.628c1d612e6d1c74.1">{name}</h3>
+            return <article data-design-block="copy.5fd1f2f695380fa0.1" className="mod-review" key={id}><h3 data-design-block="copy.628c1d612e6d1c74.1"><TeamProfileName userId={id} locationId={locationId} name={name}/></h3>
               <button data-design-block="copy.aebacf2b188b2094.1" type="button" onClick={() => toggle(id)}><ScreenText id="ManagerCloseoutPage.81883b17a3fea7ca">Remove from this shift</ScreenText></button>
               <div data-design-block="copy.c07e631dcfff3e04.1" className="mod-fields">
                 <label data-design-block="copy.34cec310e481785a.4">{questionLabel(config, 'rating', 'Rating')}<PageWord id="copy.4220523917c9f6ad.1">· </PageWord>{name}<select required value={review.rating || ''}

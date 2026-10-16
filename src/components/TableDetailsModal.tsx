@@ -1,3 +1,4 @@
+import { TeamProfileName } from './TeamProfileName'
 // page-designer-instrumented
 import { PageWord, PageOption } from "./PageDesign"
 import { ScreenText } from "./ScreenText"
@@ -234,7 +235,7 @@ export function TableDetailsModal({
             assignedServerIds.map(
               (serverId) => (
                 <strong key={serverId}>
-                  {memberName(serverId)}
+                  <TeamProfileName userId={serverId} name={memberName(serverId)}/>
                 </strong>
               ),
             )

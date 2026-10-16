@@ -1,0 +1,11 @@
+const nullableNumber={type:['number','null']},string={type:'string'}
+export const receiptSchema={type:'object',additionalProperties:false,properties:{vendor:string,purchase_date:{type:['string','null']},total:nullableNumber,tax:nullableNumber,tip:nullableNumber,warnings:{type:'array',items:string},items:{type:'array',items:{type:'object',additionalProperties:false,properties:{description:string,quantity:nullableNumber,unit_price:nullableNumber},required:['description','quantity','unit_price']}}},required:['vendor','purchase_date','total','tax','tip','warnings','items']}
+export function toBase64(bytes:Uint8Array){let out='';for(let i=0;i<bytes.length;i+=8192)out+=String.fromCharCode(...bytes.subarray(i,i+8192));return btoa(out)}
+export function validFile(bytes:Uint8Array,mime:string){if(!bytes.length||bytes.length>12582912)return false;const prefix=new TextDecoder().decode(bytes.subarray(0,12));return mime==='application/pdf'?prefix.startsWith('%PDF-'):mime==='image/jpeg'?bytes[0]===255&&bytes[1]===216&&bytes[2]===255:mime==='image/png'?bytes[0]===137&&prefix.slice(1,4)==='PNG':mime==='image/webp'?prefix.startsWith('RIFF')&&prefix.slice(8,12)==='WEBP':false}
+export function readExtraction(response:any){
+ if(response.status!=='completed')throw Error('Scan did not complete. Retry with a clearer or shorter receipt.');
+ const texts=(response.output??[]).filter((o:any)=>o.type==='message').flatMap((o:any)=>o.content??[]).filter((c:any)=>c.type==='output_text').map((c:any)=>c.text);
+ if(!texts.length)throw Error('Receipt could not be read. Enter details manually.');const r=JSON.parse(texts.join(''));
+ const number=(n:unknown,max:number)=>n===null||(typeof n==='number'&&Number.isFinite(n)&&n>=0&&n<=max);
+ if(typeof r.vendor!=='string'||r.vendor.length>200||!(r.purchase_date===null||(typeof r.purchase_date==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(r.purchase_date)))||!number(r.total,9999999999.99)||!number(r.tax,1000000)||!number(r.tip,1000000)||!Array.isArray(r.items)||r.items.length>100||!Array.isArray(r.warnings)||r.warnings.some((w:unknown)=>typeof w!=='string')||r.items.some((i:any)=>typeof i?.description!=='string'||i.description.length>200||!number(i.quantity,10000)||!number(i.unit_price,1000000)))throw Error('Invalid scan result. Enter details manually.');return r
+}
