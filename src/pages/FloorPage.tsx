@@ -103,6 +103,7 @@ type SmartRecommendation = {
   timedUses: number
   avgNetSales: number
   historicalUses: number
+  lastCloseoutDate: string | null
   currentSeats: number
   exactHistory: boolean
   reason: string
@@ -134,6 +135,7 @@ export function FloorPage() {
   const [pendingWalkin,setPendingWalkin]=useState<Walkin|null>(null)
   const [walkinRefresh,setWalkinRefresh]=useState(0)
   const [smartNotice,setSmartNotice]=useState('')
+  const [smartError,setSmartError]=useState('')
   const [floorNotice,setFloorNotice]=useState('')
   const [seatServerId,setSeatServerId]=useState('')
   const [manualReservation,setManualReservation]=useState(false)
@@ -930,21 +932,25 @@ const [partySize, setPartySize] = useState(1)
 
    async function handleSmartSection() {
     if (!selectedTableIds.length || smartLoading || saving || arrangeMode) return
-    setSmartLoading(true);setSmartNotice('');setSmartRecommendations([]);setShowSmartPanel(true)
+    setSmartLoading(true);setSmartNotice('');setSmartError('');setSmartRecommendations([]);setShowSmartPanel(true)
     const selected=[...selectedTableIds]
     const candidates=team.filter(m=>['server','bartender','manager','assistant_manager','general_manager','owner'].includes(m.role)).map(m=>({id:m.user_id,name:memberName(m.user_id)}))
     const loads:Record<string,number>={}
     assignments.filter(a=>!selected.includes(a.table_id)).forEach(a=>{if(a.server_id)loads[a.server_id]=(loads[a.server_id]??0)+(tables.find(t=>t.id===a.table_id)?.seat_count??0)})
-    let rows:{employee_id:string;net_sales:number|null;table_match:boolean;hours_worked:number|null}[]=[]
+    let rows:{employee_id:string;net_sales:number|null;table_match:boolean;hours_worked:number|null;closeout_date?:string;closeout_id?:string}[]=[]
     try {
-      const history=await supabase.rpc('floor_closeout_history',{p_location_id:locationId,p_table_ids:selected})
+      const controller=new AbortController();let timer:ReturnType<typeof setTimeout>|undefined
+      let history
+      try{history=await Promise.race([supabase.rpc('floor_closeout_history',{p_location_id:locationId,p_table_ids:selected}).abortSignal(controller.signal),new Promise<never>((_,reject)=>{timer=setTimeout(()=>{reject(Error('Closeout history did not respond. Please retry.'));controller.abort()},25000)})])}finally{if(timer)clearTimeout(timer)}
       if(history.error)throw history.error
-      rows=history.data??[]
-      setSmartNotice('Uses up to 30 positive-sales server closeouts per person from the last 90 days. Matching table combinations are preferred when available. Recorded clock-in and clock-out enable hourly comparisons. Older forms still contribute net sales history. Current table capacity also affects suggestions.')
+      if(!Array.isArray(history.data))throw Error('Closeout history could not be read. Please retry or ask management to check the connection.')
+      rows=history.data
+      setSmartRecommendations(recommendSections(candidates,rows,loads))
+      setSmartNotice('Read directly from submitted closeout forms: up to 30 positive-sales server closeouts per person from the last 90 service days. Matching table combinations are preferred when available. Recorded clock-in and clock-out enable hourly comparisons. Older forms still contribute net sales history. Current table capacity also affects suggestions.')
     } catch (e) {
-      setSmartNotice(`Closeout sales history could not load: ${String((e as {message?:string}).message??e)}. Suggestions below use current assigned capacity.`)
+      setSmartError(`Closeout forms could not be read: ${String((e as {message?:string}).message??e)}`)
     } finally {
-      setSmartRecommendations(recommendSections(candidates,rows,loads));setSmartLoading(false)
+      setSmartLoading(false)
     }
   }
 
@@ -2483,7 +2489,7 @@ const [partySize, setPartySize] = useState(1)
         <AccessSection page="floor" section="sections"><div data-design-block="copy.4c37ee59da8684e0.4" className="modal-backdrop">
           <div data-design-block="copy.7d0744713f5fc9bb.4" className="modal-card">
             <p data-design-block="copy.b78f32efa3eeed28.4" className="eyebrow"><ScreenText id="FloorPage.0c90f34dd45cb5c2">SectionIQ</ScreenText></p>
-            <AccessSection page="floor" section="sections"><h2 data-design-block="copy.2e495f44a1c1f630.5"><ScreenText id="FloorPage.a17e164e8984911a">Smart Section</ScreenText></h2></AccessSection>{smartLoading&&<p data-design-block="copy.d70411190a777647.2" role="status"><ScreenText id="FloorPage.3cc5f5f9eee5793a">Checking history and assigned capacity…</ScreenText></p>}{smartNotice&&<p data-design-block="copy.d70411190a777647.3" role="status">{smartNotice}</p>}
+            <AccessSection page="floor" section="sections"><h2 data-design-block="copy.2e495f44a1c1f630.5"><ScreenText id="FloorPage.a17e164e8984911a">Smart Section</ScreenText></h2></AccessSection>{smartLoading&&<p data-design-block="copy.d70411190a777647.2" role="status"><ScreenText id="FloorPage.3cc5f5f9eee5793a">Checking history and assigned capacity…</ScreenText></p>}{smartNotice&&<p data-design-block="copy.d70411190a777647.3" role="status">{smartNotice}</p>}{smartError&&<div role="alert"><p>{smartError}</p><button type="button" disabled={smartLoading} onClick={()=>void handleSmartSection()}>Retry closeout history</button></div>}
 
             <div data-design-block="copy.9d44ed5cc078bb68.1"
               style={{
@@ -2557,7 +2563,7 @@ const [partySize, setPartySize] = useState(1)
                             0,
                           )}/closeout avg`
                         : <PageWord id="copy.3409158e16ac927e.1">{"No historical sales data yet"}</PageWord>}
-                      {recommendation.avgSalesPerHour!==null && <div data-design-block="copy.542b94986fcaef05.3"><PageWord id="copy.a40e1250af9e4f4f.1">$</PageWord>{recommendation.avgSalesPerHour.toFixed(0)}<ScreenText id="FloorPage.f99c8033c61d6f17">/hr average · </ScreenText>{recommendation.timedUses}<ScreenText id="FloorPage.24a6edb170727de9"> timed closeouts</ScreenText></div>}
+                      {recommendation.lastCloseoutDate&&<div>Latest submitted closeout: {recommendation.lastCloseoutDate}</div>}{recommendation.avgSalesPerHour!==null && <div data-design-block="copy.542b94986fcaef05.3"><PageWord id="copy.a40e1250af9e4f4f.1">$</PageWord>{recommendation.avgSalesPerHour.toFixed(0)}<ScreenText id="FloorPage.f99c8033c61d6f17">/hr average · </ScreenText>{recommendation.timedUses}<ScreenText id="FloorPage.24a6edb170727de9"> timed closeouts</ScreenText></div>}
                     </div>
 
                     <div data-design-block="copy.1e51d7226c295f37.1"
@@ -2600,7 +2606,7 @@ const [partySize, setPartySize] = useState(1)
                 ),
               )}
 
-              {smartRecommendations.length === 0 && (
+              {!smartLoading && !smartError && smartRecommendations.length === 0 && (
                 <div data-design-block="copy.8a9a91a2792704af.4" className="empty-state"><ScreenText id="FloorPage.eda10a0961fcbc53">
                   No eligible employees were found.
                 </ScreenText></div>
@@ -3637,3 +3643,4 @@ const [partySize, setPartySize] = useState(1)
     </section>
   )
 }
+

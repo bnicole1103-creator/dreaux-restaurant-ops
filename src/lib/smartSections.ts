@@ -1,12 +1,13 @@
-export type SmartRecommendation = {employeeId:string;employeeName:string;score:number;avgNetSales:number;avgSalesPerHour:number|null;timedUses:number;historicalUses:number;currentSeats:number;exactHistory:boolean;reason:string}
+export type SmartRecommendation = {employeeId:string;employeeName:string;score:number;avgNetSales:number;avgSalesPerHour:number|null;timedUses:number;historicalUses:number;currentSeats:number;exactHistory:boolean;lastCloseoutDate:string|null;reason:string}
 type Candidate = {id:string;name:string}
-export type CloseoutPerformance = {employee_id:string;net_sales:number|null;table_match:boolean;hours_worked:number|null}
+export type CloseoutPerformance = {employee_id:string;net_sales:number|null;table_match:boolean;hours_worked:number|null;closeout_date?:string;closeout_id?:string}
 export function recommendSections(candidates:Candidate[], performance:CloseoutPerformance[], loads:Record<string,number>):SmartRecommendation[] {
-  const stats = new Map<string,{net:number;count:number;exact:boolean;hourly:number;timed:number}>()
+  const stats = new Map<string,{net:number;count:number;exact:boolean;hourly:number;timed:number;latest:string|null}>()
   for (const row of performance) {
     const net = Number(row.net_sales)
     if (row.net_sales === null || !Number.isFinite(net) || net <= 0) continue
-    const s = stats.get(row.employee_id) ?? {net:0,count:0,exact:true,hourly:0,timed:0}
+    const s = stats.get(row.employee_id) ?? {net:0,count:0,exact:true,hourly:0,timed:0,latest:null}
+    if(row.closeout_date&&/^\d{4}-\d{2}-\d{2}$/.test(row.closeout_date)&&(!s.latest||row.closeout_date>s.latest))s.latest=row.closeout_date;
     s.net += net; s.count++; s.exact = s.exact && row.table_match
     const hours=Number(row.hours_worked)
     if(row.hours_worked!==null && Number.isFinite(hours) && hours>0 && hours<=18){s.hourly+=net/hours;s.timed++}
@@ -18,7 +19,8 @@ export function recommendSections(candidates:Candidate[], performance:CloseoutPe
   const maxLoad = Math.max(1,...candidates.map(c=>loads[c.id]??0))
   return candidates.map(c=>{
     const s=stats.get(c.id), uses=s?.count??0, avg=uses?s!.net/uses:0, currentSeats=loads[c.id]??0
-    return {employeeId:c.id,employeeName:c.name,score:Math.round((uses?70*metric(s!)/maxSales:35)+30*(1-currentSeats/maxLoad)),avgNetSales:avg,avgSalesPerHour:s?.timed?s.hourly/s.timed:null,timedUses:s?.timed??0,historicalUses:uses,currentSeats,exactHistory:!!s?.exact,
+    return {employeeId:c.id,employeeName:c.name,score:Math.round((uses?70*metric(s!)/maxSales:35)+30*(1-currentSeats/maxLoad)),avgNetSales:avg,avgSalesPerHour:s?.timed?s.hourly/s.timed:null,timedUses:s?.timed??0,historicalUses:uses,currentSeats,exactHistory:!!s?.exact,lastCloseoutDate:s?.latest??null,
       reason:uses?((useHourly?'Hourly sales comparisons. ':'Net sales comparisons until every server with history has a timed closeout. ')+(s?.exact?'Submitted server closeouts for this table combination plus current assigned capacity.':'Submitted server closeouts across sections plus current assigned capacity.')):'No eligible server closeouts yet; suggestion uses current assigned capacity.'}
   }).sort((a,b)=>b.score-a.score||a.currentSeats-b.currentSeats||a.employeeName.localeCompare(b.employeeName)).slice(0,5)
 }
+
