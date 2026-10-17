@@ -1,8 +1,11 @@
+import {useId} from 'react'
+import {backgroundSvg,backgroundSettings} from '../lib/themeBackgrounds'
 import {decalSvg,decalValues} from '../lib/decals'
 import {themeFor,motifSvg,compositionFor} from '../lib/calendarThemes'
 import {calendarLook,type CalendarLook} from '../lib/calendarLook'
 import {appFonts} from '../lib/appearance'
 export function CalendarThemePreview({look,title='October',month='2026-10'}:{look:CalendarLook;title?:string;month?:string}){
+ const patternId='calendar-print-'+useId().replace(/[^a-zA-Z0-9_-]/g,''),bgSvg=backgroundSvg(look,look.template),bgSize=backgroundSettings(look).backgroundScale*.6
  const t=themeFor(look.template),style=calendarLook(look) as Record<string,string>,ink=style['--calendar-ink'],accent=look.color,paper=look.paper??'#fff8ef',heroInk=style['--calendar-hero-ink'],composition=compositionFor(look.template)
  const d=decalValues(look),svg=decalSvg(d.decal,composition==='ribbon'?heroInk:accent,look.template,d.decalOpacity),art=svg&&d.decalPlacement!=='off'?'data:image/svg+xml,'+encodeURIComponent(svg):null
 
@@ -10,6 +13,7 @@ export function CalendarThemePreview({look,title='October',month='2026-10'}:{loo
  const frame=look.outline==='double'?3:look.outline==='none'?0:1,dashed=look.outline==='dashed'?'4 4':undefined
  return <svg className="calendar-theme-preview" viewBox="0 0 360 330" aria-hidden="true" focusable="false">
  <rect width="360" height="330" rx="16" fill={paper}/>
+ {bgSvg&&<><defs><pattern id={patternId} width={bgSize} height={bgSize} patternUnits="userSpaceOnUse"><image href={'data:image/svg+xml,'+encodeURIComponent(bgSvg)} width={bgSize} height={bgSize}/></pattern></defs><rect width="360" height="330" rx="16" fill={'url(#'+patternId+')'}/></>}
  {composition==='ribbon'&&<rect x="8" y="8" width="344" height="96" rx="10" fill={accent}/>}
  {composition==='stripe'&&Array.from({length:12},(_,i)=><rect key={i} x={i*32} y="0" width="16" height="100" fill={accent} opacity=".07"/>)}
  {composition==='split'&&<path d="M0 0H360V84Q180 124 0 84Z" fill={accent} opacity=".13"/>}

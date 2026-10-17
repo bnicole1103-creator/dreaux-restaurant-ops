@@ -1,3 +1,4 @@
+import {backgroundImage,backgroundSettings} from './themeBackgrounds'
 import {decalBand,decalPositions,decalSvg,decalValues,type DecalSettings} from './decals'
 import {themeFor,motifSvg,compositionFor,type CalendarThemeId} from './calendarThemes'
 import type {CSSProperties} from 'react'
@@ -18,5 +19,5 @@ export function calendarLook(value?:CalendarLook):CSSProperties{
  const d=decalValues(value??{}),svg=decalSvg(d.decal,artColor,value?.template,d.decalOpacity)
  const art=svg?'url("data:image/svg+xml,'+encodeURIComponent(svg)+'")':'none'
 
- return {'--calendar-decal-band':decalBand(value??{},artColor,value?.template),'--calendar-decal-positions':decalPositions(value??{}),'--calendar-decal-size':d.decalSize+'px','--calendar-decal-height':decalBand(value??{},artColor,value?.template)==='none'?'0px':(d.decalSize+16)+'px','--calendar-hero-ink':heroInk,'--calendar-art':art,'--calendar-color':color,'--calendar-tint':color+'16','--calendar-paper':paper,'--calendar-ink':ink,'--calendar-font':appFonts[value?.font??defaultCalendarLook.font]?.css??appFonts.script.css,'--calendar-outline':outline==='none'?'0':outline==='double'?'4px double '+color:outline==='dashed'?'2px dashed '+color:'1px solid '+color} as CSSProperties
+ return {'--calendar-background-print':backgroundImage(value??{},value?.template),'--calendar-background-scale':backgroundSettings(value??{}).backgroundScale+'px','--calendar-decal-band':decalBand(value??{},artColor,value?.template),'--calendar-decal-positions':decalPositions(value??{}),'--calendar-decal-size':d.decalSize+'px','--calendar-decal-height':decalBand(value??{},artColor,value?.template)==='none'?'0px':(d.decalSize+16)+'px','--calendar-hero-ink':heroInk,'--calendar-art':art,'--calendar-color':color,'--calendar-tint':color+'16','--calendar-paper':paper,'--calendar-ink':ink,'--calendar-font':appFonts[value?.font??defaultCalendarLook.font]?.css??appFonts.script.css,'--calendar-outline':outline==='none'?'0':outline==='double'?'4px double '+color:outline==='dashed'?'2px dashed '+color:'1px solid '+color} as CSSProperties
 }

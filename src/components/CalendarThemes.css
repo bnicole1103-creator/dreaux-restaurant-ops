@@ -55,3 +55,6 @@
 /* Explicit decal choices work with every calendar layout. */
 .polished-app .app-content .calendar-poster .calendar-poster-masthead::before{content:""!important;display:block!important;position:relative!important;inset:auto!important;transform:none!important;float:none!important;width:100%!important;height:var(--calendar-decal-height,0px)!important;margin:0 0 12px!important;opacity:1!important;filter:none!important;background-image:var(--calendar-decal-band,none)!important;background-size:min(var(--calendar-decal-size,88px),20vw) auto!important;background-position:var(--calendar-decal-positions,center)!important;background-repeat:no-repeat!important;pointer-events:none!important}
 .polished-app .app-content .calendar-poster .calendar-poster-masthead::after{display:none!important}
+
+/* Every calendar layout shares the saved, adjustable background print. */
+.polished-app .app-content .calendar-poster{background-image:var(--calendar-background-print,none)!important;background-size:var(--calendar-background-scale,220px)!important;background-repeat:repeat!important;background-color:var(--calendar-paper)!important}

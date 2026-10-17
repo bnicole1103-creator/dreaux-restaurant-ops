@@ -1,3 +1,5 @@
+import {safeBackground,wallpaperStyle} from './themeBackgrounds'
+import type {DecalSettings} from './decals'
 import type {CSSProperties} from 'react'
 import {stickerBank,type StickerId} from './stickerBank'
 import {profileWallStyle,wallPatterns} from './chatWallStyle'
@@ -11,8 +13,8 @@ export const personalThemes={
 } as const
 export const personalDecals={none:'No decal',sparkles:'Sparkle trim',botanical:'Botanical trim',ribbon:'Ribbon trim',film:'Film strip'} as const
 export type PersonalSticker={id:StickerId;spot:'left'|'center'|'right';size:number;rotation:number}
-export type PersonalConfig={theme:keyof typeof personalThemes;pattern:keyof typeof wallPatterns;decal:keyof typeof personalDecals;stickers:PersonalSticker[]}
-export const defaultPersonalConfig:PersonalConfig={theme:'vanilla',pattern:'plain',decal:'none',stickers:[]}
+export type PersonalConfig={background?:DecalSettings;theme:keyof typeof personalThemes;pattern:keyof typeof wallPatterns;decal:keyof typeof personalDecals;stickers:PersonalSticker[]}
+export const defaultPersonalConfig:PersonalConfig={theme:'vanilla',pattern:'plain',decal:'none',stickers:[],background:undefined}
 const owns=(o:object,k:unknown)=>typeof k==='string'&&Object.prototype.hasOwnProperty.call(o,k)
-export function safePersonalConfig(value:unknown):PersonalConfig{const v=value as Partial<PersonalConfig>|null;return {theme:owns(personalThemes,v?.theme)?v!.theme!:'vanilla',pattern:owns(wallPatterns,v?.pattern)?v!.pattern!:'plain',decal:owns(personalDecals,v?.decal)?v!.decal!:'none',stickers:Array.isArray(v?.stickers)?v.stickers.filter(s=>s&&stickerBank.some(b=>b[0]===s.id)&&['left','center','right'].includes(s.spot)&&Number.isFinite(s.size)&&Number.isFinite(s.rotation)).slice(0,6).map(s=>({...s,size:Math.max(24,Math.min(64,s.size)),rotation:Math.max(-25,Math.min(25,s.rotation))})):[]}}
-export function personalSpaceStyle(value:unknown):CSSProperties{const c=safePersonalConfig(value),t=personalThemes[c.theme],paper=profileWallStyle({profile_pattern:c.pattern});return {...paper,backgroundColor:t.background,color:t.ink,'--app-background':t.background,'--app-card':t.card,'--app-text':t.ink,'--app-muted':t.ink,'--app-accent':t.accent,'--app-border':t.border} as CSSProperties}
+export function safePersonalConfig(value:unknown):PersonalConfig{const v=value as Partial<PersonalConfig>|null;return {background:safeBackground(v?.background),theme:owns(personalThemes,v?.theme)?v!.theme!:'vanilla',pattern:owns(wallPatterns,v?.pattern)?v!.pattern!:'plain',decal:owns(personalDecals,v?.decal)?v!.decal!:'none',stickers:Array.isArray(v?.stickers)?v.stickers.filter(s=>s&&stickerBank.some(b=>b[0]===s.id)&&['left','center','right'].includes(s.spot)&&Number.isFinite(s.size)&&Number.isFinite(s.rotation)).slice(0,6).map(s=>({...s,size:Math.max(24,Math.min(64,s.size)),rotation:Math.max(-25,Math.min(25,s.rotation))})):[]}}
+export function personalSpaceStyle(value:unknown):CSSProperties{const c=safePersonalConfig(value),t=personalThemes[c.theme],paper=profileWallStyle({profile_pattern:c.pattern});return {...paper,...wallpaperStyle(c.background),backgroundColor:t.background,color:t.ink,'--app-background':t.background,'--app-card':t.card,'--app-text':t.ink,'--app-muted':t.ink,'--app-accent':t.accent,'--app-border':t.border} as CSSProperties}

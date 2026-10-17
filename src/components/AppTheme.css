@@ -70,3 +70,7 @@
 .app-shell:has(style[data-app-theme=active]) #app-main .page>h1::after{display:none}
 .theme-preview::before,.generator-specimen::before{content:"";display:block;height:var(--decal-height,0px);background-image:var(--decal-band,none);background-position:var(--decal-positions,center);background-size:min(var(--decal-size,88px),20vw) auto;background-repeat:no-repeat;pointer-events:none}
 .theme-preview-art,.generator-art{display:none}
+
+/* Background prints are painted behind the canvas, never over interactive content. */
+.app-shell:has(style[data-app-theme=active]) #app-main{background-image:var(--background-print,none),var(--theme-surface,none)!important;background-size:var(--background-scale,220px),auto!important;background-repeat:repeat,no-repeat!important;background-color:var(--app-background)!important}
+.theme-preview,.generator-specimen,.theme-tile-specimen{background-image:var(--background-print,none)!important;background-size:var(--background-scale,220px)!important;background-repeat:repeat!important}
