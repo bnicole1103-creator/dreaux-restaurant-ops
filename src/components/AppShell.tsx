@@ -144,9 +144,7 @@ export function AppShell({
         <AppearanceHeader /><AppThemeRuntime />
 
         <div data-design-block="copy.4440213bd6ff846f.1" className="app-brand">
-          <strong><ScreenText id="AppShell.262da4df982b420d">
-            LNX Systems
-          </ScreenText></strong>
+          <strong>JusTini’s</strong>
 
           <span>
             {session.user.email}
@@ -163,13 +161,13 @@ export function AppShell({
           <LogOut size={24} />
         </button>
 
-        <HeaderChatPreview enabled={pageAccess.can('schedule','chat')}/>
       </header>
 
       <nav data-design-block="section.c1754735109ac4f13c9e" className="desktop-nav" aria-label="Main navigation"><p className="nav-section-label"><PageWord id="sectioncopy.caee5cd3478c41a41029">{"Your shift"}</PageWord></p>{primary.map(navItem)}<p className="nav-section-label"><PageWord id="sectioncopy.20c5d63d03cf302ecd1a">{"Workspace"}</PageWord></p>{extras.map(navItem)}</nav>
       <main ref={content} id="app-main" tabIndex={-1} data-design-block="copy.60535db1b6f53b61.1" className="app-content">
         {offline && <p role="status"><PageWord id="sectioncopy.bf2a7186a2c1ce67fd80">{"You’re offline. Reconnect before saving or refreshing."}</PageWord></p>}
         {signOutError && <p role="alert">{signOutError}</p>}
+        <HeaderChatPreview enabled={pageAccess.can('schedule','chat')}/>
         <AppStickerDecorations />
         <div className="app-sticker-content"><PageRecovery key={pathname.startsWith('/preshift/')?'/preshift':pathname}>{children}</PageRecovery></div>
       </main>

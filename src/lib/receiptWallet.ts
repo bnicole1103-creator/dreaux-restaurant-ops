@@ -1,3 +1,7 @@
+export type ReceiptKind='purchase'|'void'|'comp'
+export const receiptKinds={purchase:'Purchase / expense',void:'Void receipt',comp:'Comp receipt'} as const
+export function receiptKind(data:{category?:string}):ReceiptKind{return data.category==='Void receipt'?'void':data.category==='Comp receipt'?'comp':'purchase'}
+export function receiptCategory(kind:ReceiptKind){return kind==='purchase'?'':receiptKinds[kind]}
 export type ReceiptExtraction={vendor:string;purchase_date:string|null;total:number|null;tax:number|null;tip:number|null;warnings:string[];items:{description:string;quantity:number|null;unit_price:number|null}[]}
 export type ReceiptLine={description:string;quantity:number;unit_price:number}
 export type ReceiptData={vendor:string;purchase_date:string;source:'photo'|'manual';category:string;payment:string;reimburse:boolean;notes:string;items:ReceiptLine[];tax:number;tip:number;total:number|null}
@@ -6,7 +10,7 @@ export const receiptToday=()=>new Intl.DateTimeFormat('en-CA',{timeZone:'America
 export const receiptCents=(n:number)=>Math.round((n+Number.EPSILON)*100)
 export function receiptTotal(items:ReceiptLine[],tax:number,tip:number){return (items.reduce((sum,l)=>sum+receiptCents(l.quantity*l.unit_price),0)+receiptCents(tax)+receiptCents(tip))/100}
 export const receiptStatus=(s:PurchaseReceipt['status'])=>({draft:'Upload incomplete',captured:'Saved · details to enter',recorded:'Details recorded'})[s]
-export function receiptCsv(rows:PurchaseReceipt[]){const cell=(value:unknown)=>{let s=String(value??'');if(/^[=+\-@\t\r]/.test(s))s="'"+s;return '"'+s.replace(/"/g,'""')+'"'};return '\ufeff'+[['Receipt ID','Date','Purchaser','Vendor','Category','Total (USD)','Payment','Reimbursement requested','Source','Status','Purchaser check','Notes'],...rows.map(r=>[r.id,r.purchase_date,r.employee,r.data.vendor,r.data.category,r.total??'',r.data.payment,r.data.reimburse?'Yes':'No',r.data.source,receiptStatus(r.status),r.requires_check?(r.checked_at?'Checked':'Needs checking'):'Not required',r.data.notes])].map(row=>row.map(cell).join(',')).join('\r\n')}
+export function receiptCsv(rows:PurchaseReceipt[]){const cell=(value:unknown)=>{let s=String(value??'');if(/^[=+\-@\t\r]/.test(s))s="'"+s;return '"'+s.replace(/"/g,'""')+'"'};return '\ufeff'+[['Receipt ID','Date','Employee','Receipt type','Vendor / check reference','Category','Total (USD)','Payment','Reimbursement requested','Source','Status','Purchaser check','Notes'],...rows.map(r=>[r.id,r.purchase_date,r.employee,receiptKinds[receiptKind(r.data)],r.data.vendor,r.data.category,r.total??'',r.data.payment,r.data.reimburse?'Yes':'No',r.data.source,receiptStatus(r.status),r.requires_check?(r.checked_at?'Checked':'Needs checking'):'Not required',r.data.notes])].map(row=>row.map(cell).join(',')).join('\r\n')}
 export async function prepareReceiptFile(file:File){
  if(!['image/jpeg','image/png','image/webp','application/pdf'].includes(file.type))throw Error('Choose a JPG, PNG, WebP image or PDF.');
  if(file.size<=12*1024*1024)return file;
