@@ -1,4 +1,3 @@
-import {HeaderChatPreview} from './HeaderChatPreview'
 import {AppThemeRuntime} from './AppThemeRuntime'
 import {useAppAccess} from './AppAccess'
 import {accessPage} from '../lib/accessCatalog'
@@ -167,7 +166,6 @@ export function AppShell({
       <main ref={content} id="app-main" tabIndex={-1} data-design-block="copy.60535db1b6f53b61.1" className="app-content">
         {offline && <p role="status"><PageWord id="sectioncopy.bf2a7186a2c1ce67fd80">{"You’re offline. Reconnect before saving or refreshing."}</PageWord></p>}
         {signOutError && <p role="alert">{signOutError}</p>}
-        <HeaderChatPreview enabled={pageAccess.can('schedule','chat')}/>
         <AppStickerDecorations />
         <div className="app-sticker-content"><PageRecovery key={pathname.startsWith('/preshift/')?'/preshift':pathname}>{children}</PageRecovery></div>
       </main>

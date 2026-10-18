@@ -2,3 +2,5 @@
 
 /* Keep previews in document flow beside, never over, navigation. */
 .app-content>.header-chat-strip{box-sizing:border-box;width:100%;display:flex;position:relative;z-index:1;order:initial;flex:initial;border:1px solid var(--app-border,#ddcbb7);border-radius:16px;padding:8px 12px;margin:0 0 22px;background:var(--app-card,#fffaf5)}.crew-person-row.crew-speaker-selected,.crew-wall{scroll-margin-top:100px}
+
+.personal-profile-top{display:grid;grid-template-columns:minmax(180px,.8fr) minmax(0,1.2fr);align-items:center;gap:24px;position:relative;z-index:1}.personal-profile-top .personal-identity{min-width:0}.personal-profile-top .header-chat-strip{display:block;min-width:0;border:1px solid var(--app-border,#ddcbb7);border-radius:18px;padding:10px 14px;background:var(--app-card,#fffaf5);box-sizing:border-box}.personal-profile-top .header-chat-label{min-height:28px}.personal-profile-top .header-chat-speakers{width:100%;box-sizing:border-box}@media(max-width:700px){.personal-profile-top{grid-template-columns:minmax(0,1fr);gap:14px}}
