@@ -1,4 +1,6 @@
 import {DecalControls} from './DecalControls'
+import {ProfileNextShift} from './ProfileNextShift'
+import {AccessSection} from './AppAccess'
 import {useEffect,useRef,useState,type ReactNode} from 'react'
 import {supabase} from '../lib/supabase'
 import {personalThemes,personalDecals,defaultPersonalConfig,safePersonalConfig,personalSpaceStyle,type PersonalConfig} from '../lib/personalSpace'
@@ -19,5 +21,5 @@ export function PersonalHome({location,children}:{location:string;children:React
  const [data,setData]=useState<Space|null>(null),[error,setError]=useState(''),[refresh,setRefresh]=useState(0)
  useEffect(()=>{let live=true;setData(null);setError('');if(location)void call('personal_space_load',{p_location_id:location}).then(d=>{if(live)setData(d)}).catch(e=>{if(live)setError(String(e.message??e))});return()=>{live=false}},[location,refresh])
  useEffect(()=>{const update=()=>setRefresh(v=>v+1);window.addEventListener('personal-space-saved',update);return()=>window.removeEventListener('personal-space-saved',update)},[])
- return <div className="personal-home" style={data?personalSpaceStyle(data.config):undefined}>{location&&<header className="personal-home-header"><div className="personal-profile-brand">JusTini’s</div><PersonalDecor config={data?.config}/><div className="personal-identity">{data?.photo?<img src={data.photo} alt=""/>:<span className="personal-initial" aria-hidden="true">{data?.name?.charAt(0)||'✦'}</span>}<div><p>My profile</p><h1>{data?.name||'My Home'}</h1><small>My shift, my work, my space.</small></div></div>{error&&<p role="alert">Personal theme unavailable: {error}</p>}<PersonalSpaceEditor location={location}/></header>}{children}</div>
+ return <div className="personal-home" style={data?personalSpaceStyle(data.config):undefined}>{location&&<header className="personal-home-header"><div className="personal-profile-brand">JusTini’s</div><PersonalDecor config={data?.config}/><div className="personal-identity">{data?.photo?<img src={data.photo} alt=""/>:<span className="personal-initial" aria-hidden="true">{data?.name?.charAt(0)||'✦'}</span>}<div><p>My profile</p><h1>{data?.name||'My Home'}</h1><small>My shift, my work, my space.</small></div></div><AccessSection page="home" section="schedule"><ProfileNextShift location={location}/></AccessSection>{error&&<p role="alert">Personal theme unavailable: {error}</p>}<PersonalSpaceEditor location={location}/></header>}{children}</div>
 }
