@@ -1,3 +1,4 @@
+import {DesignSection} from './DesignSection'
 import { TeamProfileName } from './TeamProfileName'
 import {AccessSection} from './AppAccess'
 import {PageWord} from './PageDesign'
@@ -162,7 +163,7 @@ export function DisposalSummary() {
  },[])
  const bottles=sheets.reduce((total,sheet)=>total+sheet.lines.reduce((n,line)=>n+Number(line.quantity),0),0)
  const workers=Array.from(new Map(sheets.map(sheet=>[sheet.user_id??sheet.id,sheet.employee])).values())
- return <section data-design-block="section.eb4328d3ee073bf59a93" className="page inventory-page">
+ return <DesignSection as="section" data-design-block="section.eb4328d3ee073bf59a93" className="page inventory-page">
   <h1><PageWord id="sectioncopy.420fdc87e144a532030d">{"Disposal Summary"}</PageWord></h1>
   <p>{manager?'Review disposal submissions and the employees who completed them.':'View your submitted disposal sheets.'}</p>
   <label><PageWord id="sectioncopy.ef6f24773c51cf7af545">{"Service date "}</PageWord><input type="date" value={day} max={serviceDate()} onChange={event=>{if(event.target.value)setDay(event.target.value)}}/></label>
@@ -178,6 +179,6 @@ export function DisposalSummary() {
    </div>
    <AccessSection page="inventory" section="history"><DisposalSheets key={location+day} locationId={location} sheets={sheets} brands={brands} manager={manager} onRefresh={()=>load(location,day)}/></AccessSection>
   </>}
- </section>
+ </DesignSection>
 }
 

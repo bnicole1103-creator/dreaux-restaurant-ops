@@ -1,3 +1,4 @@
+import {DesignSection} from '../components/DesignSection'
 import { TeamProfileName } from '../components/TeamProfileName'
 import {AccessSection} from '../components/AppAccess'
 import {PeerRecognition} from '../components/PeerRecognition'
@@ -66,7 +67,7 @@ export function PointsPage() {
     return () => { active = false }
   }, [locationId, month, refresh])
   const mine = dashboard.standings.find(s => s.user_id === userId)
-  return <section data-design-block="copy.6804095348b4534f.1" className="points-page">
+  return <DesignSection as="section" data-design-block="copy.6804095348b4534f.1" className="points-page">
     <div data-design-block="copy.3f7c7eb5092ef959.1" className="page-heading"><p data-design-block="copy.f6a7ab23d63be064.1" className="eyebrow"><ScreenText id="PointsPage.262da4df982b420d">LNX Systems</ScreenText></p><h1 data-design-block="copy.f38aa4d1b5095c0c.1"><ScreenText id="PointsPage.7227d397db4a9148">Points & Leaderboard</ScreenText></h1>
       <p data-design-block="copy.ba8f526071f4b63b.1" className="muted"><ScreenText id="PointsPage.29c57305376b3dd7">Track your progress and celebrate the team.</ScreenText></p></div>
     {manager && <p data-design-block="copy.aaa41820a7b2efd3.1"><Link to="/closeout/awards"><ScreenText id="PointsPage.c2ae010ecda1aae1">Award / Deduct Points →</ScreenText></Link></p>}
@@ -81,23 +82,23 @@ export function PointsPage() {
     {loading && <p data-design-block="copy.bbd275d649930e49.1" role="status"><ScreenText id="PointsPage.e78e48fd3cbb9452">Loading points…</ScreenText></p>}
     {!loading && !error && (view === 'individual' ? <>
       <AccessSection page="points" section="mine"><div data-design-block="copy.290a939301e25500.1" className="points-stats">
-        <article data-design-block="copy.8bd6e18cc9706408.1" className="points-card"><h2 data-design-block="copy.cf61283aac8eec10.1"><ScreenText id="PointsPage.8e1782649e375df9">Monthly Points</ScreenText></h2><p data-design-block="copy.20cdbc4ecc72a0c8.1" className="points-value">{mine?.total ?? '—'}</p></article>
-        <article data-design-block="copy.8bd6e18cc9706408.2" className="points-card"><h2 data-design-block="copy.cf61283aac8eec10.2"><ScreenText id="PointsPage.2fac1087c80e5afe">Team Rank</ScreenText></h2><p data-design-block="copy.20cdbc4ecc72a0c8.2" className="points-value">{mine?.rank ?? '—'}</p></article>
+        <DesignSection as="article" data-design-block="copy.8bd6e18cc9706408.1" className="points-card"><h2 data-design-block="copy.cf61283aac8eec10.1"><ScreenText id="PointsPage.8e1782649e375df9">Monthly Points</ScreenText></h2><p data-design-block="copy.20cdbc4ecc72a0c8.1" className="points-value">{mine?.total ?? '—'}</p></DesignSection>
+        <DesignSection as="article" data-design-block="copy.8bd6e18cc9706408.2" className="points-card"><h2 data-design-block="copy.cf61283aac8eec10.2"><ScreenText id="PointsPage.2fac1087c80e5afe">Team Rank</ScreenText></h2><p data-design-block="copy.20cdbc4ecc72a0c8.2" className="points-value">{mine?.rank ?? '—'}</p></DesignSection>
       </div></AccessSection>
-      <AccessSection page="points" section="mine"><article data-design-block="copy.8bd6e18cc9706408.3" className="points-card"><h2 data-design-block="copy.cf61283aac8eec10.3"><ScreenText id="PointsPage.7c6d65131b8f4099">Points History</ScreenText></h2><p data-design-block="copy.aaa41820a7b2efd3.2"><ScreenText id="PointsPage.3a329828f93c1c68">Monthly starting balance: +100</ScreenText></p>
+      <AccessSection page="points" section="mine"><DesignSection as="article" data-design-block="copy.8bd6e18cc9706408.3" className="points-card"><h2 data-design-block="copy.cf61283aac8eec10.3"><ScreenText id="PointsPage.7c6d65131b8f4099">Points History</ScreenText></h2><p data-design-block="copy.aaa41820a7b2efd3.2"><ScreenText id="PointsPage.3a329828f93c1c68">Monthly starting balance: +100</ScreenText></p>
         {dashboard.history.length ? <div data-design-block="copy.46595f88b74ad3d3.1" className="points-table-wrap"><table className="points-table">
           <thead><tr><th><ScreenText id="PointsPage.ce41d9a585ca24c8">Date</ScreenText></th><th><ScreenText id="PointsPage.c5c21bab8b486453">Activity</ScreenText></th><th><ScreenText id="PointsPage.ff94246eb2bb289a">Points</ScreenText></th></tr></thead>
           <tbody>{dashboard.history.map((e, i) => <tr key={i}><td>{e.business_date}</td>
             <td>{e.description}</td><td>{e.points > 0 ? <PageWord id="copy.73caa2496555a3c6.1">{"+"}</PageWord> : <PageWord id="copy.df6ce1b283484f2f.1">{""}</PageWord>}{e.points}</td></tr>)}</tbody>
         </table></div> : <p data-design-block="copy.ba8f526071f4b63b.3" className="muted"><ScreenText id="PointsPage.2206727e97da939d">No point adjustments this month.</ScreenText></p>}
-      </article></AccessSection>
-    </> : <AccessSection page="points" section="leaderboard"><article data-design-block="copy.8bd6e18cc9706408.4" className="points-card"><h2 data-design-block="copy.cf61283aac8eec10.4"><ScreenText id="PointsPage.d7848a33da6c724d">Team Leaderboard</ScreenText></h2>
+      </DesignSection></AccessSection>
+    </> : <AccessSection page="points" section="leaderboard"><DesignSection as="article" data-design-block="copy.8bd6e18cc9706408.4" className="points-card"><h2 data-design-block="copy.cf61283aac8eec10.4"><ScreenText id="PointsPage.d7848a33da6c724d">Team Leaderboard</ScreenText></h2>
       <p data-design-block="copy.ba8f526071f4b63b.4" className="muted"><ScreenText id="PointsPage.4380866cc0b528a9">Tied totals share a rank. Final prize ties require manager review.</ScreenText></p>
       <div data-design-block="copy.46595f88b74ad3d3.2" className="points-table-wrap"><table className="points-table"><caption><ScreenText id="PointsPage.d445873f8049aaa4">Monthly team standings</ScreenText></caption>
         <thead><tr><th><ScreenText id="PointsPage.febf9850512da3b5">Rank</ScreenText></th><th><ScreenText id="PointsPage.29018cc18c7e2d93">Team Member</ScreenText></th><th><ScreenText id="PointsPage.0e216e68dda20f0b">Points</ScreenText></th></tr></thead>
         <tbody>{dashboard.standings.map(s => <tr key={s.user_id}><td>{s.rank}</td><td><TeamProfileName userId={s.user_id} locationId={locationId} name={s.name}/></td><td>{s.total}</td></tr>)}</tbody>
-      </table></div></article></AccessSection>)}
+      </table></div></DesignSection></AccessSection>)}
     {gm && <PointEntryEditor location={locationId} month={month} onChanged={()=>setRefresh(v=>v+1)} />}
-  </section>
+  </DesignSection>
 }
 

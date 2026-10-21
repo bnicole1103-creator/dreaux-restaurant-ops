@@ -1,3 +1,4 @@
+import {DesignSection} from './DesignSection'
 import {PageWord} from './PageDesign'
 import { useEffect,useRef,useState } from 'react'
 import { createPortal } from 'react-dom'
@@ -62,7 +63,7 @@ export function GeneratePreshiftQuiz({location,date,title,body,disabled,allowPas
   finally{setBusy(false)}
  }
  function changed(){request.current=null}
- return <article data-design-block="section.18490ee77f1ddb9b4a85" className="feed-card quiz-source-workflow">
+ return <DesignSection as="article" data-design-block="section.18490ee77f1ddb9b4a85" className="feed-card quiz-source-workflow">
   <h3>{allowPaste?'Create a quiz from any content':'Generate a quiz from this pre-shift'}</h3>
   <p><PageWord id="sectioncopy.f7f5c11ec4fbb95094f3">{"Paste pre-shift notes, recipes, menu details, or training content. Choose a question count; the editor opens with the questions already added."}</PageWord></p>
   {allowPaste&&<WorkflowTabs id="quiz-source" label="Generate quiz steps" tabs={[{key:'content',label:'1 · Content'},{key:'generate',label:'2 · Generate'}]} active={generatorTab} disabled={busy} onChange={setGeneratorTab}/>}
@@ -87,5 +88,5 @@ export function GeneratePreshiftQuiz({location,date,title,body,disabled,allowPas
   </div>
   {error&&<p role="alert">{error}</p>}
   {draft&&<QuizDraftModal draft={draft} onClose={()=>{setDraft(null);onSaved?.()}}/>}
- </article>
+ </DesignSection>
 }

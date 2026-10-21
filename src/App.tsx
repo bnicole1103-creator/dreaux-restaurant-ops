@@ -1,3 +1,4 @@
+import {PageCanvas} from './components/PageLayout'
 import {CrewSchedulePage} from './pages/CrewSchedulePage'
 import {ReportsPage} from './pages/ReportsPage'
 import {AccessSection} from './components/AppAccess'
@@ -111,9 +112,9 @@ export default function App() {
     }
   }, [])
 
-  if (walkinPath.startsWith('/guest-feedback/')) return <GuestFeedbackPage key={walkinPath} publicKey={walkinPath.slice('/guest-feedback/'.length)} />
+  if (walkinPath.startsWith('/guest-feedback/')) return <PageCanvas><GuestFeedbackPage key={walkinPath} publicKey={walkinPath.slice('/guest-feedback/'.length)} /></PageCanvas>
 
-  if (walkinPath.startsWith('/walk-in/')) return <WalkInPage key={walkinPath} publicKey={walkinPath.slice('/walk-in/'.length)} />
+  if (walkinPath.startsWith('/walk-in/')) return <PageCanvas><WalkInPage key={walkinPath} publicKey={walkinPath.slice('/walk-in/'.length)} /></PageCanvas>
 
   if (loading) {
     return (

@@ -1,3 +1,4 @@
+import {DesignSection} from './DesignSection'
 // page-designer-instrumented
 import { PageOption } from "./PageDesign"
 import { ScreenText } from "./ScreenText"
@@ -41,7 +42,7 @@ export function SignupApprovals({location}: {location: string}) {
   }catch(e){setError(String((e as {message?:string}).message ?? e))}
   finally{setBusy(false)}
  }
- return <article data-design-block="copy.dcdf4701a196b176.1" className="mod-review"><h2 data-design-block="copy.6460bbc8cc5d375c.1"><ScreenText id="SignupApprovals.95a9f1d8b4c13366">Staff registration</ScreenText></h2>
+ return <DesignSection as="article" data-design-block="copy.dcdf4701a196b176.1" className="mod-review"><h2 data-design-block="copy.6460bbc8cc5d375c.1"><ScreenText id="SignupApprovals.95a9f1d8b4c13366">Staff registration</ScreenText></h2>
   <p data-design-block="copy.fccf04de874a28a6.1"><ScreenText id="SignupApprovals.3a73d6354f18049d">Share this location’s registration link. New accounts wait for your approval.</ScreenText></p>
   <button data-design-block="copy.b84d5b1189dff689.1" type="button" disabled={busy} onClick={()=>void getLink()}><ScreenText id="SignupApprovals.05123828a691762a">Show registration link</ScreenText></button>
   {link && <label data-design-block="copy.e9a700bc6f9db62a.1"><ScreenText id="SignupApprovals.05fe0dd879dc8934">Link to share</ScreenText><input readOnly value={link} onFocus={e=>e.target.select()} /><button data-design-block="copy.7d713a85d6427841.1" type="button" onClick={()=>void navigator.clipboard.writeText(link).then(()=>setMessage('Link copied.')).catch(()=>setMessage('Select the link above and copy it.'))}><ScreenText id="SignupApprovals.568b322cd36d6794">Copy link</ScreenText></button></label>}
@@ -58,5 +59,5 @@ export function SignupApprovals({location}: {location: string}) {
    <button data-design-block="copy.716308f10e3c63a3.1" disabled={busy} onClick={()=>void decide(r,true)}><ScreenText id="SignupApprovals.a8b1800d91c87bb4">Approve</ScreenText></button> <button data-design-block="copy.e310de1b8a8c4799.1" disabled={busy} onClick={()=>void decide(r,false)}><ScreenText id="SignupApprovals.efa6b04a57456942">Decline</ScreenText></button>
   </article>})}
   {error && <p data-design-block="copy.70c5821183bc5e83.1" role="alert">{error}</p>}{message && <p data-design-block="copy.a9dafbd43b9e4453.1" role="status">{message}</p>}
- </article>
+ </DesignSection>
 }

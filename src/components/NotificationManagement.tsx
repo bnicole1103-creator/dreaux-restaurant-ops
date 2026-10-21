@@ -1,3 +1,4 @@
+import {DesignSection} from './DesignSection'
 import { DisposalRequirements } from './DisposalRequirements'
 import { RequiredWorkRoster } from './RequiredWorkRoster'
 import {PageWord} from './PageDesign'
@@ -68,14 +69,14 @@ export function NotificationManagement() {
     <DisposalRequirements location={location} refreshKey={0}/>
   </section>
 
-  <article data-design-block="section.cc57b0dece248baa7334" className="task-card">
+  <DesignSection as="article" data-design-block="section.cc57b0dece248baa7334" className="task-card">
    <h2><PageWord id="sectioncopy.8c50f9314c3fc79b2dfd">{"Required work and points"}</PageWord></h2>
    <p><PageWord id="sectioncopy.30eca7c7d8ff71e3f79e">{"Everyone on the saved required-work roster must complete each published daily quiz: −5 points per missed quiz."}</PageWord></p>
    <p><PageWord id="sectioncopy.d49b6260a2612e869bf0">{"Each shift marked “Closeout required” needs a submission: −10 points per missing shift closeout."}</PageWord></p>
    <p><PageWord id="sectioncopy.41cecde861259c0e330f">{"Complete every assigned task list: −5 points per incomplete list, not per unchecked task."}</PageWord></p>
    <p><PageWord id="sectioncopy.fb0ce43f3091f5fbefa8">{"Quizzes and closeouts are due by 4 AM after the service day. Task lists use their assigned due time, or the same 4 AM cutoff. Push on/off does not change these requirements."}</PageWord></p>
-  </article>
-  {access.manager && <article data-design-block="section.a2d97c5e882b5ef67674" className="task-card">
+  </DesignSection>
+  {access.manager && <DesignSection as="article" data-design-block="section.a2d97c5e882b5ef67674" className="task-card">
    <h2><PageWord id="sectioncopy.ac7ccb51ece5dcf8268e">{"Schedule and required-work roster"}</PageWord></h2>
    {access.gm && <p><PageWord id="sectioncopy.0d358329b541c02170b8">{"Choose an alert and its audience on each published "}</PageWord><Link to="/preshift"><PageWord id="sectioncopy.997a5765e02085385f66">{"post"}</PageWord></Link><PageWord id="sectioncopy.b8666ceb469d549c4dc0">{" or "}</PageWord><Link to="/quizzes"><PageWord id="sectioncopy.38a07502a4bd3de6a72f">{"quiz"}</PageWord></Link><PageWord id="sectioncopy.0ae15dddf505c4f80535">{". Publishing or editing alone sends no alert."}</PageWord></p>}
    <p><PageWord id="sectioncopy.21a9a2adadc5fd55c1af">{"Scheduled only uses the confirmed schedule for the notification’s service day. Entire staff includes active staff who are off that day. Staff still choose whether their device receives push."}</PageWord></p>
@@ -93,6 +94,6 @@ export function NotificationManagement() {
     <RequiredWorkRoster key={day} location={location} day={day} data={data} onSaved={load}/>
     <p><PageWord id="sectioncopy.c8b2da8b7c52556e8da6">{"Rules start on "}</PageWord>{data.effective_date}<PageWord id="sectioncopy.6312b2c88c68bfd294f8">{". Earlier point history is preserved. Management can waive or correct deductions in Points."}</PageWord></p>
    </fieldset>}
-  </article>}
+  </DesignSection>}
  </div>
 }

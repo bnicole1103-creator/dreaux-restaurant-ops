@@ -1,3 +1,4 @@
+import {DesignSection} from '../components/DesignSection'
 // page-designer-instrumented
 import { PageWord } from "../components/PageDesign"
 import { ScreenText } from '../components/ScreenText'
@@ -253,7 +254,7 @@ export function ReservationInquiryPage() {
     : ''
 
   return (
-    <section data-design-block="section.cde1dd811c1825f07323" className="page guest-feedback-inbox">
+    <DesignSection as="section" data-design-block="section.cde1dd811c1825f07323" className="page guest-feedback-inbox">
       <p className="eyebrow">{locationName}</p>
       <h1>
         <ScreenText id="ReservationInquiryPage.title">Reservation inquiry form</ScreenText>
@@ -288,7 +289,7 @@ export function ReservationInquiryPage() {
               </label>
 
               {isLargeParty ? (
-                <section data-design-block="section.926b40180d996ab24b0a" className="gf-entry">
+                <DesignSection as="section" data-design-block="section.926b40180d996ab24b0a" className="gf-entry">
                   <h2>
                     <ScreenText id="ReservationInquiryPage.privateParty">Private party follow-up</ScreenText>
                   </h2>
@@ -309,9 +310,9 @@ export function ReservationInquiryPage() {
                       <ScreenText id="ReservationInquiryPage.noPreset">No active preset matches this party size.</ScreenText>
                     </p>
                   )}
-                </section>
+                </DesignSection>
               ) : (
-                <section data-design-block="section.20398bc828ee443e3a46" className="gf-entry">
+                <DesignSection as="section" data-design-block="section.20398bc828ee443e3a46" className="gf-entry">
                   <h2>
                     <ScreenText id="ReservationInquiryPage.tableSeating">Traditional table seating</ScreenText>
                   </h2>
@@ -338,7 +339,7 @@ export function ReservationInquiryPage() {
                     <ScreenText id="ReservationInquiryPage.tableNotes">Guest requests or notes</ScreenText>
                     <textarea rows={4} maxLength={5000} value={guestNotes} onChange={(event) => setGuestNotes(event.target.value)} />
                   </label>
-                </section>
+                </DesignSection>
               )}
 
               <label>
@@ -366,7 +367,7 @@ export function ReservationInquiryPage() {
           )}
 
           {canManage && (
-            <section data-design-block="section.93a02a59b6f54cf2b55b" className="gf-entry">
+            <DesignSection as="section" data-design-block="section.93a02a59b6f54cf2b55b" className="gf-entry">
               <div className="gf-actions">
                 <h2>
                   <ScreenText id="ReservationInquiryPage.presets">Private party presets</ScreenText>
@@ -407,10 +408,10 @@ export function ReservationInquiryPage() {
                   </div>
                 </>
               )}
-            </section>
+            </DesignSection>
           )}
 
-          <section data-design-block="section.6c1615807acd095010d2" className="gf-entry">
+          <DesignSection as="section" data-design-block="section.6c1615807acd095010d2" className="gf-entry">
             <h2>
               <ScreenText id="ReservationInquiryPage.recent">Recent inquiries</ScreenText>
             </h2>
@@ -428,9 +429,9 @@ export function ReservationInquiryPage() {
                 </article>
               ))
             )}
-          </section>
+          </DesignSection>
         </>
       )}
-    </section>
+    </DesignSection>
   )
 }

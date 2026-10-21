@@ -1,3 +1,4 @@
+import {DesignSection} from './DesignSection'
 import {PageWord} from './PageDesign'
 import { useRef, useState } from 'react'
 import { supabase } from '../lib/supabase'
@@ -41,7 +42,7 @@ export function BulkTaskAssignment({ location, day, templates, staff, disabled, 
     } catch (e) { setError(String((e as { message?: string })?.message ?? e)) }
     finally { pending.current = false; setBusy(false); onBusy(false) }
   }
-  return <article className="task-card" data-design-block="tasks.bulk.card">
+  return <DesignSection as="article" className="task-card" data-design-block="tasks.bulk.card">
     <h2><ScreenText id="TasksBulk.heading">Assign multiple task groups</ScreenText></h2>
     <p><ScreenText id="TasksBulk.description">Choose one employee and all the task groups they need. Assign them together.</ScreenText></p>
     {error && <p role="alert">{error}</p>}{notice && <p role="status">{notice}</p>}
@@ -66,5 +67,5 @@ export function BulkTaskAssignment({ location, day, templates, staff, disabled, 
       {selected.length > 0 && <ul>{selected.map(t => <li key={t.id}>{t.title}</li>)}</ul>}
       <button type="button" disabled={!valid} onClick={() => void assign()}>{busy ? 'Assigning…' : `Assign ${ids.length} groups to ${name}`}</button>
     </fieldset>
-  </article>
+  </DesignSection>
 }

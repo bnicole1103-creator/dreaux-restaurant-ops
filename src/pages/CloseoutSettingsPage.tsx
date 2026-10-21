@@ -1,3 +1,4 @@
+import {DesignSection} from '../components/DesignSection'
 // page-designer-instrumented
 import { PageWord, PageOption } from "../components/PageDesign"
 import { ScreenText } from "../components/ScreenText"
@@ -54,7 +55,7 @@ export function CloseoutSettingsPage({awardsOnly = false, initialTab = 'staff'}:
       if(error){if(error.code){requestId.current=null;setAwardPending(false)}throw error};setMessage('Point adjustment saved. The employee’s monthly total has been updated.');setNote('');requestId.current=null;setAwardPending(false)
     }catch(e){setError(String((e as {message?:string}).message??e))}finally{setBusy(false)}}
   const rule=config?.rules.find(r=>r.id===ruleId)
-  return <section data-design-block="copy.3f89dbf081c0d62a.1" className="mod-page"><Link to="/closeout"><ScreenText id="CloseoutSettingsPage.89412119744c72b5">← Closeout</ScreenText></Link><h1 data-design-block="copy.3085ccf5f36b4e89.1">{awardsOnly ? <PageWord id="copy.f1474c9132064ed4.1">{"Award / Deduct Points"}</PageWord> : <PageWord id="copy.d7b98cfed567961b.1">{"Form & Points Settings"}</PageWord>}</h1>
+  return <DesignSection as="section" data-design-block="copy.3f89dbf081c0d62a.1" className="mod-page"><Link to="/closeout"><ScreenText id="CloseoutSettingsPage.89412119744c72b5">← Closeout</ScreenText></Link><h1 data-design-block="copy.3085ccf5f36b4e89.1">{awardsOnly ? <PageWord id="copy.f1474c9132064ed4.1">{"Award / Deduct Points"}</PageWord> : <PageWord id="copy.d7b98cfed567961b.1">{"Form & Points Settings"}</PageWord>}</h1>
     {!awardsOnly && <p data-design-block="copy.4ff63d424e9af0e9.1"><ScreenText id="CloseoutSettingsPage.6987a743a4e1d65b">Change question wording or add questions. Add manager-awarded categories and edit their reasons and values.</ScreenText></p>}
     {error&&<p data-design-block="copy.9c142daea85fd7ea.1" role="alert">{error}</p>}{message&&<p data-design-block="copy.d2938c395789d43c.1" role="status">{message}</p>}
     {!config&&<p data-design-block="copy.4ff63d424e9af0e9.2">{busy?<PageWord id="copy.47964877dcb8bfb2.1">{"Loading settings…"}</PageWord>:<PageWord id="copy.1feb03db0bf784ca.1">{"Settings unavailable."}</PageWord>}</p>}
@@ -92,7 +93,7 @@ export function CloseoutSettingsPage({awardsOnly = false, initialTab = 'staff'}:
       </div>{rule&&<p data-design-block="copy.4ff63d424e9af0e9.7">{rule.points>0?<PageWord id="copy.4b6ba40f93e7a2e1.1">{"+"}</PageWord>:<PageWord id="copy.80ef1106a839456c.1">{""}</PageWord>}{rule.points}<ScreenText id="CloseoutSettingsPage.9c11b80a43f8816b"> points will be applied.</ScreenText></p>}<button data-design-block="copy.d3cb2050ee893930.1" type="submit">{awardPending?<PageWord id="copy.c2619e9469915c66.1">{"Retry Same Adjustment"}</PageWord>:<PageWord id="copy.e7ef696a07898563.1">{"Apply Point Adjustment"}</PageWord>}</button></fieldset>
       {dirty&&<p data-design-block="copy.4ff63d424e9af0e9.8"><ScreenText id="CloseoutSettingsPage.22c9d1c31b0df769">Save your settings first.</ScreenText></p>}
     </form>}</>}
-  </section>
+  </DesignSection>
 }
 
 

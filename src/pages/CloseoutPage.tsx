@@ -1,3 +1,5 @@
+import {DesignSection} from '../components/DesignSection'
+import {PastCloseoutControls} from '../components/PastCloseoutControls'
 import {closeoutErrorMessage} from '../lib/closeoutError'
 import { CloseoutStockQuestion } from '../components/CloseoutStockQuestion'
 import { closeoutStockItems } from '../lib/stockItems'
@@ -13,7 +15,7 @@ import { submissionLabel } from '../lib/submissionTime'
 import { Link } from 'react-router-dom'
 import { CloseoutQuestions, useCloseoutConfig, checkAnswers, questionLabel, questionActive } from '../components/CloseoutConfig'
 import type { Answers } from '../components/CloseoutConfig'
-import { useEffect, useMemo, useState , useRef } from 'react'
+import { useEffect, useMemo, useState , useRef, useCallback } from 'react'
 import { supabase } from '../lib/supabase'
 import { loadTenantData } from '../lib/tenant'
 
@@ -343,10 +345,13 @@ export function CloseoutPage() {
   const [locationId, setLocationId] =
     useState('')
 
+  const [closeoutDay,setCloseoutDay] = useState(serviceDay)
+  const [datePinned,setDatePinned]=useState(false),[pastPoints,setPastPoints]=useState<boolean|null>(null),[pastReason,setPastReason]=useState('')
+  const pastPolicy=useCallback((apply:boolean|null,reason:string)=>{setPastPoints(apply);setPastReason(reason)},[])
   const closeoutRequest=useRef(crypto.randomUUID())
   const [floorShiftId,setFloorShiftId]=useState(''),[floorShifts,setFloorShifts]=useState<{id:string;shift_name:string;status:string}[]>([]),[floorTablesNotice,setFloorTablesNotice]=useState('')
-  useEffect(()=>{if(!locationId)return;let live=true;void supabase.from('shifts').select('id,shift_name,status').eq('location_id',locationId).eq('shift_date',serviceDay()).in('status',['scheduled','open','closed']).then(r=>{if(live&&!r.error)setFloorShifts(r.data??[])});return()=>{live=false}},[locationId])
-  async function pullFloorTables(){setFloorTablesNotice('');try{const u=await supabase.auth.getUser();if(u.error)throw u.error;const r=await supabase.rpc('floor_sections_for_day',{p_location_id:locationId,p_date:serviceDay(),p_only_me:true});if(r.error)throw r.error;const rows=(r.data??[]) as {table_ids:string[];id:string;starts_at:string|null;ends_at:string|null}[];const ids=[...new Set(rows.filter(row=>row.starts_at!==null||!floorShiftId||row.id===floorShiftId).flatMap(row=>row.table_ids))];setSelectedTableIds(ids.filter(id=>tables.some(t=>t.id===id)));setFloorTablesNotice(ids.length?'Floor assignments loaded. Confirm every table you actually worked, including any changes during your shift.':'No assigned tables found. Select the tables you actually worked below.')}catch(e){setFloorTablesNotice(String((e as {message?:string}).message??e))}}
+  useEffect(()=>{if(!locationId)return;let live=true;void supabase.from('shifts').select('id,shift_name,status').eq('location_id',locationId).eq('shift_date',closeoutDay).in('status',['scheduled','open','closed']).then(r=>{if(live&&!r.error)setFloorShifts(r.data??[])});return()=>{live=false}},[locationId,closeoutDay])
+  async function pullFloorTables(){setFloorTablesNotice('');try{const u=await supabase.auth.getUser();if(u.error)throw u.error;const r=await supabase.rpc('floor_sections_for_day',{p_location_id:locationId,p_date:closeoutDay,p_only_me:true});if(r.error)throw r.error;const rows=(r.data??[]) as {table_ids:string[];id:string;starts_at:string|null;ends_at:string|null}[];const ids=[...new Set(rows.filter(row=>row.starts_at!==null||!floorShiftId||row.id===floorShiftId).flatMap(row=>row.table_ids))];setSelectedTableIds(ids.filter(id=>tables.some(t=>t.id===id)));setFloorTablesNotice(ids.length?'Floor assignments loaded. Confirm every table you actually worked, including any changes during your shift.':'No assigned tables found. Select the tables you actually worked below.')}catch(e){setFloorTablesNotice(String((e as {message?:string}).message??e))}}
 
   const { config, error: configError } = useCloseoutConfig(locationId)
   const shown=(id:string)=>questionActive(config,id)
@@ -398,7 +403,6 @@ export function CloseoutPage() {
   const [salesTarget, setSalesTarget] = useState('0')
   const [targetState,setTargetState] = useState<{loading:boolean;ready:boolean;reason:string}>({loading:false,ready:false,reason:'Enter your scheduled start and role to load your target.'})
   const [targetRefresh,setTargetRefresh] = useState(0)
-  const [closeoutDay,setCloseoutDay] = useState(serviceDay)
 
 
   const [cashDeposit, setCashDeposit] =
@@ -810,7 +814,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
       config,
     ])
 
-  useEffect(()=>{const timer=window.setInterval(()=>setCloseoutDay(serviceDay()),30000);return()=>clearInterval(timer)},[])
+  useEffect(()=>{const timer=window.setInterval(()=>{if(!datePinned)setCloseoutDay(serviceDay())},30000);return()=>clearInterval(timer)},[datePinned])
   useEffect(()=>{
     let live=true;setSalesTarget('0')
     if(!locationId||!scheduledTime){setTargetState({loading:false,ready:false,reason:'Enter your scheduled start and role to load your target.'});return}
@@ -972,7 +976,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
       if (targetState.loading) throw new Error('Your automatic sales target is still loading. Try again shortly.')
       if (peerVoteEmployeeId === user.id) throw new Error('Choose a teammate other than yourself.')
 
-      const {data:closeout,error:closeoutError}=await supabase.rpc('closeout_submit_reviewed',{p_payload:{
+      const {data:closeout,error:closeoutError}=await supabase.rpc('operations_closeout_submit',{p_payload:{
           stock_items: reportedStockItems,
           zero_sales_confirmed: Number(netSales)===0 && zeroSalesConfirmed,
           zero_sales_reason: Number(netSales)===0 ? zeroSalesReason.trim() : null,
@@ -987,7 +991,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
           user_id:
             user.id,
 
-          closeout_date: serviceDay(),
+          closeout_date: closeoutDay,
 
           scheduled_start:
             scheduledTime || '00:00',
@@ -1054,7 +1058,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
 
           points_summary:
             finalPoints.adjustments,
-        },p_table_ids:selectedTables.map(t=>t.id),p_shift_id:floorShiftId||null,p_request_id:closeoutRequest.current,p_peer_user:shown('staff_11')?(peerVoteEmployeeId||null):null,p_peer_reason:peerVoteOtherReason.trim()})
+        },p_table_ids:selectedTables.map(t=>t.id),p_shift_id:floorShiftId||null,p_request_id:closeoutRequest.current,p_peer_user:shown('staff_11')?(peerVoteEmployeeId||null):null,p_peer_reason:peerVoteOtherReason.trim(),p_apply_points:pastPoints,p_reason:pastReason})
 
       if (closeoutError) {
         throw closeoutError
@@ -1075,7 +1079,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
       resetForm()
 
       let confirmation =
-        `✓ Daily closeout submitted ${submissionLabel(closeout.submitted_at)}. Shift score: ${submittedScore}.`
+        `✓ Closeout for ${closeout.closeout_date} submitted ${submissionLabel(closeout.submitted_at)}. ${closeout.operations_points_apply===false?"No point changes.":"Shift score: "+submittedScore+"."}`
 
       if (
         warnings.length > 0
@@ -1115,9 +1119,11 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
     }
   }
 
+  function changeServiceDay(day:string){if(day===closeoutDay||saving)return;if(!window.confirm('Change the service date and clear this unsaved closeout?'))return;resetForm();setFloorShiftId('');setFloorTablesNotice('');closeoutRequest.current=crypto.randomUUID();setCloseoutDay(day);setDatePinned(day!==serviceDay());setError('');setMessage('')}
+
   if (loading) {
     return (
-      <section data-design-block="copy.2c896870c0622b2a.1" className="page closeout-mobile">
+      <DesignSection as="section" data-design-block="copy.2c896870c0622b2a.1" className="page closeout-mobile">
         <h1 data-design-block="copy.7b589b42e522b192.1"><ScreenText id="CloseoutPage.19b404e3d4da3b09">
           Daily Closeout
         </ScreenText></h1>
@@ -1125,12 +1131,13 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
         <p data-design-block="copy.9780dbc6198cd2d5.1"><ScreenText id="CloseoutPage.341b29a41c67c361">
           Loading...
         </ScreenText></p>
-      </section>
+      </DesignSection>
     )
   }
 
   return (
-    <section data-design-block="copy.2c896870c0622b2a.2" className="page closeout-mobile">
+    <DesignSection as="section" data-design-block="copy.2c896870c0622b2a.2" className="page closeout-mobile">
+      <PastCloseoutControls location={locationId} day={closeoutDay} disabled={saving} onDay={changeServiceDay} onPolicy={pastPolicy}/>
 
       <div data-design-block="copy.47c9b7ba7c51dc00.1" className="page-header">
         <p data-design-block="copy.5b48154f3880900c.1" className="eyebrow"><ScreenText id="CloseoutPage.07a01084df9fad3a">
@@ -1258,11 +1265,11 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
         </div>
       </div>
 
-      <section data-design-block="section.066b9e23763c84f5534d" className="card"><h3><PageWord id="sectioncopy.6132d19813ed058f2f03">{"Automatic shift sales target"}</PageWord></h3><p><PageWord id="sectioncopy.928778e98e7523dc12b1">{"Service date: "}</PageWord>{closeoutDay}</p>
+      <DesignSection as="section" data-design-block="section.066b9e23763c84f5534d" className="card"><h3><PageWord id="sectioncopy.6132d19813ed058f2f03">{"Automatic shift sales target"}</PageWord></h3><p><PageWord id="sectioncopy.928778e98e7523dc12b1">{"Service date: "}</PageWord>{closeoutDay}</p>
         {targetState.loading?<p role="status"><PageWord id="sectioncopy.e14c065a02252931b83b">{"Loading your target…"}</PageWord></p>:targetState.ready?<><strong>{new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(Number(salesTarget))}</strong>{Number(salesTarget)>0&&netSales.trim()!==''&&<p>{((numberValue(netSales)/Number(salesTarget))*100).toFixed(1)}<PageWord id="sectioncopy.b6d9b4837e5cba9dd08f">{"% of target"}</PageWord></p>}</>:<p role="status"><PageWord id="sectioncopy.aaa172256f72059d5e98">{"Target unavailable: "}</PageWord>{targetState.reason}<PageWord id="sectioncopy.d0a3a7b935da59473ffb">{" No sales-target points will apply until a target is available."}</PageWord></p>}
         <button type="button" disabled={saving||targetState.loading} onClick={()=>setTargetRefresh(v=>v+1)}><PageWord id="sectioncopy.54a46bb5baeae12ee093">{"Refresh target"}</PageWord></button>
         <p><PageWord id="sectioncopy.e935547e2ca910b3f216">{"Imported from the app’s sales target allocation for your scheduled shift. No manual target entry is needed."}</PageWord></p>
-      </section>
+      </DesignSection>
 
       {shown('staff_3') && netSales.trim()!=='' && Number(netSales)===0 && <div data-design-block="copy.a49020c974bf8cb3.1" className="closeout-warning"><h3 data-design-block="copy.376cc9db1049f0cb.2"><ScreenText id="CloseoutPage.08bbbe6dfa02693c">Check your sales</ScreenText></h3><p data-design-block="copy.9780dbc6198cd2d5.8"><ScreenText id="CloseoutPage.b8864cc8785a4b68">You entered $0. Check your Toast report before continuing.</ScreenText></p><label data-design-block="copy.35bcf28795a297dd.1" className="closeout-check"><input type="checkbox" checked={zeroSalesConfirmed} onChange={e=>setZeroSalesConfirmed(e.target.checked)} /><span><ScreenText id="CloseoutPage.21209f4ceb62d671">I checked my report and $0 sales is accurate.</ScreenText></span></label><label data-design-block="copy.1d3e51bec05d6401.6"><ScreenText id="CloseoutPage.0c8ea3df31e4441b">Why were sales zero?</ScreenText><textarea rows={2} maxLength={2000} value={zeroSalesReason} onChange={e=>setZeroSalesReason(e.target.value)} placeholder="Explain why this shift had no sales." /></label></div>}
 
@@ -1566,7 +1573,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
       </div>
 
 
-      {shown('staff_11') && <section data-design-block="section.805c77d6a2b0a3367ff7" className="card"><h2><PageWord id="sectioncopy.bbffc818a3ca4bccdeed">{"Peer recognition"}</PageWord></h2>
+      {shown('staff_11') && <DesignSection as="section" data-design-block="section.805c77d6a2b0a3367ff7" className="card"><h2><PageWord id="sectioncopy.bbffc818a3ca4bccdeed">{"Peer recognition"}</PageWord></h2>
         <label><PageWord id="sectioncopy.bedb1af5b32500cdfb9f">{"Who helped make this shift successful? (optional) "}</PageWord><select value={peerVoteEmployeeId} onChange={e=>setPeerVoteEmployeeId(e.target.value)}>
             <option value="">No vote this shift</option>
             {employees.map(employee=><option key={employee.user_id} value={employee.user_id}>{employee.preferred_name||employee.full_name||employee.user_id}</option>)}
@@ -1574,7 +1581,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
         </label>
         {peerVoteEmployeeId && <label><PageWord id="sectioncopy.cd099ea09c18cb1f3b0e">{"What did they do? (optional)"}</PageWord><textarea maxLength={500} value={peerVoteOtherReason} onChange={e=>setPeerVoteOtherReason(e.target.value)}/></label>}
         <p><PageWord id="sectioncopy.2493b428984dcdfa398f">{"Your vote is saved with your closeout and appears in Peer recognition on Points and the closeout summary."}</PageWord></p>
-      </section>}
+      </DesignSection>}
 
       <div data-design-block="copy.af6b2df48414bca0.9" className="card">
         <h2 data-design-block="copy.601726244d06e9b3.8"><ScreenText id="CloseoutPage.6425a625f082028a">
@@ -1693,7 +1700,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
           Shift Score
         </ScreenText></h2>
 
-        {!pointResult ? (
+        {closeoutDay<serviceDay()&&pastPoints===false ? <p>No closeout point changes will be applied to this approved past-date submission.</p> : !pointResult ? (
           <p data-design-block="copy.9780dbc6198cd2d5.12"><ScreenText id="CloseoutPage.44540397f70e496a">
             Enter scheduled
             and actual
@@ -1805,7 +1812,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
         </ScreenText></h2>
         <div data-design-block="copy.68d161372c7b6924.1" className="closeout-review"><p data-design-block="copy.9780dbc6198cd2d5.14"><ScreenText id="CloseoutPage.bc9bdc4ef1b422cf">Net sales: </ScreenText><strong><ScreenText id="CloseoutPage.09fc96082d34c2df">$</ScreenText>{netSales || 'Not entered'}</strong></p><p data-design-block="copy.9780dbc6198cd2d5.15"><ScreenText id="CloseoutPage.0ca82121e91cc413">Cash deposit: </ScreenText><strong><ScreenText id="CloseoutPage.09fc96082d34c2df">$</ScreenText>{cashDeposit || 'Not entered'}</strong></p><p data-design-block="copy.9780dbc6198cd2d5.16"><ScreenText id="CloseoutPage.898ca3b88156a4c9">Review these amounts against your Toast report. An inaccurate submission does not earn the completion bonus.</ScreenText></p></div>
 
-        {pointResult && (
+        {pointResult && !(closeoutDay<serviceDay()&&pastPoints===false) && (
           <p data-design-block="copy.9780dbc6198cd2d5.17">
             <strong><ScreenText id="CloseoutPage.8bbb98bfd2fc2d4e">
               Shift Score:
@@ -1839,6 +1846,6 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
         }}
       />
 
-    </section>
+    </DesignSection>
   )
 }

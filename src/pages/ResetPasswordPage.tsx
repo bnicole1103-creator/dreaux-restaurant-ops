@@ -1,3 +1,4 @@
+import {DesignSection} from '../components/DesignSection'
 // page-designer-instrumented
 import { PageWord } from "../components/PageDesign"
 import { ScreenText } from "../components/ScreenText"
@@ -51,7 +52,7 @@ export function ResetPasswordPage({ hasSession }: { hasSession: boolean }) {
 
   return (
     <main data-design-block="copy.ae498d5fa7d8f763.1" style={{ minHeight: '100vh', display: 'grid', placeItems: 'center', padding: 24, background: 'var(--app-text)', color: '#fff' }}>
-      <section data-design-block="copy.00b5848b9645bf4b.1" style={{ width: '100%', maxWidth: 420, padding: 28, borderRadius: 16, background: 'var(--app-text)' }}>
+      <DesignSection as="section" data-design-block="copy.00b5848b9645bf4b.1" style={{ width: '100%', maxWidth: 420, padding: 28, borderRadius: 16, background: 'var(--app-text)' }}>
         <h1 data-design-block="copy.9108f926d94e8bae.1"><ScreenText id="ResetPasswordPage.1977ef6b7e4b5136">Set New Password</ScreenText></h1>
         {saved ? (
           <>
@@ -86,7 +87,7 @@ export function ResetPasswordPage({ hasSession }: { hasSession: boolean }) {
           </form>
         )}
         {error && <p data-design-block="copy.b9e676bcd0712fa3.1" role="alert" style={{ color: '#a32121' }}>{error}</p>}
-      </section>
+      </DesignSection>
     </main>
   )
 }

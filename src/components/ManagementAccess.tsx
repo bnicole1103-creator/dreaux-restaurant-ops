@@ -1,3 +1,4 @@
+import {DesignSection} from './DesignSection'
 // page-designer-instrumented
 import { PageWord } from "./PageDesign"
 import { ScreenText } from "./ScreenText"
@@ -33,8 +34,8 @@ export function useManagementAccess(userId?: string) {
 }
 export function ManagementOnly({gmOnly = false, children}: PropsWithChildren<{gmOnly?: boolean}>) {
   const access = useManagementAccess()
-  if (access.loading) return <section data-design-block="copy.4009a4af2c7a8ad6.1" className="page"><p data-design-block="copy.64cfbdd1df89de4e.1"><ScreenText id="ManagementAccess.80409edadbb53ccf">Checking access…</ScreenText></p></section>
-  if (access.error) return <section data-design-block="copy.4009a4af2c7a8ad6.2" className="page"><p data-design-block="copy.c9b544804d5d34b8.1" role="alert">{access.error}</p></section>
-  if (!(gmOnly ? access.gm : access.manager)) return <section data-design-block="copy.4009a4af2c7a8ad6.3" className="page"><h1 data-design-block="copy.794647c84babc37d.1"><ScreenText id="ManagementAccess.66253c5629fe2863">Access restricted</ScreenText></h1><p data-design-block="copy.64cfbdd1df89de4e.2">{gmOnly ? <PageWord id="copy.726d7858c8266462.1">{"Management access is required."}</PageWord> : <PageWord id="copy.c7acd52d2352ae4d.1">{"Manager access is required."}</PageWord>}</p><Link to="/closeout"><ScreenText id="ManagementAccess.5bf2843cf474120a">Return to Closeout</ScreenText></Link></section>
+  if (access.loading) return <DesignSection as="section" data-design-block="copy.4009a4af2c7a8ad6.1" className="page"><p data-design-block="copy.64cfbdd1df89de4e.1"><ScreenText id="ManagementAccess.80409edadbb53ccf">Checking access…</ScreenText></p></DesignSection>
+  if (access.error) return <DesignSection as="section" data-design-block="copy.4009a4af2c7a8ad6.2" className="page"><p data-design-block="copy.c9b544804d5d34b8.1" role="alert">{access.error}</p></DesignSection>
+  if (!(gmOnly ? access.gm : access.manager)) return <DesignSection as="section" data-design-block="copy.4009a4af2c7a8ad6.3" className="page"><h1 data-design-block="copy.794647c84babc37d.1"><ScreenText id="ManagementAccess.66253c5629fe2863">Access restricted</ScreenText></h1><p data-design-block="copy.64cfbdd1df89de4e.2">{gmOnly ? <PageWord id="copy.726d7858c8266462.1">{"Management access is required."}</PageWord> : <PageWord id="copy.c7acd52d2352ae4d.1">{"Manager access is required."}</PageWord>}</p><Link to="/closeout"><ScreenText id="ManagementAccess.5bf2843cf474120a">Return to Closeout</ScreenText></Link></DesignSection>
   return <>{children}</>
 }

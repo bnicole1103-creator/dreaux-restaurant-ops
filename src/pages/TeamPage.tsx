@@ -1,3 +1,4 @@
+import {DesignSection} from '../components/DesignSection'
 import { TeamProfileName } from '../components/TeamProfileName'
 // page-designer-instrumented
 import { PageWord, PageInput } from "../components/PageDesign"
@@ -341,18 +342,18 @@ export function TeamPage() {
 
   if (loading) {
     return (
-      <section data-design-block="copy.4c43cbee06845863.1">
+      <DesignSection as="section" data-design-block="copy.4c43cbee06845863.1">
         <div data-design-block="copy.e32e085900ed1308.1" className="page-heading">
           <p data-design-block="copy.7c3584cc95fdafc8.1" className="eyebrow"><ScreenText id="TeamPage.262da4df982b420d">LNX Systems</ScreenText></p>
           <h1 data-design-block="copy.2d15be00ac397f1a.1"><ScreenText id="TeamPage.ba414bfe8fe6cf7b">Team</ScreenText></h1>
           <p data-design-block="copy.9a0abcbc5e238444.1" className="muted"><ScreenText id="TeamPage.9ab27c4cb1072ec7">Loading team…</ScreenText></p>
         </div>
-      </section>
+      </DesignSection>
     )
   }
 
   return (
-    <section data-design-block="copy.4c43cbee06845863.2">
+    <DesignSection as="section" data-design-block="copy.4c43cbee06845863.2">
       <div data-design-block="copy.e32e085900ed1308.2" className="page-heading">
         <p data-design-block="copy.7c3584cc95fdafc8.2" className="eyebrow"><ScreenText id="TeamPage.c1b5f294c1f55228">LNX Systems</ScreenText></p>
         <h1 data-design-block="copy.2d15be00ac397f1a.2"><ScreenText id="TeamPage.f8c6bdd37125a5eb">Team</ScreenText></h1>
@@ -641,6 +642,6 @@ export function TeamPage() {
           </div>
         </div>
       )}
-    </section>
+    </DesignSection>
   )
 }

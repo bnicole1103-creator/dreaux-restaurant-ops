@@ -1,3 +1,4 @@
+import {DesignSection} from '../components/DesignSection'
 import {useAppAccess} from '../components/AppAccess'
 import {PageWord} from '../components/PageDesign'
 import { useEffect, useRef, useState } from 'react'
@@ -25,5 +26,5 @@ export function InquiryStudioPage(){
   const timer=window.setInterval(()=>{if(document.visibilityState==='visible')void connect()},60000)
   return()=>{live=false;window.removeEventListener('message',receive);listener.subscription.unsubscribe();window.clearInterval(timer)}
  },[appAccess.ready])
- return <section data-design-block="section.cc9a126508481ea76516" className="page"><p><Link to="/inquiry-inbox"><PageWord id="sectioncopy.9d70d8ab2ae22d185275">{"Back to shared inquiry inbox"}</PageWord></Link></p>{error&&<p role="alert">{error}</p>}<iframe ref={frame} src={studio+'/admin'} title="Inquiry Studio management" style={{width:'100%',height:'calc(100dvh - 190px)',minHeight:600,border:0,borderRadius:16}} /></section>
+ return <DesignSection as="section" data-design-block="section.cc9a126508481ea76516" className="page"><p><Link to="/inquiry-inbox"><PageWord id="sectioncopy.9d70d8ab2ae22d185275">{"Back to shared inquiry inbox"}</PageWord></Link></p>{error&&<p role="alert">{error}</p>}<iframe ref={frame} src={studio+'/admin'} title="Inquiry Studio management" style={{width:'100%',height:'calc(100dvh - 190px)',minHeight:600,border:0,borderRadius:16}} /></DesignSection>
 }

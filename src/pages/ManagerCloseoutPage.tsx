@@ -1,3 +1,5 @@
+import {serviceDay} from '../lib/serviceDay'
+import {DesignSection} from '../components/DesignSection'
 import { TeamProfileName } from '../components/TeamProfileName'
 // page-designer-instrumented
 import { PageWord, PageInput, PageOption } from "../components/PageDesign"
@@ -22,12 +24,8 @@ function splitReason(reason: string) {
  return match ? {category: match[1], reason: match[2] ?? ''} : {category: '', reason}
 }
 type SavedCloseout = { submitted_by: string; updated_at: string; reviews: Review[]; cash_deposit: number | null; cash_left_at: string | null; register_balanced: boolean | null; register_difference: number | null; register_notes: string | null }
-function localDate() {
-  const parts = new Intl.DateTimeFormat('en-US', { timeZone: 'America/Chicago',
-    year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(new Date())
-  const get = (type: string) => parts.find(p => p.type === type)?.value
-  return `${get('year')}-${get('month')}-${get('day')}`
-}
+function localDate() {return serviceDay()}
+
 function errorMessage(error: unknown) {
   return error && typeof error === 'object' && 'message' in error
     ? String(error.message) : 'Unable to load or save manager closeout.'
@@ -222,8 +220,8 @@ export function ManagerCloseoutPage() {
     } catch (e) { setError(errorMessage(e)) }
     finally { setSaving(false) }
   }
-  if (loading) return <section data-design-block="copy.12b488bb634c8598.1" className="page"><p data-design-block="copy.0441952f380976f4.1"><ScreenText id="ManagerCloseoutPage.09310404aab17db7">Loading manager closeout…</ScreenText></p></section>
-  return <section data-design-block="copy.962ae05cdc73eb4f.1" className="mod-page">
+  if (loading) return <DesignSection as="section" data-design-block="copy.12b488bb634c8598.1" className="page"><p data-design-block="copy.0441952f380976f4.1"><ScreenText id="ManagerCloseoutPage.09310404aab17db7">Loading manager closeout…</ScreenText></p></DesignSection>
+  return <DesignSection as="section" data-design-block="copy.962ae05cdc73eb4f.1" className="mod-page">
     <Link to="/closeout"><ScreenText id="ManagerCloseoutPage.84dae12b44d2a1b4">← Closeout</ScreenText></Link>
     <p data-design-block="copy.5f9eae41b6338cd9.1" className="eyebrow"><ScreenText id="ManagerCloseoutPage.1fd28e8b873fc628">MANAGER ONLY</ScreenText></p><h1 data-design-block="copy.16f94c658aeddd86.1"><ScreenText id="ManagerCloseoutPage.adb158d73c5ee404">Manager Closeout</ScreenText></h1>
     <p data-design-block="copy.0441952f380976f4.2">{locationName}<ScreenText id="ManagerCloseoutPage.b0bdef3954084e4a"> · Private shift performance review</ScreenText></p>
@@ -248,7 +246,7 @@ export function ManagerCloseoutPage() {
         {reviewLoading && <p data-design-block="copy.0441952f380976f4.6"><ScreenText id="ManagerCloseoutPage.779a089a26f12e4c">Loading private reviews…</ScreenText></p>}
         {shiftId && !reviewLoading && <fieldset data-design-block="copy.ced9f2f20202fef9.1" disabled={saving || !canEdit}>
           <legend><ScreenText id="ManagerCloseoutPage.30ab09d20fac2ce2">Shift closeout</ScreenText></legend>
-          <section data-design-block="copy.6c15e9c966d6ea8c.1" className="mod-rating-guide" aria-labelledby="rating-guide-heading">
+          <DesignSection as="section" data-design-block="copy.6c15e9c966d6ea8c.1" className="mod-rating-guide" aria-labelledby="rating-guide-heading">
             <h2 data-design-block="copy.50d5dd187e23d190.1" id="rating-guide-heading"><ScreenText id="ManagerCloseoutPage.f5960a21b5ce2a31">Staff ratings · What the numbers mean</ScreenText></h2>
             <dl>
               <div data-design-block="copy.d29c0da1be28c491.1"><dt><PageWord id="copy.c537a0787bcde172.1">1–2</PageWord></dt><dd><ScreenText id="ManagerCloseoutPage.c862fd8a7e1bf3aa">Immediate intervention needed</ScreenText></dd></div>
@@ -258,7 +256,7 @@ export function ManagerCloseoutPage() {
               <div data-design-block="copy.d29c0da1be28c491.5"><dt><PageWord id="copy.f3e7f3a977383488.1">9–10</PageWord></dt><dd><ScreenText id="ManagerCloseoutPage.cba738c03149ce2e">Excellent performance</ScreenText></dd></div>
             </dl>
             <p data-design-block="copy.0441952f380976f4.7"><ScreenText id="ManagerCloseoutPage.d1a53be6c6a73c3b">Ratings and review notes are visible to managers only. Employees see a points adjustment only when an existing point rule applies.</ScreenText></p>
-          </section>
+          </DesignSection>
           <h2 data-design-block="copy.d823c4c9c777dbfc.1"><ScreenText id="ManagerCloseoutPage.1a185e0991f763b1">Staff who worked this shift</ScreenText></h2>
           <p data-design-block="copy.0441952f380976f4.8"><ScreenText id="ManagerCloseoutPage.1f37c15a83ce909b">Select everyone you supervised. Your own rating is completed by another manager.</ScreenText></p>
           <label data-design-block="copy.34cec310e481785a.3"><ScreenText id="ManagerCloseoutPage.ac046e18262bb92f">Add staff member</ScreenText><select value="" onChange={e => {if(e.target.value) toggle(e.target.value)}}>
@@ -289,12 +287,12 @@ export function ManagerCloseoutPage() {
               </div>
             </article>
           })}
-          <article data-design-block="copy.ed4685c4baa6df61.1" className="mod-review"><h2 data-design-block="copy.d823c4c9c777dbfc.2"><ScreenText id="ManagerCloseoutPage.7b278dbffcc825b9">Shift MVP</ScreenText></h2>
+          <DesignSection as="article" data-design-block="copy.ed4685c4baa6df61.1" className="mod-review"><h2 data-design-block="copy.d823c4c9c777dbfc.2"><ScreenText id="ManagerCloseoutPage.7b278dbffcc825b9">Shift MVP</ScreenText></h2>
             <label data-design-block="copy.34cec310e481785a.7"><ScreenText id="ManagerCloseoutPage.ccfeac4132cad92f">Who stood out this shift? (optional)</ScreenText><select value={shiftMvp} onChange={e => setShiftMvp(e.target.value)}>
               <PageOption designId="copy.b2f2fd7933f5124e.1" value=""><ScreenText plain id="ManagerCloseoutPage.fb73f0c0d429ce03">No MVP selected</ScreenText></PageOption>
               {reviews.map(r => { const m = team.find(member => member.user_id === r.user_id); return <option key={r.user_id} value={r.user_id}>{m?.profile?.preferred_name || m?.profile?.full_name || 'Team member'}</option> })}
             </select></label>
-          </article>
+          </DesignSection>
           <h2 data-design-block="copy.d823c4c9c777dbfc.3"><ScreenText id="ManagerCloseoutPage.a8a2758d60a53a18">Cash deposit &amp; register</ScreenText></h2>
           <div data-design-block="copy.c07e631dcfff3e04.2" className="mod-fields">
             <label data-design-block="copy.34cec310e481785a.8">{questionLabel(config, 'deposit', "Cash deposit amount ($)")}<input required type="number" min="0" max="999999999.99" step="0.01"
@@ -314,9 +312,9 @@ export function ManagerCloseoutPage() {
             </>}
           </div>
           <CloseoutQuestions config={config} audience="manager" answers={answers} onChange={setAnswers} />
-          {savedQuestions.some(q => !config?.questions.some(current => current.id === q.id && current.active && current.label === q.label)) && <article data-design-block="copy.ed4685c4baa6df61.2" className="mod-review"><h2 data-design-block="copy.d823c4c9c777dbfc.4"><ScreenText id="ManagerCloseoutPage.b8bb83d7f397b820">Archived answers from this closeout</ScreenText></h2>
+          {savedQuestions.some(q => !config?.questions.some(current => current.id === q.id && current.active && current.label === q.label)) && <DesignSection as="article" data-design-block="copy.ed4685c4baa6df61.2" className="mod-review"><h2 data-design-block="copy.d823c4c9c777dbfc.4"><ScreenText id="ManagerCloseoutPage.b8bb83d7f397b820">Archived answers from this closeout</ScreenText></h2>
             {savedQuestions.filter(q => !config?.questions.some(current => current.id === q.id && current.active && current.label === q.label)).map(q => <p data-design-block="copy.baf7ab1d12779f98.1" key={q.id}>{q.label}<PageWord id="copy.3ff66c896150b376.1">: </PageWord>{answers[q.id] || 'No answer'}</p>)}
-          </article>}
+          </DesignSection>}
           <label data-design-block="copy.555a75cba4b3447e.1" className="mod-check"><input type="checkbox" required checked={confirmed}
             onChange={e => setConfirmed(e.target.checked)} /><ScreenText id="ManagerCloseoutPage.9978865bd56536f3">I included everyone I supervised who worked this shift.</ScreenText></label>
           <button data-design-block="copy.8cb3e942b1ad10b7.1" type="submit" disabled={!reviews.length || !confirmed}>{saving ? <PageWord id="copy.0f556bfd5560fe2d.1">{"Saving…"}</PageWord> : <PageWord id="copy.f13061703e4e7e97.1">{"Submit Manager Closeout"}</PageWord>}</button>
@@ -324,5 +322,5 @@ export function ManagerCloseoutPage() {
         {shiftId && !reviewLoading && !canEdit && <p data-design-block="copy.0441952f380976f4.9"><ScreenText id="ManagerCloseoutPage.30caf0d1c89056fc">Only the submitting MOD, owner, or Management can edit this saved closeout.</ScreenText></p>}
       </form>
     </>}
-  </section>
+  </DesignSection>
 }

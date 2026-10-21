@@ -1,3 +1,4 @@
+import {DesignSection} from './DesignSection'
 import { TeamProfileName } from './TeamProfileName'
 // page-designer-instrumented
 import { PageWord, PageOption } from "./PageDesign"
@@ -202,8 +203,8 @@ export function TableDetailsModal({
         }
       }}
     >
-      <section data-design-block="copy.4e89920fed7bbc7e.1" className="table-details-modal">
-        <header data-design-block="copy.51fcf0f2241481ed.1" className="table-details-header">
+      <DesignSection as="section" data-design-block="copy.4e89920fed7bbc7e.1" className="table-details-modal">
+        <DesignSection as="header" data-design-block="copy.51fcf0f2241481ed.1" className="table-details-header">
           <div data-design-block="copy.0fde5515d399a4b6.1">
             <p data-design-block="copy.07824f82ed552af0.1" className="eyebrow"><ScreenText id="TableDetailsModal.92b6ec5c49039726">
               TABLE DETAILS
@@ -224,7 +225,7 @@ export function TableDetailsModal({
             onClick={onClose}
           ><PageWord id="copy.9de522b2d542594a.1">×
           </PageWord></button>
-        </header>
+        </DesignSection>
 
         <div data-design-block="copy.a87d8aed62d28e5e.1" className="table-details-section">
           <span className="table-details-label"><ScreenText id="TableDetailsModal.8dc215a2e38b9732">
@@ -329,7 +330,7 @@ export function TableDetailsModal({
             Seat Walk-In
           </ScreenText></button>
         </div>
-      </section>
+      </DesignSection>
     </div>
   )
 }

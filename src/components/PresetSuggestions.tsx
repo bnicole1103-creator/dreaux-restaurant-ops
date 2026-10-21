@@ -1,3 +1,4 @@
+import {DesignSection} from './DesignSection'
 import { useEffect, useRef, useState } from 'react'
 export type PresetSuggestion={key:string;title:string;category:string;body:string}
 export function presetsFromPost(text:string):PresetSuggestion[]{
@@ -25,9 +26,9 @@ export function PresetSuggestions({postText,disabled,onReview,onSave}:{postText:
   setMessage(count+' preset'+(count===1?'':'s')+' saved.'+(failed?' '+failed+' could not be saved. Retry the sections below.':' Edit them later in your preset library.'))
   }finally{setBusy(false);setSavingKey('');lock.current=false}
  }
- return <section data-design-block="section.368853c0dcdb00fc2b13" className="feed-card"><h4>Save post sections as presets</h4><p>Generate reusable sections, then save one or save them all. They save privately for any day. Edit them whenever you’re ready.</p><button type="button" disabled={locked||!postText.trim()} onClick={()=>{setDrafts(presetsFromPost(postText));setErrors({});setMessage('Sections are ready. Choose Save preset or Save all presets.')}}>Generate presets from post</button>
+ return <DesignSection as="section" data-design-block="section.368853c0dcdb00fc2b13" className="feed-card"><h4>Save post sections as presets</h4><p>Generate reusable sections, then save one or save them all. They save privately for any day. Edit them whenever you’re ready.</p><button type="button" disabled={locked||!postText.trim()} onClick={()=>{setDrafts(presetsFromPost(postText));setErrors({});setMessage('Sections are ready. Choose Save preset or Save all presets.')}}>Generate presets from post</button>
  {drafts.length>0&&<button type="button" disabled={locked||drafts.every(p=>!!saved[presetKey(p)])} onClick={()=>void saveSections(drafts)}>{busy?'Saving presets…':'Save all presets'}</button>}
  {message&&<p role="status">{message}</p>}
  {drafts.map(p=>{const key=presetKey(p),isSaved=!!saved[key];return <article data-design-block="section.b9c4516cb14636ada39f" className="feed-card" key={p.key}><strong>{p.title}</strong>{isSaved&&<p role="status">Saved to your private preset library.</p>}<details><summary>Read section</summary><p className="feed-body">{p.body}</p></details><div className="feed-actions"><button type="button" disabled={locked||isSaved} onClick={()=>void saveSections([p])}>{savingKey===key?'Saving…':isSaved?'Saved':'Save preset'}</button><button type="button" disabled={locked} onClick={()=>onReview(p,saved[key])}>{isSaved?'Edit saved preset':'Edit section'}</button><button type="button" disabled={locked} onClick={()=>setDrafts(v=>v.filter(x=>x.key!==p.key))}>{isSaved?'Hide section':'Dismiss section'}</button></div>{errors[key]&&<p role="alert">{errors[key]}</p>}</article>})}
- </section>
+ </DesignSection>
 }

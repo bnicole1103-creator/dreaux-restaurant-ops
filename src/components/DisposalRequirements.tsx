@@ -1,3 +1,4 @@
+import {DesignSection} from './DesignSection'
 import { TeamProfileName } from './TeamProfileName'
 import {PageWord} from './PageDesign'
 import {useEffect,useState} from 'react'
@@ -10,7 +11,7 @@ export function DisposalRequirements({location,refreshKey}:{location:string;refr
  async function change(user:string,active:boolean){setBusy(true);setError('');try{const r=await supabase.rpc('disposal_requirement_assign',{p_location_id:location,p_day:day,p_user_id:user,p_active:active});if(r.error)throw r.error;setEmployee('');setRevision(v=>v+1)}catch(e){setError((e as Error).message)}finally{setBusy(false)}}
  async function none(){if(!window.confirm('Confirm you had no disposals to report for this shift?'))return;setBusy(true);setError('');try{const r=await supabase.rpc('disposal_requirement_none',{p_location_id:location,p_day:day});if(r.error)throw r.error;setRevision(v=>v+1)}catch(e){setError((e as Error).message)}finally{setBusy(false)}}
  const mine=data?.assignments.find(a=>a.user_id===data.user_id)
- return <section data-design-block="section.43e29761114591f92021" className="inventory-card"><h2><PageWord id="sectioncopy.8b91b0309b4b4e8ae36a">{"Required disposal forms"}</PageWord></h2><p><PageWord id="sectioncopy.b754d00cfe1de56ef682">{"Assigned employees lose 10 points if no disposal sheet or “No disposals” confirmation is submitted by 4 AM Central. Unassigned employees have no disposal deduction."}</PageWord></p>
+ return <DesignSection as="section" data-design-block="section.43e29761114591f92021" className="inventory-card"><h2><PageWord id="sectioncopy.8b91b0309b4b4e8ae36a">{"Required disposal forms"}</PageWord></h2><p><PageWord id="sectioncopy.b754d00cfe1de56ef682">{"Assigned employees lose 10 points if no disposal sheet or “No disposals” confirmation is submitted by 4 AM Central. Unassigned employees have no disposal deduction."}</PageWord></p>
  <label><PageWord id="sectioncopy.4416033541f57e903b7d">{"Service date"}</PageWord><input type="date" value={day} disabled={busy} onChange={e=>{if(e.target.value)setDay(e.target.value)}}/></label>
  {error&&<p role="alert">{error}</p>}{!data&&!error&&<p role="status"><PageWord id="sectioncopy.a28ecddba908e421ee3c">{"Loading assignments…"}</PageWord></p>}
  {data&&<><button type="button" disabled={busy} onClick={()=>setRevision(v=>v+1)}><PageWord id="sectioncopy.1edced01ff66541434d7">{"Refresh assignments"}</PageWord></button>
@@ -19,5 +20,5 @@ export function DisposalRequirements({location,refreshKey}:{location:string;refr
  {mine&&!mine.completed&&data.open&&day===serviceDay()&&<button type="button" disabled={busy} onClick={()=>void none()}><PageWord id="sectioncopy.b16bdb7f19636442743e">{"No disposals this shift"}</PageWord></button>}
  {mine&&!mine.completed&&data.open&&<p><PageWord id="sectioncopy.c2f1ce7617c13eb097f2">{"For discarded bottles, submit the disposal count sheet below, then refresh assignments."}</PageWord></p>}
  </>}
- </section>
+ </DesignSection>
 }

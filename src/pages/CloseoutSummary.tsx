@@ -1,3 +1,4 @@
+import {DesignSection} from '../components/DesignSection'
 import { TeamProfileName } from '../components/TeamProfileName'
 import {salesMoney} from '../lib/salesTargets'
 import {AccessSection} from '../components/AppAccess'
@@ -477,7 +478,7 @@ function CloseoutDay({selectedDate,refresh,onDeleted,locationId,locationName,cur
   }
 
   return (
-    <section data-design-block="copy.b7855dad4d090df7.1" className="page closeout-summary-mobile">
+    <DesignSection as="section" data-design-block="copy.b7855dad4d090df7.1" className="page closeout-summary-mobile">
 
       <div data-design-block="copy.12b48e3a46acaef2.1" className="page-header">
         <p data-design-block="copy.1b0c72492b2ceb94.1" className="eyebrow">
@@ -1207,7 +1208,7 @@ function CloseoutDay({selectedDate,refresh,onDeleted,locationId,locationName,cur
         }}
       />
 
-    </section>
+    </DesignSection>
   )
 }
 
@@ -1242,15 +1243,15 @@ export function CloseoutSummaryPage() {
   return [...groups.entries()]
  },[history])
  function reload(){setDay(serviceDay());setRefresh(v=>v+1)}
- if(!location)return <section data-design-block="copy.b7855dad4d090df7.2" className="page closeout-summary-mobile"><p data-design-block="copy.9883f35f00a514b5.1" role={error?'alert':'status'}>{error || 'Loading summary…'}</p></section>
+ if(!location)return <DesignSection as="section" data-design-block="copy.b7855dad4d090df7.2" className="page closeout-summary-mobile"><p data-design-block="copy.9883f35f00a514b5.1" role={error?'alert':'status'}>{error || 'Loading summary…'}</p></DesignSection>
  return <>
   <div data-design-block="copy.d392d3a76fa3a359.1" className="page"><button data-design-block="copy.bbbbe200cfd4ed8a.1" type="button" onClick={reload}><ScreenText id="CloseoutSummary.f4bbc18b0dbe1711">Refresh closeouts</ScreenText></button></div>
   <CloseoutDay focusId={linkedDate===day?focusId:''} selectedDate={day} current refresh={refresh} locationId={location.id} locationName={location.name} onDeleted={reload} />
-  <section data-design-block="copy.b7855dad4d090df7.3" className="page closeout-summary-mobile"><article data-design-block="copy.640020cccc2ec727.1" className="card"><h2 data-design-block="copy.f9ef78219c5e44bd.3"><ScreenText id="CloseoutSummary.643cd94130e638aa">Previous closeouts</ScreenText></h2><p data-design-block="copy.1d73108071987a91.8"><ScreenText id="CloseoutSummary.cc09234f89870176">Organized by month and service day, newest first.</ScreenText></p>
+  <DesignSection as="section" data-design-block="copy.b7855dad4d090df7.3" className="page closeout-summary-mobile"><DesignSection as="article" data-design-block="copy.640020cccc2ec727.1" className="card"><h2 data-design-block="copy.f9ef78219c5e44bd.3"><ScreenText id="CloseoutSummary.643cd94130e638aa">Previous closeouts</ScreenText></h2><p data-design-block="copy.1d73108071987a91.8"><ScreenText id="CloseoutSummary.cc09234f89870176">Organized by month and service day, newest first.</ScreenText></p>
    {error && <p data-design-block="copy.9004f87397a1f020.1" role="alert">{error}</p>}{historyLoading && history.length===0 && <p data-design-block="copy.8cb8926814305e94.2" role="status"><ScreenText id="CloseoutSummary.5c3f475acefcfa5d">Loading history…</ScreenText></p>}
    {!error && !historyLoading && history.length===0 && <p data-design-block="copy.1d73108071987a91.9"><ScreenText id="CloseoutSummary.acbc70394af59cae">No previous closeouts.</ScreenText></p>}
    {months.map(([month,entries])=><details key={month}><summary>{serviceDateLabel(month,true)}<PageWord id="copy.f323e928bd4d3fcf.3">· </PageWord>{entries.reduce((n,e)=>n+e.count,0)}<ScreenText id="CloseoutSummary.c5b235886695e308"> closeouts</ScreenText></summary><div data-design-block="copy.e684c0fac2070a8a.1" style={{display:'grid',gap:8,margin:'12px 0'}}>{entries.map(e=><button data-design-block="copy.a607a529308834b7.1" type="button" key={e.day} aria-pressed={archiveDate===e.day} onClick={()=>setArchiveDate(v=>v===e.day?'':e.day)}>{serviceDateLabel(e.day)}<PageWord id="copy.f323e928bd4d3fcf.4">· </PageWord>{e.count}<ScreenText id="CloseoutSummary.ce9ee2502f65fa17"> closeout</ScreenText>{e.count===1?<PageWord id="copy.f0c5aa23cb74409a.1">{""}</PageWord>:<PageWord id="copy.c90e9ff86d08cb7e.1">{"s"}</PageWord>}<PageWord id="copy.f323e928bd4d3fcf.5">· </PageWord>{archiveDate===e.day?<PageWord id="copy.f02fba44883ffcf3.2">{"Hide"}</PageWord>:<PageWord id="copy.643535fe4b22d9c9.2">{"View"}</PageWord>}</button>)}</div></details>)}
-  </article></section>
+  </DesignSection></DesignSection>
   {archiveDate && archiveDate<day && <CloseoutDay focusId={linkedDate===archiveDate?focusId:''} key={archiveDate} selectedDate={archiveDate} current={false} refresh={refresh} locationId={location.id} locationName={location.name} onDeleted={reload} />}
  </>
 }

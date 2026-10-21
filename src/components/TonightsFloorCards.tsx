@@ -1,3 +1,4 @@
+import {DesignSection} from './DesignSection'
 // page-designer-instrumented
 import { PageWord } from "./PageDesign"
 import { ScreenText } from "./ScreenText"
@@ -140,7 +141,7 @@ export function TonightsFloorCards({
 
   if (validServerIds.length === 0) {
     return (
-      <section data-design-block="copy.45ec43eb98bc70f6.1" className="tonights-floor-panel">
+      <DesignSection as="section" data-design-block="copy.45ec43eb98bc70f6.1" className="tonights-floor-panel">
         <div data-design-block="copy.e97b0a6919f6f122.1" className="tonights-floor-heading">
           <div data-design-block="copy.e5a4fc73f4141b43.1">
             <p data-design-block="copy.221de76e6ff20003.1" className="eyebrow"><ScreenText id="TonightsFloorCards.6f61093d8beda6b9">
@@ -156,12 +157,12 @@ export function TonightsFloorCards({
             No server assignments yet.
           </ScreenText></span>
         </div>
-      </section>
+      </DesignSection>
     )
   }
 
   return (
-    <section data-design-block="copy.45ec43eb98bc70f6.2" className="tonights-floor-panel">
+    <DesignSection as="section" data-design-block="copy.45ec43eb98bc70f6.2" className="tonights-floor-panel">
       <div data-design-block="copy.e97b0a6919f6f122.2" className="tonights-floor-heading">
         <div data-design-block="copy.e5a4fc73f4141b43.2">
           <p data-design-block="copy.221de76e6ff20003.2" className="eyebrow"><ScreenText id="TonightsFloorCards.a9507a1ecffee18f">
@@ -315,6 +316,6 @@ export function TonightsFloorCards({
           )
         })}
       </div>
-    </section>
+    </DesignSection>
   )
 }

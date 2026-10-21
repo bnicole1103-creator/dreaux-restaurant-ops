@@ -11,12 +11,14 @@ if(typeof window!=='undefined'&&editorPreviewActive(window.location.search,windo
  const blockPreviewAction=(event:Event)=>{if(event.cancelable&&preventPreviewDefault(event.type))event.preventDefault();event.stopImmediatePropagation()}
  blockedPreviewEvents.forEach(type=>document.addEventListener(type,blockPreviewAction,{capture:true,passive:false}))
 }
-import {appFonts,type FontName} from '../lib/appearance'
-export type DesignChange={font?:FontName;text?:string;hidden?:boolean;x?:number;y?:number;order?:number;parent?:string}
+import type {FontName} from '../lib/appearance'
+import {designCss,validId} from '../lib/pageEditor'
+export type DesignChange={presentation?:'inline'|'collapse'|'popup';panelTitle?:string;defaultOpen?:boolean;color?:string;background?:string;borderColor?:string;fontSize?:number;align?:'left'|'center'|'right';kind?:'note'|'link';title?:string;href?:string;linkLabel?:string;font?:FontName;text?:string;hidden?:boolean;x?:number;y?:number;order?:number;parent?:string}
 export type Design={version:number;changes:Record<string,DesignChange>}
 let current:Design={version:0,changes:{}}
 const subscribers=new Set<()=>void>()
 const subscribe=(fn:()=>void)=>{subscribers.add(fn);return()=>{subscribers.delete(fn)}}
+export function usePageDesign(){return useSyncExternalStore(subscribe,()=>current,()=>current)}
 export function setPageDesign(value:Design){current=value;subscribers.forEach(fn=>fn())}
 export function PageWord({id:baseId,children,instance=false}:{id:string;children:ReactNode;instance?:boolean}){
  const design=useSyncExternalStore(subscribe,()=>current,()=>current)
@@ -29,27 +31,22 @@ export function PageWord({id:baseId,children,instance=false}:{id:string;children
 export function PageDesignLoader(){
  const {pathname}=useLocation(),[design,setDesign]=useState<Design>({version:0,changes:{}})
  const baseRef=useRef<Design>({version:0,changes:{}}),layersRef=useRef<{all:Record<string,DesignChange>;role:Record<string,DesignChange>}>({all:{},role:{}}),draftRef=useRef<{scope:string;changes:Record<string,DesignChange>}|null>(null)
- function applyStaff(){const l=layersRef.current,d=draftRef.current;const merged={...baseRef.current,changes:mergeStaffChanges(baseRef.current.changes,d?.scope==='all'?d.changes:l.all,d&&d.scope!=='all'?d.changes:l.role)};setPageDesign(merged);setDesign(merged)}
+ const editorDraft=useRef<Design|null>(null)
+ function applyStaff(){const l=layersRef.current,d=draftRef.current;const merged={...baseRef.current,changes:mergeStaffChanges(editorDraft.current?.changes??baseRef.current.changes,d?.scope==='all'?d.changes:l.all,d&&d.scope!=='all'?d.changes:l.role)};setPageDesign(merged);setDesign(merged)}
+ useEffect(()=>{const receive=(event:MessageEvent)=>{if(!editorPreviewActive(window.location.search,window.parent!==window)||event.source!==window.parent||event.origin!==window.location.origin||event.data?.type!=='page-editor-draft'||event.data.page!==pathname)return;editorDraft.current=event.data.design;applyStaff()};window.addEventListener('message',receive);return()=>window.removeEventListener('message',receive)},[pathname])
  useEffect(()=>{const receive=(event:MessageEvent)=>{if(!staffLayoutPreview()||event.source!==window.parent||event.origin!==window.location.origin||event.data?.type!=='staff-layout-draft')return;draftRef.current={scope:event.data.scope,changes:event.data.changes};applyStaff()};window.addEventListener('message',receive);return()=>window.removeEventListener('message',receive)},[pathname])
- useEffect(()=>{let live=true,seq=0;setPageDesign({version:0,changes:{}});setDesign({version:0,changes:{}})
+ useEffect(()=>{editorDraft.current=null;let live=true,seq=0;setPageDesign({version:0,changes:{}});setDesign({version:0,changes:{}})
  async function refresh(){const ticket=++seq;try{const guest=pathname.match(/^\/(walk-in|guest-feedback)\/([0-9a-f-]{36})$/i);let result
  if(guest)result=await supabase.rpc('page_design_public',{p_key:guest[2],p_kind:guest[1],p_page:pathname.replace(guest[2],':key')})
  else{const session=await supabase.auth.getSession();if(!session.data.session)return;const tenant=await loadTenantData();const id=tenant.locations[0]?.id;if(!id)return;result=await supabase.rpc('page_design_load',{p_location_id:id,p_page:pathname});const scoped=await supabase.rpc('staff_layout_load',{p_location_id:id,p_page:pathname});layersRef.current=scoped.error?{all:{},role:{}}:scoped.data}
  if(!result.error&&live&&ticket===seq){baseRef.current=result.data;applyStaff()}}catch{/* Keep the original screen when customization is unavailable. */}}
  void refresh();const timer=setInterval(()=>void refresh(),30000);const focus=()=>void refresh();window.addEventListener('focus',focus);const {data:{subscription}}=supabase.auth.onAuthStateChange(()=>{seq++;setPageDesign({version:0,changes:{}});setDesign({version:0,changes:{}});void refresh()})
  return()=>{live=false;seq++;clearInterval(timer);window.removeEventListener('focus',focus);subscription.unsubscribe()}},[pathname])
- let css='';const preview=(new URLSearchParams(window.location.search).has('wording-preview')||staffLayoutPreview())
- for(const [id,value] of Object.entries(design.changes)){if(!/^[A-Za-z0-9_.-]+$/.test(id))continue;const selector='[data-design-block="'+id+'"]';if(value.hidden)css+=selector+'{'+(preview?'opacity:.4;':'display:none!important;')+'}';if(value.order!==undefined&&value.parent&&/^[A-Za-z0-9_.-]+$/.test(value.parent)){css+='[data-design-block="'+value.parent+'"]{display:flex!important;flex-direction:column!important;}'+selector+'{order:'+value.order+'!important;}'}if(value.x||value.y)css+=selector+'{position:relative;left:'+(value.x??0)+'px;top:'+(value.y??0)+'px;}'}
-const fontRules:string[]=[],wordRules:string[]=[]
- const depth=(id:string)=>{if(!/^[A-Za-z0-9_.-]+$/.test(id))return 0;let node=document.querySelector('[data-design-block="'+id+'"],[data-design-word="'+id+'"]'),n=0;while(node){n++;node=node.parentElement}return n}
- for(const [id,value] of Object.entries(design.changes).sort(([a],[b])=>depth(a)-depth(b))){
-  if(!/^[A-Za-z0-9_.-]+$/.test(id)||!value.font||!Object.prototype.hasOwnProperty.call(appFonts,value.font))continue
-  const family=appFonts[value.font].css
-  const block='[data-design-block="'+id+'"]',word='[data-design-word="'+id+'"]'
-  fontRules.push(block+','+block+' *{font-family:'+family+'!important;}')
-  wordRules.push(word+','+word+' *{font-family:'+family+'!important;}')
- }
- return <style>{css+fontRules.join('')+wordRules.join('')}</style>
+ const [depths,setDepths]=useState<Record<string,number>>({})
+ useEffect(()=>{let timer:ReturnType<typeof setTimeout>|undefined;const measure=()=>{const next:Record<string,number>={};for(const id of Object.keys(design.changes)){if(!validId(id))continue;let node=document.querySelector('[data-design-block="'+id+'"],[data-design-word="'+id+'"]'),n=0;while(node){n++;node=node.parentElement}next[id]=n}setDepths(old=>JSON.stringify(old)===JSON.stringify(next)?old:next)};measure();const observer=new MutationObserver(()=>{if(timer)clearTimeout(timer);timer=setTimeout(measure,40)});observer.observe(document.body,{childList:true,subtree:true});return()=>{observer.disconnect();if(timer)clearTimeout(timer)}},[design.changes])
+ const preview=editorPreviewActive(window.location.search,window.parent!==window)||staffLayoutPreview()
+ const depth=(id:string)=>depths[id]??0
+ return <style>{designCss(design.changes,preview,depth)}</style>
 }
 
 export function PageInput({designId,...props}:import('react').InputHTMLAttributes<HTMLInputElement>&{designId:string}){
