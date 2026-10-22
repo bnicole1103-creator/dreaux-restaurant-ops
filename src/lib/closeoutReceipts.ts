@@ -4,3 +4,9 @@ export type CloseoutReceipt = {origin_bucket?:string;source_purchase_id?:string|
 export function receiptReason(reason:string|null){return ({...voidReasons,...compReasons} as Record<string,string>)[reason??'']??'Reason needed'}
 export function summarizeCloseoutReceipts(rows:CloseoutReceipt[]){const ready=rows.filter(r=>r.ready&&!r.closeout_deleted),voids=ready.filter(r=>r.kind==='void'),comps=ready.filter(r=>r.kind!=='void');return {voidCount:voids.length,voidTotal:voids.reduce((n,r)=>n+Math.round(Number(r.amount)*100),0)/100,compTotal:comps.reduce((n,r)=>n+Math.round(Number(r.amount)*100),0)/100,errors:ready.filter(r=>r.reason==='server_error'||r.reason==='spill_waste_server_error').length,posted:ready.reduce((n,r)=>n+r.points,0),incomplete:rows.filter(r=>!r.ready).length}}
 export function closeoutReceiptCsv(rows:CloseoutReceipt[]){const cell=(v:unknown)=>{let s=String(v??'');if(/^[=+\-@\t\r]/.test(s))s="'"+s;return '"'+s.replace(/"/g,'""')+'"'};return '\ufeff'+[['Receipt ID','Date','Employee','Type','Reason','Amount','Check number','Closeout ID','Status','Posted points','Notes'],...rows.map(r=>[r.id,r.business_date,r.employee,r.kind,receiptReason(r.reason),r.amount,r.check_number,r.closeout_key,r.closeout_deleted?'Closeout deleted':r.submitted?(r.ready?'Submitted':'Details needed'):'Awaiting closeout',r.points,r.notes])].map(r=>r.map(cell).join(',')).join('\r\n')}
+
+export function receiptDraftState(amount:string,reason:string){
+ const value=amount.trim()===''?null:Number(amount)
+ if(value!==null&&(!Number.isFinite(value)||value<=0))throw Error('Enter a positive amount or leave it blank to finish later.')
+ return {amount:value,ready:value!==null&&reason.trim()!==''}
+}

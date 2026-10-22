@@ -96,8 +96,8 @@ begin
  end if;
  if prior.id is null and r.source_purchase_id is not null then
   select * into source from public.purchase_receipts where id=r.source_purchase_id and location_id=p_location_id;
-  if source.id is null or source.user_id<>r.user_id or source.purchase_date<>r.business_date or source.file_path is null or source.file_mime is null or source.data->>'category' not in ('Void receipt','Comp receipt') then raise exception 'Choose a saved void or comp photo for this employee and date.';end if;
-  r.origin_bucket:='purchase-receipts';r.file_path:=source.file_path;r.file_mime:=source.file_mime;r.kind:=case when source.data->>'category'='Void receipt' then 'void' else 'comp' end;r.amount:=source.total;r.check_number:=left(coalesce(source.data->>'vendor',''),100);r.notes:=left(coalesce(source.data->>'notes',''),2000);
+  if source.id is null or source.user_id<>r.user_id or source.purchase_date<>r.business_date or source.file_path is null or source.file_mime is null or source.data->>'source' is distinct from 'photo' then raise exception 'Choose a saved receipt photo for this employee and date.';end if;
+  r.origin_bucket:='purchase-receipts';r.file_path:=source.file_path;r.file_mime:=source.file_mime;r.kind:=case when source.data->>'category'='Comp receipt' then 'comp' else 'void' end;r.amount:=source.total;r.check_number:=left(coalesce(source.data->>'vendor',''),100);r.notes:=left(coalesce(source.data->>'notes',''),2000);
  end if;
  if not manager and r.user_id<>auth.uid() then raise exception 'Choose your own employee profile.' using errcode='42501';end if;
  if not exists(select 1 from public.location_memberships where location_id=p_location_id and user_id=r.user_id and status='active') then raise exception 'Choose an active employee.';end if;
