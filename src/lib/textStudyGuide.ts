@@ -1,0 +1,3 @@
+export type TextGuideSection={name:string;category:string;build:string;method:string;finish:string;notes:string}
+export const textGuideFields=[['method','Overview'],['build','Key points'],['finish','Practice questions'],['notes','Answer key & source excerpts']] as const
+export function validTextGuideSections(value:unknown):value is TextGuideSection[]{return Array.isArray(value)&&value.length>=1&&value.length<=12&&value.every(row=>row&&typeof row==='object'&&['name','category','build','method','finish','notes'].every(k=>typeof row[k]==='string'&&row[k].length<=12000)&&row.name.trim().length>0&&row.name.length<=160&&row.category.trim().length>0&&row.category.length<=80)}
