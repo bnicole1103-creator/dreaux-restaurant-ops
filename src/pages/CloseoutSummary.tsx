@@ -1,4 +1,4 @@
-import { CloseoutReceiptWallet, CloseoutReceiptReports } from '../components/CloseoutReceiptWallet'
+import { CloseoutReceiptWallet, CloseoutReceiptReports, DailyReceiptSummary } from '../components/CloseoutReceiptWallet'
 import {DesignSection} from '../components/DesignSection'
 import { TeamProfileName } from '../components/TeamProfileName'
 import {salesMoney} from '../lib/salesTargets'
@@ -618,6 +618,7 @@ function CloseoutDay({selectedDate,refresh,onDeleted,locationId,locationName,cur
         )}
       </div>
 
+      <DailyReceiptSummary location={locationId} day={selectedDate} refreshKey={refresh}/>
       <CloseoutReceiptReports location={locationId} day={selectedDate}/>
       {locationId && <PeerRecognition location={locationId} from={selectedDate} to={selectedDate}/>}
       {isManager&&dayTargets&&<section className="card" aria-label="Daily sales targets"><h2>Sales targets · {serviceDateLabel(selectedDate)}</h2>{dayTargets.ready?<><p>Team goal: <strong>{salesMoney(Number(dayTargets.team_target))}</strong></p><ul>{Object.values((dayTargets.rows??[]).reduce<Record<string,{name:string;group:string;target:number}>>((all,r)=>{const key=r.group+':'+r.employee_key;const row=all[key]??{name:r.name??'Employee '+r.employee_key,group:r.group,target:0};row.target+=Number(r.target);all[key]=row;return all},{})).map((r,i)=><li key={i}>{r.name} · {r.group==='bar'?'Bar':'Floor'} · {salesMoney(r.target)}</li>)}</ul><p>Loaded automatically from app sales targets. Closeouts are not required for targets to appear.</p></>:<p role="status">{dayTargets.reason??'Sales targets are not available for this date.'}</p>}</section>}

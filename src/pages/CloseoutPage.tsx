@@ -1,4 +1,4 @@
-import { CloseoutReceiptWallet, useReceiptDraft } from '../components/CloseoutReceiptWallet'
+import { CloseoutReceiptWallet, ReceiptSubmissionLog, useReceiptDraft } from '../components/CloseoutReceiptWallet'
 import { summarizeCloseoutReceipts, type CloseoutReceipt } from '../lib/closeoutReceipts'
 import {DesignSection} from '../components/DesignSection'
 import {PastCloseoutControls} from '../components/PastCloseoutControls'
@@ -353,6 +353,7 @@ export function CloseoutPage() {
   const receiptDraft=useReceiptDraft(locationId,closeoutDay)
   const closeoutRequest=useRef('')
   closeoutRequest.current=receiptDraft.key
+  const [submittedReceiptKey,setSubmittedReceiptKey]=useState('')
   const [receiptRows,setReceiptRows]=useState<CloseoutReceipt[]>([])
   const receiptTotals=summarizeCloseoutReceipts(receiptRows)
   const [floorShiftId,setFloorShiftId]=useState(''),[floorShifts,setFloorShifts]=useState<{id:string;shift_name:string;status:string}[]>([]),[floorTablesNotice,setFloorTablesNotice]=useState('')
@@ -1072,6 +1073,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
         throw closeoutError
       }
 
+      setSubmittedReceiptKey(closeout.id)
       receiptDraft.rotate()
       setReceiptRows([])
       const warnings:
@@ -1128,7 +1130,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
     }
   }
 
-  function changeServiceDay(day:string){if(day===closeoutDay||saving)return;if(!window.confirm('Change the service date and clear this unsaved closeout?'))return;resetForm();setFloorShiftId('');setFloorTablesNotice('');setReceiptRows([]);setCloseoutDay(day);setDatePinned(day!==serviceDay());setError('');setMessage('')}
+  function changeServiceDay(day:string){if(day===closeoutDay||saving)return;if(!window.confirm('Change the service date and clear this unsaved closeout?'))return;resetForm();setFloorShiftId('');setFloorTablesNotice('');setReceiptRows([]);setSubmittedReceiptKey('');setCloseoutDay(day);setDatePinned(day!==serviceDay());setError('');setMessage('')}
 
   if (loading) {
     return (
@@ -1851,6 +1853,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
         </button>
       </div>
 
+      {receiptDraft.key&&<ReceiptSubmissionLog location={locationId} day={closeoutDay} closeoutKey={receiptRows.length?receiptDraft.key:(submittedReceiptKey||receiptDraft.key)}/>}
       <div
         style={{
           height: 160,
