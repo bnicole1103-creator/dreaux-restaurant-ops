@@ -1,3 +1,4 @@
+import { CloseoutReceiptWallet, CloseoutReceiptReports } from '../components/CloseoutReceiptWallet'
 import {DesignSection} from '../components/DesignSection'
 import { TeamProfileName } from '../components/TeamProfileName'
 import {salesMoney} from '../lib/salesTargets'
@@ -617,6 +618,7 @@ function CloseoutDay({selectedDate,refresh,onDeleted,locationId,locationName,cur
         )}
       </div>
 
+      <CloseoutReceiptReports location={locationId} day={selectedDate}/>
       {locationId && <PeerRecognition location={locationId} from={selectedDate} to={selectedDate}/>}
       {isManager&&dayTargets&&<section className="card" aria-label="Daily sales targets"><h2>Sales targets · {serviceDateLabel(selectedDate)}</h2>{dayTargets.ready?<><p>Team goal: <strong>{salesMoney(Number(dayTargets.team_target))}</strong></p><ul>{Object.values((dayTargets.rows??[]).reduce<Record<string,{name:string;group:string;target:number}>>((all,r)=>{const key=r.group+':'+r.employee_key;const row=all[key]??{name:r.name??'Employee '+r.employee_key,group:r.group,target:0};row.target+=Number(r.target);all[key]=row;return all},{})).map((r,i)=><li key={i}>{r.name} · {r.group==='bar'?'Bar':'Floor'} · {salesMoney(r.target)}</li>)}</ul><p>Loaded automatically from app sales targets. Closeouts are not required for targets to appear.</p></>:<p role="status">{dayTargets.reason??'Sales targets are not available for this date.'}</p>}</section>}
       {closeouts.some(c=>!hasTarget(c))&&<p role="status"><PageWord id="sectioncopy.2837ea3ec6c11338de09">{"Some closeouts have no saved target. Target percentages include only closeouts with available positive targets."}</PageWord></p>}
@@ -1171,6 +1173,7 @@ function CloseoutDay({selectedDate,refresh,onDeleted,locationId,locationName,cur
                           )}
 
                           {!!closeout.omitted_questions?.length&&<p data-design-block="copy.8cb8926814305e94.1" role="status"><PageWord id="copy.d026ca712cc52526.1">Not collected on this form: </PageWord>{closeout.omitted_questions.map(id=>({'staff_0':'scheduled start','staff_1':'clock-in','staff_2':'shift','staff_3':'net sales','staff_4':'manual target','staff_5':'cash deposit','staff_6':'voids','staff_7':'discounts','staff_8':'register cash','staff_9':'imbalance reason','staff_10':'verifier','staff_11':'peer recognition','staff_12':'recognition reason','staff_13':'recognition explanation','staff_14':'money recipient','staff_15':'drink maker'} as Record<string,string>)[id]??id).join(', ')}<PageWord id="copy.30787e9cfdd1feed.1">. Removed sales and attendance questions do not produce performance adjustments.</PageWord></p>}
+                          <CloseoutReceiptWallet location={locationId} day={selectedDate} userId={closeout.user_id} closeoutKey={closeout.id} onSaved={onDeleted}/>
                           <CloseoutStockDetails location={locationId} id={closeout.id}/>
                           {closeout.notes && (
                             <div data-design-block="copy.82fd4d29db15c7f6.2"

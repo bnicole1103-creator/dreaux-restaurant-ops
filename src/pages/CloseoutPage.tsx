@@ -1,3 +1,5 @@
+import { CloseoutReceiptWallet, useReceiptDraft } from '../components/CloseoutReceiptWallet'
+import { summarizeCloseoutReceipts, type CloseoutReceipt } from '../lib/closeoutReceipts'
 import {DesignSection} from '../components/DesignSection'
 import {PastCloseoutControls} from '../components/PastCloseoutControls'
 import {closeoutErrorMessage} from '../lib/closeoutError'
@@ -348,7 +350,11 @@ export function CloseoutPage() {
   const [closeoutDay,setCloseoutDay] = useState(serviceDay)
   const [datePinned,setDatePinned]=useState(false),[pastPoints,setPastPoints]=useState<boolean|null>(null),[pastReason,setPastReason]=useState('')
   const pastPolicy=useCallback((apply:boolean|null,reason:string)=>{setPastPoints(apply);setPastReason(reason)},[])
-  const closeoutRequest=useRef(crypto.randomUUID())
+  const receiptDraft=useReceiptDraft(locationId,closeoutDay)
+  const closeoutRequest=useRef('')
+  closeoutRequest.current=receiptDraft.key
+  const [receiptRows,setReceiptRows]=useState<CloseoutReceipt[]>([])
+  const receiptTotals=summarizeCloseoutReceipts(receiptRows)
   const [floorShiftId,setFloorShiftId]=useState(''),[floorShifts,setFloorShifts]=useState<{id:string;shift_name:string;status:string}[]>([]),[floorTablesNotice,setFloorTablesNotice]=useState('')
   useEffect(()=>{if(!locationId)return;let live=true;void supabase.from('shifts').select('id,shift_name,status').eq('location_id',locationId).eq('shift_date',closeoutDay).in('status',['scheduled','open','closed']).then(r=>{if(live&&!r.error)setFloorShifts(r.data??[])});return()=>{live=false}},[locationId,closeoutDay])
   async function pullFloorTables(){setFloorTablesNotice('');try{const u=await supabase.auth.getUser();if(u.error)throw u.error;const r=await supabase.rpc('floor_sections_for_day',{p_location_id:locationId,p_date:closeoutDay,p_only_me:true});if(r.error)throw r.error;const rows=(r.data??[]) as {table_ids:string[];id:string;starts_at:string|null;ends_at:string|null}[];const ids=[...new Set(rows.filter(row=>row.starts_at!==null||!floorShiftId||row.id===floorShiftId).flatMap(row=>row.table_ids))];setSelectedTableIds(ids.filter(id=>tables.some(t=>t.id===id)));setFloorTablesNotice(ids.length?'Floor assignments loaded. Confirm every table you actually worked, including any changes during your shift.':'No assigned tables found. Select the tables you actually worked below.')}catch(e){setFloorTablesNotice(String((e as {message?:string}).message??e))}}
@@ -362,13 +368,14 @@ export function CloseoutPage() {
     const adjustments = original.adjustments.filter(a=>{
       if(a.code.startsWith('LATE_'))return shown('staff_0')&&shown('staff_1')
       if(a.code.startsWith('SALES_'))return shown('staff_0')&&shown('staff_3')
-      if(a.code==='VOID_OVER_15')return shown('staff_6')
-      if(a.code==='DISCOUNT_OVER_15')return shown('staff_7')
+      if(a.code==='VOID_OVER_15')return false
+      if(a.code==='DISCOUNT_OVER_15')return false
       return true
     }).map(a => {
       const rule = config?.rules.find(r => r.id === a.code)
       return rule ? {...a, points: rule.active ? rule.points : 0, description: rule.reason} : a
     })
+    if(receiptTotals.errors)adjustments.push({code:'RECEIPT_SERVER_ERRORS',description:receiptTotals.errors+' server-error entries (−5 each)',points:-5*receiptTotals.errors})
     const pointsDelta = adjustments.reduce((n, a) => n + a.points, 0)
     return {...original, adjustments, pointsDelta, shiftScore: original.startingScore + pointsDelta}
   }
@@ -881,6 +888,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
       setSaving(true)
       setError('')
       setMessage('')
+      if(!receiptDraft.key)throw new Error('Receipt wallet is still loading. Try again shortly.')
       const reportedStockItems=closeoutStockItems(hasStockItems,stockItems)
 
       const {
@@ -1064,7 +1072,8 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
         throw closeoutError
       }
 
-      closeoutRequest.current=crypto.randomUUID()
+      receiptDraft.rotate()
+      setReceiptRows([])
       const warnings:
         string[] = []
 
@@ -1119,7 +1128,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
     }
   }
 
-  function changeServiceDay(day:string){if(day===closeoutDay||saving)return;if(!window.confirm('Change the service date and clear this unsaved closeout?'))return;resetForm();setFloorShiftId('');setFloorTablesNotice('');closeoutRequest.current=crypto.randomUUID();setCloseoutDay(day);setDatePinned(day!==serviceDay());setError('');setMessage('')}
+  function changeServiceDay(day:string){if(day===closeoutDay||saving)return;if(!window.confirm('Change the service date and clear this unsaved closeout?'))return;resetForm();setFloorShiftId('');setFloorTablesNotice('');setReceiptRows([]);setCloseoutDay(day);setDatePinned(day!==serviceDay());setError('');setMessage('')}
 
   if (loading) {
     return (
@@ -1153,6 +1162,8 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
         </p>
       </div>
 
+      {receiptDraft.key&&<CloseoutReceiptWallet key={receiptDraft.key} location={locationId} day={closeoutDay} closeoutKey={receiptDraft.key} shiftId={floorShiftId||undefined} onChange={rows=>{setReceiptRows(rows);const t=summarizeCloseoutReceipts(rows);setVoidCount(String(t.voidCount));setVoidValue(String(t.voidTotal));setDiscountValue(String(t.compTotal))}}/>}
+      <p>Attach one entry for each void, comp or discount. Receipt amounts must match the POS totals below. Server errors deduct 5 points per entry unless this past-date closeout has been approved without points.</p>
       {error && (
         <div data-design-block="copy.50484d57069c0d3a.1"
           style={{
