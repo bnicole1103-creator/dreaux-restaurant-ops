@@ -13,6 +13,8 @@ function BasicDialog({person,error,busy,onClose,location}:{person:Person|null;er
 }
 export function TeamProfileName({userId,employeeKey,locationId,name,children,postId}:{postId?:string;userId?:string|null;employeeKey?:string|null;locationId?:string;name?:string;children?:ReactNode}){
  const [open,setOpen]=useState(false),[busy,setBusy]=useState(false),[error,setError]=useState(''),[person,setPerson]=useState<Person|null>(null),[location,setLocation]=useState('')
+ const [updatedName,setUpdatedName]=useState('')
+ useEffect(()=>{const changed=(event:Event)=>{const detail=(event as CustomEvent<{user_id:string;name:string}>).detail;if(detail?.user_id===(userId||person?.user_id))setUpdatedName(detail.name)};window.addEventListener('team-profile-name-updated',changed);return()=>window.removeEventListener('team-profile-name-updated',changed)},[userId,person?.user_id])
  const sequence=useRef(0),trigger=useRef<HTMLButtonElement>(null)
  useEffect(()=>()=>{sequence.current++},[])
  function close(){sequence.current++;setOpen(false);setBusy(false);setPerson(null);setError('');trigger.current?.focus()}
@@ -21,6 +23,6 @@ export function TeamProfileName({userId,employeeKey,locationId,name,children,pos
   const r=postId?await supabase.rpc('team_profile_post_author',{p_location_id:loc,p_post_id:postId}):await supabase.rpc('team_profile_resolve',{p_location_id:loc,p_user_id:userId||null,p_employee_key:employeeKey||null});if(r.error)throw r.error;
   if(sequence.current===token){setPerson(r.data);setLocation(loc)}
  }catch(e){if(sequence.current===token)setError(String((e as Error).message??e))}finally{if(sequence.current===token)setBusy(false)}}
- return <><button ref={trigger} className="team-profile-name" type="button" aria-label={'Open team profile for '+(name??'employee')} onClick={e=>{e.stopPropagation();void show()}}>{children??name??'Team member'}</button>{open&&(person?.can_analyze?<EmployeeProfile key={person.user_id} locationId={location} userId={person.user_id} onClose={close}/>:<BasicDialog location={location} person={person} error={error} busy={busy} onClose={close}/>)}</>
+ return <><button ref={trigger} className="team-profile-name" type="button" aria-label={'Open team profile for '+(updatedName||name||'employee')} onClick={e=>{e.stopPropagation();void show()}}>{updatedName||(children??name??'Team member')}</button>{open&&(person?.can_analyze?<EmployeeProfile key={person.user_id} locationId={location} userId={person.user_id} onClose={close}/>:<BasicDialog location={location} person={person} error={error} busy={busy} onClose={close}/>)}</>
 }
 

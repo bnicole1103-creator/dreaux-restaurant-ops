@@ -3,6 +3,7 @@ import {DesignSection} from './DesignSection'
 import { PageOption } from "./PageDesign"
 import { ScreenText } from "./ScreenText"
 import { useEffect, useState } from 'react'
+import { EmployeeNameEditor } from './EmployeeNameEditor'
 import { supabase } from '../lib/supabase'
 type Request = {id: string; name: string; email: string; created_at: string}
 export function SignupApprovals({location}: {location: string}) {
@@ -50,6 +51,7 @@ export function SignupApprovals({location}: {location: string}) {
   {!busy && requests.length===0 && <p data-design-block="copy.fccf04de874a28a6.2"><ScreenText id="SignupApprovals.039c735a83bd164d">No pending requests.</ScreenText></p>}
   {requests.map(r=>{const d=drafts[r.id] ?? {role:'employee',access:'staff'};return <article data-design-block="copy.446ae97690ed27cf.1" className="mod-review" key={r.id}>
    <h3 data-design-block="copy.9127f2e04348955c.2">{r.name}</h3><p data-design-block="copy.fccf04de874a28a6.3">{r.email}</p>
+   <EmployeeNameEditor locationId={location} requestId={r.id} onSaved={()=>void load()}/>
    <label data-design-block="copy.e9a700bc6f9db62a.2"><ScreenText id="SignupApprovals.f4c886ee06bf98eb">Job role</ScreenText><select value={d.role} disabled={busy} onChange={e=>setDrafts(v=>({...v,[r.id]:{...d,role:e.target.value,access:e.target.value==='owner'?'owner':d.access}}))}>
     {['employee','host','server','bartender','busser','kitchen','assistant_manager','manager','general_manager','owner'].map(role=><option key={role} value={role}>{role.replace(/_/g,' ')}</option>)}
    </select></label>
