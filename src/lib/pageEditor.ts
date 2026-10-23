@@ -46,6 +46,9 @@ export function syncOrderHosts(doc:Document,changes:Design['changes']){
   })
  }
  for(const host of hosts){
+  // Transparent wrappers share their ancestor's flex/grid formatting context.
+  // Giving this wrapper a box traps its children in a separate order group.
+  if(host.dataset.layoutTransparent==='true')continue
   const display=doc.defaultView?.getComputedStyle(host).display??''
   if(!['flex','inline-flex','grid','inline-grid'].includes(display))host.setAttribute('data-design-order-flow','true')
  }
@@ -65,7 +68,7 @@ export function editorItems(doc:Document):EditorItem[]{
  })
 }
 export function designCss(changes:Record<string,DesignChange>,preview:boolean,depth:(id:string)=>number=()=>0){
- let css='[data-design-order-flow="true"]{display:flex!important;flex-direction:column!important;gap:16px;}';const words:string[]=[]
+ let css='[data-layout-transparent="true"]{display:contents!important;}[data-design-order-flow="true"]{display:flex!important;flex-direction:column!important;gap:16px;}';const words:string[]=[]
  for(const[id,v]of Object.entries(changes).sort(([a],[b])=>depth(a)-depth(b))){
   if(!validId(id))continue
   const block='[data-design-block="'+id+'"]',word='[data-design-word="'+id+'"]',selector=block+','+word
