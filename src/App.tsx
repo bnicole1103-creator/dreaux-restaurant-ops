@@ -1,3 +1,4 @@
+import {ServiceTrainingPage} from './pages/ServiceTrainingPage'
 import {PageCanvas} from './components/PageLayout'
 import {CrewSchedulePage} from './pages/CrewSchedulePage'
 import {ReportsPage} from './pages/ReportsPage'
@@ -152,6 +153,7 @@ export default function App() {
         <Route path="/inquiry-inbox" element={<GuestServicesPage />} />
         <Route path="/training" element={<TrainingPage />} />
         <Route path="/training/cocktails" element={<AccessSection page="training" section="cocktails"><CocktailTrainingPage /></AccessSection>} />
+        <Route path="/training/service" element={<AccessSection page="training" section="service"><ServiceTrainingPage /></AccessSection>} />
         <Route path="/training/food" element={<AccessSection page="training" section="food"><CocktailTrainingPage key="food" kind="food" /></AccessSection>} />
         <Route path="/settings/sales-targets" element={<ManagementOnly gmOnly><SalesTargetsPage /></ManagementOnly>} />
         <Route path="/settings/wording" element={<ManagementOnly gmOnly><ScreenWordingPage /></ManagementOnly>} />

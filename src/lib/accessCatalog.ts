@@ -59,6 +59,7 @@ export const accessCatalog={
   "sections": [
    "cocktails",
    "food",
+   "service",
    "guides",
    "quizzes"
   ]

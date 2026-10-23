@@ -32,13 +32,15 @@ export function QuizDraftModal({draft,onClose}:{draft:GeneratedQuiz;onClose:()=>
    onStateChange={s=>{state.current=s}}/>
  </dialog>,document.body)
 }
-export function GeneratePreshiftQuiz({location,date,title,body,disabled,allowPaste=false,onSaved}:{
- location:string;date:string;title:string;body:string;disabled:boolean;allowPaste?:boolean;onSaved?:()=>void
+export function GeneratePreshiftQuiz({location,date,title,body,disabled,allowPaste=false,onSaved,heading,countOptions,onBusy}:{
+ location:string;date:string;title:string;body:string;disabled:boolean;allowPaste?:boolean;onSaved?:()=>void;heading?:string;countOptions?:number[];onBusy?:(v:boolean)=>void
 }) {
  const [busy,setBusy]=useState(false),[count,setCount]=useState(10),[error,setError]=useState('')
  const [draft,setDraft]=useState<GeneratedQuiz|null>(null)
  const [generatorTab,setGeneratorTab]=useState('content')
  const [content,setContent]=useState(''),[quizDate,setQuizDate]=useState(date),[topic,setTopic]=useState('')
+ const activity=useRef(onBusy);activity.current=onBusy
+ useEffect(()=>{activity.current?.(busy);return()=>activity.current?.(false)},[busy])
  const request=useRef<string|null>(null)
  const actualBody=allowPaste?content:body
  const actualDate=allowPaste?quizDate:date
@@ -64,7 +66,7 @@ export function GeneratePreshiftQuiz({location,date,title,body,disabled,allowPas
  }
  function changed(){request.current=null}
  return <DesignSection as="article" data-design-block="section.18490ee77f1ddb9b4a85" className="feed-card quiz-source-workflow">
-  <h3>{allowPaste?'Create a quiz from any content':'Generate a quiz from this pre-shift'}</h3>
+  <h3>{heading??(allowPaste?'Create a quiz from any content':'Generate a quiz from this pre-shift')}</h3>
   <p><PageWord id="sectioncopy.f7f5c11ec4fbb95094f3">{"Paste pre-shift notes, recipes, menu details, or training content. Choose a question count; the editor opens with the questions already added."}</PageWord></p>
   {allowPaste&&<WorkflowTabs id="quiz-source" label="Generate quiz steps" tabs={[{key:'content',label:'1 · Content'},{key:'generate',label:'2 · Generate'}]} active={generatorTab} disabled={busy} onChange={setGeneratorTab}/>}
   <div role="tabpanel" id="quiz-source-content-panel" aria-labelledby="quiz-source-content-tab" hidden={allowPaste&&generatorTab!=='content'}>
@@ -79,8 +81,8 @@ export function GeneratePreshiftQuiz({location,date,title,body,disabled,allowPas
    <label><PageWord id="sectioncopy.3ab309ca6f7f1bd66653">{"Quiz date"}</PageWord><input type="date" value={quizDate} onChange={e=>{setQuizDate(e.target.value);changed()}}/></label>
    <label><PageWord id="sectioncopy.0f2d273e67ee421e5156">{"Topic / title"}</PageWord><input maxLength={160} value={topic} placeholder="Cocktail recipes, Tuesday specials, guest service…" onChange={e=>{setTopic(e.target.value);changed()}}/></label>
   </fieldset>}
-  <label><PageWord id="sectioncopy.4cdd68c082fac18c0b59">{"How many questions?"}</PageWord><input type="number" min={1} max={30} step={1} value={count}
-   disabled={disabled||busy} onChange={e=>{setCount(Number(e.target.value));changed()}}/></label>
+  <label><PageWord id="sectioncopy.4cdd68c082fac18c0b59">{"How many questions?"}</PageWord>{countOptions?<select aria-label="How many questions?" value={count} disabled={disabled||busy} onChange={e=>{setCount(Number(e.target.value));changed()}}>{countOptions.map(n=><option key={n} value={n}>{n}</option>)}</select>:<input type="number" min={1} max={30} step={1} value={count}
+   disabled={disabled||busy} onChange={e=>{setCount(Number(e.target.value));changed()}}/>}</label>
   <button type="button" className="primary-button"
    disabled={disabled||busy||!location||!actualDate||actualBody.trim().length<30||!Number.isInteger(count)||count<1||count>30}
    onClick={()=>void generate()}>{busy?'Generating quiz…':'Generate quiz'}</button>
