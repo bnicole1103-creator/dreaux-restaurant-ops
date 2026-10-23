@@ -12,7 +12,7 @@ if(typeof window!=='undefined'&&editorPreviewActive(window.location.search,windo
  blockedPreviewEvents.forEach(type=>document.addEventListener(type,blockPreviewAction,{capture:true,passive:false}))
 }
 import type {FontName} from '../lib/appearance'
-import {designCss,validId} from '../lib/pageEditor'
+import {designCss,syncOrderHosts,validId} from '../lib/pageEditor'
 export type DesignChange={presentation?:'inline'|'collapse'|'popup';panelTitle?:string;defaultOpen?:boolean;color?:string;background?:string;borderColor?:string;fontSize?:number;align?:'left'|'center'|'right';kind?:'note'|'link';title?:string;href?:string;linkLabel?:string;font?:FontName;text?:string;hidden?:boolean;x?:number;y?:number;order?:number;parent?:string}
 export type Design={version:number;changes:Record<string,DesignChange>}
 let current:Design={version:0,changes:{}}
@@ -44,6 +44,14 @@ export function PageDesignLoader(){
  return()=>{live=false;seq++;clearInterval(timer);window.removeEventListener('focus',focus);subscription.unsubscribe()}},[pathname])
  const [depths,setDepths]=useState<Record<string,number>>({})
  useEffect(()=>{let timer:ReturnType<typeof setTimeout>|undefined;const measure=()=>{const next:Record<string,number>={};for(const id of Object.keys(design.changes)){if(!validId(id))continue;let node=document.querySelector('[data-design-block="'+id+'"],[data-design-word="'+id+'"]'),n=0;while(node){n++;node=node.parentElement}next[id]=n}setDepths(old=>JSON.stringify(old)===JSON.stringify(next)?old:next)};measure();const observer=new MutationObserver(()=>{if(timer)clearTimeout(timer);timer=setTimeout(measure,40)});observer.observe(document.body,{childList:true,subtree:true});return()=>{observer.disconnect();if(timer)clearTimeout(timer)}},[design.changes])
+ useEffect(()=>{
+  let timer:ReturnType<typeof setTimeout>|undefined
+  const apply=()=>syncOrderHosts(document,design.changes)
+  apply()
+  const observer=new MutationObserver(()=>{if(timer)clearTimeout(timer);timer=setTimeout(apply,40)})
+  observer.observe(document.body,{childList:true,subtree:true})
+  return()=>{observer.disconnect();if(timer)clearTimeout(timer);document.querySelectorAll('[data-design-order-flow]').forEach(n=>n.removeAttribute('data-design-order-flow'))}
+ },[design.changes])
  const preview=editorPreviewActive(window.location.search,window.parent!==window)||staffLayoutPreview()
  const depth=(id:string)=>depths[id]??0
  return <style>{designCss(design.changes,preview,depth)}</style>
