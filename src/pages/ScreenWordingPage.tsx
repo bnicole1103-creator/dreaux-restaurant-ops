@@ -8,6 +8,7 @@ import {serviceDay} from '../lib/serviceDay'
 import {editorItems,moveSectionTo,safePageLink,validColor,type EditorItem} from '../lib/pageEditor'
 import {blockedPreviewEvents,preventPreviewDefault,wholeWordingElement} from '../lib/screenEditorSelection'
 import type {Config} from '../components/CloseoutConfig'
+import {attachPreviewSectionMoves,type PreviewSectionMoves} from '../lib/previewSectionMoves'
 import {SectionOrderEditor} from '../components/SectionOrderEditor'
 import './ScreenWordingPage.css'
 const pages=[['Home / Dashboard','/'],['Schedule','/schedule'],['Reports','/reports'],['Reservation Inquiries','/reservation-inquiries'],['Inquiry Studio','/inquiry-studio'],['Guest Services','/inquiry-inbox'],['Food Training','/training/food'],['Staff View Settings','/settings/staff-view'],['Forms Settings','/settings/forms'],['Points Settings','/settings/points'],['Points Adjustments','/settings/points-adjustments'],['Permissions Settings','/settings/permissions'],['Closeout Menu','/closeout'],['Closeout Settings','/closeout/settings'],['Point Rules','/settings/point-rules'],['Manager Awards','/closeout/awards'],['Permissions','/closeout/permissions'],['Published Quizzes','/quizzes/manage'],['Guest Feedback Inbox','/guest-feedback'],['Floor & Reservations','/floor'],['Staff Closeout','/closeout/staff'],['Manager Closeout','/closeout/manager'],['Closeout Summary','/closeout-summary'],['Cash Summary','/closeout-summary/cash'],['Pre-Shift','/preshift'],['Write Pre-Shift','/preshift/write'],['Generate Pre-Shift','/preshift/generate'],['Pre-Shift Presets','/preshift/presets'],['Pre-Shift Drafts','/preshift/drafts'],['Quizzes','/quizzes'],['Quiz Builder','/quizzes/build'],['Tasks','/tasks'],['Assign Tasks','/tasks?view=assign'],['Task Presets','/tasks?view=presets'],['Task Progress','/tasks?view=progress'],['AI Phone','/settings?view=phone'],['Account Settings','/settings?view=security'],['Schedule Roster','/settings?view=roster'],['Styling','/settings?view=styling'],['Inventory History','/inventory?view=history'],['Team','/team'],['Points','/rewards'],['Inventory','/inventory'],['Training','/training'],['Cocktail Training','/training/cocktails'],['Sales Targets','/settings/sales-targets'],['Settings','/settings'],['Appearance','/appearance'],['Calendar','/calendar'],['Stickers & Fonts','/settings/stickers']] as const
@@ -21,6 +22,7 @@ export function ScreenWordingPage(){
  const [items,setItems]=useState<EditorItem[]>([]),[selected,setSelected]=useState<Selected|null>(null),[mode,setMode]=useState<'sections'|'text'>('sections'),[filter,setFilter]=useState(''),[tab,setTab]=useState<'layout'|'style'|'wording'>('layout'),[historyCount,setHistoryCount]=useState(0),[futureCount,setFutureCount]=useState(0)
  const [config,setConfig]=useState<Config|null>(null),[questionText,setQuestionText]=useState('')
  const frame=useRef<HTMLIFrameElement>(null),cleanup=useRef<()=>void>(()=>{}),panel=useRef<HTMLFieldSetElement>(null),history=useRef<Design['changes'][]>([]),future=useRef<Design['changes'][]>([]),lock=useRef(false)
+ const previewMoves=useRef<PreviewSectionMoves|null>(null),draftAction=useRef(draft);draftAction.current=draft
  const state=useRef({changes,loaded,busy,mode,items,config,page});state.current={changes,loaded,busy,mode,items,config,page}
  const previewPath=page.split('?')[0]
  const designPage=previewPath.replace(/(\/(?:walk-in|guest-feedback)\/)[0-9a-f-]{36}/i,'$1:key')
@@ -37,6 +39,7 @@ export function ScreenWordingPage(){
  return()=>{live=false;cleanup.current()}
  },[location,designPage,page,revision])
  useEffect(()=>{if(!loaded||!ready)return;frame.current?.contentWindow?.postMessage({type:'page-editor-draft',page:previewPath,design:{version:saved.version,changes}},window.location.origin)},[changes,loaded,ready,page,saved.version])
+ useEffect(()=>{previewMoves.current?.refresh()},[changes,items,busy])
  useEffect(()=>{if(!dirty)return;const guard=(e:BeforeUnloadEvent)=>{e.preventDefault();e.returnValue=''};window.addEventListener('beforeunload',guard);return()=>window.removeEventListener('beforeunload',guard)},[dirty])
  function draft(next:Design['changes']){if(busy||!loaded||next===changes)return;history.current=[...history.current,changes].slice(-80);future.current=[];setHistoryCount(history.current.length);setFutureCount(0);setChanges(next);setNotice('Draft updated. Save page when you are ready.');setError('')}
  function patch(id:string,update:Partial<DesignChange>){draft({...changes,[id]:{...changes[id],...update}})}
@@ -45,16 +48,18 @@ export function ScreenWordingPage(){
  function redo(){const next=future.current.pop();if(!next)return;history.current.push(changes);setChanges(next);setHistoryCount(history.current.length);setFutureCount(future.current.length)}
  function choose(item:Selected){setSelected(item);setTab(item.word||item.question?'wording':'style');setError('');panel.current?.scrollIntoView({behavior:'smooth',block:'nearest'})}
  function locate(id:string){
+ previewMoves.current?.select(id)
  const doc=frame.current?.contentDocument,node=doc?.querySelector<HTMLElement>('[data-design-block="'+id+'"]');if(!node)return
  doc?.querySelectorAll('[data-editor-selected]').forEach(n=>n.removeAttribute('data-editor-selected'));node.setAttribute('data-editor-selected','true');frame.current?.scrollIntoView({behavior:'smooth',block:'start'});node.scrollIntoView({behavior:'smooth',block:'center'})
  }
  function attach(){cleanup.current();const doc=frame.current?.contentDocument,win=frame.current?.contentWindow;if(!doc||!win)return
  const style=doc.createElement('style');style.textContent='[data-layout-item]{outline:2px dashed #b59a78;outline-offset:2px}[data-design-word]{cursor:pointer!important}[data-editor-selected]{outline:3px solid #a75a28!important;outline-offset:4px}';doc.head.appendChild(style)
+ const moves=attachPreviewSectionMoves(doc,win,{items:()=>state.current.items,changes:()=>state.current.changes,blocked:()=>state.current.busy||!state.current.loaded,move:(id,position)=>{const next=moveSectionTo(state.current.changes,state.current.items,id,position);if(next===state.current.changes){setError('This section has no available move in its current group.');return false}draftAction.current(next);return true}});previewMoves.current=moves
  let indexTimer:ReturnType<typeof setTimeout>|undefined,lastIndex=''
  const index=()=>{const next=editorItems(doc),key=JSON.stringify(next);if(lastIndex!==key){lastIndex=key;setItems(next)}}
  index();const observer=new MutationObserver(()=>{if(indexTimer)clearTimeout(indexTimer);indexTimer=setTimeout(index,80)});observer.observe(doc.body,{childList:true,subtree:true,characterData:true})
  let down:{x:number;y:number;target:EventTarget|null}|null=null,lastPointer=0
- const handle=(event:Event)=>{if(event.cancelable&&preventPreviewDefault(event.type))event.preventDefault();event.stopImmediatePropagation();if(state.current.busy||!state.current.loaded)return
+ const handle=(event:Event)=>{if(moves.handle(event))return;if(event.type==='pointermove')return;if(event.cancelable&&preventPreviewDefault(event.type))event.preventDefault();event.stopImmediatePropagation();if(state.current.busy||!state.current.loaded)return
  if(event.type==='pointerdown'){const e=event as PointerEvent;down={x:e.clientX,y:e.clientY,target:e.target};return}
  if(event.type==='pointercancel'){down=null;return}
  if(event.type==='pointerup'){const e=event as PointerEvent,first=down;down=null;lastPointer=Date.now();if(!first||first.target!==event.target||Math.hypot(e.clientX-first.x,e.clientY-first.y)>10)return}else if(event.type==='click'){if(Date.now()-lastPointer<700)return}else return
@@ -64,10 +69,11 @@ export function ScreenWordingPage(){
   const q=target.closest<HTMLElement>('[data-question-id]'),question=state.current.config?.questions.find(x=>x.id===q?.dataset.questionId);if(question){setQuestionText(question.label);choose({id:question.id,label:question.label,question:true});return}
  }
  const block=target.closest<HTMLElement>('[data-layout-item]')??target.closest<HTMLElement>('section[data-design-block],article[data-design-block],header[data-design-block],fieldset[data-design-block],details[data-design-block]')??target.closest<HTMLElement>('[data-design-block]')
- const item=state.current.items.find(x=>x.id===block?.dataset.designBlock);if(item)choose({id:item.id,label:item.label});else setNotice('Use the section list, or choose Text and tap an editable label.')
+ const item=state.current.items.find(x=>x.id===block?.dataset.designBlock);if(item){moves.select(item.id);setSelected({id:item.id,label:item.label});setTab(item.movable?'layout':'style');setError('')}else setNotice('Use the section list, or choose Text and tap an editable label.')
  }
- blockedPreviewEvents.forEach(type=>win.addEventListener(type,handle,{capture:true,passive:false}))
- cleanup.current=()=>{observer.disconnect();if(indexTimer)clearTimeout(indexTimer);style.remove();blockedPreviewEvents.forEach(type=>win.removeEventListener(type,handle,true))};setReady(true)
+ const previewEvents=[...blockedPreviewEvents,'pointermove']
+ previewEvents.forEach(type=>win.addEventListener(type,handle,{capture:true,passive:false}))
+ cleanup.current=()=>{moves.destroy();if(previewMoves.current===moves)previewMoves.current=null;observer.disconnect();if(indexTimer)clearTimeout(indexTimer);style.remove();previewEvents.forEach(type=>win.removeEventListener(type,handle,true))};setReady(true)
  // The app loads asynchronously after the iframe load event. Re-send drafts on mount.
  win.postMessage({type:'page-editor-draft',page:state.current.page.split('?')[0],design:{version:saved.version,changes:state.current.changes}},window.location.origin)
  }
@@ -89,7 +95,7 @@ export function ScreenWordingPage(){
  <div className="wording-controls"><label>1. Choose a page<select value={page} disabled={busy} onChange={e=>switchPage(e.target.value)}>{[...pages,...extra].map(([name,path])=><option key={path} value={path}>{name}</option>)}</select></label><label>Preview size<select value={width} onChange={e=>setWidth(e.target.value)}><option value="390px">Phone</option><option value="820px">Tablet</option><option value="100%">Full width</option></select></label></div>
  <div className="editor-savebar"><strong role="status">{busy?'Saving…':dirty?'Unsaved draft':'Saved version'}</strong><button disabled={busy||!loaded||!dirty} onClick={()=>void save()}>Save page</button><button disabled={busy||!historyCount} onClick={undo}>Undo</button><button disabled={busy||!futureCount} onClick={redo}>Redo</button><button disabled={busy||!location} onClick={discard}>Reload saved page</button><a href={page} target="_blank" rel="noreferrer">Open live page ↗</a></div>
  {error&&<p role="alert">{error}</p>}{notice&&<p role="status">{notice}</p>}
- <p className="editor-help">Changes affect this location’s page design. Staff permissions and role-specific layout settings still apply. Work buttons in the editing preview cannot submit forms or change assignments.</p>
+ <p className="editor-help"><strong>Preview movement repair 2.</strong> Tap a section in the preview to show Move up, Move down and a touch drag handle. Changes affect this location’s page design. Staff permissions and role-specific layout settings still apply. Work buttons in the editing preview cannot submit forms or change assignments.</p>
  {!loaded&&!error&&<p role="status">Loading saved page…</p>}
  {loaded&&<div className="editor-workspace"><aside className="editor-sidebar"><div className="editor-tabs" role="tablist" aria-label="Editing tools">{(['layout','style','wording'] as const).map(t=><button key={t} role="tab" aria-selected={tab===t} onClick={()=>setTab(t)}>{t==='layout'?'2. Sections':t==='style'?'3. Style':'4. Wording'}</button>)}</div>
  <fieldset disabled={busy||!loaded} className="editor-toolbox" ref={panel}>
