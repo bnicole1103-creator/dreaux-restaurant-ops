@@ -1,0 +1,12 @@
+import {useEffect,useState} from 'react'
+import {Link} from 'react-router-dom'
+import {loadTenantData} from '../lib/tenant'
+import {supabase} from '../lib/supabase'
+import './OperationsControls.css'
+type Alert={id:string;source:string;source_id:string;created_at:string;read_at:string|null;summary:{name:string;type:string;guests:string;date:string;notes:string;phone:string;email:string}}
+export function OperationsAlerts(){
+ const [location,setLocation]=useState(''),[rows,setRows]=useState<Alert[]>([]),[error,setError]=useState('')
+ async function load(l:string,id?:string){const r=await supabase.rpc('operations_alerts_load',{p_location_id:l,p_read_id:id??null});if(r.error)throw r.error;setRows(r.data??[]);setError('')}
+ useEffect(()=>{let live=true;let timer:ReturnType<typeof setInterval>|undefined;void loadTenantData().then(async t=>{if(!live)return;const l=t.locations[0]?.id;if(!l)throw Error('No active location.');setLocation(l);await load(l);timer=setInterval(()=>{if(document.visibilityState==='visible')void load(l).catch(e=>setError(e.message))},30000)}).catch(e=>{if(live)setError(e.message)});return()=>{live=false;if(timer)clearInterval(timer)}},[])
+ return <section className="operations-alerts"><h1>Inquiry notifications</h1><p>Requests sent to you by the saved notification rules. A request still needs availability checked before confirmation.</p>{error&&<p role="alert">{error}</p>}<button type="button" disabled={!location} onClick={()=>void load(location).catch(e=>setError(e.message))}>Refresh</button>{rows.map(r=><article key={r.id}><h2>{!r.read_at?'New · ':''}{r.summary.name||'Guest inquiry'}</h2><p>{r.source} · {r.summary.type} · {r.summary.guests||'Not supplied'} guests · {r.summary.date||'Date not supplied'}</p><p>{r.summary.notes}</p><nav aria-label="Contact guest">{r.summary.phone&&<><a href={'tel:'+r.summary.phone.replace(/[^+\d]/g,'')}>Call {r.summary.phone}</a><a href={'sms:'+r.summary.phone.replace(/[^+\d]/g,'')}>Text guest</a></>}{r.summary.email&&<a href={'mailto:'+encodeURIComponent(r.summary.email)}>Email {r.summary.email}</a>}<Link to="/inquiry-inbox">Open inquiry inbox</Link></nav><p>Received {new Date(r.created_at).toLocaleString()}</p>{!r.read_at&&<button type="button" onClick={()=>void load(location,r.id).catch(e=>setError(e.message))}>Mark read</button>}</article>)}{!rows.length&&!error&&<p>No inquiry notifications yet.</p>}</section>
+}

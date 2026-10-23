@@ -1,7 +1,7 @@
 import {createClient} from 'https://esm.sh/@supabase/supabase-js@2'
-import {requestBody,parseGuide} from './generate.ts'
+import {requestBody,parseGuide,guideVersion} from './generate.ts'
 const headers={'Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers':'authorization,x-client-info,apikey,content-type','Access-Control-Allow-Methods':'POST,OPTIONS','Content-Type':'application/json'}
-const send=(body:unknown,status=200)=>new Response(JSON.stringify(body),{status,headers})
+const send=(body:unknown,status=200)=>new Response(JSON.stringify(typeof body==='object'&&body!==null?{...body,generator_version:guideVersion}:body),{status,headers})
 Deno.serve(async(req:Request)=>{
  if(req.method==='OPTIONS')return new Response('ok',{headers})
  if(req.method!=='POST')return send({error:'Use POST.'},405)

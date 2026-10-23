@@ -1,3 +1,4 @@
+import {DirectMessages} from './DirectMessages'
 import {AppThemeRuntime} from './AppThemeRuntime'
 import {useAppAccess} from './AppAccess'
 import {accessPage} from '../lib/accessCatalog'
@@ -150,6 +151,7 @@ export function AppShell({
           </span>
         </div>
 
+        <DirectMessages key={session.user.id} userId={session.user.id}/>
         <button data-design-block="copy.816668b675145def.1"
           type="button"
           className="logout-button"

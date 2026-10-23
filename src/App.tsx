@@ -21,8 +21,6 @@ import { SalesTargetsPage } from './pages/SalesTargetsPage'
 import { TasksPage } from './pages/TasksPage'
 import { SettingsPage } from './pages/SettingsPage'
 import { SummaryPage } from './pages/SummaryPage'
-import {StickerBankPage} from './pages/StickerBankPage'
-import { AppearancePage as LocationAppearancePage } from './pages/AppearancePage'
 import { ManagementOnly as AppearanceGuard } from './components/ManagementAccess'
 import { PreshiftFeedPage } from './pages/PreshiftFeedPage'
 import { QuizBuilderPage } from './pages/QuizBuilderPage'
@@ -165,8 +163,8 @@ export default function App() {
         <Route path="/settings/permissions" element={<ManagementOnly gmOnly><PermissionsPage /></ManagementOnly>} />
         <Route path="/settings/point-rules" element={<ManagementOnly gmOnly><CloseoutSettingsPage key="point-rules" initialTab="points" /></ManagementOnly>} />
         <Route path="/closeout-summary/cash" element={<SummaryPage cash />} />
-        <Route path="/settings/stickers" element={<AppearanceGuard gmOnly><StickerBankPage /></AppearanceGuard>} />
-        <Route path="/appearance" element={<AppearanceGuard gmOnly><LocationAppearancePage /></AppearanceGuard>} />
+        <Route path="/settings/stickers" element={<AppearanceGuard gmOnly><Navigate to="/settings/wording?tool=stickers" replace /></AppearanceGuard>} />
+        <Route path="/appearance" element={<AppearanceGuard gmOnly><Navigate to="/settings/wording?tool=fonts" replace /></AppearanceGuard>} />
         <Route path="/preshift/*" element={<PreshiftFeedPage />} />
         <Route path="/quizzes" element={<QuizzesPage />} />
         <Route path="/quizzes/build" element={<ManagementOnly><QuizBuilderPage key="future" /></ManagementOnly>} />

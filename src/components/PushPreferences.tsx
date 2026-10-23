@@ -1,3 +1,4 @@
+import {Link} from 'react-router-dom'
 import { ScreenText } from './ScreenText'
 import { useEffect,useState } from 'react'
 import { supabase } from '../lib/supabase'
@@ -34,6 +35,7 @@ export function PushPreferences(){
  return <details className="home-section" data-design-block="copy.PushPreferences.section">
   <summary data-design-block="copy.PushPreferences.title"><ScreenText id="PushPreferences.title">My notifications</ScreenText></summary>
   <p data-design-block="copy.PushPreferences.description"><ScreenText id="PushPreferences.description">Enable notifications once on this device for the whole app. You can turn them off here anytime. The Management chooses which posts send an alert and who receives them.</ScreenText></p>
+  <p><Link to="/settings?view=alerts">Open inquiry notifications and guest contact details</Link></p>
   {!supported()&&<p data-design-block="copy.PushPreferences.install"><ScreenText id="PushPreferences.install">On iPhone or iPad: open the app in Safari → Share → Add to Home Screen. Open the new Home Screen icon, sign in, then enable notifications here.</ScreenText></p>}
   {supported()&&<p data-design-block="copy.PushPreferences.status">{enabled?<ScreenText id="PushPreferences.enabled">Enabled on this device.</ScreenText>:<ScreenText id="PushPreferences.disabled">Not enabled on this device.</ScreenText>}</p>}
   {(supported()||preview)&&<fieldset disabled={busy||!loaded} data-design-block="copy.PushPreferences.controls">

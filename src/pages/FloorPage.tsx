@@ -97,6 +97,7 @@ type ReservationRecord = {
 }
 
 type SmartRecommendation = {
+  scheduled?:boolean;
   employeeId: string
   employeeName: string
   score: number
@@ -135,6 +136,9 @@ type RotationLogEntry = {
 export function FloorPage() {
   const [pendingWalkin,setPendingWalkin]=useState<Walkin|null>(null)
   const [walkinRefresh,setWalkinRefresh]=useState(0)
+  const [smartDay,setSmartDay]=useState(serviceDay)
+  const [smartRole,setSmartRole]=useState('server')
+  const [smartPotential,setSmartPotential]=useState(true)
   const [smartNotice,setSmartNotice]=useState('')
   const [smartError,setSmartError]=useState('')
   const [floorNotice,setFloorNotice]=useState('')
@@ -925,19 +929,17 @@ const [partySize, setPartySize] = useState(1)
     if (!selectedTableIds.length || smartLoading || saving || arrangeMode) return
     setSmartLoading(true);setSmartNotice('');setSmartError('');setSmartRecommendations([]);setShowSmartPanel(true)
     const selected=[...selectedTableIds]
-    const candidates=team.filter(m=>['server','bartender','manager','assistant_manager','general_manager','owner'].includes(m.role)).map(m=>({id:m.user_id,name:memberName(m.user_id)}))
     const loads:Record<string,number>={}
-    assignments.filter(a=>!selected.includes(a.table_id)).forEach(a=>{if(a.server_id)loads[a.server_id]=(loads[a.server_id]??0)+(tables.find(t=>t.id===a.table_id)?.seat_count??0)})
-    let rows:{employee_id:string;net_sales:number|null;table_match:boolean;hours_worked:number|null;closeout_date?:string;closeout_id?:string}[]=[]
+    const planned:Record<string,Set<string>>={}
+    const planDay=(value:string)=>new Date(Date.parse(value)-4*3600000).toLocaleDateString('en-CA',{timeZone:'America/Chicago'})
+    sectionPlans.filter(a=>a.published_at&&planDay(a.starts_at)<=smartDay&&planDay(a.ends_at)>=smartDay).forEach(a=>{if(a.employee_id){planned[a.employee_id]??=new Set();a.table_ids.filter(id=>!selected.includes(id)).forEach(id=>planned[a.employee_id!].add(id))}})
+    Object.entries(planned).forEach(([id,ids])=>{loads[id]=[...ids].reduce((sum,id)=>sum+(tables.find(t=>t.id===id)?.seat_count??0),0)})
     try {
-      const controller=new AbortController();let timer:ReturnType<typeof setTimeout>|undefined
-      let history
-      try{history=await Promise.race([supabase.rpc('floor_closeout_history',{p_location_id:locationId,p_table_ids:selected}).abortSignal(controller.signal),new Promise<never>((_,reject)=>{timer=setTimeout(()=>{reject(Error('Closeout history did not respond. Please retry.'));controller.abort()},25000)})])}finally{if(timer)clearTimeout(timer)}
+      const history=await supabase.rpc('floor_smart_context',{p_location_id:locationId,p_table_ids:selected,p_day:smartDay,p_role:smartRole})
       if(history.error)throw history.error
-      if(!Array.isArray(history.data))throw Error('Closeout history could not be read. Please retry or ask management to check the connection.')
-      rows=history.data
-      setSmartRecommendations(recommendSections(candidates,rows,loads))
-      setSmartNotice('Read directly from submitted closeout forms: up to 30 positive-sales server closeouts per person from the last 90 service days. Matching table combinations are preferred when available. Recorded clock-in and clock-out enable hourly comparisons. Older forms still contribute net sales history. Current table capacity also affects suggestions.')
+      const context=history.data
+      setSmartRecommendations(recommendSections(context.candidates,context.performance,context.loads??loads,context.seats))
+      setSmartNotice(`${context.seats} selected seats · ${smartRole} · ${smartDay}. Scheduled people appear first. History uses up to 30 submitted closeouts per employee from 90 days. Section assignments fill gaps in closeout table records. Historical seat counts use today's table capacities. ${context.schedule_confirmed_at?'Reviewed schedule confirmed '+new Date(context.schedule_confirmed_at).toLocaleString('en-US',{timeZone:'America/Chicago'})+' CT':context.schedule_error?'Schedule sync error: '+context.schedule_error:context.schedule_synced_at?'Schedule last synced '+new Date(context.schedule_synced_at).toLocaleString():'No imported schedule for this date; availability is unconfirmed.'}`)
     } catch (e) {
       setSmartError(`Closeout forms could not be read: ${String((e as {message?:string}).message??e)}`)
     } finally {
@@ -2337,7 +2339,7 @@ const [partySize, setPartySize] = useState(1)
         <AccessSection page="floor" section="sections"><div data-design-block="copy.4c37ee59da8684e0.4" className="modal-backdrop">
           <div data-design-block="copy.7d0744713f5fc9bb.4" className="modal-card">
             <p data-design-block="copy.b78f32efa3eeed28.4" className="eyebrow"><ScreenText id="FloorPage.0c90f34dd45cb5c2">SectionIQ</ScreenText></p>
-            <AccessSection page="floor" section="sections"><h2 data-design-block="copy.2e495f44a1c1f630.5"><ScreenText id="FloorPage.a17e164e8984911a">Smart Section</ScreenText></h2></AccessSection>{smartLoading&&<p data-design-block="copy.d70411190a777647.2" role="status"><ScreenText id="FloorPage.3cc5f5f9eee5793a">Checking history and assigned capacity…</ScreenText></p>}{smartNotice&&<p data-design-block="copy.d70411190a777647.3" role="status">{smartNotice}</p>}{smartError&&<div role="alert"><p>{smartError}</p><button type="button" disabled={smartLoading} onClick={()=>void handleSmartSection()}>Retry closeout history</button></div>}
+            <div className="form-grid"><label>Recommendation date<input type="date" value={smartDay} onChange={e=>{setSmartDay(e.target.value);setSmartRecommendations([])}}/></label><label>Position<select value={smartRole} onChange={e=>{setSmartRole(e.target.value);setSmartRecommendations([])}}>{['server','bartender','host','busser','manager','kitchen'].map(r=><option key={r}>{r}</option>)}</select></label><label><input type="checkbox" checked={smartPotential} onChange={e=>setSmartPotential(e.target.checked)}/>Include potential employees — confirm availability</label><button disabled={smartLoading} onClick={()=>void handleSmartSection()}>Analyze selected combination</button></div><AccessSection page="floor" section="sections"><h2 data-design-block="copy.2e495f44a1c1f630.5"><ScreenText id="FloorPage.a17e164e8984911a">Smart Section</ScreenText></h2></AccessSection>{smartLoading&&<p data-design-block="copy.d70411190a777647.2" role="status"><ScreenText id="FloorPage.3cc5f5f9eee5793a">Checking history and assigned capacity…</ScreenText></p>}{smartNotice&&<p data-design-block="copy.d70411190a777647.3" role="status">{smartNotice}</p>}{smartError&&<div role="alert"><p>{smartError}</p><button type="button" disabled={smartLoading} onClick={()=>void handleSmartSection()}>Retry closeout history</button></div>}
 
             <div data-design-block="copy.9d44ed5cc078bb68.1"
               style={{
@@ -2369,7 +2371,7 @@ const [partySize, setPartySize] = useState(1)
             </div>
 
             <div data-design-block="copy.20ed96841559d606.1" style={{ display: 'grid', gap: '10px' }}>
-              {smartRecommendations.map(
+              {smartRecommendations.filter(r=>smartPotential||r.scheduled).map(
                 (recommendation, index) => (
                   <div data-design-block="copy.a14eb06a1bf41547.1"
                     key={recommendation.employeeId}
@@ -2391,7 +2393,7 @@ const [partySize, setPartySize] = useState(1)
                     >
                       <strong>
                         {index === 0 ? <PageWord id="copy.3b9b597229a99dd2.1">{"⭐ "}</PageWord> : <PageWord id="copy.d8faa01e919cbb07.5">{""}</PageWord>}
-                        <TeamProfileName userId={recommendation.employeeId} locationId={locationId} name={recommendation.employeeName}/>
+                        <TeamProfileName userId={recommendation.employeeId.startsWith('schedule:')?undefined:recommendation.employeeId} locationId={locationId} name={recommendation.employeeName}/>
                       </strong>
 
                       <strong>
@@ -2421,7 +2423,7 @@ const [partySize, setPartySize] = useState(1)
                         opacity: 0.8,
                       }}
                     ><ScreenText id="FloorPage.14863dce1469a07a">
-                      Current assigned capacity:</ScreenText>{' '}
+                      Other planned capacity on this date:</ScreenText>{' '}
                       {recommendation.currentSeats}<ScreenText id="FloorPage.2c216c77f3f8764e"> seats
                     </ScreenText></div>
 
@@ -2442,10 +2444,10 @@ const [partySize, setPartySize] = useState(1)
                       }}
                       onClick={() => {
                         setShowSmartPanel(false)
-                        setScheduleEditRequest({id:'',nonce:Date.now(),employee_id:recommendation.employeeId})
+                        setScheduleEditRequest({id:'',nonce:Date.now(),employee_id:recommendation.employeeId.startsWith('schedule:')?undefined:recommendation.employeeId,guest_name:recommendation.employeeId.startsWith('schedule:')?recommendation.employeeName:undefined,date:smartDay})
                       }}
                     ><ScreenText id="FloorPage.2e430a58775b49a6">
-                      Use This Server
+                      Use this employee
                     </ScreenText></button>
                   </div>
                 ),

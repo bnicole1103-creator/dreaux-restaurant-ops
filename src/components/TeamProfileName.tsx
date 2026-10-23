@@ -1,3 +1,4 @@
+import {MessageEmployeeButton} from './DirectMessages'
 import {TeamProfileWeek} from './TeamProfileWeek'
 import {useEffect,useRef,useState,type ReactNode} from 'react'
 import {createPortal} from 'react-dom'
@@ -9,7 +10,7 @@ type Person={user_id:string;name:string;role:string;status:string;photo:string|n
 function BasicDialog({person,error,busy,onClose,location}:{person:Person|null;error:string;busy:boolean;onClose:()=>void;location:string}){
  const dialog=useRef<HTMLDialogElement>(null)
  useEffect(()=>{const d=dialog.current;d?.showModal();return()=>d?.close()},[])
- return createPortal(<dialog className="wt-dialog team-profile-dialog" ref={dialog} onCancel={onClose} aria-label="Team profile"><button type="button" className="wt-close" aria-label="Close team profile" onClick={onClose}>×</button>{busy&&<p role="status">Opening team profile…</p>}{error&&<p role="alert">{error}</p>}{person&&<>{person.photo&&<img className="team-profile-photo" src={person.photo} alt=""/>}<h2>{person.name}</h2><p>{person.role.replace(/_/g,' ')} · {person.status}</p><TeamProfileWeek locationId={location} userId={person.user_id}/><p>Detailed activity and analysis are available to this employee and management.</p></>}</dialog>,document.body)
+ return createPortal(<dialog className="wt-dialog team-profile-dialog" ref={dialog} onCancel={onClose} aria-label="Team profile"><button type="button" className="wt-close" aria-label="Close team profile" onClick={onClose}>×</button>{busy&&<p role="status">Opening team profile…</p>}{error&&<p role="alert">{error}</p>}{person&&<>{person.photo&&<img className="team-profile-photo" src={person.photo} alt=""/>}<h2>{person.name}</h2><MessageEmployeeButton location={location} userId={person.user_id} onOpen={onClose}/><p>{person.role.replace(/_/g,' ')} · {person.status}</p><TeamProfileWeek locationId={location} userId={person.user_id}/><p>Detailed activity and analysis are available to this employee and management.</p></>}</dialog>,document.body)
 }
 export function TeamProfileName({userId,employeeKey,locationId,name,children,postId}:{postId?:string;userId?:string|null;employeeKey?:string|null;locationId?:string;name?:string;children?:ReactNode}){
  const [open,setOpen]=useState(false),[busy,setBusy]=useState(false),[error,setError]=useState(''),[person,setPerson]=useState<Person|null>(null),[location,setLocation]=useState('')

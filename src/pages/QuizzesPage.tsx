@@ -15,8 +15,8 @@ import type { PublishedQuiz } from '../components/PublishedQuizzes'
 import './ManagerCloseoutPage.css'
 import './QuizzesPage.css'
 export type Question = {prompt:string;category:string;options:string[];correct:number;explanation:string}
-export type Quiz = {id:string;version:number;quiz_date:string;title:string;instructions:string;questions:Question[];published:boolean}
-export type QuizResult = {score:number;total:number;percent:number;reward_points?:number;questions:{prompt:string;category:string;selected:string;correct_answer:string;correct:boolean;explanation:string}[]}
+export type Quiz = {id:string;version:number;quiz_date:string;title:string;instructions:string;questions:Question[];published:boolean;answers_released?:boolean}
+export type QuizResult = {score:number;total:number;percent:number;reward_points?:number;answers_released?:boolean;questions:{prompt:string;category:string;selected:string;correct_answer:string;correct:boolean;explanation:string}[]}
 type Attempt={quiz_id:string;quiz_date:string;title:string;submitted_at:string;result:QuizResult;running_score:number;earned_points:number}
 type Monthly={points:number;correct:number;requirements:{quiz_id:string;due_at:string}[];penalties:{entry_key:string;business_date:string;points:number;description:string}[];possible:number;completed:number;attempts:Attempt[]}
 export function quizToday(){const p=new Intl.DateTimeFormat('en-US',{timeZone:'America/Chicago',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());const get=(t:string)=>p.find(x=>x.type===t)?.value;return `${get('year')}-${get('month')}-${get('day')}`}
@@ -25,7 +25,7 @@ export function quizDateLabel(day:string){return new Intl.DateTimeFormat('en-US'
 export function quizError(e:unknown){return String((e as {message?:string})?.message ?? e)}
 export function QuizResults({result}:{result:QuizResult}){
  return <DesignSection as="article" data-design-block="copy.b40784f5607731b4.1" className="mod-review"><h3 data-design-block="copy.26f1d34ac8687bbf.1"><ScreenText id="QuizzesPage.415b1b5046913963">Your score: </ScreenText>{result.score}<PageWord id="copy.398a3a3d69b591bc.1">/ </PageWord>{result.total}<PageWord id="copy.027cc0e91ed89a2a.1">(</PageWord>{result.percent}<PageWord id="copy.9dfa82fee9811aed.1">%)</PageWord></h3>
-  {result.questions.map((q,i)=><article data-design-block="copy.f0f45233c95a8c35.1" className="quiz-question" key={i}><h4 data-design-block="copy.dd53bf8527110477.1">{i+1}<PageWord id="copy.df6b29a90fc3e15f.1">. </PageWord>{q.prompt}</h4><p data-design-block="copy.854e1d9db292679b.1">{q.correct?<PageWord id="copy.563e36564de73a11.1">{"Correct"}</PageWord>:<PageWord id="copy.3023b617f2667a00.1">{"Incorrect"}</PageWord>}<ScreenText id="QuizzesPage.a96b839a58105eb0"> · Your answer: </ScreenText>{q.selected}</p><p data-design-block="copy.854e1d9db292679b.2"><ScreenText id="QuizzesPage.9d4db8d05a3c92fd">Correct answer: </ScreenText>{q.correct_answer}</p>{q.explanation && <p data-design-block="copy.854e1d9db292679b.3">{q.explanation}</p>}</article>)}
+  {result.answers_released===false&&<p>Correct answers and explanations will appear when management releases them.</p>}{result.questions.map((q,i)=><article data-design-block="copy.f0f45233c95a8c35.1" className="quiz-question" key={i}><h4 data-design-block="copy.dd53bf8527110477.1">{i+1}<PageWord id="copy.df6b29a90fc3e15f.1">. </PageWord>{q.prompt}</h4><p data-design-block="copy.854e1d9db292679b.1">{q.correct?<PageWord id="copy.563e36564de73a11.1">{"Correct"}</PageWord>:<PageWord id="copy.3023b617f2667a00.1">{"Incorrect"}</PageWord>}<ScreenText id="QuizzesPage.a96b839a58105eb0"> · Your answer: </ScreenText>{q.selected}</p><p data-design-block="copy.854e1d9db292679b.2"><ScreenText id="QuizzesPage.9d4db8d05a3c92fd">Correct answer: </ScreenText>{q.correct_answer}</p>{q.explanation && <p data-design-block="copy.854e1d9db292679b.3">{q.explanation}</p>}</article>)}
  </DesignSection>
 }
 function CompletedQuiz({title,date,result,running,monthly,submittedAt,earned}:{title:string;date:string;result:QuizResult;running?:number;monthly?:number;submittedAt?:string;earned?:number}){
@@ -40,7 +40,7 @@ export function QuizzesPage(){
  const access=useManagementAccess();const navigate=useNavigate()
  const [location,setLocation]=useState('');const [date,setDate]=useState(quizToday)
  const [month,setMonth]=useState(()=>quizToday().slice(0,7));const [refresh,setRefresh]=useState(0)
- const [quiz,setQuiz]=useState<Quiz|null>(null);const [result,setResult]=useState<QuizResult|null>(null)
+ const [scheduled,setScheduled]=useState<{id:string;title:string;quiz_date:string}[]>([]);const [dayQuizzes,setDayQuizzes]=useState<{quiz:Quiz;result:QuizResult|null;scheduled:boolean}[]>([]);const [selectedQuiz,setSelectedQuiz]=useState('');const [quiz,setQuiz]=useState<Quiz|null>(null);const [result,setResult]=useState<QuizResult|null>(null)
  const [monthly,setMonthly]=useState<Monthly|null>(null);const [answers,setAnswers]=useState<Record<number,number>>({})
  const [submitting,setSubmitting]=useState(false);const [confirmSubmit,setConfirmSubmit]=useState(false);const [submitError,setSubmitError]=useState('');const [submitted,setSubmitted]=useState(false)
  const submissionLock=useRef(false);const submitFeedback=useRef<HTMLDivElement>(null)
@@ -49,8 +49,8 @@ export function QuizzesPage(){
  useEffect(()=>{let live=true;void loadTenantData().then(t=>{if(!t.locations[0])throw new Error('No active location.');if(live)setLocation(t.locations[0].id)}).catch(e=>{if(live){setError(quizError(e));setBusy(false);setMonthBusy(false)}});return()=>{live=false}},[])
  useEffect(()=>{const check=()=>setDate(quizToday());const visible=()=>{if(document.visibilityState==='visible')check()};const timer=setInterval(check,30000);window.addEventListener('focus',check);document.addEventListener('visibilitychange',visible);return()=>{clearInterval(timer);window.removeEventListener('focus',check);document.removeEventListener('visibilitychange',visible)}},[])
  useEffect(()=>{setMonth(date.slice(0,7))},[date])
- useEffect(()=>{if(!location)return;let live=true;setBusy(true);setError('');setQuiz(null);setResult(null);setAnswers({});setConfirmSubmit(false);setSubmitError('');setSubmitted(false);void (async()=>{
-  try{const {data,error}=await supabase.rpc('quiz_staff_load',{p_location_id:location,p_date:date});if(error)throw error;if(live){setQuiz(data.quiz);setResult(data.result)}}catch(e){if(live)setError(quizError(e))}finally{if(live)setBusy(false)}
+ useEffect(()=>{if(!location)return;let live=true;setBusy(true);setError('');setQuiz(null);setResult(null);setDayQuizzes([]);setScheduled([]);setAnswers({});setConfirmSubmit(false);setSubmitError('');setSubmitted(false);void (async()=>{
+  try{const {data,error}=await supabase.rpc('quiz_staff_day_v2',{p_location_id:location,p_date:date});if(error)throw error;if(live){const entries=data.quizzes??[];setDayQuizzes(entries);setScheduled(data.scheduled??[]);const first=entries.find((x:{quiz:Quiz})=>x.quiz.id===selectedQuiz)??entries.find((x:{result:QuizResult|null})=>!x.result)??entries[0];setQuiz(first?.quiz??null);setResult(first?.result??null)}}catch(e){if(live)setError(quizError(e))}finally{if(live)setBusy(false)}
  })();return()=>{live=false}},[location,date,refresh])
  useEffect(()=>{if(!location)return;let live=true;setMonthBusy(true);setMonthError('');setMonthly(null);void (async()=>{
   try{const {data,error}=await supabase.rpc('quiz_staff_month',{p_location_id:location,p_month:month+'-01'});if(error)throw error;if(live)setMonthly(data)}catch(e){if(live)setMonthError(quizError(e))}finally{if(live)setMonthBusy(false)}
@@ -81,7 +81,7 @@ export function QuizzesPage(){
    ])
    if(error)throw error
    if(!data || !Array.isArray(data.questions) || typeof data.score!=='number')throw new Error('The server did not return a quiz result. Your answers are still here. Try submitting again to check whether it saved.')
-   setResult(data);setSubmitted(true);setScoresRefresh(v=>v+1)
+   setResult(data);setDayQuizzes(v=>v.map(x=>x.quiz.id===quiz.id?{...x,result:data}:x));setSubmitted(true);setScoresRefresh(v=>v+1)
   }catch(e){setSubmitError(quizError(e));requestAnimationFrame(()=>submitFeedback.current?.focus())}
   finally{if(timeout)clearTimeout(timeout);submissionLock.current=false;setSubmitting(false)}
  }
@@ -91,8 +91,8 @@ export function QuizzesPage(){
   setBusy(true);setError('')
   try{const {error}=await supabase.rpc('quiz_manager_remove',{p_location_id:location,p_quiz_id:q.id,p_version:q.version});if(error)throw error;setRefresh(v=>v+1)}catch(e){setError(quizError(e))}finally{setBusy(false)}
  }
- const ownToday=monthly?.attempts.find(a=>a.quiz_date===date)
- const otherAttempts=monthly?.attempts.filter(a=>!(quiz && result && a.quiz_date===date)) ?? []
+ const ownToday=monthly?.attempts.find(a=>a.quiz_id===quiz?.id)
+ const otherAttempts=monthly?.attempts ?? []
  return <DesignSection as="section" data-design-block="copy.2ad13fdb7d598282.1" className="mod-page quiz-page"><p data-design-block="copy.55e941dd4b788dbb.1" className="eyebrow"><ScreenText id="QuizzesPage.15c8c5ead821decf">Pre-shift preparation</ScreenText></p><h1 data-design-block="copy.a5c87383cd4dd950.1"><ScreenText id="QuizzesPage.38584cb9f2b57db7">Daily Quizzes</ScreenText></h1>
   <nav data-design-block="section.ceb12dc9375bffa771a4" className="workspace-actions" aria-label="Quiz tools"><Link to="/quizzes"><PageWord id="sectioncopy.d4417b3e7bb7a967dc89">{"Today's quizzes"}</PageWord></Link><Link to="/quizzes?view=scores"><PageWord id="sectioncopy.f068a59b5eeab6666e68">{"My scores"}</PageWord></Link><button type="button" disabled={busy || submitting} onClick={()=>{if(Object.keys(answers).length&&!result&&!window.confirm("Discard answers and refresh?"))return;setRefresh(v=>v+1)}}><PageWord id="sectioncopy.d4bfa52c801449ac87aa">{"Refresh quizzes"}</PageWord></button>{access.manager&&<><Link to="/quizzes?view=generate"><PageWord id="sectioncopy.4c65231936d43a5f56c0">{"Generate quiz"}</PageWord></Link><Link to="/quizzes/build"><PageWord id="sectioncopy.ba52ba963af755154d28">{"Build / question bank"}</PageWord></Link><Link to="/quizzes?view=manage"><PageWord id="sectioncopy.430a6fbcab3788e2f243">{"Published quizzes / team scores"}</PageWord></Link></>}</nav>
   {access.manager&&view==='generate'&&<AccessSection page="posts" section="builder"><GeneratePreshiftQuiz allowPaste location={location} date={date} title="" body="" disabled={!location} onSaved={()=>setRefresh(v=>v+1)}/></AccessSection>}
@@ -101,6 +101,7 @@ export function QuizzesPage(){
   <h2 data-design-block="copy.b5e32943f8cdadea.1"><ScreenText id="QuizzesPage.6e4f183331ca689e">Today · </ScreenText>{quizDateLabel(date)}</h2>
   {error && <p data-design-block="copy.33f8f18b9f66c5f9.1" role="alert">{error}</p>}{busy && <p data-design-block="copy.dce6c33edff70b50.1" role="status"><ScreenText id="QuizzesPage.6799e69e289fa08d">Loading…</ScreenText></p>}
   {!busy && !quiz && !error && <DesignSection as="article" data-design-block="copy.b40784f5607731b4.2" className="mod-review"><h3 data-design-block="copy.26f1d34ac8687bbf.2"><ScreenText id="QuizzesPage.1d72b99728971f78">No quiz published for today</ScreenText></h3><p data-design-block="copy.854e1d9db292679b.6"><ScreenText id="QuizzesPage.21286979d56c5fd7">Your manager will publish today’s pre-shift quiz here.</ScreenText></p>{access.manager && <Link to={'/quizzes/manage?date='+date}><ScreenText id="QuizzesPage.0904328e9a0b32e1">Create / Publish Today’s Quiz →</ScreenText></Link>}</DesignSection>}
+  {!!dayQuizzes.length&&<nav className="quiz-day-selector" aria-label="Today’s quizzes">{dayQuizzes.map(entry=><button type="button" key={entry.quiz.id} disabled={submitting} aria-pressed={quiz?.id===entry.quiz.id} onClick={()=>{if(Object.keys(answers).length&&!result&&!window.confirm('Discard unsaved answers and switch quizzes?'))return;setSelectedQuiz(entry.quiz.id);setQuiz(entry.quiz);setResult(entry.result);setAnswers({});setConfirmSubmit(false);setSubmitError('');setSubmitted(false)}}>{entry.quiz.title} · {entry.result?'Submitted':'Not submitted'}</button>)}</nav>}
   {quiz && monthly?.requirements?.find(r=>r.quiz_id===quiz.id) && <p data-design-block="copy.854e1d9db292679b.7"><ScreenText id="QuizzesPage.cf3a03ebcb629cd4">This quiz is required for you. Deadline: </ScreenText>{submissionLabel(monthly.requirements.find(r=>r.quiz_id===quiz.id)?.due_at)}<PageWord id="copy.df6b29a90fc3e15f.2">.</PageWord></p>}
   {submitted && <p role="status">Quiz submitted successfully. Your score is saved.</p>}
   {quiz && (result?<CompletedQuiz title={quiz.title} date={date} result={result} submittedAt={ownToday?.submitted_at} earned={ownToday?.earned_points} running={ownToday?.running_score} monthly={month===date.slice(0,7)?monthly?.points:undefined} />:<DesignSection as="article" data-design-block="copy.b40784f5607731b4.3" className="mod-review"><h3 data-design-block="copy.26f1d34ac8687bbf.3"><ScreenText id="QuizzesPage.3780149cd908fc4d">Pre-Shift Quiz · </ScreenText>{quizDateLabel(date)}</h3><p data-design-block="copy.854e1d9db292679b.8">{quiz.title}</p>{quiz.instructions && <p data-design-block="copy.cc40ed17908bb9de.1" className="quiz-instructions">{quiz.instructions}</p>}
@@ -112,6 +113,7 @@ export function QuizzesPage(){
    </div></form>
   </DesignSection>)}
   </>}
+  {view==='today'&&!!scheduled.length&&<section aria-label="Scheduled quizzes"><h2>Upcoming quizzes</h2>{scheduled.map(q=><p key={q.id}>{quizDateLabel(q.quiz_date)} · {q.title} · Opens on the quiz date</p>)}</section>}
   {view==='scores'&&  <DesignSection as="article" data-design-block="copy.b40784f5607731b4.4" className="mod-review"><h2 data-design-block="copy.b5e32943f8cdadea.2"><ScreenText id="QuizzesPage.0cb69b9dbee3b5dd">My Monthly Quiz Scores</ScreenText></h2><label data-design-block="copy.45940bda03775ba8.1"><ScreenText id="QuizzesPage.76488090a5a6664f">Month</ScreenText><input type="month" value={month} max={date.slice(0,7)} onChange={e=>{if(e.target.value)setMonth(e.target.value)}} /></label>
    {monthError && <p data-design-block="copy.33f8f18b9f66c5f9.2" role="alert">{monthError}</p>}{monthBusy && <p data-design-block="copy.dce6c33edff70b50.2" role="status"><ScreenText id="QuizzesPage.2932d9f524945dc5">Loading quiz points…</ScreenText></p>}
    {monthly && <><p data-design-block="copy.8b6a36984e3d7399.1" className="quiz-month-total"><strong>{monthly.correct}<PageWord id="copy.398a3a3d69b591bc.3">/ </PageWord>{monthly.possible}</strong><ScreenText id="QuizzesPage.c867c300a82de4b2"> correct answers</ScreenText></p><p data-design-block="copy.854e1d9db292679b.9">{monthly.completed}<ScreenText id="QuizzesPage.e88d2571ca0c7ec0"> quizzes completed · </ScreenText>{monthly.points}<ScreenText id="QuizzesPage.8e8d6815000b8987"> reward points</ScreenText></p></>}
@@ -120,7 +122,7 @@ export function QuizzesPage(){
    <h3 data-design-block="copy.26f1d34ac8687bbf.4"><ScreenText id="QuizzesPage.3c438183031c1c95">Completed quizzes</ScreenText></h3>{monthly && otherAttempts.length===0 && <p data-design-block="copy.854e1d9db292679b.10">{ownToday && quiz && result?<PageWord id="copy.21889ed57431a966.1">{"Today’s completed quiz is shown above."}</PageWord>:<PageWord id="copy.152f8eb485ee5a01.1">{"No other quizzes completed this month."}</PageWord>}</p>}
    {otherAttempts.map(a=><CompletedQuiz key={a.quiz_id} title={a.title} date={a.quiz_date} result={a.result} submittedAt={a.submitted_at} earned={a.earned_points} running={a.running_score} monthly={monthly?.points} />)}
   </DesignSection>}
-  {access.manager && view==='manage'&&<details open><summary><ScreenText id="QuizzesPage.26d09c58d141e83c">Manage Published Quizzes / Team Scores</ScreenText></summary><PublishedQuizzes location={location} refresh={refresh} disabled={busy || !location} throughDate={date} onEdit={d=>navigate('/quizzes/manage?date='+d)} onRemove={remove} /></details>}
+  {access.manager && view==='manage'&&<details open><summary><ScreenText id="QuizzesPage.26d09c58d141e83c">Manage Published Quizzes / Team Scores</ScreenText></summary><PublishedQuizzes location={location} refresh={refresh} disabled={busy || !location} throughDate={date} onEdit={(d,id)=>navigate('/quizzes/manage?date='+d+'&quiz='+id)} onRemove={remove} /></details>}
  </DesignSection>
 }
 

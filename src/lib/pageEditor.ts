@@ -56,7 +56,7 @@ export function editorItems(doc:Document):EditorItem[]{
  return nodes.filter(n=>counts.get(n.dataset.designBlock!)===1&&!n.closest('[data-editor-ignore]')).map(n=>{
   const parent=layoutOwner(n),group=parent?.dataset.layoutGroup
   // Reorder only explicit layout slots, or semantic siblings in an existing instrumented container.
-  const semantic='section[data-design-block],article[data-design-block],header[data-design-block],aside[data-design-block],details[data-design-block],fieldset[data-design-block]'
+  const semantic='section[data-design-block],article[data-design-block],header[data-design-block],aside[data-design-block],details[data-design-block],fieldset[data-design-block],nav[data-design-block],form[data-design-block],div[data-design-block]'
   const safe=!n.dataset.layoutTransparent&&!!parent?.dataset.designBlock&&n.matches(semantic)&&Array.from(n.parentElement?.children??[]).filter(c=>c.matches(semantic)).length>1
   const movable=!!n.dataset.layoutItem&&!!group||safe
   const words=Array.from(n.querySelectorAll<HTMLElement>('[data-design-word]')).filter(w=>!/\.w\d+$/.test(w.dataset.designWord??'')).filter((w,i,a)=>a.findIndex(x=>x.dataset.designWord===w.dataset.designWord)===i).map(w=>({id:w.dataset.designWord!,text:w instanceof doc.defaultView!.HTMLInputElement?(w as HTMLInputElement).placeholder:w.textContent??''}))
