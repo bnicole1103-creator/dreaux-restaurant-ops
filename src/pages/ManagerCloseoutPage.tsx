@@ -54,6 +54,7 @@ export function ManagerCloseoutPage() {
   const [loading, setLoading] = useState(true)
   const [shiftLoading, setShiftLoading] = useState(false)
   const [reviewLoading, setReviewLoading] = useState(false)
+  const [receiptPending,setReceiptPending]=useState<number|null>(null)
   const [saving, setSaving] = useState(false)
   const [allowed, setAllowed] = useState(false)
   const [canEdit, setCanEdit] = useState(true)
@@ -171,6 +172,8 @@ export function ManagerCloseoutPage() {
   async function submit(event: FormEvent) {
     event.preventDefault()
     if (saving) return
+    if(receiptPending===null){setError('Open My wallet and wait for receipt photos to load before submitting.');return}
+    if(receiptPending>0){setError('Review and save or delete every receipt photo before submitting.');return}
     setError(''); setMessage('')
     if (!confirmed || !reviews.length || reviews.some(r => !r.rating || !r.category?.trim())) {
       setError('Select all staff who worked, rate each person, choose a reason category, and confirm the roster.')
@@ -231,7 +234,7 @@ export function ManagerCloseoutPage() {
     {message && <p data-design-block="copy.e6598ab30c274935.1" role="status">{message}</p>}
     {stamp && <p data-design-block="copy.0441952f380976f4.3"><ScreenText id="ManagerCloseoutPage.77476d75d9140c97">Submitted: </ScreenText>{submissionLabel(stamp.submitted_at)}{stamp.updated_at!==stamp.submitted_at && <><ScreenText id="ManagerCloseoutPage.d5bb16ce999eef86"> · Last updated: </ScreenText>{submissionLabel(stamp.updated_at)}</>}</p>}
     {allowed && <>
-      <CloseoutReceiptWallet inline managerCloseout location={locationId} day={date} shiftId={shiftId||undefined} label="Open manager receipt wallet & voids/comps report"/>
+      <CloseoutReceiptWallet onPendingChange={setReceiptPending} inline managerCloseout location={locationId} day={date} shiftId={shiftId||undefined} label="Open manager receipt wallet & voids/comps report"/>
       <form data-design-block="copy.dd10d8aa672e4d86.1" onSubmit={submit}>
         <fieldset data-design-block="copy.77f40dd73dabd8ed.1" disabled={saving || creatingShift} className="mod-controls">
           <label data-design-block="copy.34cec310e481785a.1"><ScreenText id="ManagerCloseoutPage.2202e5e40ee243a8">Shift date</ScreenText><input type="date" required max={localDate()} value={date}
@@ -319,7 +322,7 @@ export function ManagerCloseoutPage() {
           </DesignSection>}
           <label data-design-block="copy.555a75cba4b3447e.1" className="mod-check"><input type="checkbox" required checked={confirmed}
             onChange={e => setConfirmed(e.target.checked)} /><ScreenText id="ManagerCloseoutPage.9978865bd56536f3">I included everyone I supervised who worked this shift.</ScreenText></label>
-          <button data-design-block="copy.8cb3e942b1ad10b7.1" type="submit" disabled={!reviews.length || !confirmed}>{saving ? <PageWord id="copy.0f556bfd5560fe2d.1">{"Saving…"}</PageWord> : <PageWord id="copy.f13061703e4e7e97.1">{"Submit Manager Closeout"}</PageWord>}</button>
+          <button data-design-block="copy.8cb3e942b1ad10b7.1" type="submit" disabled={!reviews.length || !confirmed || receiptPending!==0}>{saving ? <PageWord id="copy.0f556bfd5560fe2d.1">{"Saving…"}</PageWord> : <PageWord id="copy.f13061703e4e7e97.1">{"Submit Manager Closeout"}</PageWord>}</button>
         </fieldset>}
         {shiftId && !reviewLoading && !canEdit && <p data-design-block="copy.0441952f380976f4.9"><ScreenText id="ManagerCloseoutPage.30caf0d1c89056fc">Only the submitting MOD, owner, or Management can edit this saved closeout.</ScreenText></p>}
       </form><ReceiptSubmissionLog location={locationId} day={date}/>

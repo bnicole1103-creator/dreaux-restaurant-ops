@@ -354,6 +354,7 @@ export function CloseoutPage() {
   const closeoutRequest=useRef('')
   closeoutRequest.current=receiptDraft.key
   const [submittedReceiptKey,setSubmittedReceiptKey]=useState('')
+  const [receiptPending,setReceiptPending]=useState<number|null>(null)
   const [receiptRows,setReceiptRows]=useState<CloseoutReceipt[]>([])
   const receiptTotals=summarizeCloseoutReceipts(receiptRows)
   const [floorShiftId,setFloorShiftId]=useState(''),[floorShifts,setFloorShifts]=useState<{id:string;shift_name:string;status:string}[]>([]),[floorTablesNotice,setFloorTablesNotice]=useState('')
@@ -889,6 +890,8 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
       setSaving(true)
       setError('')
       setMessage('')
+      if(receiptPending===null)throw new Error('Wait for your receipt wallet to load before submitting.');
+      if(receiptPending>0)throw new Error('Review and save or delete every receipt photo before submitting.');
       if(!receiptDraft.key)throw new Error('Receipt wallet is still loading. Try again shortly.')
       const reportedStockItems=closeoutStockItems(hasStockItems,stockItems)
 
@@ -1164,8 +1167,8 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
         </p>
       </div>
 
-      {receiptDraft.key&&<CloseoutReceiptWallet inline key={receiptDraft.key} location={locationId} day={closeoutDay} closeoutKey={receiptDraft.key} shiftId={floorShiftId||undefined} onChange={rows=>{setReceiptRows(rows);const t=summarizeCloseoutReceipts(rows);setVoidCount(String(t.voidCount));setVoidValue(String(t.voidTotal));setDiscountValue(String(t.compTotal))}}/>}
-      <p>Attach one entry for each void, comp or discount. Receipt amounts must match the POS totals below. Server errors deduct 5 points per entry unless this past-date closeout has been approved without points.</p>
+      {receiptDraft.key&&<CloseoutReceiptWallet onPendingChange={setReceiptPending} inline key={receiptDraft.key} location={locationId} day={closeoutDay} closeoutKey={receiptDraft.key} shiftId={floorShiftId||undefined} onChange={rows=>{setReceiptRows(rows);const t=summarizeCloseoutReceipts(rows);setVoidCount(String(t.voidCount));setVoidValue(String(t.voidTotal));setDiscountValue(String(t.compTotal))}}/>}
+      <p>Review each saved photo in Receipts above. Save receipt attaches it automatically; delete any duplicate or unwanted photo. Receipt amounts must match the POS totals below. Server errors deduct 5 points per entry unless this past-date closeout has been approved without points.</p>
       {error && (
         <div data-design-block="copy.50484d57069c0d3a.1"
           style={{
@@ -1844,7 +1847,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
             submitCloseout
           }
           disabled={
-            saving
+            saving || receiptPending!==0
           }
         >
           {saving
