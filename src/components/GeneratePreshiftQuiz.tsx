@@ -86,7 +86,7 @@ export function GeneratePreshiftQuiz({location,date,title,body,disabled,allowPas
   <button type="button" className="primary-button"
    disabled={disabled||busy||!location||!actualDate||actualBody.trim().length<30||!Number.isInteger(count)||count<1||count>30}
    onClick={()=>void generate()}>{busy?'Generating quiz…':'Generate quiz'}</button>
-  <p><PageWord id="sectioncopy.ecb0e61eb781235f59d9">{"Generated questions are saved automatically to the question bank by subject and source date. The quiz itself remains a draft until you save or publish. Limited source material may produce fewer questions."}</PageWord></p>
+  <p><PageWord id="sectioncopy.ecb0e61eb781235f59d9">{"Generated answers are checked against the source before questions are saved to the question bank by subject and source date. The quiz itself remains a draft until you save or publish. Limited source material may produce fewer questions."}</PageWord></p>
   </div>
   {error&&<p role="alert">{error}</p>}
   {draft&&<QuizDraftModal draft={draft} onClose={()=>{setDraft(null);onSaved?.()}}/>}
