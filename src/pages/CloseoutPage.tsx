@@ -1164,7 +1164,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
         </p>
       </div>
 
-      {receiptDraft.key&&<CloseoutReceiptWallet key={receiptDraft.key} location={locationId} day={closeoutDay} closeoutKey={receiptDraft.key} shiftId={floorShiftId||undefined} onChange={rows=>{setReceiptRows(rows);const t=summarizeCloseoutReceipts(rows);setVoidCount(String(t.voidCount));setVoidValue(String(t.voidTotal));setDiscountValue(String(t.compTotal))}}/>}
+      {receiptDraft.key&&<CloseoutReceiptWallet inline key={receiptDraft.key} location={locationId} day={closeoutDay} closeoutKey={receiptDraft.key} shiftId={floorShiftId||undefined} onChange={rows=>{setReceiptRows(rows);const t=summarizeCloseoutReceipts(rows);setVoidCount(String(t.voidCount));setVoidValue(String(t.voidTotal));setDiscountValue(String(t.compTotal))}}/>}
       <p>Attach one entry for each void, comp or discount. Receipt amounts must match the POS totals below. Server errors deduct 5 points per entry unless this past-date closeout has been approved without points.</p>
       {error && (
         <div data-design-block="copy.50484d57069c0d3a.1"
