@@ -50,19 +50,19 @@ export function ProfileSalesTargets({ location }: { location: string }) {
         {personal !== null && <div><dt>My assigned target</dt><dd>{salesMoney(personal)}</dd></div>}
       </dl>
       {personal === null && <p>No individual target assigned for today.</p>}
-      {plan && <div className="profile-target-plan"><h3>{personal === null ? 'Quick plan for the team goal' : 'Quick plan for my target'}</h3>
+      {plan && <details className="profile-target-plan"><summary>{personal === null ? 'View the team target plan' : 'View my target plan'}</summary>
         {plan.hourly !== null && <p><strong>{salesMoney(plan.hourly)} per scheduled hour</strong> across {hours} assigned hours.</p>}
         {plan.guests !== null && <p><strong>{plan.guests} {plan.guests === 1 ? 'guest' : 'guests'}</strong> averaging {salesMoney(plan.spend!)} in net sales each would reach this goal.</p>}
         <label>Example average spend per guest ($)<input type="number" min="0.01" step="0.01" value={spend} onChange={e => setSpend(e.target.value)} /></label>
         {plan.guests === null && <p>Enter a positive average spend to calculate a guest goal.</p>}
         <small>Planning estimates, not a sales-progress total. Average spend excludes tax and tips.</small>
-        <details><summary>Ways to get there</summary><ul>
+        <h3>Ways to get there</h3><ul>
           <li>Start with a specific cocktail recommendation and offer an appetizer while guests decide.</li>
           <li>Watch drinks and offer another round at the right moment.</li>
           <li>Offer dessert before presenting the check.</li>
           <li>Small additions count: an extra $5 in net sales for each of 10 guests adds $50.</li>
-        </ul></details>
-      </div>}
+        </ul>
+      </details>}
     </> : <p>{data?.reason || 'Targets have not been assigned for today.'}</p>}
   </section>
 }

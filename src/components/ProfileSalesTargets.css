@@ -1,1 +1,10 @@
 .profile-sales-targets{position:relative;margin-top:16px;padding:16px;border:1px solid var(--app-border,#d6c5b5);border-radius:14px;background:var(--app-card,#fff8ef);color:var(--app-text,#3b281d);min-width:0}.profile-target-heading{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.profile-target-heading h2{margin:0;font-size:1.1rem}.profile-target-heading button{min-height:44px;font:inherit}.profile-target-totals{display:flex;gap:20px;flex-wrap:wrap}.profile-target-totals dt{font-size:.9rem}.profile-target-totals dd{margin:4px 0 0;font-size:1.45rem;font-weight:700;font-variant-numeric:tabular-nums}.profile-target-plan{border-top:1px solid var(--app-border,#d6c5b5);padding-top:12px}.profile-target-plan h3{margin:0 0 10px;font-size:1rem}.profile-target-plan label{display:grid;gap:6px;max-width:300px;margin:12px 0}.profile-target-plan input{width:100%;box-sizing:border-box;min-height:44px;font:inherit}.profile-target-plan details{margin-top:12px}.profile-target-plan summary{cursor:pointer;font-weight:700}.profile-target-plan li{margin:8px 0}.profile-target-plan small{display:block}
+
+/* Targets sit beside the identity; crew chat stays below the top row. */
+.personal-home .personal-profile-top{grid-template-columns:minmax(180px,.8fr) minmax(280px,1.2fr);align-items:start;gap:20px}
+.personal-home .personal-profile-top>.personal-identity{grid-column:1;grid-row:1;align-self:center}
+.personal-home .personal-profile-top>.profile-sales-targets{grid-column:2;grid-row:1;margin:0;width:100%;box-sizing:border-box}
+.personal-home .personal-profile-top .header-chat-strip{grid-column:1 / -1;grid-row:2}
+.profile-target-plan>summary{cursor:pointer;font-weight:700;min-height:44px;display:list-item;align-content:center;padding:8px 0;box-sizing:border-box}
+.profile-target-plan h3{margin-top:16px}
+@media(max-width:900px){.personal-home .personal-profile-top{grid-template-columns:minmax(0,1fr)}.personal-home .personal-profile-top>.personal-identity,.personal-home .personal-profile-top>.profile-sales-targets,.personal-home .personal-profile-top .header-chat-strip{grid-column:1;grid-row:auto}}
