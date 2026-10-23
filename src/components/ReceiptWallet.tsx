@@ -84,5 +84,5 @@ function WalletDialog({location,initialFile,initialMode,initialKind='purchase',o
 }
 export function ReceiptWalletHome({location}:{location:string}){
  const [manual,setManual]=useState(false)
- return <section className="home-section receipt-wallet-home"><h2>My receipt wallet</h2><CloseoutReceiptWallet inline location={location} day={serviceDay()}/><button type="button" onClick={()=>setManual(true)}>Record a purchase / expense</button>{manual&&<WalletDialog location={location} initialFile={null} initialMode="manual" onClose={()=>setManual(false)}/>}</section>
+ return <section className="home-section receipt-wallet-home"><CloseoutReceiptWallet inline location={location} day={serviceDay()}/><button type="button" onClick={()=>setManual(true)}>Record a purchase / expense</button>{manual&&<WalletDialog location={location} initialFile={null} initialMode="manual" onClose={()=>setManual(false)}/>}</section>
 }

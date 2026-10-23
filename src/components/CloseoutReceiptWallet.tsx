@@ -7,7 +7,7 @@ import {PageWord} from './PageDesign'
 import {DesignSection} from './DesignSection'
 import {EmployeeReceiptWallet} from './EmployeeReceiptWallet'
 import './ReceiptWallet.css'
-type Props={managerCloseout?:boolean;inline?:boolean;location:string;day?:string;from?:string;to?:string;userId?:string;closeoutKey?:string;shiftId?:string;onChange?:(rows:CloseoutReceipt[])=>void;onSaved?:()=>void;onPendingChange?:(count:number|null)=>void;label?:string}
+type Props={submittedOnly?:boolean;managerCloseout?:boolean;inline?:boolean;location:string;day?:string;from?:string;to?:string;userId?:string;closeoutKey?:string;shiftId?:string;onChange?:(rows:CloseoutReceipt[])=>void;onSaved?:()=>void;onPendingChange?:(count:number|null)=>void;label?:string}
 export function CloseoutReceiptWallet(props:Props){return <EmployeeReceiptWallet {...props}/>}
 export function useReceiptDraft(location:string,day=serviceDay()){
  const [key,setKey]=useState(''),[identity,setIdentity]=useState('')
@@ -32,6 +32,6 @@ export function DailyReceiptSummary({location,day,refreshKey=0}:{location:string
 export function CloseoutReceiptReports({location,day=serviceDay()}:{location:string;day?:string}){
  const [start,setStart]=useState(day),[end,setEnd]=useState(day)
  useEffect(()=>{setStart(day);setEnd(day)},[day])
- return <section><h3><PageWord id="receipt.flow.4455c80ab51358ff">{"Voids & comps report"}</PageWord></h3><div className="receipt-wallet-fields"><label><PageWord id="receipt.flow.95c03564b0d0dfc4">{"From"}</PageWord><input type="date" value={start} onChange={e=>setStart(e.target.value)}/></label><label><PageWord id="receipt.flow.1efb34245e6ccae8">{"Through"}</PageWord><input type="date" value={end} onChange={e=>setEnd(e.target.value)}/></label></div><CloseoutReceiptWallet location={location} day={day} from={start} to={end} label="Open voids & comps report"/></section>
+ return <section><h3><PageWord id="receipt.flow.4455c80ab51358ff">{"Voids & comps report"}</PageWord></h3><div className="receipt-wallet-fields"><label><PageWord id="receipt.flow.95c03564b0d0dfc4">{"From"}</PageWord><input type="date" value={start} onChange={e=>setStart(e.target.value)}/></label><label><PageWord id="receipt.flow.1efb34245e6ccae8">{"Through"}</PageWord><input type="date" value={end} onChange={e=>setEnd(e.target.value)}/></label></div><CloseoutReceiptWallet submittedOnly location={location} day={day} from={start} to={end} label="Open voids & comps report"/></section>
 }
 
