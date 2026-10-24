@@ -1,8 +1,9 @@
+import { SalesTargetVideos } from './SalesTargetVideos'
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { serviceDay, serviceDateLabel } from '../lib/serviceDay'
 import { salesMoney } from '../lib/salesTargets'
-import { homeTargetPlan } from '../lib/homeTargetPlan'
+import { salesProgressPlan } from '../lib/salesProgressPlan'
 import './ProfileSalesTargets.css'
 
 type Targets = { ready: boolean; date: string; reason?: string; team_target?: number | null; individual_target?: number | null; assigned_hours?: number | null; locked?: boolean }
@@ -13,6 +14,8 @@ export function ProfileSalesTargets({ location }: { location: string }) {
   const [error, setError] = useState('')
   const [refresh, setRefresh] = useState(0)
   const [spend, setSpend] = useState('35')
+  const [currentSales, setCurrentSales] = useState('')
+  useEffect(() => {setData(null);setCurrentSales('');setSpend('35')}, [location,date])
   useEffect(() => {
     const update = () => { if (document.visibilityState === 'visible') { setDate(serviceDay()); setRefresh(v => v + 1) } }
     const timer = setInterval(update, 60000)
@@ -26,7 +29,7 @@ export function ProfileSalesTargets({ location }: { location: string }) {
     let active = true
     const controller = new AbortController()
     const timer = setTimeout(() => controller.abort(), 20000)
-    setData(null); setError(''); setLoading(true)
+    setError(''); setLoading(true)
     void (async () => {
       try {
         if (!location) return
@@ -40,29 +43,45 @@ export function ProfileSalesTargets({ location }: { location: string }) {
   }, [location, date, refresh])
   const personal = data?.individual_target == null ? null : Number(data.individual_target)
   const team = data?.team_target == null ? null : Number(data.team_target)
-  const hours = data?.assigned_hours == null ? null : Number(data.assigned_hours)
-  const plan = data?.ready ? homeTargetPlan(personal ?? team, personal === null ? null : hours, spend) : null
+  const plan = data?.ready ? salesProgressPlan(personal,spend,currentSales) : null
   return <section className="profile-sales-targets" aria-label="Today's sales targets" aria-busy={loading}>
     <div className="profile-target-heading"><h2>Today’s sales targets</h2><button type="button" disabled={loading} onClick={() => { setDate(serviceDay()); setRefresh(v => v + 1) }}>Refresh targets</button></div>
     <p>{serviceDateLabel(date)} · Net sales</p>
-    {loading ? <p role="status">Loading targets…</p> : error ? <p role="alert">{error}</p> : data?.ready ? <>
+    {loading&&!data ? <p role="status">Loading targets…</p> : error ? <p role="alert">{error}</p> : data?.ready ? <>
       <dl className="profile-target-totals"><div><dt>Team target</dt><dd>{team === null ? 'Not available' : salesMoney(team)}</dd></div>
-        {personal !== null && <div><dt>My assigned target</dt><dd>{salesMoney(personal)}</dd></div>}
+        <div><dt>My assigned target</dt><dd>{personal===null?'Not assigned':salesMoney(personal)}</dd></div>
       </dl>
-      {personal === null && <p>No individual target assigned for today.</p>}
-      {plan && <details className="profile-target-plan"><summary>{personal === null ? 'View the team target plan' : 'View my target plan'}</summary>
-        {plan.hourly !== null && <p><strong>{salesMoney(plan.hourly)} per scheduled hour</strong> across {hours} assigned hours.</p>}
-        {plan.guests !== null && <p><strong>{plan.guests} {plan.guests === 1 ? 'guest' : 'guests'}</strong> averaging {salesMoney(plan.spend!)} in net sales each would reach this goal.</p>}
-        <label>Example average spend per guest ($)<input type="number" min="0.01" step="0.01" value={spend} onChange={e => setSpend(e.target.value)} /></label>
-        {plan.guests === null && <p>Enter a positive average spend to calculate a guest goal.</p>}
-        <small>Planning estimates, not a sales-progress total. Average spend excludes tax and tips.</small>
-        <h3>Ways to get there</h3><ul>
-          <li>Start with a specific cocktail recommendation and offer an appetizer while guests decide.</li>
-          <li>Watch drinks and offer another round at the right moment.</li>
-          <li>Offer dessert before presenting the check.</li>
-          <li>Small additions count: an extra $5 in net sales for each of 10 guests adds $50.</li>
-        </ul>
-      </details>}
+      {personal===null&&<p>No individual target assigned for today. Your personal calculator will be available once a target is assigned.</p>}
+      {plan&&<div className="profile-target-plan" aria-label="My goal calculator" data-design-block="home.targets.calculator">
+        <h3>My goal calculator</h3>
+        <div className="profile-target-inputs">
+          <label>My current net sales ($)<input type="number" inputMode="decimal" min="0" step="0.01" placeholder="Enter current sales" value={currentSales} onChange={e=>setCurrentSales(e.target.value)}/></label>
+          <label>Average spend per guest ($)<input type="number" inputMode="decimal" min="0.01" step="0.01" value={spend} onChange={e=>setSpend(e.target.value)}/></label>
+        </div>
+        <small>Enter net sales before tax and tips. These are manual planning estimates.</small>
+        {plan.current===null?<p role="status">{currentSales.trim()===''?'Enter your current sales, including 0 at the start of your shift.':'Enter a valid current net sales amount of 0 or more.'}</p>:<>
+          <div className="profile-target-progress" aria-label="My sales progress">
+            <progress max={100} value={plan.percent??0} aria-label="Progress toward my assigned target"/>
+            <dl><div><dt>Current sales</dt><dd>{salesMoney(plan.current)}</dd></div><div><dt>Still to go</dt><dd data-testid="target-remaining">{salesMoney(plan.remaining!)}</dd></div></dl>
+          </div>
+          <div className="profile-target-next" role="status" aria-live="polite">
+            {plan.stage==='reached'?<><strong>Target reached{plan.over!>0?' · '+salesMoney(plan.over!)+' above goal':''}.</strong><p>Keep making thoughtful recommendations and maintain the same service standards.</p></>:<>
+              <strong>{salesMoney(plan.remaining!)} left to reach your individual target.</strong>
+              {plan.guests!==null?<p>About <b>{plan.guests} more {plan.guests===1?'guest':'guests'}</b> at {salesMoney(plan.spend!)} average net spend would cover the amount left.</p>:<p>Enter a positive average spend to estimate how many more guests would cover the gap.</p>}
+              <p>{plan.stage==='close'?'You’re close: check for a useful next offer at the tables you’re already serving.':'Build the next checks: lead with a specific drink recommendation, suggest a starter, and follow up at the right moment.'}</p>
+              <small>Another example: {plan.fiveDollarAdds} additional $5 net-sales {plan.fiveDollarAdds===1?'addition':'additions'}, or {plan.tenDollarAdds} additional $10 {plan.tenDollarAdds===1?'addition':'additions'}, would cover the gap. Use your actual menu prices.</small>
+            </>}
+          </div>
+        </>}
+      </div>}
     </> : <p>{data?.reason || 'Targets have not been assigned for today.'}</p>}
+    <details className="profile-target-scripts" data-design-block="home.targets.scripts"><summary>Recommendations &amp; selling scripts</summary>
+      <p>Choose the offer that fits the guest and the stage of their meal.</p>
+      <h3>Welcome &amp; first drink</h3><p>“Are you in the mood for something refreshing or something liquor-forward? I can recommend a cocktail.”</p>
+      <h3>A starter while they decide</h3><p>“Would you like to start with an appetizer for the table while you look over the menu?”</p>
+      <h3>The next round</h3><p>“Would you like another of the same, or would you like me to recommend something different?”</p>
+      <h3>Dessert before the check</h3><p>“Would you like to finish with dessert? I can walk you through today’s options.”</p>
+    </details>
+    <SalesTargetVideos key={location} location={location} />
   </section>
 }
