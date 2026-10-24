@@ -9,3 +9,7 @@
 .receipt-wallet-inline[open]{display:block;position:relative;inset:auto;width:100%;max-height:none;margin:16px 0;overflow:visible;box-shadow:none}.receipt-time-stamps{padding:8px 12px;background:#eee0cc;border-radius:8px;font-size:.9rem}.receipt-time-stamps p{margin:4px 0}
 
 .receipt-wallet-inline[open]{display:block;position:relative;inset:auto;width:100%;max-height:none;margin:16px 0;overflow:visible;box-shadow:none}.receipt-time-stamps{padding:8px 12px;background:#eee0cc;border-radius:8px;font-size:.9rem}.receipt-time-stamps p{margin:4px 0}
+
+/* Keep capture available while scrolling long receipt forms and lists. */
+.receipt-wallet-dialog .receipt-wallet-capture-bar{position:sticky;top:0;z-index:5;padding:8px 0;margin:0 0 12px;background:var(--app-card,#fff8ef);border-bottom:1px solid var(--app-border,#d6c5b5)}
+.receipt-wallet-capture-bar button{min-height:44px}

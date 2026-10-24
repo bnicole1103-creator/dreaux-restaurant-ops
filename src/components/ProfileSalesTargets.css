@@ -2,9 +2,9 @@
 
 /* Targets sit beside the identity; crew chat stays below the top row. */
 .personal-home .personal-profile-top{grid-template-columns:minmax(180px,.8fr) minmax(280px,1.2fr);align-items:start;gap:20px}
-.personal-home .personal-profile-top>.personal-identity{grid-column:1;grid-row:1;align-self:center}
-.personal-home .personal-profile-top>.profile-sales-targets{grid-column:2;grid-row:1;margin:0;width:100%;box-sizing:border-box}
-.personal-home .personal-profile-top .header-chat-strip{grid-column:1 / -1;grid-row:2}
+.personal-home .personal-profile-top>.personal-identity{align-self:center}
+.personal-home .personal-profile-top>.profile-sales-targets{margin:0;width:100%;box-sizing:border-box}
+.personal-home .personal-profile-top .header-chat-strip{grid-column:1 / -1;order:2}
 .profile-target-plan>summary{cursor:pointer;font-weight:700;min-height:44px;display:list-item;align-content:center;padding:8px 0;box-sizing:border-box}
 .profile-target-plan h3{margin-top:16px}
 @media(max-width:900px){.personal-home .personal-profile-top{grid-template-columns:minmax(0,1fr)}.personal-home .personal-profile-top>.personal-identity,.personal-home .personal-profile-top>.profile-sales-targets,.personal-home .personal-profile-top .header-chat-strip{grid-column:1;grid-row:auto}}
@@ -23,3 +23,16 @@
 .profile-target-scripts summary{cursor:pointer;font-weight:700;min-height:44px;padding:8px 0}
 .profile-target-scripts h3{font-size:.95rem;margin:12px 0 6px}
 .profile-target-scripts p{margin:6px 0 12px}
+
+/* A compact default; editor width and movement overrides remain available. */
+.profile-sales-targets{padding:12px;margin-top:12px}
+.profile-sales-targets>p{margin:6px 0;font-size:.85rem}
+.profile-target-heading{gap:8px}.profile-target-heading h2{font-size:1rem}
+.profile-target-totals{gap:10px 20px;margin:10px 0}.profile-target-totals dd{font-size:1.25rem;margin-top:2px}
+.profile-target-plan{padding-top:8px}.profile-target-plan h3{margin:0 0 6px}
+.profile-target-inputs{gap:8px;grid-template-columns:repeat(2,minmax(0,1fr))}
+.profile-target-plan .profile-target-inputs label{margin:4px 0;font-size:.85rem}
+.profile-target-plan small{font-size:.75rem;margin-top:4px}
+.profile-target-progress{margin:8px 0}.profile-target-progress dl{margin:6px 0;gap:8px 24px}.profile-target-progress dd{font-size:1.1rem}
+.profile-target-scripts{margin-top:8px;padding-top:0}.profile-target-scripts>summary{box-sizing:border-box;min-height:44px;padding:12px 0}
+.profile-sales-targets>.sales-target-clips{margin-top:8px;padding:12px;border:1px solid var(--app-accent,#795036);border-radius:12px;background:var(--app-card,#fff8ef)}
