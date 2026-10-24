@@ -1,3 +1,7 @@
+import {SummaryDisclosure} from '../components/SummaryDisclosure'
+import {ManagerCloseoutDetails} from '../components/ManagerCloseoutDetails'
+import {closeoutDate,closeoutShift,managerCloseoutLink} from '../lib/closeoutNavigation'
+import './CloseoutSummarySimple.css'
 import { CloseoutReceiptWallet, CloseoutReceiptReports, DailyReceiptSummary } from '../components/CloseoutReceiptWallet'
 import {DesignSection} from '../components/DesignSection'
 import { TeamProfileName } from '../components/TeamProfileName'
@@ -8,7 +12,7 @@ import {PeerRecognition} from '../components/PeerRecognition'
 import { ManagerRecap } from "../components/ManagerRecap"
 import { PageWord } from "../components/PageDesign"
 import { StockBoard,CloseoutStockDetails } from '../components/StockBoard'
-import { useSearchParams } from 'react-router-dom'
+import { Link,useSearchParams } from 'react-router-dom'
 import { ScreenText } from "../components/ScreenText"
 import './CloseoutMobile.css'
 import { CloseoutCorrectionEditor } from '../components/CloseoutCorrectionEditor'
@@ -139,7 +143,7 @@ const DEFAULT_CARDS: CardSetting[] = [
   {
     key: 'targetPercent',
     label: 'Target %',
-    visible: true,
+    visible: false,
   },
   {
     key: 'cash',
@@ -149,17 +153,17 @@ const DEFAULT_CARDS: CardSetting[] = [
   {
     key: 'voids',
     label: 'Voids',
-    visible: true,
+    visible: false,
   },
   {
     key: 'discounts',
     label: 'Discounts',
-    visible: true,
+    visible: false,
   },
   {
     key: 'score',
     label: 'Average Shift Score',
-    visible: true,
+    visible: false,
   },
 ]
 
@@ -212,8 +216,11 @@ function roleLabel(role: string) {
   )
 }
 
-function CloseoutDay({selectedDate,refresh,onDeleted,locationId,locationName,current,focusId=''}:{selectedDate:string;refresh:number;onDeleted:()=>void;locationId:string;locationName:string;current:boolean;focusId?:string}) {
+function CloseoutDay({selectedDate,refresh,onDeleted,locationId,locationName,current,focusId='',managerFocusId=''}:{selectedDate:string;refresh:number;onDeleted:()=>void;locationId:string;locationName:string;current:boolean;focusId?:string;managerFocusId?:string}) {
   const [isManager,setIsManager]=useState(false)
+  const [managerDataMissing,setManagerDataMissing]=useState(false)
+  const [expandedManager,setExpandedManager]=useState(managerFocusId)
+  useEffect(()=>setExpandedManager(managerFocusId),[managerFocusId])
   const [deletingId,setDeletingId]=useState('')
   const [editingId,setEditingId]=useState('')
   const request=useRef(0)
@@ -268,12 +275,12 @@ function CloseoutDay({selectedDate,refresh,onDeleted,locationId,locationName,cur
   useEffect(()=>{void loadSummary(locationId,selectedDate);return()=>{request.current+=1}},[locationId,selectedDate,refresh])
   async function loadSummary(targetLocationId:string,businessDate:string) {
     const ticket=++request.current
-    setLoading(true);setError('');setDayTargets(null);setCloseouts([]);setProfiles([]);setCloseoutTables([]);setManagerCloseouts([]);setIsManager(false)
+    setLoading(true);setError('');setDayTargets(null);setCloseouts([]);setProfiles([]);setCloseoutTables([]);setManagerCloseouts([]);setIsManager(false);setManagerDataMissing(false)
     try {
       const {data,error}=await supabase.rpc('closeout_summary_day',{p_location_id:targetLocationId,p_day:businessDate})
       if(error)throw error
       if(ticket!==request.current)return
-      setDayTargets(data.sales_targets??null);setIsManager(!!data.manager);setCloseouts(data.closeouts ?? []);setProfiles(data.profiles ?? []);setCloseoutTables(data.tables ?? []);setManagerCloseouts(data.manager_closeouts ?? [])
+      setDayTargets(data.sales_targets??null);setIsManager(!!data.manager);setCloseouts(data.closeouts ?? []);setProfiles(data.profiles ?? []);setCloseoutTables(data.tables ?? []);setManagerCloseouts(data.manager&&Array.isArray(data.manager_closeouts)?data.manager_closeouts:[]);setManagerDataMissing(!!data.manager&&!Array.isArray(data.manager_closeouts))
     } catch(e) {if(ticket===request.current)setError(String((e as {message?:string})?.message ?? e))}
     finally {if(ticket===request.current)setLoading(false)}
   }
@@ -618,12 +625,6 @@ function CloseoutDay({selectedDate,refresh,onDeleted,locationId,locationName,cur
         )}
       </div>
 
-      <DailyReceiptSummary location={locationId} day={selectedDate} refreshKey={refresh}/>
-      <CloseoutReceiptReports location={locationId} day={selectedDate}/>
-      {locationId && <PeerRecognition location={locationId} from={selectedDate} to={selectedDate}/>}
-      {isManager&&dayTargets&&<section className="card" aria-label="Daily sales targets"><h2>Sales targets · {serviceDateLabel(selectedDate)}</h2>{dayTargets.ready?<><p>Team goal: <strong>{salesMoney(Number(dayTargets.team_target))}</strong></p><ul>{Object.values((dayTargets.rows??[]).reduce<Record<string,{name:string;group:string;target:number}>>((all,r)=>{const key=r.group+':'+r.employee_key;const row=all[key]??{name:r.name??'Employee '+r.employee_key,group:r.group,target:0};row.target+=Number(r.target);all[key]=row;return all},{})).map((r,i)=><li key={i}>{r.name} · {r.group==='bar'?'Bar':'Floor'} · {salesMoney(r.target)}</li>)}</ul><p>Loaded automatically from app sales targets. Closeouts are not required for targets to appear.</p></>:<p role="status">{dayTargets.reason??'Sales targets are not available for this date.'}</p>}</section>}
-      {closeouts.some(c=>!hasTarget(c))&&<p role="status"><PageWord id="sectioncopy.2837ea3ec6c11338de09">{"Some closeouts have no saved target. Target percentages include only closeouts with available positive targets."}</PageWord></p>}
-      {locationId&&<StockBoard location={locationId} readOnly date={selectedDate}/>}
       {error && (
         <div data-design-block="copy.7928f50964d7a778.1"
           style={{
@@ -644,7 +645,7 @@ function CloseoutDay({selectedDate,refresh,onDeleted,locationId,locationName,cur
         <div data-design-block="copy.df748de098f5387f.2" className="card"><ScreenText id="CloseoutSummary.1eed37a7be178e26">
           Loading summary...
         </ScreenText></div>
-      ) : (
+      ) : error ? <p role="status">Summary data is unavailable. Use Refresh closeouts to retry.</p> : (
         <>
           <div data-design-block="copy.d4b2dedeef02487c.1"
             className="summary-card-grid"
@@ -671,7 +672,7 @@ function CloseoutDay({selectedDate,refresh,onDeleted,locationId,locationName,cur
             ) && (
               <div data-design-block="copy.8a0c80c48ccea263.2" className="summary-stat-card">
                 <span>
-                  {isManager ? <PageWord id="copy.c0cd80e79e923e88.1">{"Business Net Sales"}</PageWord> : <PageWord id="copy.b88049d10df021d7.1">{"My Net Sales"}</PageWord>}
+                  {isManager ? <PageWord id="copy.c0cd80e79e923e88.1">{"Reported Net Sales"}</PageWord> : <PageWord id="copy.b88049d10df021d7.1">{"My Net Sales"}</PageWord>}
                 </span>
 
                 <strong>
@@ -715,7 +716,7 @@ function CloseoutDay({selectedDate,refresh,onDeleted,locationId,locationName,cur
             ) && (
               <div data-design-block="copy.8a0c80c48ccea263.5" className="summary-stat-card">
                 <span>
-                  {isManager ? <PageWord id="copy.f8e6a56798b65da6.1">{"Business Cash Deposits"}</PageWord> : <PageWord id="copy.a3db89580e74bfc8.1">{"My Cash Deposits"}</PageWord>}
+                  {isManager ? <PageWord id="copy.f8e6a56798b65da6.1">{"Staff-Reported Cash"}</PageWord> : <PageWord id="copy.a3db89580e74bfc8.1">{"My Cash Deposits"}</PageWord>}
                 </span>
 
                 <strong>
@@ -784,7 +785,8 @@ function CloseoutDay({selectedDate,refresh,onDeleted,locationId,locationName,cur
             <h2 data-design-block="copy.manager-closeouts-summary.2">
               <ScreenText id="CloseoutSummary.managerCloseouts">Manager Closeouts</ScreenText>
             </h2>
-            {managerCloseouts.length === 0 ? (
+            {managerFocusId&&!managerDataMissing&&!managerCloseouts.some(row=>row.shift_id===managerFocusId)&&<p role="alert">The linked manager closeout was not returned for this date. Refresh or check the selected service day.</p>}
+            {managerDataMissing ? <p role="alert">Manager closeout data was not returned by the summary function. Its connection needs verification; this does not mean no manager submitted.</p> : managerCloseouts.length === 0 ? (
               <p data-design-block="copy.manager-closeouts-summary.3">
                 <ScreenText id="CloseoutSummary.noManagerCloseouts">No manager closeout submitted for this date yet.</ScreenText>
               </p>
@@ -798,7 +800,7 @@ function CloseoutDay({selectedDate,refresh,onDeleted,locationId,locationName,cur
                         <div><TeamProfileName locationId={locationId} userId={row.submitted_by} name={row.submitted_by_name||'Manager'}/></div>
                       </div>
                       <div data-design-block="copy.manager-closeouts-summary.8">
-                        <strong>{money(row.cash_deposit)}</strong>
+                        <strong>{row.cash_deposit==null?'Not recorded':money(row.cash_deposit)}</strong>
                         <div><ScreenText id="CloseoutSummary.managerCashDeposit">Cash deposit</ScreenText></div>
                       </div>
                       <div data-design-block="copy.manager-closeouts-summary.9">
@@ -806,14 +808,15 @@ function CloseoutDay({selectedDate,refresh,onDeleted,locationId,locationName,cur
                         <div><ScreenText id="CloseoutSummary.managerReviews">staff reviews</ScreenText></div>
                       </div>
                     </div>
-                    <div data-design-block="copy.manager-closeouts-summary.10" className="closeout-summary-details">
+                    <div className="manager-summary-actions"><button type="button" aria-expanded={expandedManager===row.shift_id} onClick={()=>setExpandedManager(v=>v===row.shift_id?'':row.shift_id)}>{expandedManager===row.shift_id?'Hide details':'View saved details'}</button><Link to={managerCloseoutLink(selectedDate,row.shift_id)}>Open / edit this manager closeout</Link></div>
+                    {expandedManager===row.shift_id&&<><div data-design-block="copy.manager-closeouts-summary.10" className="closeout-summary-details">
                       <div data-design-block="copy.manager-closeouts-summary.11"><span><ScreenText id="CloseoutSummary.managerSubmitted">Submitted</ScreenText></span><strong>{submissionLabel(row.submitted_at)}</strong></div>
                       <div data-design-block="copy.manager-closeouts-summary.12"><span><ScreenText id="CloseoutSummary.managerRegister">Register</ScreenText></span><strong>{row.register_balanced == null ? 'Not recorded' : row.register_balanced ? 'Balanced' : `Off by ${money(row.register_difference)}`}</strong></div>
                       <div data-design-block="copy.manager-closeouts-summary.13"><span><ScreenText id="CloseoutSummary.managerCashLeft">Cash left at</ScreenText></span><strong>{row.cash_left_at || 'Not recorded'}</strong></div>
                       <div data-design-block="copy.manager-closeouts-summary.14"><span><ScreenText id="CloseoutSummary.managerAverageRating">Average rating</ScreenText></span><strong>{row.average_rating == null ? '—' : row.average_rating.toFixed(1)}</strong></div>
                       <div data-design-block="copy.manager-closeouts-summary.15"><span><ScreenText id="CloseoutSummary.managerMvp">Shift MVP</ScreenText></span><strong>{row.shift_mvp?<TeamProfileName locationId={locationId} userId={row.shift_mvp} name={row.shift_mvp_name||'Team member'}/>:'Not selected'}</strong></div>
                       {row.register_notes && <div data-design-block="copy.manager-closeouts-summary.16" style={{gridColumn:'1 / -1'}}><span><ScreenText id="CloseoutSummary.managerRegisterNotes">Register notes</ScreenText></span><strong>{row.register_notes}</strong></div>}
-                    </div>
+                    </div><AccessSection page="summary" section="reviews"><ManagerCloseoutDetails location={locationId} day={selectedDate} shift={row.shift_id} refresh={refresh}/></AccessSection></>}
                   </article>
                 ))}
               </div>
@@ -822,8 +825,8 @@ function CloseoutDay({selectedDate,refresh,onDeleted,locationId,locationName,cur
           )}
 
           {isManager && (
-          <AccessSection page="summary" section="reviews"><ManagerRecap location={locationId} day={selectedDate} refresh={refresh}
-            title={current ? 'Today’s Manager Recap' : 'Manager Recap'} lines={recap}/></AccessSection>
+          <AccessSection page="summary" section="reviews"><SummaryDisclosure title="Manager recap"><ManagerRecap location={locationId} day={selectedDate} refresh={refresh}
+            title={current ? 'Today’s Manager Recap' : 'Manager Recap'} lines={recap}/></SummaryDisclosure></AccessSection>
 
           )}
 
@@ -1206,59 +1209,44 @@ function CloseoutDay({selectedDate,refresh,onDeleted,locationId,locationName,cur
         </>
       )}
 
-      <div
-        style={{
-          height: 150,
-        }}
-      />
+
+
+      <SummaryDisclosure title="Receipts, voids & comps"><DailyReceiptSummary location={locationId} day={selectedDate} refreshKey={refresh}/><CloseoutReceiptReports location={locationId} day={selectedDate}/></SummaryDisclosure>
+      {locationId && <SummaryDisclosure title="Peer recognition"><PeerRecognition location={locationId} from={selectedDate} to={selectedDate}/></SummaryDisclosure>}
+      {isManager&&dayTargets&&<SummaryDisclosure title="Sales target breakdown"><section className="card" aria-label="Daily sales targets"><h2>Sales targets · {serviceDateLabel(selectedDate)}</h2>{dayTargets.ready?<><p>Team goal: <strong>{salesMoney(Number(dayTargets.team_target))}</strong></p><ul>{Object.values((dayTargets.rows??[]).reduce<Record<string,{name:string;group:string;target:number}>>((all,r)=>{const key=r.group+':'+r.employee_key;const row=all[key]??{name:r.name??'Employee '+r.employee_key,group:r.group,target:0};row.target+=Number(r.target);all[key]=row;return all},{})).map((r,i)=><li key={i}>{r.name} · {r.group==='bar'?'Bar':'Floor'} · {salesMoney(r.target)}</li>)}</ul><p>Loaded automatically from app sales targets. Closeouts are not required for targets to appear.</p></>:<p role="status">{dayTargets.reason??'Sales targets are not available for this date.'}</p>}</section></SummaryDisclosure>}
+      {closeouts.some(c=>!hasTarget(c))&&<p role="status"><PageWord id="sectioncopy.2837ea3ec6c11338de09">{"Some closeouts have no saved target. Target percentages include only closeouts with available positive targets."}</PageWord></p>}
+      {locationId&&<SummaryDisclosure title="86 board"><StockBoard location={locationId} readOnly date={selectedDate}/></SummaryDisclosure>}
 
     </DesignSection>
   )
 }
 
-type ArchiveDay={day:string;count:number}
+type ArchiveDay={day:string;count:number;staff_count?:number;manager_count?:number}
 export function CloseoutSummaryPage() {
- const [params]=useSearchParams(),requested=params.get('date')??'',focusId=params.get('closeout')??''
- const linkedDate=/^\d{4}-\d{2}-\d{2}$/.test(requested)&&requested<=serviceDay()?requested:''
- const [day,setDay]=useState(serviceDay)
- const [refresh,setRefresh]=useState(0)
+ const [params,setParams]=useSearchParams(),[day,setDay]=useState(serviceDay),[refresh,setRefresh]=useState(0)
+ const requested=closeoutDate(params.get('date'),day),selectedDate=requested||day
+ const focusId=params.get('closeout')??'',managerFocusId=closeoutShift(params.get('manager_shift'))
  const [location,setLocation]=useState<{id:string;name:string}|null>(null)
- const [history,setHistory]=useState<ArchiveDay[]>([])
- const [archiveDate,setArchiveDate]=useState(linkedDate)
- useEffect(()=>{if(linkedDate)setArchiveDate(linkedDate)},[linkedDate])
- const [error,setError]=useState('')
- const [historyLoading,setHistoryLoading]=useState(false)
- useEffect(()=>{let live=true;void loadTenantData().then(t=>{if(!t.locations[0])throw new Error('No active location.');if(live)setLocation({id:t.locations[0].id,name:t.locations[0].name ?? ''})}).catch(e=>{if(live)setError(String((e as {message?:string})?.message ?? e))});return()=>{live=false}},[])
+ const [history,setHistory]=useState<ArchiveDay[]>([]),[error,setError]=useState(''),[historyLoading,setHistoryLoading]=useState(false)
+ const archivePicker=useRef<HTMLDetailsElement>(null)
+ useEffect(()=>{let live=true;void loadTenantData().then(t=>{if(!t.locations[0])throw new Error('No active location.');if(live)setLocation({id:t.locations[0].id,name:t.locations[0].name??''})}).catch(e=>{if(live)setError(String((e as {message?:string})?.message??e))});return()=>{live=false}},[])
  useEffect(()=>{
   let timer:ReturnType<typeof setTimeout>
   function update(){setDay(serviceDay());setRefresh(v=>v+1);clearTimeout(timer);timer=setTimeout(update,Math.max(1,nextServiceBoundary()-Date.now()))}
   const onVisible=()=>{if(document.visibilityState==='visible')update()}
-  update();window.addEventListener('focus',update);document.addEventListener('visibilitychange',onVisible)
-  const poll=setInterval(()=>{if(document.visibilityState==='visible'){setDay(serviceDay());setRefresh(v=>v+1)}},60000)
-  return()=>{clearTimeout(timer);clearInterval(poll);window.removeEventListener('focus',update);document.removeEventListener('visibilitychange',onVisible)}
+  update();window.addEventListener('focus',update);window.addEventListener('closeout-saved',update);document.addEventListener('visibilitychange',onVisible)
+  const poll=setInterval(()=>{if(document.visibilityState==='visible')update()},60000)
+  return()=>{clearTimeout(timer);clearInterval(poll);window.removeEventListener('focus',update);window.removeEventListener('closeout-saved',update);document.removeEventListener('visibilitychange',onVisible)}
  },[])
- useEffect(()=>{if(!location)return;let live=true;setHistoryLoading(true);setError('');void (async()=>{
-  try{const {data,error}=await supabase.rpc('closeout_summary_archive',{p_location_id:location.id,p_before:day});if(error)throw error;if(live)setHistory(data ?? [])}
-  catch(e){if(live){setError(String((e as {message?:string})?.message ?? e));setHistory([])}}finally{if(live)setHistoryLoading(false)}
- })();return()=>{live=false}},[location,day,refresh])
- const months=useMemo(()=>{
-  const groups=new Map<string,ArchiveDay[]>()
-  for(const entry of history){const key=entry.day.slice(0,7);groups.set(key,[...(groups.get(key) ?? []),entry])}
-  return [...groups.entries()]
- },[history])
+ useEffect(()=>{if(!location)return;let live=true;setHistoryLoading(true);setError('');void Promise.resolve(supabase.rpc('closeout_summary_archive',{p_location_id:location.id,p_before:day})).then(({data,error})=>{if(!live)return;if(error){setError(error.message);setHistory([])}else setHistory(Array.isArray(data)?data:[])}).catch(e=>{if(live){setError(String(e.message??e));setHistory([])}}).finally(()=>{if(live)setHistoryLoading(false)});return()=>{live=false}},[location,day,refresh])
+ const months=useMemo(()=>{const groups=new Map<string,ArchiveDay[]>();for(const entry of [...history].sort((a,b)=>b.day.localeCompare(a.day))){const month=entry.day.slice(0,7);groups.set(month,[...(groups.get(month)??[]),entry])}return [...groups.entries()]},[history])
+ function choose(date:string){const next=new URLSearchParams(params);next.delete('closeout');next.delete('manager_shift');if(date&&date!==day)next.set('date',date);else next.delete('date');setParams(next);if(archivePicker.current)archivePicker.current.open=false}
  function reload(){setDay(serviceDay());setRefresh(v=>v+1)}
- if(!location)return <DesignSection as="section" data-design-block="copy.b7855dad4d090df7.2" className="page closeout-summary-mobile"><p data-design-block="copy.9883f35f00a514b5.1" role={error?'alert':'status'}>{error || 'Loading summary…'}</p></DesignSection>
+ if(!location)return <section className="page closeout-summary-mobile"><p role={error?'alert':'status'}>{error||'Loading summary…'}</p></section>
  return <>
-  <div data-design-block="copy.d392d3a76fa3a359.1" className="page"><button data-design-block="copy.bbbbe200cfd4ed8a.1" type="button" onClick={reload}><ScreenText id="CloseoutSummary.f4bbc18b0dbe1711">Refresh closeouts</ScreenText></button></div>
-  <CloseoutDay focusId={linkedDate===day?focusId:''} selectedDate={day} current refresh={refresh} locationId={location.id} locationName={location.name} onDeleted={reload} />
-  <DesignSection as="section" data-design-block="copy.b7855dad4d090df7.3" className="page closeout-summary-mobile"><DesignSection as="article" data-design-block="copy.640020cccc2ec727.1" className="card"><h2 data-design-block="copy.f9ef78219c5e44bd.3"><ScreenText id="CloseoutSummary.643cd94130e638aa">Previous closeouts</ScreenText></h2><p data-design-block="copy.1d73108071987a91.8"><ScreenText id="CloseoutSummary.cc09234f89870176">Organized by month and service day, newest first.</ScreenText></p>
-   {error && <p data-design-block="copy.9004f87397a1f020.1" role="alert">{error}</p>}{historyLoading && history.length===0 && <p data-design-block="copy.8cb8926814305e94.2" role="status"><ScreenText id="CloseoutSummary.5c3f475acefcfa5d">Loading history…</ScreenText></p>}
-   {!error && !historyLoading && history.length===0 && <p data-design-block="copy.1d73108071987a91.9"><ScreenText id="CloseoutSummary.acbc70394af59cae">No previous closeouts.</ScreenText></p>}
-   {months.map(([month,entries])=><details key={month}><summary>{serviceDateLabel(month,true)}<PageWord id="copy.f323e928bd4d3fcf.3">· </PageWord>{entries.reduce((n,e)=>n+e.count,0)}<ScreenText id="CloseoutSummary.c5b235886695e308"> closeouts</ScreenText></summary><div data-design-block="copy.e684c0fac2070a8a.1" style={{display:'grid',gap:8,margin:'12px 0'}}>{entries.map(e=><button data-design-block="copy.a607a529308834b7.1" type="button" key={e.day} aria-pressed={archiveDate===e.day} onClick={()=>setArchiveDate(v=>v===e.day?'':e.day)}>{serviceDateLabel(e.day)}<PageWord id="copy.f323e928bd4d3fcf.4">· </PageWord>{e.count}<ScreenText id="CloseoutSummary.ce9ee2502f65fa17"> closeout</ScreenText>{e.count===1?<PageWord id="copy.f0c5aa23cb74409a.1">{""}</PageWord>:<PageWord id="copy.c90e9ff86d08cb7e.1">{"s"}</PageWord>}<PageWord id="copy.f323e928bd4d3fcf.5">· </PageWord>{archiveDate===e.day?<PageWord id="copy.f02fba44883ffcf3.2">{"Hide"}</PageWord>:<PageWord id="copy.643535fe4b22d9c9.2">{"View"}</PageWord>}</button>)}</div></details>)}
-  </DesignSection></DesignSection>
-  {archiveDate && archiveDate<day && <CloseoutDay focusId={linkedDate===archiveDate?focusId:''} key={archiveDate} selectedDate={archiveDate} current={false} refresh={refresh} locationId={location.id} locationName={location.name} onDeleted={reload} />}
+  <div className="page closeout-summary-toolbar" aria-label="Closeout summary navigation"><strong>{serviceDateLabel(selectedDate)}</strong>{selectedDate!==day&&<button type="button" onClick={()=>choose(day)}>Back to today</button>}<button type="button" onClick={reload}>Refresh closeouts</button>
+   <details className="closeout-archive-picker" ref={archivePicker}><summary>Archives{selectedDate!==day?' · viewing '+serviceDateLabel(selectedDate):''}</summary><label>Archived service day<select aria-label="Archived service day" value={selectedDate<day?selectedDate:''} onChange={e=>choose(e.target.value)}><option value="">Today · {serviceDateLabel(day)}</option>{selectedDate<day&&!history.some(e=>e.day===selectedDate)&&<option value={selectedDate}>{serviceDateLabel(selectedDate)} · linked date</option>}{months.map(([month,entries])=><optgroup key={month} label={serviceDateLabel(month,true)}>{entries.map(e=><option key={e.day} value={e.day}>{serviceDateLabel(e.day)} · {e.staff_count!==undefined&&e.manager_count!==undefined?`${e.staff_count} staff / ${e.manager_count} manager`:`${e.count} closeouts`}</option>)}</optgroup>)}</select></label>{historyLoading&&<p role="status">Loading archives…</p>}{error&&<p role="alert">Archives could not load: {error}</p>}{!historyLoading&&!error&&!history.length&&<p>No previous closeouts returned.</p>}</details>
+  </div>
+  <CloseoutDay key={location.id+':'+selectedDate} selectedDate={selectedDate} current={selectedDate===day} focusId={focusId} managerFocusId={managerFocusId} refresh={refresh} locationId={location.id} locationName={location.name} onDeleted={reload}/>
  </>
 }
-
-
-

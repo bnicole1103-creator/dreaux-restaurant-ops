@@ -1,3 +1,4 @@
+import {closeoutDate,closeoutShift,managerSummaryLink} from '../lib/closeoutNavigation'
 import { CloseoutReceiptWallet, ReceiptSubmissionLog } from '../components/CloseoutReceiptWallet'
 import {serviceDay} from '../lib/serviceDay'
 import {DesignSection} from '../components/DesignSection'
@@ -9,9 +10,9 @@ import './ManagerRatingGuide.css'
 import { submissionLabel } from '../lib/submissionTime'
 import { CloseoutQuestions, useCloseoutConfig, checkAnswers, questionLabel } from '../components/CloseoutConfig'
 import type { Answers, Question } from '../components/CloseoutConfig'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
-import { Link } from 'react-router-dom'
+import { Link,useSearchParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { loadTenantData } from '../lib/tenant'
 import { loadLocationTeam } from '../lib/team'
@@ -32,13 +33,17 @@ function errorMessage(error: unknown) {
     ? String(error.message) : 'Unable to load or save manager closeout.'
 }
 export function ManagerCloseoutPage() {
+  const [params]=useSearchParams(),requestedDay=closeoutDate(params.get('date')),requestedShift=closeoutShift(params.get('shift'))
+  const [lastSaved,setLastSaved]=useState<{day:string;shift:string}|null>(null)
+  const saveLock=useRef(false)
+  const [reviewReady,setReviewReady]=useState(false)
   const [locationId, setLocationId] = useState('')
   const { config, error: configError } = useCloseoutConfig(locationId)
   const [answers, setAnswers] = useState<Answers>({})
   const [savedQuestions, setSavedQuestions] = useState<Question[]>([])
   const [locationName, setLocationName] = useState('')
   const [team, setTeam] = useState<TeamMember[]>([])
-  const [date, setDate] = useState(localDate)
+  const [date, setDate] = useState(()=>requestedDay||localDate())
   const [shifts, setShifts] = useState<Shift[]>([])
   const [shiftId, setShiftId] = useState('')
   const [creatingShift, setCreatingShift] = useState(false)
@@ -64,6 +69,7 @@ export function ManagerCloseoutPage() {
   const [message, setMessage] = useState('')
   const [stamp,setStamp]=useState<{submitted_at:string;updated_at:string}|null>(null)
 
+  useEffect(()=>{if(requestedDay)setDate(requestedDay)},[requestedDay])
   useEffect(() => {
     let active = true
     async function initialize() {
@@ -105,14 +111,15 @@ export function ManagerCloseoutPage() {
           .eq('location_id', locationId).eq('shift_date', date)
           .neq('status', 'cancelled').order('created_at')
         if (queryError) throw queryError
-        if (active) { const rows = (data ?? []) as Shift[]; setShifts(rows); if(rows.length === 1) setShiftId(rows[0].id) }
+        if (active) { const rows = (data ?? []) as Shift[]; setShifts(rows); if(requestedShift&&date===requestedDay&&rows.some(s=>s.id===requestedShift))setShiftId(requestedShift);else if(requestedShift&&date===requestedDay)setError('The linked shift was not found for this date and location. Choose the correct shift.');else if(rows.length === 1) setShiftId(rows[0].id) }
       } catch (e) { if (active) setError(errorMessage(e)) }
       finally { if (active) setShiftLoading(false) }
     })()
     return () => { active = false }
-  }, [locationId, date])
+  }, [locationId, date,requestedShift])
 
   useEffect(() => {
+    setReviewReady(false);setCanEdit(false)
     if (!shiftId) return
     let active = true
     setAnswers({}); setSavedQuestions([]); setDeposit(''); setCashLeft(''); setBalanced(''); setDifference(''); setCashNotes('')
@@ -137,7 +144,7 @@ export function ManagerCloseoutPage() {
         setBalanced(saved?.register_balanced == null ? '' : saved.register_balanced ? 'yes' : 'no')
         setDifference(saved?.register_difference != null ? String(saved.register_difference) : '')
         setCashNotes(saved?.register_notes ?? '')
-        setCanEdit(!saved || saved.submitted_by === currentUser || elevated)
+        setCanEdit(!saved || saved.submitted_by === currentUser || elevated);setReviewReady(true)
         if (saved) setMessage('Saved closeout loaded. Changes recalculate points without counting another rating.')
       } catch (e) { if (active) setError(errorMessage(e)) }
       finally { if (active) setReviewLoading(false) }
@@ -171,7 +178,8 @@ export function ManagerCloseoutPage() {
   }
   async function submit(event: FormEvent) {
     event.preventDefault()
-    if (saving) return
+    if (saving||saveLock.current) return
+    if(!reviewReady||reviewLoading||shiftLoading||!shiftId||!canEdit||!config||configError){setError('Wait for this shift and its saved closeout to load successfully before saving.');return}
     if(receiptPending===null){setError('Open My wallet and wait for receipt photos to load before submitting.');return}
     if(receiptPending>0){setError('Review and save or delete every receipt photo before submitting.');return}
     setError(''); setMessage('')
@@ -185,7 +193,8 @@ export function ManagerCloseoutPage() {
       setError('Enter the cash deposit, where it was left, and whether the register balanced. Explain any shortage or overage.')
       return
     }
-    setSaving(true)
+    saveLock.current=true;setSaving(true)
+    const submittedDay=date,submittedShift=shiftId
     try {
       const customAnswers = {...checkAnswers(config, 'manager', answers), _shift_mvp: shiftMvp}
       const submittedReviews = reviews.map(r => ({user_id: r.user_id, rating: r.rating, reason: `Category: ${r.category}\n${r.reason.trim()}`}))
@@ -198,6 +207,7 @@ export function ManagerCloseoutPage() {
         p_register_notes: cashNotes.trim(),
       })
       if (saveError) throw saveError
+      setLastSaved({day:submittedDay,shift:submittedShift});window.dispatchEvent(new CustomEvent('closeout-saved',{detail:{day:submittedDay,shift:submittedShift}}))
       // The save succeeded. Clear the form before loading the optional receipt.
       setShiftId('')
       setReviews([])
@@ -222,7 +232,7 @@ export function ManagerCloseoutPage() {
         // A receipt lookup failure must not turn a successful save into an error.
       }
     } catch (e) { setError(errorMessage(e)) }
-    finally { setSaving(false) }
+    finally { saveLock.current=false;setSaving(false) }
   }
   if (loading) return <DesignSection as="section" data-design-block="copy.12b488bb634c8598.1" className="page"><p data-design-block="copy.0441952f380976f4.1"><ScreenText id="ManagerCloseoutPage.09310404aab17db7">Loading manager closeout…</ScreenText></p></DesignSection>
   return <DesignSection as="section" data-design-block="copy.962ae05cdc73eb4f.1" className="mod-page">
@@ -232,6 +242,7 @@ export function ManagerCloseoutPage() {
     {configError && <p data-design-block="copy.d4b2922a100383aa.1" role="alert">{configError}</p>}
     {error && <p data-design-block="copy.d4b2922a100383aa.2" role="alert">{error}</p>}
     {message && <p data-design-block="copy.e6598ab30c274935.1" role="status">{message}</p>}
+    {(lastSaved||shiftId)&&<p><Link to={managerSummaryLink(shiftId?date:lastSaved!.day,shiftId||lastSaved!.shift)}>View this manager closeout in Summary →</Link></p>}
     {stamp && <p data-design-block="copy.0441952f380976f4.3"><ScreenText id="ManagerCloseoutPage.77476d75d9140c97">Submitted: </ScreenText>{submissionLabel(stamp.submitted_at)}{stamp.updated_at!==stamp.submitted_at && <><ScreenText id="ManagerCloseoutPage.d5bb16ce999eef86"> · Last updated: </ScreenText>{submissionLabel(stamp.updated_at)}</>}</p>}
     {allowed && <>
       <CloseoutReceiptWallet onPendingChange={setReceiptPending} inline managerCloseout location={locationId} day={date} shiftId={shiftId||undefined} label="Open manager receipt wallet & voids/comps report"/>
@@ -249,7 +260,7 @@ export function ManagerCloseoutPage() {
         {shiftLoading && <p data-design-block="copy.0441952f380976f4.4"><ScreenText id="ManagerCloseoutPage.04eecb585c2af027">Loading shifts…</ScreenText></p>}
         {creatingShift && <p data-design-block="copy.0441952f380976f4.5"><ScreenText id="ManagerCloseoutPage.b2e1bb32e9d242cc">Creating shift…</ScreenText></p>}
         {reviewLoading && <p data-design-block="copy.0441952f380976f4.6"><ScreenText id="ManagerCloseoutPage.779a089a26f12e4c">Loading private reviews…</ScreenText></p>}
-        {shiftId && !reviewLoading && <fieldset data-design-block="copy.ced9f2f20202fef9.1" disabled={saving || !canEdit}>
+        {shiftId && !reviewLoading && <fieldset data-design-block="copy.ced9f2f20202fef9.1" disabled={saving || !canEdit || !reviewReady || !!configError}>
           <legend><ScreenText id="ManagerCloseoutPage.30ab09d20fac2ce2">Shift closeout</ScreenText></legend>
           <DesignSection as="section" data-design-block="copy.6c15e9c966d6ea8c.1" className="mod-rating-guide" aria-labelledby="rating-guide-heading">
             <h2 data-design-block="copy.50d5dd187e23d190.1" id="rating-guide-heading"><ScreenText id="ManagerCloseoutPage.f5960a21b5ce2a31">Staff ratings · What the numbers mean</ScreenText></h2>
@@ -322,7 +333,7 @@ export function ManagerCloseoutPage() {
           </DesignSection>}
           <label data-design-block="copy.555a75cba4b3447e.1" className="mod-check"><input type="checkbox" required checked={confirmed}
             onChange={e => setConfirmed(e.target.checked)} /><ScreenText id="ManagerCloseoutPage.9978865bd56536f3">I included everyone I supervised who worked this shift.</ScreenText></label>
-          <button data-design-block="copy.8cb3e942b1ad10b7.1" type="submit" disabled={!reviews.length || !confirmed || receiptPending!==0}>{saving ? <PageWord id="copy.0f556bfd5560fe2d.1">{"Saving…"}</PageWord> : <PageWord id="copy.f13061703e4e7e97.1">{"Submit Manager Closeout"}</PageWord>}</button>
+          <button data-design-block="copy.8cb3e942b1ad10b7.1" type="submit" disabled={saving||!reviewReady||!!configError||!config||!reviews.length || !confirmed || receiptPending!==0}>{saving ? <PageWord id="copy.0f556bfd5560fe2d.1">{"Saving…"}</PageWord> : <PageWord id="copy.f13061703e4e7e97.1">{"Submit Manager Closeout"}</PageWord>}</button>
         </fieldset>}
         {shiftId && !reviewLoading && !canEdit && <p data-design-block="copy.0441952f380976f4.9"><ScreenText id="ManagerCloseoutPage.30caf0d1c89056fc">Only the submitting MOD, owner, or Management can edit this saved closeout.</ScreenText></p>}
       </form><ReceiptSubmissionLog location={locationId} day={date}/>
