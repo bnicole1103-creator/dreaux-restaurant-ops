@@ -1,15 +1,19 @@
-import {DesignSection} from '../components/DesignSection'
-// page-designer-instrumented
-import { ScreenText } from "../components/ScreenText"
-export function CashPage() {
-  return (
-    <DesignSection as="section" data-design-block="copy.8b13deb8a5483480.1">
-      <div data-design-block="copy.a5eff8abab3519c4.1" className="page-heading">
-        <p data-design-block="copy.a4bf89891af37ec6.1" className="eyebrow"><ScreenText id="CashPage.9bfcb5f85e32c4ba">CashFlow</ScreenText></p>
-        <h1 data-design-block="copy.390fc9b78a59c326.1"><ScreenText id="CashPage.785ff2920771b63d">Cash controls</ScreenText></h1>
-        <p data-design-block="copy.6d4dfa5c1c918b7a.1" className="muted"><ScreenText id="CashPage.19713b20a40dacc8">Next: drawer sessions, deposits, voids, comps, receipt uploads, and manager cashout.</ScreenText></p>
-      </div>
-      <div data-design-block="copy.fa27e8d2669ab1b7.1" className="empty-state"><strong><ScreenText id="CashPage.a86dd3e9dd5b40a3">Cash module foundation ready</ScreenText></strong></div>
-    </DesignSection>
-  )
+import {useEffect,useState} from 'react'
+import {Link,useSearchParams} from 'react-router-dom'
+import {supabase} from '../lib/supabase'
+import {loadTenantData} from '../lib/tenant'
+import {serviceDay,serviceDateLabel} from '../lib/serviceDay'
+import {closeoutDate,managerSummaryLink} from '../lib/closeoutNavigation'
+import {compareCash,type CashDay} from '../lib/cashReconciliation'
+import {salesMoney} from '../lib/salesTargets'
+import './CashReconciliation.css'
+export function CashPage(){
+ const [params,setParams]=useSearchParams(),day=closeoutDate(params.get('date'))||serviceDay()
+ const [data,setData]=useState<CashDay|null>(null),[error,setError]=useState(''),[loading,setLoading]=useState(true),[shift,setShift]=useState(''),[refresh,setRefresh]=useState(0)
+ useEffect(()=>{let active=true;setLoading(true);setData(null);setError('');setShift('');void(async()=>{try{const tenant=await loadTenantData(),location=tenant.locations[0]?.id;if(!location)throw Error('No active location.');const r=await supabase.rpc('cash_reconciliation_day_v1',{p_location_id:location,p_day:day});if(r.error)throw r.error;if(active){setData(r.data);if(r.data.manager_closeouts?.length===1)setShift(r.data.manager_closeouts[0].shift_id)}}catch(e){if(active)setError(String((e as {message?:string}).message??e))}finally{if(active)setLoading(false)}})();return()=>{active=false}},[day,refresh])
+ const result=data?compareCash(data,shift):null
+ return <section className="page cash-reconciliation" data-design-block="cash.reconciliation"><h1>Cash reconciliation</h1><p>Compare all submitted staff cash for {serviceDateLabel(day)} with the manager’s end-of-night deposit.</p><div className="cash-reconciliation-controls"><label>Service date<input type="date" max={serviceDay()} value={day} onChange={e=>{if(!closeoutDate(e.target.value))return;const next=new URLSearchParams(params);next.set('date',e.target.value);setParams(next)}}/></label><button disabled={loading} type="button" onClick={()=>setRefresh(v=>v+1)}>Refresh cash totals</button></div>
+  {loading&&<p role="status">Loading submitted closeout amounts…</p>}{error&&<p role="alert">Cash reconciliation could not load: {error}</p>}
+  {data&&result&&<><label>End-of-night manager closeout<select aria-label="End-of-night manager closeout" value={shift} onChange={e=>setShift(e.target.value)}><option value="">Choose the closing manager report</option>{data.manager_closeouts.map(m=><option key={m.shift_id} value={m.shift_id}>{m.shift_name} · {m.submitted_by_name||'Manager'} · {m.cash_deposit==null?'Deposit not recorded':salesMoney(Number(m.cash_deposit))}</option>)}</select></label><p>Choose one closing report. Midday and closing manager reports are not added together.</p><div className="cash-reconciliation-totals"><div>Staff-reported cash<strong>{salesMoney(Number(data.staff_total))}</strong><small>{data.staff_count} submitted staff closeouts</small></div><div>Closing manager deposit<strong>{data.manager_closeouts.find(m=>m.shift_id===shift)?.cash_deposit==null?'Not selected / not recorded':salesMoney(Number(data.manager_closeouts.find(m=>m.shift_id===shift)!.cash_deposit))}</strong></div><div>Difference · manager minus staff<strong>{result.difference==null?'Unavailable':salesMoney(result.difference)}</strong></div></div><p role="status" className="cash-reconciliation-status">{result.status}</p>{data.missing_cash>0&&<p role="alert">{data.missing_cash} staff closeouts have no collected cash amount. Review those records.</p>}{data.roster_confirmed!==true&&<p role="status">The confirmed schedule is unavailable. Matching dollar totals do not establish that every staff closeout is included.</p>}{!!data.missing_required_closeouts&&<p role="alert">{data.missing_required_closeouts} required staff closeouts are still missing.</p>}{shift&&<p><Link to={managerSummaryLink(day,shift)}>Open closing manager report in Summary →</Link></p>}<h2>Staff deposit breakdown</h2><table><thead><tr><th>Employee</th><th>Reported cash</th><th>Closeout</th></tr></thead><tbody>{data.staff.map(c=><tr key={c.id}><td>{c.name}</td><td>{c.cash_deposit==null?'Not collected':salesMoney(Number(c.cash_deposit))}</td><td><Link to={'/closeout-summary?'+new URLSearchParams({date:day,closeout:c.id})}>Review closeout</Link></td></tr>)}</tbody></table>{!data.staff.length&&<p>No staff closeouts were returned for this day.</p>}</>}
+ </section>
 }

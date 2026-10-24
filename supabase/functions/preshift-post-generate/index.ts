@@ -20,6 +20,6 @@ Deno.serve(async(req:Request)=>{
  const claim=await client.rpc('preshift_post_generation_claim',{p_location_id:location_id});if(claim.error)return send({error:claim.error.message},claim.error.code==='42501'?403:429);if(claim.data!==true)return send({error:'Manager access required.'},403)
  const response=await fetch('https://api.openai.com/v1/responses',{method:'POST',headers:{Authorization:'Bearer '+key,'Content-Type':'application/json'},body:JSON.stringify(requestBody(Deno.env.get('PRESHIFT_GENERATION_MODEL')??'gpt-4.1-mini',{date,details,notes,format})),signal:AbortSignal.timeout(90000)})
  if(!response.ok)return send({error:response.status===429?'The AI service is busy or its API quota is exhausted. Check API billing or try again later.':'The AI service could not generate a pre-shift. Check the API key and try again.'},502)
- return send({...parsePost(await response.json()),service_date:date})
+ return send({...parsePost(await response.json(),{date,details,notes,format}),service_date:date})
  }catch(e){return send({error:e instanceof Error&&e.name==='TimeoutError'?'Generation timed out. Try fewer notes.':e instanceof Error?e.message:'Unable to generate a pre-shift.'},400)}
 })

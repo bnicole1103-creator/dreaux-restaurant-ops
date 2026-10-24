@@ -1,3 +1,4 @@
+import {orderRooms} from '../lib/roomOrder'
 import {DesignSection} from '../components/DesignSection'
 import { TeamProfileName } from '../components/TeamProfileName'
 import {AccessSection} from '../components/AppAccess'
@@ -314,7 +315,7 @@ const [partySize, setPartySize] = useState(1)
         if (roomResult.error) throw roomResult.error
         if (tableResult.error) throw tableResult.error
 
-        const nextRooms = roomResult.data ?? []
+        const nextRooms = orderRooms(roomResult.data ?? [])
         const nextShifts = shiftResult ?? []
 
         setRooms(nextRooms)

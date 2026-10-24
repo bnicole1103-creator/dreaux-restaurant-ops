@@ -12,8 +12,8 @@ if(typeof window!=='undefined'&&editorPreviewActive(window.location.search,windo
  blockedPreviewEvents.forEach(type=>document.addEventListener(type,blockPreviewAction,{capture:true,passive:false}))
 }
 import type {FontName} from '../lib/appearance'
-import {designCss,syncOrderHosts,validId} from '../lib/pageEditor'
-export type DesignChange={presentation?:'inline'|'collapse'|'popup';panelTitle?:string;defaultOpen?:boolean;color?:string;background?:string;borderColor?:string;fontSize?:number;align?:'left'|'center'|'right';kind?:'note'|'link';title?:string;href?:string;linkLabel?:string;font?:FontName;text?:string;hidden?:boolean;x?:number;y?:number;order?:number;parent?:string}
+import {designCss,syncOrderHosts,validId,ensureElementIds} from '../lib/pageEditor'
+export type DesignChange={offsetX?:number;offsetY?:number;width?:number;minHeight?:number;iconSize?:number;presentation?:'inline'|'collapse'|'popup';panelTitle?:string;defaultOpen?:boolean;color?:string;background?:string;borderColor?:string;fontSize?:number;align?:'left'|'center'|'right';kind?:'note'|'link';title?:string;href?:string;linkLabel?:string;font?:FontName;text?:string;hidden?:boolean;x?:number;y?:number;order?:number;parent?:string}
 export type Design={version:number;changes:Record<string,DesignChange>}
 let current:Design={version:0,changes:{}}
 const subscribers=new Set<()=>void>()
@@ -46,7 +46,7 @@ export function PageDesignLoader(){
  useEffect(()=>{let timer:ReturnType<typeof setTimeout>|undefined;const measure=()=>{const next:Record<string,number>={};for(const id of Object.keys(design.changes)){if(!validId(id))continue;let node=document.querySelector('[data-design-block="'+id+'"],[data-design-word="'+id+'"]'),n=0;while(node){n++;node=node.parentElement}next[id]=n}setDepths(old=>JSON.stringify(old)===JSON.stringify(next)?old:next)};measure();const observer=new MutationObserver(()=>{if(timer)clearTimeout(timer);timer=setTimeout(measure,40)});observer.observe(document.body,{childList:true,subtree:true});return()=>{observer.disconnect();if(timer)clearTimeout(timer)}},[design.changes])
  useEffect(()=>{
   let timer:ReturnType<typeof setTimeout>|undefined
-  const apply=()=>syncOrderHosts(document,design.changes)
+  const apply=()=>{ensureElementIds(document);syncOrderHosts(document,design.changes)}
   apply()
   const observer=new MutationObserver(()=>{if(timer)clearTimeout(timer);timer=setTimeout(apply,40)})
   observer.observe(document.body,{childList:true,subtree:true})
