@@ -1,14 +1,5 @@
 .profile-sales-targets{position:relative;margin-top:16px;padding:16px;border:1px solid var(--app-border,#d6c5b5);border-radius:14px;background:var(--app-card,#fff8ef);color:var(--app-text,#3b281d);min-width:0}.profile-target-heading{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.profile-target-heading h2{margin:0;font-size:1.1rem}.profile-target-heading button{min-height:44px;font:inherit}.profile-target-totals{display:flex;gap:20px;flex-wrap:wrap}.profile-target-totals dt{font-size:.9rem}.profile-target-totals dd{margin:4px 0 0;font-size:1.45rem;font-weight:700;font-variant-numeric:tabular-nums}.profile-target-plan{border-top:1px solid var(--app-border,#d6c5b5);padding-top:12px}.profile-target-plan h3{margin:0 0 10px;font-size:1rem}.profile-target-plan label{display:grid;gap:6px;max-width:300px;margin:12px 0}.profile-target-plan input{width:100%;box-sizing:border-box;min-height:44px;font:inherit}.profile-target-plan details{margin-top:12px}.profile-target-plan summary{cursor:pointer;font-weight:700}.profile-target-plan li{margin:8px 0}.profile-target-plan small{display:block}
 
-/* Targets sit beside the identity; crew chat stays below the top row. */
-.personal-home .personal-profile-top{grid-template-columns:minmax(180px,.8fr) minmax(280px,1.2fr);align-items:start;gap:20px}
-.personal-home .personal-profile-top>.personal-identity{align-self:center}
-.personal-home .personal-profile-top>.profile-sales-targets{margin:0;width:100%;box-sizing:border-box}
-.personal-home .personal-profile-top .header-chat-strip{grid-column:1 / -1;order:2}
-.profile-target-plan>summary{cursor:pointer;font-weight:700;min-height:44px;display:list-item;align-content:center;padding:8px 0;box-sizing:border-box}
-.profile-target-plan h3{margin-top:16px}
-@media(max-width:900px){.personal-home .personal-profile-top{grid-template-columns:minmax(0,1fr)}.personal-home .personal-profile-top>.personal-identity,.personal-home .personal-profile-top>.profile-sales-targets,.personal-home .personal-profile-top .header-chat-strip{grid-column:1;grid-row:auto}}
-
 /* Individual progress calculator; the team target remains a separate reference. */
 .profile-target-inputs{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(210px,100%),1fr));gap:12px}
 .profile-target-plan .profile-target-inputs label{max-width:none;margin:8px 0}
@@ -35,4 +26,14 @@
 .profile-target-plan small{font-size:.75rem;margin-top:4px}
 .profile-target-progress{margin:8px 0}.profile-target-progress dl{margin:6px 0;gap:8px 24px}.profile-target-progress dd{font-size:1.1rem}
 .profile-target-scripts{margin-top:8px;padding-top:0}.profile-target-scripts>summary{box-sizing:border-box;min-height:44px;padding:12px 0}
-.profile-sales-targets>.sales-target-clips{margin-top:8px;padding:12px;border:1px solid var(--app-accent,#795036);border-radius:12px;background:var(--app-card,#fff8ef)}
+
+
+/* One full-width target panel; video and totals share its top row. */
+.personal-home-header>.profile-sales-targets{width:100%;box-sizing:border-box;margin:12px 0;min-width:0}
+.profile-target-top{display:grid;grid-template-columns:minmax(0,1fr) minmax(120px,1fr);gap:12px;align-items:start}
+.profile-target-numbers{min-width:0}.profile-target-totals{display:grid;gap:8px;margin:0}.profile-target-totals dt{font-size:.72rem}.profile-target-totals dd{font-size:1.1rem;overflow-wrap:anywhere}.profile-target-numbers>p{font-size:.7rem;margin:6px 0}
+.profile-target-heading{flex-wrap:nowrap}.profile-target-heading h2{font-size:1rem}.profile-target-heading button{width:44px;padding:4px;flex-shrink:0}
+.profile-target-plan{margin-top:10px}.profile-target-plan h3{font-size:.85rem}.profile-target-inputs label{line-height:1.3}.profile-target-plan .profile-target-inputs label{font-size:.75rem}
+.profile-target-plan small{font-size:.65rem}.profile-target-progress dd{font-size:1rem}.profile-target-scripts>summary{font-size:.85rem}
+.profile-target-plan>summary{box-sizing:border-box;min-height:44px;padding:12px 0;cursor:pointer;font-size:.85rem;font-weight:700}
+.profile-target-totals dd{font-size:clamp(.85rem,3.5vw,1.1rem);line-height:1.2;overflow-wrap:normal;word-break:normal}

@@ -1,3 +1,4 @@
+import {createPortal} from 'react-dom'
 import {TrackedVideo} from './TrackedVideo'
 import {useEffect,useRef,useState} from 'react'
 import {supabase} from '../lib/supabase'
@@ -7,10 +8,13 @@ import './SalesTargetVideos.css'
 type Clip={id:string;title:string;caption:string;path:string;version:number}
 type Draft={id:string;title:string;caption:string;path:string;version:number;file:File|null}
 const message=(e:unknown)=>String((e as {message?:string})?.message||'Unable to update sales coaching clips. Please retry.')
-export function SalesTargetVideos({location}:{location:string}){
+export function SalesTargetVideos({location,compact=false}:{location:string;compact?:boolean}){
  const [clips,setClips]=useState<Clip[]>([]),[canManage,setCanManage]=useState(false),[loading,setLoading]=useState(true),[busy,setBusy]=useState(false)
  const [error,setError]=useState(''),[notice,setNotice]=useState(''),[refresh,setRefresh]=useState(0),[draft,setDraft]=useState<Draft|null>(null)
  const [urls,setUrls]=useState<Record<string,string>>({}),[mediaError,setMediaError]=useState(''),[failed,setFailed]=useState<Record<string,boolean>>({})
+ const [opened,setOpened]=useState(false)
+ const dialog=useRef<HTMLDialogElement>(null)
+ useEffect(()=>{const d=dialog.current;if(opened&&d&&!d.open)d.showModal()},[opened])
  const lock=useRef(false),live=useRef(true),uploaded=useRef('')
  useEffect(()=>{live.current=true;return()=>{live.current=false}},[])
  useEffect(()=>{let active=true;setLoading(true);setError('')
@@ -41,7 +45,7 @@ export function SalesTargetVideos({location}:{location:string}){
    const clean=await supabase.storage.from(targetVideoBucket).remove([r.data]);if(clean.error&&live.current)setNotice('Clip removed from the page. Its stored video could not be deleted; contact your administrator for storage cleanup.')
   }catch(e){if(live.current)setError(message(e))}finally{lock.current=false;if(live.current)setBusy(false)}
  }
- return <DesignSection as="section" data-design-block="home.targets.coaching" data-layout-label="Sales coaching clips" className="sales-target-clips" aria-label="Sales coaching clips">
+ const content=<>
   <div className="target-clips-heading"><h3>Sales coaching clips</h3><button type="button" disabled={busy||loading} onClick={()=>setRefresh(v=>v+1)}>Reload clips</button></div>
   <p>Quick tips to help you reach your sales goal.</p>
   {loading&&<p role="status">Loading coaching clips…</p>}{error&&<p role="alert">{error}</p>}{notice&&<p role="status">{notice}</p>}
@@ -59,5 +63,13 @@ export function SalesTargetVideos({location}:{location:string}){
    <label>Coaching note or transcript (optional)<textarea rows={3} maxLength={1000} value={draft.caption} onChange={e=>setDraft({...draft,caption:e.target.value})}/></label>
    <div className="target-clip-actions"><button type="submit" disabled={!draft.title.trim()||(!draft.path&&!draft.file)}>{busy?'Saving…':draft.version?'Save clip details':'Publish coaching clip'}</button><button type="button" onClick={()=>void cancel()}>Cancel</button></div>
   </fieldset></form>}
- </DesignSection>
+ </>
+ if(!compact)return <DesignSection as="section" data-design-block="home.targets.coaching" data-layout-label="Sales coaching clips" className="sales-target-clips" aria-label="Sales coaching clips">{content}</DesignSection>
+ return <section data-design-block="home.targets.coaching" data-layout-label="Sales video" className="sales-target-inline" aria-label="Sales coaching clips">
+  <button className="target-video-preview" type="button" disabled={!clips.length||loading} aria-label={clips.length?'Watch '+clips[0].title:'No coaching video posted yet'} onClick={()=>setOpened(true)}><span aria-hidden="true">▶</span><span>{clips.length?'Watch video':'Sales video'}</span></button>
+  {!loading&&!clips.length&&<small>No video yet.</small>}
+  {error&&<><small role="alert">{error}</small><button type="button" aria-label="Reload clips" onClick={()=>setRefresh(v=>v+1)}>↻ Retry</button></>}
+  {canManage&&<button className="target-video-add" type="button" aria-label="Add coaching video" disabled={busy} onClick={()=>{if(!draft){uploaded.current='';setError('');setNotice('');setDraft({id:crypto.randomUUID(),title:'',caption:'',path:'',version:0,file:null})}setOpened(true)}}>＋ Add video</button>}
+  {opened&&createPortal(<dialog ref={dialog} className="target-video-dialog" aria-label="Sales coaching video player" onCancel={e=>{e.preventDefault();if(!busy)setOpened(false)}}><div className="target-video-dialog-heading"><strong>Sales videos</strong><button type="button" disabled={busy} onClick={()=>setOpened(false)}>Close video</button></div><div className="sales-target-clips">{content}</div></dialog>,document.body)}
+ </section>
 }

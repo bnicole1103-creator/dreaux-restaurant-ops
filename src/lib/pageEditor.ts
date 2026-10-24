@@ -31,10 +31,14 @@ function layoutOwner(node:HTMLElement){
   parent=parent.parentElement
   if(parent?.hasAttribute('data-design-dialog'))parent=parent.parentElement
  }
+ while(parent&&(parent.hasAttribute('data-theme-section')||parent.dataset.layoutTransparent==='true'))parent=parent.parentElement
  return parent
 }
 const layoutRoots=(id:string)=>':is([data-layout-group="'+id+'"],[data-design-block="'+id+'"])'
-const layoutHosts=(id:string)=>{const root=layoutRoots(id);return [root,root+'>[data-design-content]',root+'>[data-design-dialog]>[data-design-content]']}
+const transparent=':is([data-theme-section],[data-layout-transparent="true"])'
+const layoutHosts=(id:string)=>{const root=layoutRoots(id);const bases=[root,root+'>[data-design-content]',root+'>[data-design-dialog]>[data-design-content]'];return bases.flatMap(base=>Array.from({length:6},(_,depth)=>base+('>'+transparent).repeat(depth)))}
+function orderChildren(host:HTMLElement):HTMLElement[]{return Array.from(host.children).flatMap(child=>{const n=child as HTMLElement;return n.hasAttribute('data-theme-section')||n.dataset.layoutTransparent==='true'?orderChildren(n):[n]})}
+
 /** Only block/contents hosts need a flex fallback. Existing grids and rows stay intact. */
 export function syncOrderHosts(doc:Document,changes:Design['changes']){
  doc.querySelectorAll('[data-design-order-flow]').forEach(n=>n.removeAttribute('data-design-order-flow'))
@@ -42,7 +46,7 @@ export function syncOrderHosts(doc:Document,changes:Design['changes']){
  for(const[id,value]of Object.entries(changes)){
   if(!validId(id)||!value.parent||!validId(value.parent)||!Number.isInteger(value.order))continue
   doc.querySelectorAll<HTMLElement>(layoutHosts(value.parent).join(',')).forEach(host=>{
-   if(Array.from(host.children).some(n=>(n as HTMLElement).dataset.designBlock===id))hosts.add(host)
+   if(orderChildren(host).some(n=>n.dataset.designBlock===id))hosts.add(host)
   })
  }
  for(const host of hosts){
@@ -53,14 +57,32 @@ export function syncOrderHosts(doc:Document,changes:Design['changes']){
   if(!['flex','inline-flex','grid','inline-grid'].includes(display))host.setAttribute('data-design-order-flow','true')
  }
 }
+/** Static containers get the same identity in the live page and preview.
+ * Permission wrappers remain in place. Repeated records and editor overlays are excluded. */
+export function ensureBoxIds(doc:Document){
+ for(const n of doc.querySelectorAll<HTMLElement>('[data-auto-box]')){delete n.dataset.designBlock;delete n.dataset.autoBox;delete n.dataset.layoutLabel}
+ const candidates=new Map<string,HTMLElement[]>(),seen=new Map<string,number>()
+ const selector='section,aside,nav,fieldset,form,div[class]'
+ for(const n of doc.querySelectorAll<HTMLElement>(selector)){
+  if(n.dataset.designBlock||n.closest('[data-editor-ignore],.crew-person-row,[data-record-id],tr,[data-crew-speaker]'))continue
+  if(n.tagName==='DIV'&&!/(?:^|[-_ ])(?:box|panel|strip|wall|widget|section)(?:$|[-_ ])/.test(n.className))continue
+  const owner=n.parentElement?.closest<HTMLElement>('[data-design-block]:not([data-auto-element]):not([data-auto-box])'),id=owner?.dataset.designBlock
+  if(!id||!validId(id))continue
+  const key=[id,n.tagName,n.id,Array.from(n.classList).filter(c=>!/^is-|selected|active|loading/.test(c)).sort().join('.')].join('|')
+  candidates.set(key,[...(candidates.get(key)||[]),n])
+ }
+ for(const [key,nodes]of candidates){if(nodes.length!==1)continue;let hash=2166136261;for(const c of key)hash=Math.imul(hash^c.charCodeAt(0),16777619)>>>0;const id='box.'+hash.toString(16);seen.set(id,1+(seen.get(id)??0))}
+ for(const [key,nodes]of candidates){if(nodes.length!==1)continue;let hash=2166136261;for(const c of key)hash=Math.imul(hash^c.charCodeAt(0),16777619)>>>0;const id='box.'+hash.toString(16);if(seen.get(id)!==1)continue;const n=nodes[0];n.dataset.designBlock=id;n.dataset.autoBox='true';n.dataset.layoutLabel=n.getAttribute('aria-label')||n.querySelector('h1,h2,h3,legend,summary')?.textContent?.trim()||n.classList[0]?.replace(/[-_]/g,' ')||n.tagName.toLowerCase()}
+}
 /** Give otherwise unmarked controls a reproducible identity under their unique static block.
  * Repeated data rows retain their component's record identities; never guess from employee names. */
 export function ensureElementIds(doc:Document){
- const original=Array.from(doc.querySelectorAll<HTMLElement>('[data-design-block]:not([data-auto-element])')),counts=new Map<string,number>(),seen=new Map<string,number>()
+ ensureBoxIds(doc)
+ const original=Array.from(doc.querySelectorAll<HTMLElement>('[data-design-block]:not([data-auto-element]):not([data-auto-box])')),counts=new Map<string,number>(),seen=new Map<string,number>()
  original.forEach(n=>counts.set(n.dataset.designBlock!,1+(counts.get(n.dataset.designBlock!)??0)))
  for(const n of Array.from(doc.querySelectorAll<HTMLElement>('button,input:not([type=hidden]):not([type=file]),select,textarea,a[href],img,label'))){
   if((n.dataset.designBlock&&!n.dataset.autoElement)||n.closest('[data-editor-ignore]'))continue
-  const owner=n.parentElement?.closest<HTMLElement>('[data-design-block]:not([data-auto-element])'),id=owner?.dataset.designBlock
+  const owner=n.parentElement?.closest<HTMLElement>('[data-design-block]:not([data-auto-element]):not([data-auto-box])'),id=owner?.dataset.designBlock
   if(!id||counts.get(id)!==1)continue
   const semantic=[id,n.tagName,n.getAttribute('type')||'',n.getAttribute('name')||'',n.getAttribute('aria-label')||'',n.getAttribute('href')||''].join('|'),rank=seen.get(semantic)??0;seen.set(semantic,rank+1)
   const key=semantic+'|'+rank;let hash=2166136261;for(const c of key)hash=Math.imul(hash^c.charCodeAt(0),16777619)>>>0
@@ -75,7 +97,7 @@ export function editorItems(doc:Document):EditorItem[]{
   const parent=layoutOwner(n),group=parent?.dataset.layoutGroup
   // Reorder only explicit layout slots, or semantic siblings in an existing instrumented container.
   const semantic='section[data-design-block],article[data-design-block],header[data-design-block],aside[data-design-block],details[data-design-block],fieldset[data-design-block],nav[data-design-block],form[data-design-block],div[data-design-block]'
-  const safe=!n.dataset.layoutTransparent&&!!parent?.dataset.designBlock&&n.matches(semantic)&&Array.from(n.parentElement?.children??[]).filter(c=>c.matches(semantic)).length>1
+  const safe=!n.dataset.layoutTransparent&&!!parent?.dataset.designBlock&&n.matches(semantic)&&!!parent&&orderChildren(parent).filter(c=>c.matches(semantic)).length>1
   const movable=!!n.dataset.layoutItem&&!!group||safe
   const words=Array.from(n.querySelectorAll<HTMLElement>('[data-design-word]')).filter(w=>!/\.w\d+$/.test(w.dataset.designWord??'')).filter((w,i,a)=>a.findIndex(x=>x.dataset.designWord===w.dataset.designWord)===i).map(w=>({id:w.dataset.designWord!,text:w instanceof doc.defaultView!.HTMLInputElement?(w as HTMLInputElement).placeholder:w.textContent??''}))
   const label=n.dataset.layoutLabel||n.querySelector('h1,h2,h3,legend,summary')?.textContent?.trim()||(n.textContent??'').replace(/\s+/g,' ').trim().slice(0,70)||'Section'
@@ -93,7 +115,7 @@ export function designCss(changes:Record<string,DesignChange>,preview:boolean,de
   }
   const offsetX=v.offsetX??v.x,offsetY=v.offsetY??v.y
   if(offsetX||offsetY||v.offsetX===0||v.offsetY===0)css+=block+'{position:relative!important;left:'+(Number.isFinite(offsetX)?offsetX:0)+'px!important;top:'+(Number.isFinite(offsetY)?offsetY:0)+'px!important;}'
-  if(Number.isInteger(v.width)&&v.width!>=44&&v.width!<=2000)css+=block+'{box-sizing:border-box!important;width:'+v.width+'px!important;max-width:100%!important;}'
+  if(Number.isInteger(v.width)&&v.width!>=44&&v.width!<=2000)css+=block+'{box-sizing:border-box!important;width:'+v.width+'px!important;max-width:calc(100vw - 24px)!important;}'
   if(Number.isInteger(v.minHeight)&&v.minHeight!>=44&&v.minHeight!<=2000)css+=block+'{min-height:'+v.minHeight+'px!important;}'
   if(Number.isInteger(v.iconSize)&&v.iconSize!>=16&&v.iconSize!<=160)css+=block+' svg{width:'+v.iconSize+'px!important;height:'+v.iconSize+'px!important;}'
   let typography=''

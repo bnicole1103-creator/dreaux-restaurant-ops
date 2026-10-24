@@ -48,15 +48,17 @@ export function ProfileSalesTargets({ location }: { location: string }) {
   const goalLabel = usingTeam ? 'Team goal calculator' : 'My goal calculator'
   const plan = data?.ready ? salesProgressPlan(personal ?? team,spend,currentSales) : null
   return <DesignSection as="section" data-design-block="home.targets" data-layout-item="true" data-layout-label="Sales targets and coaching videos" className="profile-sales-targets" aria-label="Today's sales targets" aria-busy={loading}>
-    <div className="profile-target-heading"><h2>Today’s sales targets</h2><button type="button" disabled={loading} onClick={() => { setDate(serviceDay()); setRefresh(v => v + 1) }}>Refresh targets</button></div>
+    <div className="profile-target-heading"><h2>Today’s sales targets</h2><button type="button" disabled={loading} aria-label="Refresh targets" title="Refresh targets" onClick={() => { setDate(serviceDay()); setRefresh(v => v + 1) }}>↻</button></div>
     <p>{serviceDateLabel(date)} · Net sales</p>
-    {loading&&!data ? <p role="status">Loading targets…</p> : error ? <p role="alert">{error}</p> : data?.ready ? <>
-      <dl className="profile-target-totals"><div><dt>Team target</dt><dd>{team === null ? 'Not available' : salesMoney(team)}</dd></div>
+    <div className="profile-target-top"><div className="profile-target-numbers">
+      {data?.ready&&<><dl className="profile-target-totals"><div><dt>Team target</dt><dd>{team === null ? 'Not available' : salesMoney(team)}</dd></div>
         <div><dt>My assigned target</dt><dd>{personal===null?'Not assigned':salesMoney(personal)}</dd></div>
       </dl>
-      {personal===null&&<p>No individual target assigned · calculator uses team sales.</p>}
-      {plan&&<div className="profile-target-plan" aria-label={goalLabel} data-design-block="home.targets.calculator">
-        <h3>{goalLabel}</h3>
+      {personal===null&&<p>Using team sales.</p>}</>}
+    </div><SalesTargetVideos key={location} location={location} compact /></div>
+    {loading&&!data ? <p role="status">Loading targets…</p> : error ? <p role="alert">{error}</p> : data?.ready ? <>
+      {plan&&<details className="profile-target-plan" aria-label={goalLabel} data-design-block="home.targets.calculator">
+        <summary>{goalLabel}</summary>
         <div className="profile-target-inputs">
           <label>{usingTeam ? 'Team current net sales ($)' : 'My current net sales ($)'}<input type="number" inputMode="decimal" min="0" step="0.01" placeholder="Enter current sales" value={currentSales} onChange={e=>setCurrentSales(e.target.value)}/></label>
           <label>Average spend per guest ($)<input type="number" inputMode="decimal" min="0.01" step="0.01" value={spend} onChange={e=>setSpend(e.target.value)}/></label>
@@ -69,7 +71,7 @@ export function ProfileSalesTargets({ location }: { location: string }) {
           </div>
           {plan.stage==='reached'&&<p role="status">Target reached{plan.over!>0?' · '+salesMoney(plan.over!)+' above goal':''}.</p>}
         </>}
-      </div>}
+      </details>}
     </> : <p>{data?.reason || 'Targets have not been assigned for today.'}</p>}
     <details className="profile-target-scripts" data-design-block="home.targets.scripts"><summary>Team plan</summary>
       {plan?.current!==null&&plan&&<div className="profile-target-next" role="status" aria-live="polite">
@@ -87,6 +89,5 @@ export function ProfileSalesTargets({ location }: { location: string }) {
       <h3>The next round</h3><p>“Would you like another of the same, or would you like me to recommend something different?”</p>
       <h3>Dessert before the check</h3><p>“Would you like to finish with dessert? I can walk you through today’s options.”</p>
     </details>
-    <SalesTargetVideos key={location} location={location} />
   </DesignSection>
 }
