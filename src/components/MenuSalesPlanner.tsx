@@ -1,3 +1,4 @@
+import {MenuPlanScripts} from './MenuPlanScripts'
 import {useState} from 'react'
 import {menuServices,pricedMenuChoices,type SalesMenuItem,type MenuService} from '../lib/menuCatalog'
 import {salesMoney} from '../lib/salesTargets'
@@ -25,6 +26,7 @@ export function MenuSalesPlanner({items,service:initialService,remaining}:{items
  </div>)}
  <button type="button" onClick={()=>add()}>Add another menu item</button>
  {rows.length>0&&<div aria-live="polite">{valid?<><p>Planned extra sales: <b>{salesMoney(total/100)}</b></p><p>Covers <b>{salesMoney(covered/100)}</b>{remainingCents>0?' ('+(covered/remainingCents*100).toFixed(1)+'%)':''} of your remaining goal.</p><p>Still left after this plan: <b>{salesMoney(left/100)}</b></p>{extra>0&&<p>{salesMoney(extra/100)} above your goal if you sell this mix.</p>}</>:<p>Complete each quantity to calculate your plan.</p>}<button type="button" onClick={()=>setRows([])}>Clear my plan</button></div>}
+ {rows.length>0&&valid&&<MenuPlanScripts key={JSON.stringify({service,selected:selected.map(r=>[r.item?.key,r.quantity]),items})} choices={selected.flatMap(r=>r.item?[r.item]:[])} items={items}/>}
  </>}
  <small>Planned sales are estimates and are not recorded as actual sales. Prices exclude tax, tips, discounts and comps. Catering quantities represent pans or trays. Changing the price menu clears this plan.</small>
  </div>

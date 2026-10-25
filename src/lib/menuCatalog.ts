@@ -4,7 +4,7 @@ export type MenuPrice={label:string;cents:number|null;unit:string;minimum:number
 export type MenuData={name:string;description:string;category:string;service:MenuService;notes:string;prices:MenuPrice[];available:boolean;recommend:boolean;source_file:string}
 export type MenuRow={id:string;data:MenuData;version:number;archived:boolean;has_photo?:boolean;photo?:string}
 export type RestaurantProfile={location_id:string;version:number;data:{title:string;description:string;notes:string}}
-export type SalesMenuItem={id:string;name:string;category:string;service:MenuService;prices:MenuPrice[]}
+export type SalesMenuItem={id:string;description?:string;name:string;category:string;service:MenuService;prices:MenuPrice[]}
 export const emptyMenuItem=():MenuData=>({name:'',description:'',category:'Entrées',service:'regular',notes:'',prices:[{label:'Menu price',cents:null,unit:'order',minimum:1}],available:true,recommend:true,source_file:''})
 export type PricedChoice={key:string;name:string;category:string;price:MenuPrice}
 export function pricedMenuChoices(items:SalesMenuItem[],service:MenuService):PricedChoice[]{return items.filter(i=>i.service===service).flatMap(i=>i.prices.flatMap((p,index)=>p.cents!==null&&Number.isSafeInteger(p.cents)&&p.cents>0&&Number.isInteger(p.minimum)&&p.minimum>0?[{key:i.id+':'+index,name:i.name,category:i.category,price:p}]:[]))}
