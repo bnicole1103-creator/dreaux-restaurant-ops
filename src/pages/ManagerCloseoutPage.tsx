@@ -1,3 +1,4 @@
+import {managerExtraConfig,managerLegacySalesAnswers} from '../lib/managerSalesQuestions'
 import {ManagerDayFields,emptyManagerDay,validateManagerDay,managerDayPayload,type ManagerDayDraft,type ManagerDayContext} from '../components/ManagerDayFields'
 import {closeoutDate,closeoutShift,managerSummaryLink} from '../lib/closeoutNavigation'
 import { CloseoutReceiptWallet, ReceiptSubmissionLog } from '../components/CloseoutReceiptWallet'
@@ -205,7 +206,7 @@ export function ManagerCloseoutPage() {
     saveLock.current=true;setSaving(true)
     const submittedDay=date,submittedShift=shiftId
     try {
-      const customAnswers = {...checkAnswers(config, 'manager', answers), _shift_mvp: shiftMvp}
+      const customAnswers = {...checkAnswers(config, 'manager', {...answers,...managerLegacySalesAnswers(config,dayReport.individual_net_sales)}), _shift_mvp: shiftMvp}
       const submittedReviews = reviews.map(r => ({user_id: r.user_id, rating: r.rating, reason: `Category: ${r.category}\n${r.reason.trim()}`}))
       if (submittedReviews.some(r => r.reason.length > 2000)) throw new Error('Shorten the rating notes to fit 2,000 characters with the category.')
       const { error: saveError } = await supabase.rpc('mod_submit_day_closeout', {
@@ -341,7 +342,7 @@ export function ManagerCloseoutPage() {
             </>}
           </div>
           </>}
-          <CloseoutQuestions config={config} audience="manager" answers={answers} onChange={setAnswers} />
+          <CloseoutQuestions config={managerExtraConfig(config)} audience="manager" answers={answers} onChange={setAnswers} />
           {savedQuestions.some(q => !config?.questions.some(current => current.id === q.id && current.active && current.label === q.label)) && <DesignSection as="article" data-design-block="copy.ed4685c4baa6df61.2" className="mod-review"><h2 data-design-block="copy.d823c4c9c777dbfc.4"><ScreenText id="ManagerCloseoutPage.b8bb83d7f397b820">Archived answers from this closeout</ScreenText></h2>
             {savedQuestions.filter(q => !config?.questions.some(current => current.id === q.id && current.active && current.label === q.label)).map(q => <p data-design-block="copy.baf7ab1d12779f98.1" key={q.id}>{q.label}<PageWord id="copy.3ff66c896150b376.1">: </PageWord>{answers[q.id] || 'No answer'}</p>)}
           </DesignSection>}
