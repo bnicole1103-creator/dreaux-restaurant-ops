@@ -1,4 +1,3 @@
-import {createPortal} from 'react-dom'
 import {TrackedVideo} from './TrackedVideo'
 import {useEffect,useRef,useState} from 'react'
 import {supabase} from '../lib/supabase'
@@ -12,9 +11,7 @@ export function SalesTargetVideos({location,compact=false}:{location:string;comp
  const [clips,setClips]=useState<Clip[]>([]),[canManage,setCanManage]=useState(false),[loading,setLoading]=useState(true),[busy,setBusy]=useState(false)
  const [error,setError]=useState(''),[notice,setNotice]=useState(''),[refresh,setRefresh]=useState(0),[draft,setDraft]=useState<Draft|null>(null)
  const [urls,setUrls]=useState<Record<string,string>>({}),[mediaError,setMediaError]=useState(''),[failed,setFailed]=useState<Record<string,boolean>>({})
- const [opened,setOpened]=useState(false)
- const dialog=useRef<HTMLDialogElement>(null)
- useEffect(()=>{const d=dialog.current;if(opened&&d&&!d.open)d.showModal()},[opened])
+ const [selected,setSelected]=useState('')
  const lock=useRef(false),live=useRef(true),uploaded=useRef('')
  useEffect(()=>{live.current=true;return()=>{live.current=false}},[])
  useEffect(()=>{let active=true;setLoading(true);setError('')
@@ -45,13 +42,15 @@ export function SalesTargetVideos({location,compact=false}:{location:string;comp
    const clean=await supabase.storage.from(targetVideoBucket).remove([r.data]);if(clean.error&&live.current)setNotice('Clip removed from the page. Its stored video could not be deleted; contact your administrator for storage cleanup.')
   }catch(e){if(live.current)setError(message(e))}finally{lock.current=false;if(live.current)setBusy(false)}
  }
+ const activeClip=clips.find(c=>c.id===selected)??clips[0]
  const content=<>
-  <div className="target-clips-heading"><h3>Sales coaching clips</h3><button type="button" disabled={busy||loading} onClick={()=>setRefresh(v=>v+1)}>Reload clips</button></div>
-  <p>Quick tips to help you reach your sales goal.</p>
+  <div className="target-clips-heading">{!compact&&<h3>Sales coaching clips</h3>}<button type="button" disabled={busy||loading} onClick={()=>setRefresh(v=>v+1)}>Reload clips</button></div>
+  {!compact&&<p>Quick tips to help you reach your sales goal.</p>}
+  {compact&&clips.length>1&&<label>Choose video<select aria-label="Choose sales coaching video" value={activeClip?.id??''} onChange={e=>setSelected(e.target.value)}>{clips.map(c=><option key={c.id} value={c.id}>{c.title}</option>)}</select></label>}
   {loading&&<p role="status">Loading coaching clips…</p>}{error&&<p role="alert">{error}</p>}{notice&&<p role="status">{notice}</p>}
   {!loading&&!error&&!clips.length&&<p>No coaching clips posted yet.</p>}
-  <div className="target-clips-grid">{clips.map(clip=><article key={clip.id} data-design-block={'target.clip.'+clip.id}>
-   <h4>{clip.title}</h4>{urls[clip.path]?<><TrackedVideo source="sales" path={clip.path} src={urls[clip.path]} controls playsInline preload="none" aria-label={clip.title} onError={()=>setFailed(v=>({...v,[clip.path]:true}))}/>{failed[clip.path]&&<p role="status">This video format may not play on this device. Try opening it below.</p>}<a href={urls[clip.path]} target="_blank" rel="noreferrer">Open video ↗</a></>:<p role="status">{mediaError?'Video unavailable. Reload clips to retry.':'Loading video…'}</p>}
+  <div className="target-clips-grid">{clips.filter(c=>!compact||c.id===activeClip?.id).map(clip=><article key={clip.id} data-design-block={'target.clip.'+clip.id}>
+   <h4>{clip.title}</h4>{urls[clip.path]?<><TrackedVideo key={clip.id} source="sales" path={clip.path} src={urls[clip.path]} controls playsInline preload="none" aria-label={clip.title} onError={()=>setFailed(v=>({...v,[clip.path]:true}))}/>{failed[clip.path]&&<p role="status">This video format may not play on this device. Try opening it below.</p>}{failed[clip.path]&&<a href={urls[clip.path]} target="_blank" rel="noreferrer">Open video ↗</a>}</>:<p role="status">{mediaError?'Video unavailable. Reload clips to retry.':'Loading video…'}</p>}
    {clip.caption&&<p className="target-clip-caption">{clip.caption}</p>}
    {canManage&&<div className="target-clip-actions"><button type="button" disabled={busy||!!draft} onClick={()=>{uploaded.current='';setError('');setDraft({...clip,file:null})}}>Edit caption / title</button><button type="button" disabled={busy||!!draft} onClick={()=>void remove(clip)}>Remove clip</button></div>}
   </article>)}</div>{mediaError&&<p role="alert">{mediaError}</p>}
@@ -65,11 +64,5 @@ export function SalesTargetVideos({location,compact=false}:{location:string;comp
   </fieldset></form>}
  </>
  if(!compact)return <DesignSection as="section" data-design-block="home.targets.coaching" data-layout-label="Sales coaching clips" className="sales-target-clips" aria-label="Sales coaching clips">{content}</DesignSection>
- return <section data-design-block="home.targets.coaching" data-layout-label="Sales video" className="sales-target-inline" aria-label="Sales coaching clips">
-  <button className="target-video-preview" type="button" disabled={!clips.length||loading} aria-label={clips.length?'Watch '+clips[0].title:'No coaching video posted yet'} onClick={()=>setOpened(true)}><span aria-hidden="true">▶</span><span>{clips.length?'Watch video':'Sales video'}</span></button>
-  {!loading&&!clips.length&&<small>No video yet.</small>}
-  {error&&<><small role="alert">{error}</small><button type="button" aria-label="Reload clips" onClick={()=>setRefresh(v=>v+1)}>↻ Retry</button></>}
-  {canManage&&<button className="target-video-add" type="button" aria-label="Add coaching video" disabled={busy} onClick={()=>{if(!draft){uploaded.current='';setError('');setNotice('');setDraft({id:crypto.randomUUID(),title:'',caption:'',path:'',version:0,file:null})}setOpened(true)}}>＋ Add video</button>}
-  {opened&&createPortal(<dialog ref={dialog} className="target-video-dialog" aria-label="Sales coaching video player" onCancel={e=>{e.preventDefault();if(!busy)setOpened(false)}}><div className="target-video-dialog-heading"><strong>Sales videos</strong><button type="button" disabled={busy} onClick={()=>setOpened(false)}>Close video</button></div><div className="sales-target-clips">{content}</div></dialog>,document.body)}
- </section>
+ return <section data-design-block="home.targets.coaching" data-layout-label="Sales video" className="sales-target-inline" aria-label="Sales coaching clips">{content}</section>
 }
