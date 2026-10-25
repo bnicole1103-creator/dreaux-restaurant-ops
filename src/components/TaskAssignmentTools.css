@@ -1,0 +1,11 @@
+.task-assignment-tools{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem;margin:1rem 0;align-items:start}
+.task-assignment-tool{min-width:0;border:1px solid var(--border,#cbbbaa);border-radius:16px;padding:1rem;background:var(--surface,#fffaf5);color:var(--text,#36251e);overflow-wrap:anywhere}
+.task-assignment-tool h2{font-size:1.15rem;margin:0 0 .5rem}.task-assignment-tool p{font-size:.9rem;line-height:1.45}
+.task-assignment-tool header{display:flex;justify-content:space-between;align-items:start;gap:.75rem;flex-wrap:wrap}
+.task-assignment-tool label{display:grid;gap:.35rem;margin:.65rem 0}.task-assignment-tool input:not([type=checkbox]),.task-assignment-tool select{width:100%;min-width:0;box-sizing:border-box}
+.task-assignment-actions{display:flex;gap:.5rem;flex-wrap:wrap;margin:.7rem 0}.task-assignment-actions button{min-height:42px;white-space:normal}
+.task-assignment-tool .task-assignment-check{display:flex;align-items:center;gap:.5rem}.task-assignment-tool input[type=checkbox]{width:20px;height:20px;flex-shrink:0;accent-color:#785238}
+.task-assignment-hint{opacity:.85}.task-schedule-shifts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.5rem;max-height:420px;overflow:auto}
+.task-assignment-tool .task-schedule-shift{display:flex;gap:.6rem;align-items:start;border:1px solid var(--border,#d9cbbb);border-radius:10px;padding:.7rem;margin:0}.task-schedule-shift>span{display:grid;gap:.2rem}.task-schedule-shift span span,.task-schedule-shift small{font-size:.85rem}.task-schedule-unlinked{border-style:dashed!important}.task-assignment-delete{border:1px solid currentColor;border-radius:10px;padding:.7rem}.task-assignment-delete button{margin-right:.5rem}
+@media(max-width:850px){.task-assignment-tools{grid-template-columns:1fr}.task-schedule-roster{order:-1}}
+@media(max-width:420px){.task-schedule-shifts{grid-template-columns:1fr}.task-assignment-tool{padding:.8rem}}

@@ -1,3 +1,4 @@
+import {ManagerDayFields,emptyManagerDay,validateManagerDay,managerDayPayload,type ManagerDayDraft,type ManagerDayContext} from '../components/ManagerDayFields'
 import {closeoutDate,closeoutShift,managerSummaryLink} from '../lib/closeoutNavigation'
 import { CloseoutReceiptWallet, ReceiptSubmissionLog } from '../components/CloseoutReceiptWallet'
 import {serviceDay} from '../lib/serviceDay'
@@ -50,6 +51,9 @@ export function ManagerCloseoutPage() {
   const [reviews, setReviews] = useState<Review[]>([])
   const [shiftMvp, setShiftMvp] = useState('')
   const categories = [...new Set([...(config?.rules.filter(r => r.active).map(r => r.category.trim().replace(/\s+/g, ' ')).filter(Boolean) ?? []), 'Other'])]
+  const [dayReport,setDayReport]=useState<ManagerDayDraft>(emptyManagerDay)
+  const [dayVersion,setDayVersion]=useState(0)
+  const [dayContext,setDayContext]=useState<ManagerDayContext|null>(null)
   const [deposit, setDeposit] = useState('')
   const [cashLeft, setCashLeft] = useState('')
   const [balanced, setBalanced] = useState('')
@@ -101,6 +105,7 @@ export function ManagerCloseoutPage() {
   useEffect(() => {
     if (!locationId) return
     let active = true
+    setDayReport(emptyManagerDay());setDayVersion(0);setDayContext(null);
     setStamp(null); setShiftLoading(true); setShiftId(''); setShifts([]); setReviews([]); setShiftMvp('')
     setConfirmed(false); setMessage(''); setError('')
     setAnswers({}); setSavedQuestions([]); setDeposit(''); setCashLeft(''); setBalanced(''); setDifference(''); setCashNotes('')
@@ -122,6 +127,7 @@ export function ManagerCloseoutPage() {
     setReviewReady(false);setCanEdit(false)
     if (!shiftId) return
     let active = true
+    setDayReport(emptyManagerDay());setDayVersion(0);setDayContext(null);
     setAnswers({}); setSavedQuestions([]); setDeposit(''); setCashLeft(''); setBalanced(''); setDifference(''); setCashNotes('')
     setStamp(null); setReviewLoading(true); setReviews([]); setShiftMvp(''); setConfirmed(false); setMessage(''); setError('')
     void (async () => {
@@ -132,8 +138,10 @@ export function ManagerCloseoutPage() {
         if (extra.error) throw extra.error
         const timestamp=await supabase.rpc('closeout_manager_submission',{p_shift_id:shiftId})
         if(timestamp.error)throw timestamp.error
+        const dayData=await supabase.rpc('manager_day_load',{p_shift_id:shiftId});if(dayData.error)throw dayData.error;
         const saved = data as SavedCloseout | null
         if (!active) return
+        setDayContext(dayData.data);const record=dayData.data.report;setDayVersion(record?.version??0);setDayReport(record?{closing_day:record.closing_day?'yes':'no',shift_type:record.shift_type,individual_net_sales:String(record.individual_net_sales),restaurant_net_sales:record.restaurant_net_sales==null?'':String(record.restaurant_net_sales),collections:(record.collections??[]).map((r:{user_id:string|null;person_name:string;amount:number;note:string})=>({...r,amount:String(r.amount)})),override_final:false}:emptyManagerDay());
         setStamp(timestamp.data)
         setAnswers(extra.data?.answers ?? {})
         setSavedQuestions(extra.data?.questions ?? [])
@@ -187,9 +195,10 @@ export function ManagerCloseoutPage() {
       setError('Select all staff who worked, rate each person, choose a reason category, and confirm the roster.')
       return
     }
-    if (!deposit.trim() || !Number.isFinite(Number(deposit)) || Number(deposit) < 0 ||
+    const dayError=validateManagerDay(dayReport);if(dayError){setError(dayError);return}
+    if (dayReport.closing_day==='yes' && (!deposit.trim() || !Number.isFinite(Number(deposit)) || Number(deposit) < 0 ||
       !cashLeft.trim() || !balanced || (balanced === 'no' &&
-        (!difference.trim() || !Number.isFinite(Number(difference)) || Number(difference) === 0 || !cashNotes.trim()))) {
+        (!difference.trim() || !Number.isFinite(Number(difference)) || Number(difference) === 0 || !cashNotes.trim())))) {
       setError('Enter the cash deposit, where it was left, and whether the register balanced. Explain any shortage or overage.')
       return
     }
@@ -199,15 +208,17 @@ export function ManagerCloseoutPage() {
       const customAnswers = {...checkAnswers(config, 'manager', answers), _shift_mvp: shiftMvp}
       const submittedReviews = reviews.map(r => ({user_id: r.user_id, rating: r.rating, reason: `Category: ${r.category}\n${r.reason.trim()}`}))
       if (submittedReviews.some(r => r.reason.length > 2000)) throw new Error('Shorten the rating notes to fit 2,000 characters with the category.')
-      const { error: saveError } = await supabase.rpc('mod_submit_closeout', {
+      const { error: saveError } = await supabase.rpc('mod_submit_day_closeout', {
         p_answers: customAnswers, p_shift_id: shiftId, p_reviews: submittedReviews, p_roster_confirmed: confirmed,
-        p_cash_deposit: Number(deposit), p_cash_left_at: cashLeft.trim(),
+        p_day_report:managerDayPayload(dayReport),p_day_version:dayVersion,
+        p_cash_deposit:dayReport.closing_day==='yes'?Number(deposit):0, p_cash_left_at: cashLeft.trim(),
         p_register_balanced: balanced === 'yes',
         p_register_difference: balanced === 'yes' ? 0 : Number(difference),
         p_register_notes: cashNotes.trim(),
       })
       if (saveError) throw saveError
       setLastSaved({day:submittedDay,shift:submittedShift});window.dispatchEvent(new CustomEvent('closeout-saved',{detail:{day:submittedDay,shift:submittedShift}}))
+      window.dispatchEvent(new Event('monthly-sales-changed'));setDayReport(emptyManagerDay());setDayVersion(0);setDayContext(null);
       // The save succeeded. Clear the form before loading the optional receipt.
       setShiftId('')
       setReviews([])
@@ -309,6 +320,8 @@ export function ManagerCloseoutPage() {
               {reviews.map(r => { const m = team.find(member => member.user_id === r.user_id); return <option key={r.user_id} value={r.user_id}>{m?.profile?.preferred_name || m?.profile?.full_name || 'Team member'}</option> })}
             </select></label>
           </DesignSection>
+          <ManagerDayFields value={dayReport} onChange={setDayReport} team={team} context={dayContext} elevated={elevated} deposit={deposit} currentUser={currentUser}/>
+          {dayReport.closing_day==='yes'&&<>
           <h2 data-design-block="copy.d823c4c9c777dbfc.3"><ScreenText id="ManagerCloseoutPage.a8a2758d60a53a18">Cash deposit &amp; register</ScreenText></h2>
           <div data-design-block="copy.c07e631dcfff3e04.2" className="mod-fields">
             <label data-design-block="copy.34cec310e481785a.8">{questionLabel(config, 'deposit', "Cash deposit amount ($)")}<input required type="number" min="0" max="999999999.99" step="0.01"
@@ -327,6 +340,7 @@ export function ManagerCloseoutPage() {
                 onChange={e => setCashNotes(e.target.value)} /></label>
             </>}
           </div>
+          </>}
           <CloseoutQuestions config={config} audience="manager" answers={answers} onChange={setAnswers} />
           {savedQuestions.some(q => !config?.questions.some(current => current.id === q.id && current.active && current.label === q.label)) && <DesignSection as="article" data-design-block="copy.ed4685c4baa6df61.2" className="mod-review"><h2 data-design-block="copy.d823c4c9c777dbfc.4"><ScreenText id="ManagerCloseoutPage.b8bb83d7f397b820">Archived answers from this closeout</ScreenText></h2>
             {savedQuestions.filter(q => !config?.questions.some(current => current.id === q.id && current.active && current.label === q.label)).map(q => <p data-design-block="copy.baf7ab1d12779f98.1" key={q.id}>{q.label}<PageWord id="copy.3ff66c896150b376.1">: </PageWord>{answers[q.id] || 'No answer'}</p>)}

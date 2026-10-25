@@ -1,3 +1,4 @@
+import {ManagerCashDaySummary} from '../components/ManagerCashDaySummary'
 import {SummaryDisclosure} from '../components/SummaryDisclosure'
 import {ManagerCloseoutDetails} from '../components/ManagerCloseoutDetails'
 import {closeoutDate,closeoutShift,managerCloseoutLink} from '../lib/closeoutNavigation'
@@ -1211,6 +1212,7 @@ function CloseoutDay({selectedDate,refresh,onDeleted,locationId,locationName,cur
 
 
 
+      {isManager&&locationId&&<SummaryDisclosure title="Restaurant day close & cash"><ManagerCashDaySummary location={locationId} day={selectedDate}/></SummaryDisclosure>}
       <SummaryDisclosure title="Receipts, voids & comps"><DailyReceiptSummary location={locationId} day={selectedDate} refreshKey={refresh}/><CloseoutReceiptReports location={locationId} day={selectedDate}/></SummaryDisclosure>
       {locationId && <SummaryDisclosure title="Peer recognition"><PeerRecognition location={locationId} from={selectedDate} to={selectedDate}/></SummaryDisclosure>}
       {isManager&&dayTargets&&<SummaryDisclosure title="Sales target breakdown"><section className="card" aria-label="Daily sales targets"><h2>Sales targets · {serviceDateLabel(selectedDate)}</h2>{dayTargets.ready?<><p>Team goal: <strong>{salesMoney(Number(dayTargets.team_target))}</strong></p><ul>{Object.values((dayTargets.rows??[]).reduce<Record<string,{name:string;group:string;target:number}>>((all,r)=>{const key=r.group+':'+r.employee_key;const row=all[key]??{name:r.name??'Employee '+r.employee_key,group:r.group,target:0};row.target+=Number(r.target);all[key]=row;return all},{})).map((r,i)=><li key={i}>{r.name} · {r.group==='bar'?'Bar':'Floor'} · {salesMoney(r.target)}</li>)}</ul><p>Loaded automatically from app sales targets. Closeouts are not required for targets to appear.</p></>:<p role="status">{dayTargets.reason??'Sales targets are not available for this date.'}</p>}</section></SummaryDisclosure>}

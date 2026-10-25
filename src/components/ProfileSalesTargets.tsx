@@ -1,93 +1,41 @@
+import {MonthlySalesTracker} from './MonthlySalesTracker'
 import {DesignSection} from './DesignSection'
-import { SalesTargetVideos } from './SalesTargetVideos'
-import { useEffect, useState } from 'react'
-import { supabase } from '../lib/supabase'
-import { serviceDay, serviceDateLabel } from '../lib/serviceDay'
-import { salesMoney } from '../lib/salesTargets'
-import { salesProgressPlan } from '../lib/salesProgressPlan'
+import {SalesTargetVideos} from './SalesTargetVideos'
+import {useEffect,useState} from 'react'
+import {supabase} from '../lib/supabase'
+import {serviceDay,serviceDateLabel} from '../lib/serviceDay'
+import {salesMoney} from '../lib/salesTargets'
+import {salesProgressPlan} from '../lib/salesProgressPlan'
+import {menuServices,pricedMenuChoices,menuSalesExamples,type SalesMenuItem,type MenuService} from '../lib/menuCatalog'
 import './ProfileSalesTargets.css'
-
-type Targets = { ready: boolean; date: string; reason?: string; team_target?: number | null; individual_target?: number | null; assigned_hours?: number | null; locked?: boolean }
-export function ProfileSalesTargets({ location }: { location: string }) {
-  const [data, setData] = useState<Targets | null>(null)
-  const [date, setDate] = useState(serviceDay)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
-  const [refresh, setRefresh] = useState(0)
-  const [spend, setSpend] = useState('35')
-  const [currentSales, setCurrentSales] = useState('')
-  useEffect(() => {setData(null);setCurrentSales('');setSpend('35')}, [location,date])
-  useEffect(() => {
-    const update = () => { if (document.visibilityState === 'visible') { setDate(serviceDay()); setRefresh(v => v + 1) } }
-    const timer = setInterval(update, 60000)
-    window.addEventListener('focus', update)
-    window.addEventListener('crew-schedule-changed', update)
-    window.addEventListener('sales-targets-changed', update)
-    document.addEventListener('visibilitychange', update)
-    return () => { clearInterval(timer); window.removeEventListener('focus', update); window.removeEventListener('crew-schedule-changed', update); window.removeEventListener('sales-targets-changed', update); document.removeEventListener('visibilitychange', update) }
-  }, [])
-  useEffect(() => {
-    let active = true
-    const controller = new AbortController()
-    const timer = setTimeout(() => controller.abort(), 20000)
-    setError(''); setLoading(true)
-    void (async () => {
-      try {
-        if (!location) return
-        const result = await supabase.rpc('my_home_sales_targets', { p_location_id: location, p_date: date }).abortSignal(controller.signal)
-        if (result.error) throw result.error
-        if (active) setData(result.data as Targets)
-      } catch (e) { if (active) setError(String((e as { message?: string }).message || 'Unable to load sales targets. Please refresh.')) }
-      finally { clearTimeout(timer); if (active) setLoading(false) }
-    })()
-    return () => { active = false; clearTimeout(timer); controller.abort() }
-  }, [location, date, refresh])
-  const personal = data?.individual_target == null ? null : Number(data.individual_target)
-  const team = data?.team_target == null ? null : Number(data.team_target)
-  const usingTeam = personal === null
-  const goalLabel = usingTeam ? 'Team goal calculator' : 'My goal calculator'
-  const plan = data?.ready ? salesProgressPlan(personal ?? team,spend,currentSales) : null
-  return <DesignSection as="section" data-design-block="home.targets" data-layout-item="true" data-layout-label="Sales targets and coaching videos" className="profile-sales-targets" aria-label="Today's sales targets" aria-busy={loading}>
-    <div className="profile-target-heading"><h2>Today’s sales targets</h2><button type="button" disabled={loading} aria-label="Refresh targets" title="Refresh targets" onClick={() => { setDate(serviceDay()); setRefresh(v => v + 1) }}>↻</button></div>
-    <p>{serviceDateLabel(date)} · Net sales</p>
-    <div className="profile-target-top"><div className="profile-target-numbers">
-      {data?.ready&&<><dl className="profile-target-totals"><div><dt>Team target</dt><dd>{team === null ? 'Not available' : salesMoney(team)}</dd></div>
-        <div><dt>My assigned target</dt><dd>{personal===null?'Not assigned':salesMoney(personal)}</dd></div>
-      </dl>
-      {personal===null&&<p>Using team sales.</p>}</>}
-    </div><SalesTargetVideos key={location} location={location} compact /></div>
-    {loading&&!data ? <p role="status">Loading targets…</p> : error ? <p role="alert">{error}</p> : data?.ready ? <>
-      {plan&&<details className="profile-target-plan" aria-label={goalLabel} data-design-block="home.targets.calculator">
-        <summary>{goalLabel}</summary>
-        <div className="profile-target-inputs">
-          <label>{usingTeam ? 'Team current net sales ($)' : 'My current net sales ($)'}<input type="number" inputMode="decimal" min="0" step="0.01" placeholder="Enter current sales" value={currentSales} onChange={e=>setCurrentSales(e.target.value)}/></label>
-          <label>Average spend per guest ($)<input type="number" inputMode="decimal" min="0.01" step="0.01" value={spend} onChange={e=>setSpend(e.target.value)}/></label>
-        </div>
-        <small>Enter net sales before tax and tips. These are manual planning estimates.</small>
-        {plan.current===null?<p role="status">{currentSales.trim()===''?(usingTeam ? 'Enter the team’s combined current sales, including 0 at the start of service.' : 'Enter your current sales, including 0 at the start of your shift.'):'Enter a valid current net sales amount of 0 or more.'}</p>:<>
-          <div className="profile-target-progress" aria-label={usingTeam ? 'Team sales progress' : 'My sales progress'}>
-            <progress max={100} value={plan.percent??0} aria-label={usingTeam ? 'Progress toward the team target' : 'Progress toward my assigned target'}/>
-            <dl><div><dt>Current sales</dt><dd>{salesMoney(plan.current)}</dd></div><div><dt>Still to go</dt><dd data-testid="target-remaining">{salesMoney(plan.remaining!)}</dd></div></dl>
-          </div>
-          {plan.stage==='reached'&&<p role="status">Target reached{plan.over!>0?' · '+salesMoney(plan.over!)+' above goal':''}.</p>}
-        </>}
-      </details>}
-    </> : <p>{data?.reason || 'Targets have not been assigned for today.'}</p>}
-    <details className="profile-target-scripts" data-design-block="home.targets.scripts"><summary>Team plan</summary>
-      {plan?.current!==null&&plan&&<div className="profile-target-next" role="status" aria-live="polite">
-            {plan.stage==='reached'?<p>Keep making thoughtful recommendations and maintain the same service standards.</p>:<>
-              <strong>{salesMoney(plan.remaining!)} left to reach {usingTeam ? 'the team target' : 'your individual target'}.</strong>
-              {plan.guests!==null?<p>About <b>{plan.guests} more {plan.guests===1?'guest':'guests'}</b> at {salesMoney(plan.spend!)} average net spend would cover the amount left.</p>:<p>Enter a positive average spend to estimate how many more guests would cover the gap.</p>}
-              <p>{plan.stage==='close'?'You’re close: check for a useful next offer at the tables currently being served.':'Build the next checks: lead with a specific drink recommendation, suggest a starter, and follow up at the right moment.'}</p>
-              <small>Another example: {plan.fiveDollarAdds} additional $5 net-sales {plan.fiveDollarAdds===1?'addition':'additions'}, or {plan.tenDollarAdds} additional $10 {plan.tenDollarAdds===1?'addition':'additions'}, would cover the gap. Use your actual menu prices.</small>
-            </>}
-          </div>}
-      <h3>Recommendations &amp; selling scripts</h3>
-      <p>Choose the offer that fits the guest and the stage of their meal.</p>
-      <h3>Welcome &amp; first drink</h3><p>“Are you in the mood for something refreshing or something liquor-forward? I can recommend a cocktail.”</p>
-      <h3>A starter while they decide</h3><p>“Would you like to start with an appetizer for the table while you look over the menu?”</p>
-      <h3>The next round</h3><p>“Would you like another of the same, or would you like me to recommend something different?”</p>
-      <h3>Dessert before the check</h3><p>“Would you like to finish with dessert? I can walk you through today’s options.”</p>
-    </details>
-  </DesignSection>
+type Targets={ready:boolean;date:string;reason?:string;team_target?:number|null;individual_target?:number|null}
+const message=(e:unknown)=>String((e as {message?:string})?.message??e)
+export function ProfileSalesTargets({location}:{location:string}){
+ const [data,setData]=useState<Targets|null>(null),[date,setDate]=useState(serviceDay),[loading,setLoading]=useState(true),[error,setError]=useState(''),[refresh,setRefresh]=useState(0)
+ const [scope,setScope]=useState<'team'|'individual'>('team'),[current,setCurrent]=useState({team:'',individual:''}),[spend,setSpend]=useState('35'),[menu,setMenu]=useState<SalesMenuItem[]>([]),[menuError,setMenuError]=useState(''),[menuLoading,setMenuLoading]=useState(false),[service,setService]=useState<MenuService>('regular'),[primary,setPrimary]=useState(''),[secondary,setSecondary]=useState(''),[open,setOpen]=useState(false)
+ useEffect(()=>{setData(null);setCurrent({team:'',individual:''});setSpend('35');setMenu([])},[location,date])
+ useEffect(()=>{const update=()=>{if(document.visibilityState==='visible'){setDate(serviceDay());setRefresh(v=>v+1)}};const timer=setInterval(update,60000);for(const event of ['focus','crew-schedule-changed','sales-targets-changed','menu-catalog-changed'])window.addEventListener(event,update);document.addEventListener('visibilitychange',update);return()=>{clearInterval(timer);for(const event of ['focus','crew-schedule-changed','sales-targets-changed','menu-catalog-changed'])window.removeEventListener(event,update);document.removeEventListener('visibilitychange',update)}},[])
+ useEffect(()=>{let live=true;const controller=new AbortController();const timer=setTimeout(()=>controller.abort(),20000);setLoading(true);setError('');void(async()=>{try{if(!location)return;const r=await supabase.rpc('my_home_sales_targets',{p_location_id:location,p_date:date}).abortSignal(controller.signal);if(r.error)throw r.error;if(live)setData(r.data as Targets)}catch(e){if(live){setData(null);setError(message(e))}}finally{clearTimeout(timer);if(live)setLoading(false)}})();return()=>{live=false;clearTimeout(timer);controller.abort()}},[location,date,refresh])
+ useEffect(()=>{if(!open||!location)return;let live=true;const controller=new AbortController();const timer=setTimeout(()=>controller.abort(),20000);setMenuLoading(true);setMenuError('');void(async()=>{try{const r=await supabase.rpc('menu_sales_items',{p_location_id:location}).abortSignal(controller.signal);if(r.error)throw r.error;if(live)setMenu(r.data??[])}catch(e){if(live){setMenu([]);setMenuError(message(e))}}finally{clearTimeout(timer);if(live)setMenuLoading(false)}})();return()=>{live=false;clearTimeout(timer);controller.abort()}},[location,open,refresh])
+ const value=scope==='team'?data?.team_target:data?.individual_target,goal=data?.ready&&value!==null&&value!==undefined&&Number.isFinite(Number(value))?Number(value):null
+ const plan=goal===null?null:salesProgressPlan(goal,spend,current[scope]),choices=pricedMenuChoices(menu,service)
+ const first=choices.find(c=>c.key===primary)??choices.find(c=>c.category==='Entrées'&&/pasta/i.test(c.name))??choices[0]??null
+ const second=choices.find(c=>c.key===secondary&&c.key!==first?.key)??choices.find(c=>c.category==='Desserts'&&c.key!==first?.key)??choices.find(c=>c.key!==first?.key)??null
+ const examples=plan?.remaining!==null&&plan?.remaining!==undefined?menuSalesExamples(plan.remaining,first,second):null
+ const label=scope==='team'?'Team':'Individual'
+ return <DesignSection as="section" data-design-block="home.targets" data-layout-item="true" data-layout-label="Sales target calculator and videos" className="profile-sales-targets" aria-label="Today's sales targets" aria-busy={loading}>
+ <div className="profile-target-heading"><h2>Today’s sales goal</h2><button type="button" disabled={loading} aria-label="Refresh targets" title="Refresh targets" onClick={()=>{setDate(serviceDay());setRefresh(v=>v+1)}}>↻</button></div><p>{serviceDateLabel(date)} · Net sales</p>
+ <div className="profile-target-top"><div className="profile-target-numbers"><label className="profile-goal-select">Calculate for<select aria-label="Calculate for" value={scope} onChange={e=>setScope(e.target.value as 'team'|'individual')}><option value="team">Team goal</option><option value="individual">Individual goal</option></select></label>
+ {loading?<p role="status">Loading goal…</p>:error?<p role="alert">{error}</p>:goal===null?<p role="status">No goal assigned for that day.{scope==='team'&&data?.reason?<small>{data.reason}</small>:null}</p>:<dl className="profile-target-totals"><div><dt>{label} goal</dt><dd>{salesMoney(goal)}</dd></div></dl>}</div><SalesTargetVideos key={location} location={location} compact/></div>
+ {!loading&&!error&&goal!==null&&plan&&<details className="profile-target-plan" data-design-block="home.targets.calculator" onToggle={e=>setOpen(e.currentTarget.open)}><summary>{label} goal calculator</summary>
+ <div className="profile-target-inputs"><label>{scope==='team'?'Team current net sales ($)':'My current net sales ($)'}<input type="number" inputMode="decimal" min="0" step="0.01" value={current[scope]} placeholder="Enter current sales" onChange={e=>setCurrent(old=>({...old,[scope]:e.target.value}))}/></label><label>Average spend per guest ($)<input type="number" inputMode="decimal" min="0.01" step="0.01" value={spend} onChange={e=>setSpend(e.target.value)}/></label></div>
+ {plan.current===null?<p role="status">Enter {scope==='team'?'the team’s combined':'your'} current net sales, including 0 at the start.</p>:<><div className="profile-target-progress"><progress max={100} value={plan.percent??0} aria-label={label+' goal progress'}/><dl><div><dt>Current sales</dt><dd>{salesMoney(plan.current)}</dd></div><div><dt>Still to go</dt><dd data-testid="target-remaining">{salesMoney(plan.remaining!)}</dd></div></dl></div>{plan.stage==='reached'?<p role="status">Goal reached{plan.over!>0?' · '+salesMoney(plan.over!)+' above goal':''}.</p>:<>{plan.guests!==null&&<p>About {plan.guests} more {plan.guests===1?'guest':'guests'} at {salesMoney(plan.spend!)} average net spend.</p>}
+ <label className="profile-menu-select">Use prices from<select aria-label="Use prices from" value={service} onChange={e=>{setService(e.target.value as MenuService);setPrimary('');setSecondary('')}}>{Object.entries(menuServices).map(([key,text])=><option key={key} value={key}>{text}</option>)}</select></label>
+ {menuLoading?<p role="status">Loading menu prices…</p>:menuError?<p role="alert">Menu examples unavailable: {menuError} <button type="button" onClick={()=>setRefresh(v=>v+1)}>Retry menu prices</button></p>:!choices.length?<p>No priced, available items in this menu. Update Menu descriptions to add items or prices.</p>:<><div className="profile-target-inputs"><label>First menu item<select aria-label="First menu item" value={first?.key??''} onChange={e=>setPrimary(e.target.value)}>{choices.map(c=><option key={c.key} value={c.key}>{c.name} · {c.price.label} · {salesMoney(c.price.cents!/100)}</option>)}</select></label><label>Second menu item<select aria-label="Second menu item" disabled={choices.length<2} value={second?.key??''} onChange={e=>setSecondary(e.target.value)}>{choices.filter(c=>c.key!==first?.key).map(c=><option key={c.key} value={c.key}>{c.name} · {c.price.label} · {salesMoney(c.price.cents!/100)}</option>)}</select></label></div>
+ {examples&&<div className="profile-menu-examples" aria-live="polite"><strong>Menu examples to cover {salesMoney(plan.remaining!)}</strong>{examples.mix.length>1&&<p data-testid="menu-mix">One possible mix: {examples.mix.map((r,i)=><span key={r.item.key}>{i>0?' + ':''}{r.quantity} × {r.item.name} ({r.item.price.label}) at {salesMoney(r.item.price.cents!/100)}</span>)} = <b>{salesMoney(examples.total/100)}</b>.</p>}<ul>{examples.single.map(r=><li key={r.item.key}>Or {r.quantity} × {r.item.name} ({r.item.price.label}) at {salesMoney(r.item.price.cents!/100)} each = {salesMoney(r.total/100)}.</li>)}</ul></div>}</>}
+ <small>Alternative estimates using saved menu prices; confirm service hours and availability. Each count respects the item’s minimum quantity. Tax, gratuity, discounts and comps are excluded. Catering counts are pans or trays, not individual guests.</small>
+ </>}</>}
+ <small>Manual planning calculator. Enter current net sales before tax and tips.</small></details>}
+ <MonthlySalesTracker location={location} compact/>
+ </DesignSection>
 }
