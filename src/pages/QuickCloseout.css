@@ -1,0 +1,16 @@
+.quick-closeout{max-width:880px;margin-inline:auto;padding-bottom:110px}
+.quick-closeout .quick-fields{border:0;padding:0;margin:0;min-width:0;display:grid;gap:14px}
+.quick-closeout .quick-fields>.card{margin:0;padding:18px}
+.quick-closeout h1{margin:.25em 0}.quick-closeout h2{font-size:1.25rem;margin:0 0 12px}
+.quick-closeout h3{font-size:1.05rem}.quick-closeout p{margin:8px 0}.quick-closeout small{display:block}
+.quick-closeout .quick-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:12px 0}
+.quick-closeout label{display:grid;gap:6px}.quick-closeout input,.quick-closeout select,.quick-closeout textarea{max-width:100%;min-width:0;width:100%;box-sizing:border-box;font-size:16px}
+.quick-closeout button,.quick-closeout summary{min-height:44px}.quick-closeout summary{cursor:pointer;display:list-item;padding:10px 0;font-weight:700}
+.quick-closeout details{margin-top:8px}.quick-closeout details details{border-top:1px solid #bba58b55}
+.quick-closeout .quick-check{display:flex;align-items:flex-start;gap:10px;margin:14px 0}.quick-closeout .quick-check input{width:24px;height:24px;flex:0 0 24px;margin:0}
+.quick-closeout .quick-actions{display:flex;gap:10px;flex-wrap:wrap}.quick-closeout button[aria-pressed=true]{outline:2px solid currentColor;outline-offset:2px}
+.quick-closeout .quick-errors{padding:16px;border:2px solid #b43a37;border-radius:12px}.quick-closeout .quick-errors a{color:inherit}.quick-closeout .quick-field-error{color:#a52320;font-weight:600}.quick-closeout .quick-success{padding:12px;border:1px solid #327b4e;border-radius:10px}
+.quick-closeout .quick-receipts{border-top:1px solid #bba58b55;margin-top:16px;padding-top:12px}.quick-closeout .employee-receipt-toolbar{flex-wrap:wrap;gap:8px}
+.quick-closeout .receipt-camera-icon{min-width:76px;min-height:70px}.quick-closeout .quick-submit>.primary-button{width:100%;min-height:54px;font-size:1.1rem}
+.quick-closeout [id^=quick-]{scroll-margin-top:100px}.quick-closeout .card .card{box-shadow:none;border:0;padding:0;margin:8px 0}
+@media(max-width:550px){.quick-closeout .quick-grid{grid-template-columns:1fr}.quick-closeout .quick-fields>.card{padding:14px}.quick-closeout .employee-receipt-grid{grid-template-columns:1fr}.quick-closeout .employee-receipt-capture{flex-wrap:wrap}}

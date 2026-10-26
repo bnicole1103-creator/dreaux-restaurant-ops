@@ -6,8 +6,9 @@ import {closeoutErrorMessage} from '../lib/closeoutError'
 import { CloseoutStockQuestion } from '../components/CloseoutStockQuestion'
 import { closeoutStockItems } from '../lib/stockItems'
 // page-designer-instrumented
-import { PageWord, PageInput, PageOption } from "../components/PageDesign"
-import { StockBoard } from '../components/StockBoard'
+import { PageWord } from "../components/PageDesign"
+import './QuickCloseout.css'
+import { quickCloseoutIssues, roleFromSchedule, centralTime, type QuickShift } from '../lib/quickCloseout'
 import { serviceDay } from '../lib/serviceDay'
 import { ScreenText } from "../components/ScreenText"
 import { ClockTime } from '../components/ClockTime'
@@ -333,6 +334,12 @@ function calculateShiftPoints({
 }
 
 export function CloseoutPage() {
+  const [ownerId,setOwnerId]=useState('')
+  const [shiftOpen,setShiftOpen]=useState(false),[reportOpen,setReportOpen]=useState(false)
+  const [issues,setIssues]=useState<{field:string;message:string}[]>([]),[draftStatus,setDraftStatus]=useState('')
+  const [draftReady,setDraftReady]=useState('')
+  const draftSaved=useRef(false),draftContext=useRef(''),touched=useRef({shift:false,tables:false}),submitLock=useRef(false)
+  const [quickShifts,setQuickShifts]=useState<QuickShift[]>([]),[quickShift,setQuickShift]=useState(''),[scheduleNotice,setScheduleNotice]=useState('')
   const [answers, setAnswers] = useState<Answers>({})
 
   const [loading, setLoading] =
@@ -348,7 +355,7 @@ export function CloseoutPage() {
     useState('')
 
   const [closeoutDay,setCloseoutDay] = useState(serviceDay)
-  const [datePinned,setDatePinned]=useState(false),[pastPoints,setPastPoints]=useState<boolean|null>(null),[pastReason,setPastReason]=useState('')
+  const [datePinned,setDatePinned]=useState(true),[pastPoints,setPastPoints]=useState<boolean|null>(null),[pastReason,setPastReason]=useState('')
   const pastPolicy=useCallback((apply:boolean|null,reason:string)=>{setPastPoints(apply);setPastReason(reason)},[])
   const receiptDraft=useReceiptDraft(locationId,closeoutDay)
   const closeoutRequest=useRef('')
@@ -489,6 +496,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
         )
       }
 
+      const auth=await supabase.auth.getUser();if(auth.error)throw auth.error;if(!auth.data.user)throw Error('Sign in to complete your closeout.');setOwnerId(auth.data.user.id)
       setOrganizationId(
         tenant.organization.id
       )
@@ -821,6 +829,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
       voidValue,
       discountValue,
       config,
+      receiptRows,
     ])
 
   useEffect(()=>{const timer=window.setInterval(()=>{if(!datePinned)setCloseoutDay(serviceDay())},30000);return()=>clearInterval(timer)},[datePinned])
@@ -883,76 +892,23 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
 
     setNotes('')
     setCertified(false)
+    setRegisterCash('');setRegisterImbalanceReason('');setRegisterVerifiedBy('')
   }
 
   async function submitCloseout() {
+    if(submitLock.current)return;submitLock.current=true
     try {
       setSaving(true)
       setError('')
       setMessage('')
-      if(receiptPending===null)throw new Error('Wait for your receipt wallet to load before submitting.');
-      if(receiptPending>0)throw new Error('Review and save or delete every receipt photo before submitting.');
-      if(!receiptDraft.key)throw new Error('Receipt wallet is still loading. Try again shortly.')
+      const failures=currentIssues()
+      setIssues(failures)
+      if(failures.length){setShiftOpen(failures.some(x=>x.field==='shift'));setReportOpen(failures.some(x=>x.field==='report'));requestAnimationFrame(()=>document.getElementById('closeout-errors')?.focus());return}
       const reportedStockItems=closeoutStockItems(hasStockItems,stockItems)
-
-      const {
-        data: { user },
-        error: userError,
-      } =
-        await supabase.auth.getUser()
-
-      if (userError) {
-        throw userError
-      }
-
-      if (!user) {
-        throw new Error(
-          'You must be signed in.'
-        )
-      }
-
-      if (
-        !organizationId ||
-        !locationId
-      ) {
-        throw new Error(
-          'Organization or location is missing.'
-        )
-      }
-
-      if (shown('staff_0') && !scheduledTime) {
-        throw new Error(
-          'Enter your scheduled time.'
-        )
-      }
-
-      if (shown('staff_1') && !clockInTime) {
-        throw new Error(
-          'Enter your actual clock-in time.'
-        )
-      }
-
-      if (shown('staff_1') && closeoutHours(clockInTime, clockOutTime) === null) throw new Error('Enter your clock-out time. Shift length must be greater than zero and no more than 18 hours. A clock-out earlier than clock-in means the next day.')
-
-      if (shown('staff_14') && numberValue(cashDeposit)>0 && !moneyTurnedInTo) {
-        throw new Error(
-          'Select who received your money.'
-        )
-      }
-
-      if (!certified) {
-        throw new Error(
-          'Please confirm that the closeout information is accurate.'
-        )
-      }
-
-      for (const [label, raw] of [['Net sales', netSales], ['Cash deposit', cashDeposit], ['Voids', voidValue], ['Discounts', discountValue]]) {
-        if (shown(({'Net sales':'staff_3','Cash deposit':'staff_5','Voids':'staff_6','Discounts':'staff_7','Sales target':'staff_4'} as Record<string,string>)[label]) && (!raw.trim() || !/^\d+(\.\d{1,2})?$/.test(raw.trim()) || !Number.isFinite(Number(raw)) || Number(raw)>100000000)) throw new Error(`Enter ${label.toLowerCase()} as a valid amount. Enter 0 only when it is accurate.`)
-      }
-      if (shown('staff_2') && !shiftType) throw new Error('Select the shift you worked.')
-      if (voidCount && (!/^\d+$/.test(voidCount) || Number(voidCount)>100000)) throw new Error('Void count must be a nonnegative whole number.')
-      if (shown('staff_3') && Number(netSales)===0 && (!zeroSalesConfirmed || zeroSalesReason.trim().length<3)) throw new Error('Confirm that $0 sales is accurate and explain why.')
       const customAnswers = checkAnswers(config, 'staff', answers)
+      const {data:{user},error:userError}=await supabase.auth.getUser()
+      if(userError)throw userError
+      if(!user||user.id!==ownerId)throw Error('Your sign-in changed. Reopen closeout before submitting.')
       const finalPoints =
         configuredShiftPoints({
           scheduledTime,
@@ -970,9 +926,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
             ),
 
           voidCount:
-            Number(
-              voidCount || 0
-            ),
+            receiptTotals.voidCount,
 
           voidValue:
             numberValue(
@@ -1031,9 +985,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
             ),
 
           void_count:
-            Number(
-              voidCount || 0
-            ),
+            receiptTotals.voidCount,
 
           void_value:
             numberValue(
@@ -1053,8 +1005,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
             null,
 
           notes:
-            notes.trim() ||
-            null,
+            [notes.trim(),jobRole==='main_bartender'&&shown('staff_8')?'Register cash left: $'+Number(registerCash).toFixed(2)+(Number(registerCash)!==200?' · Difference reason: '+registerImbalanceReason.trim()+' · Verified by: '+(employees.find(p=>p.user_id===registerVerifiedBy)?.full_name||registerVerifiedBy):' · Balanced at $200'):null].filter(Boolean).join('\n') || null,
 
           employee_certified:
             certified,
@@ -1076,6 +1027,10 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
         throw closeoutError
       }
 
+      draftSaved.current=true
+      try{sessionStorage.removeItem(draftContext.current)}catch{}
+      setDraftStatus('Closeout submitted. Draft cleared.')
+      setIssues([])
       setSubmittedReceiptKey(closeout.id)
       receiptDraft.rotate()
       setReceiptRows([])
@@ -1129,740 +1084,124 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
           'smooth',
       })
     } finally {
+      submitLock.current=false
       setSaving(false)
     }
   }
 
-  function changeServiceDay(day:string){if(day===closeoutDay||saving)return;if(!window.confirm('Change the service date and clear this unsaved closeout?'))return;resetForm();setFloorShiftId('');setFloorTablesNotice('');setReceiptRows([]);setSubmittedReceiptKey('');setCloseoutDay(day);setDatePinned(day!==serviceDay());setError('');setMessage('')}
+  function changeServiceDay(day:string){if(day===closeoutDay||saving)return;if(!window.confirm('Change the service date and clear this unsaved closeout?'))return;resetForm();setFloorShiftId('');setFloorTablesNotice('');setReceiptRows([]);setSubmittedReceiptKey('');setCloseoutDay(day);setDatePinned(true);setError('');setMessage('')}
 
-  if (loading) {
-    return (
-      <DesignSection as="section" data-design-block="copy.2c896870c0622b2a.1" className="page closeout-mobile">
-        <h1 data-design-block="copy.7b589b42e522b192.1"><ScreenText id="CloseoutPage.19b404e3d4da3b09">
-          Daily Closeout
-        </ScreenText></h1>
-
-        <p data-design-block="copy.9780dbc6198cd2d5.1"><ScreenText id="CloseoutPage.341b29a41c67c361">
-          Loading...
-        </ScreenText></p>
-      </DesignSection>
-    )
+  const draftKey=ownerId&&locationId&&receiptDraft.key?'justinis.quick-closeout.v1.'+ownerId+'.'+locationId+'.'+closeoutDay+'.'+receiptDraft.key:''
+  useEffect(()=>{
+    if(!draftKey)return
+    draftContext.current=draftKey;draftSaved.current=false;touched.current={shift:false,tables:false};setDraftReady('')
+    resetForm();setShiftType('');setFloorShiftId('');setQuickShift('');setAnswers({});setStockItems('');setHasStockItems('');setPeerVoteEmployeeId('');setPeerVoteOtherReason('');setIssues([])
+    try{
+      const raw=sessionStorage.getItem(draftKey),d=raw?JSON.parse(raw):null
+      const str=(key:string,max=8000)=>typeof d?.[key]==='string'?d[key].slice(0,max):''
+      if(d?.version===1&&typeof d.savedAt==='number'&&Date.now()-d.savedAt<86400000){
+        setScheduledTime(str('scheduledTime',5));setClockInTime(str('clockInTime',5));setClockOutTime(str('clockOutTime',5));setShiftType(str('shiftType',20));setNetSales(str('netSales',30));setCashDeposit(str('cashDeposit',30));setVoidCount(str('voidCount',20));setVoidValue(str('voidValue',30));setDiscountValue(str('discountValue',30));if(Object.prototype.hasOwnProperty.call(ROLE_LABELS,str('jobRole')))setJobRole(str('jobRole') as JobRole)
+        setFloorShiftId(str('floorShiftId',36));setQuickShift(str('quickShift',200));setSelectedTableIds(Array.isArray(d.selectedTableIds)?d.selectedTableIds.filter((x:unknown)=>typeof x==='string').slice(0,300):[])
+        setMoneyTurnedInTo(str('moneyTurnedInTo',36));setDrinkMaker(str('drinkMaker',36));setNotes(str('notes'));setRegisterCash(str('registerCash',30));setRegisterImbalanceReason(str('registerImbalanceReason',2000));setRegisterVerifiedBy(str('registerVerifiedBy',36));setStockItems(str('stockItems'));if(['yes','no'].includes(str('hasStockItems')))setHasStockItems(str('hasStockItems') as 'yes'|'no');setPeerVoteEmployeeId(str('peerVoteEmployeeId',36));setPeerVoteOtherReason(str('peerVoteOtherReason',500));setZeroSalesReason(str('zeroSalesReason',2000))
+        if(d.answers&&typeof d.answers==='object'&&!Array.isArray(d.answers))setAnswers(Object.fromEntries(Object.entries(d.answers).filter(([k,v])=>k.length<200&&typeof v==='string'&&v.length<=2000)) as Answers)
+        touched.current={shift:true,tables:true};setDraftStatus('Draft restored in this tab. Check your amounts and confirm accuracy before submitting.')
+      }else setDraftStatus('Progress saves in this tab while you work.')
+    }catch{setDraftStatus('Draft storage is unavailable. Keep this page open until you submit.')}
+    setDraftReady(draftKey)
+  },[draftKey])
+  useEffect(()=>{
+    if(!draftKey||draftReady!==draftKey||draftSaved.current)return
+    const value={version:1,savedAt:Date.now(),scheduledTime,clockInTime,clockOutTime,shiftType,jobRole,quickShift,floorShiftId,selectedTableIds,netSales,cashDeposit,voidCount,voidValue,discountValue,moneyTurnedInTo,drinkMaker,notes,registerCash,registerImbalanceReason,registerVerifiedBy,hasStockItems,stockItems,answers,peerVoteEmployeeId,peerVoteOtherReason,zeroSalesReason}
+    try{sessionStorage.setItem(draftKey,JSON.stringify(value));setDraftStatus('Draft saved in this tab.')}catch{setDraftStatus('Could not save the draft in this tab. Keep this page open until you submit.')}
+  },[draftKey,draftReady,scheduledTime,clockInTime,clockOutTime,shiftType,jobRole,quickShift,floorShiftId,selectedTableIds,netSales,cashDeposit,voidCount,voidValue,discountValue,moneyTurnedInTo,drinkMaker,notes,registerCash,registerImbalanceReason,registerVerifiedBy,hasStockItems,stockItems,answers,peerVoteEmployeeId,peerVoteOtherReason,zeroSalesReason])
+  function chooseQuickShift(s:QuickShift){
+    touched.current.shift=true;setQuickShift(s.key);setScheduledTime(centralTime(s.start));const role=roleFromSchedule(s.role);if(role)setJobRole(role as JobRole);setScheduleNotice(role?'Scheduled start and role loaded. Actual clock times still need your confirmation.':'Scheduled start loaded. Choose the role you actually worked.');setCertified(false)
   }
-
-  return (
-    <DesignSection as="section" data-design-block="copy.2c896870c0622b2a.2" className="page closeout-mobile">
-      <PastCloseoutControls location={locationId} day={closeoutDay} disabled={saving} onDay={changeServiceDay} onPolicy={pastPolicy}/>
-
-      <div data-design-block="copy.47c9b7ba7c51dc00.1" className="page-header">
-        <p data-design-block="copy.5b48154f3880900c.1" className="eyebrow"><ScreenText id="CloseoutPage.07a01084df9fad3a">
-          SHIFT ACCOUNTABILITY
-        </ScreenText></p>
-
-        <h1 data-design-block="copy.7b589b42e522b192.2"><ScreenText id="CloseoutPage.78176397e4f5311f">
-          Daily Closeout
-        </ScreenText></h1>
-
-        <p data-design-block="copy.9780dbc6198cd2d5.2">
-          {locationName}
-        </p>
-      </div>
-
-      {receiptDraft.key&&<CloseoutReceiptWallet onPendingChange={setReceiptPending} inline key={receiptDraft.key} location={locationId} day={closeoutDay} closeoutKey={receiptDraft.key} shiftId={floorShiftId||undefined} onChange={rows=>{setReceiptRows(rows);const t=summarizeCloseoutReceipts(rows);setVoidCount(String(t.voidCount));setVoidValue(String(t.voidTotal));setDiscountValue(String(t.compTotal))}}/>}
-      <p>Review each saved photo in Receipts above. Save receipt attaches it automatically; delete any duplicate or unwanted photo. Receipt amounts must match the POS totals below. Server errors deduct 5 points per entry unless this past-date closeout has been approved without points.</p>
-      {error && (
-        <div data-design-block="copy.50484d57069c0d3a.1"
-          style={{
-            marginBottom: 20,
-            padding: 16,
-            borderRadius: 12,
-            border:
-              '1px solid #ef4444',
-            background:
-              'rgba(239,68,68,.12)',
-            fontWeight: 700,
-          }}
-        >
-          {error}
+  useEffect(()=>{
+    if(!locationId||!ownerId||draftReady!==draftKey||!draftKey)return
+    let live=true;setQuickShifts([]);setScheduleNotice('Checking your confirmed schedule…')
+    const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),15000)
+    void Promise.resolve(supabase.rpc('quick_closeout_context',{p_location_id:locationId,p_day:closeoutDay}).abortSignal(controller.signal)).then(({data,error})=>{
+      if(!live)return;if(error)throw error
+      if(!Array.isArray(data?.shifts))throw Error('Schedule details were not returned.')
+      const rows=data.shifts as QuickShift[];if(rows.some(s=>typeof s.key!=='string'||!centralTime(s.start)||typeof s.role!=='string'))throw Error('Schedule details were incomplete.')
+      setQuickShifts(rows);setScheduleNotice(!data.confirmed?'Schedule is not confirmed. Enter your actual shift details below.':!rows.length?'No matching confirmed shift. Enter the shift you actually worked.':rows.length>1?'Choose the shift you are closing out.':'Using your confirmed schedule. Actual clock times remain separate.')
+      if(rows.length===1&&!touched.current.shift){setQuickShift(rows[0].key);setScheduledTime(centralTime(rows[0].start));const role=roleFromSchedule(rows[0].role);if(role)setJobRole(role as JobRole)}
+    }).catch(e=>{if(live)setScheduleNotice('Schedule unavailable. Enter your shift details. '+String((e as {message?:string})?.message??e))}).finally(()=>clearTimeout(timer))
+    return()=>{live=false;controller.abort();clearTimeout(timer)}
+  },[locationId,ownerId,closeoutDay,draftReady,draftKey])
+  useEffect(()=>{
+    if(!locationId||!tables.length||draftReady!==draftKey||!draftKey||touched.current.tables)return
+    let live=true;const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),15000)
+    void Promise.resolve(supabase.rpc('floor_sections_for_day',{p_location_id:locationId,p_date:closeoutDay,p_only_me:true}).abortSignal(controller.signal)).then(({data,error})=>{
+      if(!live||touched.current.tables)return;if(error)throw error;if(!Array.isArray(data))throw Error('Floor assignments were not returned.')
+      const ids=[...new Set(data.flatMap((r:{table_ids?:string[]})=>Array.isArray(r.table_ids)?r.table_ids:[]))] as string[]
+      setSelectedTableIds(ids.filter(id=>tables.some(t=>t.id===id)));setFloorTablesNotice(ids.length?'Published tables loaded. Change these if you worked different tables.':'No published tables found. Add the tables you worked if applicable.')
+    }).catch(e=>{if(live)setFloorTablesNotice('Tables unavailable. Select the tables you worked. '+String((e as {message?:string})?.message??e))}).finally(()=>clearTimeout(timer))
+    return()=>{live=false;controller.abort();clearTimeout(timer)}
+  },[locationId,closeoutDay,tables,draftReady,draftKey])
+  function currentIssues(){
+    return quickCloseoutIssues({config,configError,shown,scheduledTime,clockInTime,clockOutTime,shiftType,jobRole,netSales,cashDeposit,voidCount,voidValue,discountValue,moneyTurnedInTo,certified,zeroSalesConfirmed,zeroSalesReason,hasStockItems,stockItems,registerCash,registerImbalanceReason,registerVerifiedBy,answers,receiptPending,receiptKey:receiptDraft.key,receiptRows,targetLoading:targetState.loading,ownerId,peerVoteEmployeeId,ready:!!organizationId&&!!locationId&&draftReady===draftKey})
+  }
+  const visibleIssues=issues.length?currentIssues():[]
+  const fieldError=(field:string)=>visibleIssues.filter(x=>x.field===field).map(x=><p key={x.message} className="quick-field-error">{x.message}</p>)
+  const money=(v:string)=>v.trim()===''?'Not entered':new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(Number(v)||0)
+  const staffQuestions=config?.questions.filter(q=>q.active&&!q.builtin&&q.audience==='staff')??[]
+  if(loading)return <section className="page closeout-mobile"><h1>Staff closeout</h1><p role="status">Loading your closeout…</p></section>
+  return <DesignSection as="section" data-design-block="closeout.quick.page" className="page closeout-mobile quick-closeout">
+    <header><p>{locationName} · {closeoutDay}</p><h1>Finish my shift</h1><p>Check your shift, enter your totals, and submit.</p><small role="status">{draftStatus}</small></header>
+    {closeoutDay!==serviceDay()&&<p role="status">You are closing out {closeoutDay}. Today’s service date is {serviceDay()}.</p>}
+    {message&&<p className="quick-success" role="status">{message}</p>}
+    {error&&<p role="alert" className="quick-field-error">{error}</p>}
+    {visibleIssues.length>0&&<section id="closeout-errors" tabIndex={-1} role="alert" className="quick-errors"><h2>Finish these before submitting</h2><ul>{visibleIssues.map(x=><li key={x.message}><a href={'#quick-'+x.field} onClick={()=>{if(x.field==='shift')setShiftOpen(true);if(x.field==='report')setReportOpen(true)}}>{x.message}</a></li>)}</ul></section>}
+    <fieldset disabled={saving} className="quick-fields">
+    <DesignSection as="section" data-design-block="closeout.quick.shift" className="card" id="quick-shift">
+      <h2>1. Your shift</h2><p><strong>{ROLE_LABELS[jobRole]}</strong> · {shiftType||'Choose shift'} · {scheduledTime||'Start needed'}{clockOutTime?' – '+clockOutTime:''}</p>
+      <p>{selectedTables.length?selectedTables.map(t=>t.table_name).join(', '):'Tables not selected'} · Target: {targetState.loading?'Loading…':targetState.ready?money(salesTarget):'Unavailable'}</p>
+        {shown('staff_1')&&<div className="quick-grid"><label>Actual clock-in<ClockTime required label="Clock-in time" value={clockInTime} onChange={setClockInTime}/></label><label>Actual clock-out<ClockTime required label="Clock-out time" value={clockOutTime} onChange={setClockOutTime}/></label></div>}
+      <details open={shiftOpen||(!scheduledTime&&!quickShifts.length)} onToggle={e=>setShiftOpen(e.currentTarget.open)}><summary>Check / change shift details</summary>
+        <p role="status">{scheduleNotice}</p>
+        {quickShifts.length>0&&<label>Confirmed shift<select value={quickShift} onChange={e=>{const s=quickShifts.find(s=>s.key===e.target.value);if(s)chooseQuickShift(s)}}><option value="">Select shift</option>{quickShifts.map(s=><option key={s.key} value={s.key}>{s.role} · {centralTime(s.start)} – {centralTime(s.end)}</option>)}</select></label>}
+        <div className="quick-grid">
+          {shown('staff_0')&&<label>{questionLabel(config,'staff_0','Scheduled start')}<ClockTime required label="Scheduled start" value={scheduledTime} onChange={v=>{touched.current.shift=true;setScheduledTime(v)}}/></label>}
+          <label>Role worked<select value={jobRole} onChange={e=>{touched.current.shift=true;setJobRole(e.target.value as JobRole)}}>{Object.entries(ROLE_LABELS).map(([id,label])=><option key={id} value={id}>{label}</option>)}</select></label>
+          {shown('staff_2')&&<label>{questionLabel(config,'staff_2','Shift')}<select value={shiftType} onChange={e=>setShiftType(e.target.value)}><option value="">Choose shift</option><option value="AM">AM</option><option value="PM">PM</option><option value="TO_VOLUME">To Volume</option></select></label>}
         </div>
-      )}
-
-      {message && (
-        <div data-design-block="copy.d65df369fa218acc.1"
-          style={{
-            marginBottom: 20,
-            padding: 16,
-            borderRadius: 12,
-            border:
-              '1px solid #22c55e',
-            background:
-              'rgba(34,197,94,.14)',
-            fontWeight: 700,
-          }}
-        >
-          {message}
-        </div>
-      )}
-
-      <p data-design-block="copy.9780dbc6198cd2d5.3"><Link to="/closeout"><ScreenText id="CloseoutPage.0ce3457f5ccec1c4">← Closeout</ScreenText></Link></p>
-      {configError && <p data-design-block="copy.0ddaed72ed7c19a9.1" role="alert">{configError}</p>}
-      
-
-      <div data-design-block="copy.af6b2df48414bca0.1" className="card">
-        <h2 data-design-block="copy.601726244d06e9b3.1"><ScreenText id="CloseoutPage.dfb5350d0897214f">
-          Shift Information
-        </ScreenText></h2>
-
-        <div data-design-block="copy.cd860d0c2bc6318a.1" className="form-grid">
-
-          {shown('staff_0') && (<label data-design-block="copy.1d3e51bec05d6401.1">
-            {questionLabel(config, 'staff_0', "Scheduled Time")}
-
-            <ClockTime required label="Scheduled time" value={scheduledTime} onChange={setScheduledTime} />
-          </label>)}
-
-          {shown('staff_1') && (<label data-design-block="copy.1d3e51bec05d6401.2">
-            {questionLabel(config, 'staff_1', "Actual Clock-In Time")}
-
-            <ClockTime required label="Clock-in time" value={clockInTime} onChange={setClockInTime} />
-          </label>)}
-
-          <label data-design-block="copy.1d3e51bec05d6401.3"><ScreenText id="CloseoutPage.a803ddaf64e382d1">Actual Clock-Out Time
-            </ScreenText><ClockTime required label="Clock-out time" value={clockOutTime} onChange={setClockOutTime} />
-            <small><ScreenText id="CloseoutPage.0cb264d4769f0e13">Use your actual end time. After-midnight clock-out is treated as the next day.</ScreenText></small>
-          </label>
-          {closeoutHours(clockInTime,clockOutTime)!==null && <p data-design-block="copy.9780dbc6198cd2d5.4"><ScreenText id="CloseoutPage.ecbf49a3335e8ec7">Shift length: </ScreenText>{closeoutHours(clockInTime,clockOutTime)!.toFixed(2)}<ScreenText id="CloseoutPage.9b614fcd90489a0d"> hours</ScreenText></p>}
-
-          {shown('staff_2') && (<label data-design-block="copy.1d3e51bec05d6401.4">
-            {questionLabel(config, 'staff_2', "Shift")}
-
-            <select
-              value={shiftType}
-              onChange={(event) => setShiftType(event.target.value)}
-            >
-              <PageOption designId="copy.870f72c3520d9a59.1" value=""><ScreenText plain id="CloseoutPage.48e9a699102a192e">Select Shift</ScreenText></PageOption>
-              <PageOption designId="copy.58d1cb102c52361d.1" value="AM"><ScreenText plain id="CloseoutPage.6350660034efc36b">AM</ScreenText></PageOption>
-              <PageOption designId="copy.02af1ec40f3efd20.1" value="PM"><ScreenText plain id="CloseoutPage.1c0f4170d0704b8b">PM</ScreenText></PageOption>
-              <PageOption designId="copy.46cc66ba19a8e855.1" value="TO_VOLUME"><ScreenText plain id="CloseoutPage.77baab9ee40baaa4">To Volume</ScreenText></PageOption>
-            </select>
-          </label>)}
-        </div>
-      </div>
-
-      <div data-design-block="copy.af6b2df48414bca0.2" className="card">
-        <h2 data-design-block="copy.601726244d06e9b3.2"><ScreenText id="CloseoutPage.e97932f94c4d02e8">
-          Sales
-        </ScreenText></h2>
-
-        <div data-design-block="copy.cd860d0c2bc6318a.2" className="form-grid">
-
-          {shown('staff_3') && (<label data-design-block="copy.1d3e51bec05d6401.5">
-            {questionLabel(config, 'staff_3', "Total Net Sales")}
-
-            <input
-              type="number"
-              inputMode="decimal"
-              step="0.01"
-              value={
-                netSales
-              }
-              onChange={(
-                event
-              ) =>
-                setNetSales(
-                  event.target
-                    .value
-                )
-              }
-            />
-          </label>)}
-
-
-
-        </div>
-      </div>
-
-      <DesignSection as="section" data-design-block="section.066b9e23763c84f5534d" className="card"><h3><PageWord id="sectioncopy.6132d19813ed058f2f03">{"Automatic shift sales target"}</PageWord></h3><p><PageWord id="sectioncopy.928778e98e7523dc12b1">{"Service date: "}</PageWord>{closeoutDay}</p>
-        {targetState.loading?<p role="status"><PageWord id="sectioncopy.e14c065a02252931b83b">{"Loading your target…"}</PageWord></p>:targetState.ready?<><strong>{new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(Number(salesTarget))}</strong>{Number(salesTarget)>0&&netSales.trim()!==''&&<p>{((numberValue(netSales)/Number(salesTarget))*100).toFixed(1)}<PageWord id="sectioncopy.b6d9b4837e5cba9dd08f">{"% of target"}</PageWord></p>}</>:<p role="status"><PageWord id="sectioncopy.aaa172256f72059d5e98">{"Target unavailable: "}</PageWord>{targetState.reason}<PageWord id="sectioncopy.d0a3a7b935da59473ffb">{" No sales-target points will apply until a target is available."}</PageWord></p>}
-        <button type="button" disabled={saving||targetState.loading} onClick={()=>setTargetRefresh(v=>v+1)}><PageWord id="sectioncopy.54a46bb5baeae12ee093">{"Refresh target"}</PageWord></button>
-        <p><PageWord id="sectioncopy.e935547e2ca910b3f216">{"Imported from the app’s sales target allocation for your scheduled shift. No manual target entry is needed."}</PageWord></p>
-      </DesignSection>
-
-      {shown('staff_3') && netSales.trim()!=='' && Number(netSales)===0 && <div data-design-block="copy.a49020c974bf8cb3.1" className="closeout-warning"><h3 data-design-block="copy.376cc9db1049f0cb.2"><ScreenText id="CloseoutPage.08bbbe6dfa02693c">Check your sales</ScreenText></h3><p data-design-block="copy.9780dbc6198cd2d5.8"><ScreenText id="CloseoutPage.b8864cc8785a4b68">You entered $0. Check your Toast report before continuing.</ScreenText></p><label data-design-block="copy.35bcf28795a297dd.1" className="closeout-check"><input type="checkbox" checked={zeroSalesConfirmed} onChange={e=>setZeroSalesConfirmed(e.target.checked)} /><span><ScreenText id="CloseoutPage.21209f4ceb62d671">I checked my report and $0 sales is accurate.</ScreenText></span></label><label data-design-block="copy.1d3e51bec05d6401.6"><ScreenText id="CloseoutPage.0c8ea3df31e4441b">Why were sales zero?</ScreenText><textarea rows={2} maxLength={2000} value={zeroSalesReason} onChange={e=>setZeroSalesReason(e.target.value)} placeholder="Explain why this shift had no sales." /></label></div>}
-
-      <div data-design-block="copy.af6b2df48414bca0.4" className="card">
-        <h2 data-design-block="copy.601726244d06e9b3.3"><ScreenText id="CloseoutPage.fa54c9aa63aa0de5">
-          Cash & Adjustments
-        </ScreenText></h2>
-
-        <div data-design-block="copy.7231a33be3530dd9.1" className="form-grid"
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
-                gap: '16px',
-                alignItems: 'start',
-                width: '100%',
-              }}
-            >
-
-          {shown('staff_5') && (<label data-design-block="copy.1d3e51bec05d6401.7">
-            {questionLabel(config, 'staff_5', "Cash Deposit")}
-
-            <input
-              type="number"
-              step="0.01"
-              value={
-                cashDeposit
-              }
-              onChange={(
-                event
-              ) =>
-                setCashDeposit(
-                  event.target
-                    .value
-                )
-              }
-            />
-          </label>)}
-
-
-          {shown('staff_6') && (<label data-design-block="copy.1d3e51bec05d6401.8">
-            {questionLabel(config, 'staff_6', "Total Value of Voids")}
-
-            <input
-              type="number"
-              step="0.01"
-              value={
-                voidValue
-              }
-              onChange={(
-                event
-              ) =>
-                setVoidValue(
-                  event.target
-                    .value
-                )
-              }
-            />
-          </label>)}
-
-          {shown('staff_7') && (<label data-design-block="copy.1d3e51bec05d6401.9">
-            {questionLabel(config, 'staff_7', "Total Value of Discounts")}
-
-            <input
-              type="number"
-              step="0.01"
-              value={
-                discountValue
-              }
-              onChange={(
-                event
-              ) =>
-                setDiscountValue(
-                  event.target
-                    .value
-                )
-              }
-            />
-          </label>)}
-
-        </div>
-      </div>
-
-      <div data-design-block="copy.af6b2df48414bca0.5" className="card">
-        <h2 data-design-block="copy.601726244d06e9b3.4"><ScreenText id="CloseoutPage.ef596096378905dc">
-          Role Worked
-        </ScreenText></h2>
-
-        <select
-          value={
-            jobRole
-          }
-          onChange={(
-            event
-          ) =>
-            setJobRole(
-              event.target
-                .value as JobRole
-            )
-          }
-        >
-          {(
-            Object.keys(
-              ROLE_LABELS
-            ) as JobRole[]
-          ).map(
-            (role) => (
-              <option
-                key={
-                  role
-                }
-                value={
-                  role
-                }
-              >
-                {
-                  ROLE_LABELS[
-                    role
-                  ]
-                }
-              </option>
-            )
-          )}
-        </select>
-
-        <div data-design-block="copy.f8a452f93368fd3f.1" className="role-description">
-          <strong>
-            {
-              ROLE_LABELS[
-                jobRole
-              ]
-            }
-          </strong>
-
-          <p data-design-block="copy.9780dbc6198cd2d5.9">
-            {
-              ROLE_DESCRIPTIONS[
-                jobRole
-              ]
-            }
-          </p>
-        </div>
-      </div>
-{jobRole === 'main_bartender' && (
-  <div data-design-block="copy.af6b2df48414bca0.6" className="card">
-    <h2 data-design-block="copy.601726244d06e9b3.5"><ScreenText id="CloseoutPage.0a257811571b1959">Register Closeout</ScreenText></h2>
-
-    {shown('staff_8') && (<label data-design-block="copy.1d3e51bec05d6401.10">
-      {questionLabel(config, 'staff_8', "Cash Left in Register")}
-      <PageInput designId="copy.393b1ea89e060356.1"
-        type="number"
-        step="0.01"
-        min="0"
-        value={registerCash}
-        onChange={(event) =>
-          setRegisterCash(event.target.value)
-        }
-        placeholder="200.00"
-        required
-      />
-    </label>)}
-
-    {registerCash !== '' &&
-      Number(registerCash) !== 200 && (
-        <>
-          {shown('staff_9') && (<label data-design-block="copy.1d3e51bec05d6401.11">
-            {questionLabel(config, 'staff_9', "Why is the register not at $200?")}
-            <textarea
-              value={registerImbalanceReason}
-              onChange={(event) =>
-                setRegisterImbalanceReason(
-                  event.target.value
-                )
-              }
-              required
-            />
-          </label>)}
-
-          {shown('staff_10') && (<label data-design-block="copy.1d3e51bec05d6401.12">
-            {questionLabel(config, 'staff_10', "Who verified the imbalance?")}
-            <select
-              value={registerVerifiedBy}
-              onChange={(event) =>
-                setRegisterVerifiedBy(
-                  event.target.value
-                )
-              }
-              required
-            >
-              <PageOption designId="copy.f0708cbf429da944.1" value=""><ScreenText plain id="CloseoutPage.109949a6b786df90">
-                Select verifier
-              </ScreenText></PageOption>
-
-              {employees.map((employee) => (
-                <option
-                  key={employee.user_id}
-                  value={employee.user_id}
-                >
-                  {employee.full_name}
-                </option>
-              ))}
-            </select>
-          </label>)}
-        </>
-      )}
-  </div>
-      )}
-      <div data-design-block="copy.af6b2df48414bca0.7" className="card">
-        <h2 data-design-block="copy.601726244d06e9b3.6"><ScreenText id="CloseoutPage.168812ccfe0a7259">
-          Tables Worked
-        </ScreenText></h2>
-
-        <label><PageWord id="sectioncopy.3e696ab1db70fb6dad89">{"Floor shift (optional)"}</PageWord><select value={floorShiftId} onChange={e=>setFloorShiftId(e.target.value)}><option value="">Choose the shift worked</option>{floorShifts.map(shift=><option key={shift.id} value={shift.id}>{shift.shift_name} · {shift.status}</option>)}</select></label>
-        <button type="button" disabled={saving} onClick={()=>void pullFloorTables()}><PageWord id="sectioncopy.c11818c96a3a9822ba8f">{"Load my Floor tables"}</PageWord></button>
-        <p role="status">{floorTablesNotice||'Select the tables you actually worked. These are the same table records used on Floor; saving preserves them for Smart Sections.'}</p>
-        {Object.entries(
-          groupedTables
-        ).map(
-          ([
-            roomName,
-            roomTables,
-          ]) => (
-            <div data-design-block="copy.e504eb9cedd619ff.1"
-              key={
-                roomName
-              }
-              className="closeout-room-group"
-            >
-              <h3 data-design-block="copy.376cc9db1049f0cb.3">
-                {
-                  roomName
-                }
-              </h3>
-
-              <div data-design-block="copy.9c4126ff19fd40d6.1" className="closeout-table-grid">
-
-                {roomTables.map(
-                  (table) => {
-                    const selected =
-                      selectedTableIds.includes(
-                        table.id
-                      )
-
-                    return (
-                      <button data-design-block="copy.8aca45050763e074.1"
-                        key={
-                          table.id
-                        }
-                        type="button"
-
-                        className={
-                          selected
-                            ? 'table-select-button selected'
-                            : 'table-select-button'
-                        }
-                        style={
-                          selected
-                            ? {
-                                backgroundColor: '#d9b45b',
-                                color: '#ffffff',
-                                borderColor: '#d9b45b',
-                                boxShadow: '0 0 0 2px rgba(217, 180, 91, 0.35)',
-                                fontWeight: 700,
-                              }
-                            : undefined
-                        }
-
-                        onClick={() =>
-                          toggleTable(
-                            table.id
-                          )
-                        }
-                      >
-                        {
-                          table.table_name
-                        }
-                      </button>
-                    )
-                  }
-                )}
-
-              </div>
-            </div>
-          )
-        )}
-
-        <p data-design-block="copy.9780dbc6198cd2d5.10">
-          <strong><ScreenText id="CloseoutPage.fcad3a28960326e6">
-            Selected:
-          </ScreenText></strong>{' '}
-
-          {selectedTables.length >
-          0
-            ? selectedTables
-                .map(
-                  (table) =>
-                    table.table_name
-                )
-                .join(', ')
-            : <PageWord id="copy.4d3966fcacfbab86.1">{"None"}</PageWord>}
-        </p>
-      </div>
-
-
-      {shown('staff_11') && <DesignSection as="section" data-design-block="section.805c77d6a2b0a3367ff7" className="card"><h2><PageWord id="sectioncopy.bbffc818a3ca4bccdeed">{"Peer recognition"}</PageWord></h2>
-        <label><PageWord id="sectioncopy.bedb1af5b32500cdfb9f">{"Who helped make this shift successful? (optional) "}</PageWord><select value={peerVoteEmployeeId} onChange={e=>setPeerVoteEmployeeId(e.target.value)}>
-            <option value="">No vote this shift</option>
-            {employees.map(employee=><option key={employee.user_id} value={employee.user_id}>{employee.preferred_name||employee.full_name||employee.user_id}</option>)}
-          </select>
-        </label>
-        {peerVoteEmployeeId && <label><PageWord id="sectioncopy.cd099ea09c18cb1f3b0e">{"What did they do? (optional)"}</PageWord><textarea maxLength={500} value={peerVoteOtherReason} onChange={e=>setPeerVoteOtherReason(e.target.value)}/></label>}
-        <p><PageWord id="sectioncopy.2493b428984dcdfa398f">{"Your vote is saved with your closeout and appears in Peer recognition on Points and the closeout summary."}</PageWord></p>
-      </DesignSection>}
-
-      <div data-design-block="copy.af6b2df48414bca0.9" className="card">
-        <h2 data-design-block="copy.601726244d06e9b3.8"><ScreenText id="CloseoutPage.6425a625f082028a">
-          Shift Accountability
-        </ScreenText></h2>
-
-        <div data-design-block="copy.cd860d0c2bc6318a.4" className="form-grid">
-
-          {shown('staff_14') && numberValue(cashDeposit)>0 && (<label data-design-block="copy.1d3e51bec05d6401.16">
-            {questionLabel(config, 'staff_14', "Who did you turn your money in to?")}
-
-            <select
-              value={
-                moneyTurnedInTo
-              }
-              onChange={(
-                event
-              ) =>
-                setMoneyTurnedInTo(
-                  event.target
-                    .value
-                )
-              }
-            >
-              <PageOption designId="copy.cb2e85ecf7126707.1" value=""><ScreenText plain id="CloseoutPage.4abe602200d57d86">
-                Select employee
-              </ScreenText></PageOption>
-
-              {employees.map(
-                (employee) => (
-                  <option
-                    key={
-                      employee.user_id
-                    }
-                    value={
-                      employee.user_id
-                    }
-                  >
-                    {employeeName(
-                      employee
-                    )}
-                  </option>
-                )
-              )}
-            </select>
-          </label>)}
-
-          {shown('staff_15') && jobRole==='server' && (<label data-design-block="copy.1d3e51bec05d6401.17">
-            {questionLabel(config, 'staff_15', "Who made your drinks?")}
-
-            <select
-              value={
-                drinkMaker
-              }
-              onChange={(
-                event
-              ) =>
-                setDrinkMaker(
-                  event.target
-                    .value
-                )
-              }
-            >
-              <PageOption designId="copy.a30265454c1af2fd.1" value=""><ScreenText plain id="CloseoutPage.34be05437c660577">
-                Not applicable
-              </ScreenText></PageOption>
-
-              {employees.map(
-                (employee) => (
-                  <option
-                    key={
-                      employee.user_id
-                    }
-                    value={
-                      employee.user_id
-                    }
-                  >
-                    {employeeName(
-                      employee
-                    )}
-                  </option>
-                )
-              )}
-            </select>
-          </label>)}
-
-        </div>
-      </div>
-
-      <CloseoutStockQuestion answer={hasStockItems} items={stockItems} disabled={saving} onAnswer={value=>{setHasStockItems(value);if(value!=='yes')setStockItems('')}} onItems={setStockItems}/>
-      
-      <div data-design-block="copy.af6b2df48414bca0.11" className="card">
-        <h2 data-design-block="copy.601726244d06e9b3.10"><ScreenText id="CloseoutPage.e0f8109cb9cd8aa4">
-          Notes
-        </ScreenText></h2>
-
-        <textarea
-          rows={4}
-          value={
-            notes
-          }
-          onChange={(
-            event
-          ) =>
-            setNotes(
-              event.target
-                .value
-            )
-          }
-          placeholder="Shift notes, discrepancies, guest issues, etc."
-        />
-      </div>
-
-      <div data-design-block="copy.af6b2df48414bca0.12" className="card">
-        <h2 data-design-block="copy.601726244d06e9b3.11"><ScreenText id="CloseoutPage.371d2d55a7237afc">
-          Shift Score
-        </ScreenText></h2>
-
-        {closeoutDay<serviceDay()&&pastPoints===false ? <p>No closeout point changes will be applied to this approved past-date submission.</p> : !pointResult ? (
-          <p data-design-block="copy.9780dbc6198cd2d5.12"><ScreenText id="CloseoutPage.44540397f70e496a">
-            Enter scheduled
-            and actual
-            clock-in times
-            to calculate.
-          </ScreenText></p>
-        ) : (
-          <>
-            <div data-design-block="copy.af66a2a6770a2a0c.1" className="shift-score-number">
-              {
-                pointResult.shiftScore
-              }
-            </div>
-
-            <p data-design-block="copy.9780dbc6198cd2d5.13"><ScreenText id="CloseoutPage.0e2a4f8a7539964b">
-              Starting score:
-              </ScreenText>{' '}<ScreenText id="CloseoutPage.ad57366865126e55">100
-            </ScreenText></p>
-
-            <div data-design-block="copy.4d9fe49f70483b17.1" className="point-adjustment-list">
-
-              {pointResult.adjustments.map(
-                (item) => (
-                  <div data-design-block="copy.8b86a6fee39e8c8b.1"
-                    key={
-                      item.code
-                    }
-                    className="point-adjustment"
-                  >
-                    <span>
-                      {
-                        item.description
-                      }
-                    </span>
-
-                    <strong>
-                      {item.points >
-                      0
-                        ? `+${item.points}`
-                        : item.points}
-                    </strong>
-                  </div>
-                )
-              )}
-
-            </div>
-
-            <div data-design-block="copy.2404f0af255afc39.1" className="point-total">
-              <span><ScreenText id="CloseoutPage.33f40dc823dadbd0">
-                Net Adjustment
-              </ScreenText></span>
-
-              <strong>
-                {pointResult.pointsDelta >
-                0
-                  ? `+${pointResult.pointsDelta}`
-                  : pointResult.pointsDelta}
-              </strong>
-            </div>
-          </>
-        )}
-      </div>
-
-      <fieldset data-design-block="copy.8c754f7e3c019e7b.1" disabled={saving}><CloseoutQuestions config={config} audience="staff" answers={answers} onChange={setAnswers} /></fieldset>
-
-      <div data-design-block="copy.af6b2df48414bca0.13" className="card">
-        <h2 data-design-block="copy.601726244d06e9b3.12"><ScreenText id="CloseoutPage.7c5ffc958d77a5c3">
-          Certification
-        </ScreenText></h2>
-
-        <label data-design-block="copy.8af48ed555396f33.1"
-          style={{
-            display:
-              'flex',
-
-            gap: 12,
-
-            alignItems:
-              'flex-start',
-          }}
-        >
-          <input
-            type="checkbox"
-            checked={
-              certified
-            }
-            onChange={(
-              event
-            ) =>
-              setCertified(
-                event.target
-                  .checked
-              )
-            }
-          />
-
-          <span><ScreenText id="CloseoutPage.a48fce357dd33e37">
-            I confirm that
-            the information
-            in this closeout
-            is accurate.
-          </ScreenText></span>
-        </label>
-      </div>
-
-      <div data-design-block="copy.af6b2df48414bca0.14" className="card">
-        <h2 data-design-block="copy.601726244d06e9b3.13"><ScreenText id="CloseoutPage.e13d79760a892b77">
-          Review & Submit
-        </ScreenText></h2>
-        <div data-design-block="copy.68d161372c7b6924.1" className="closeout-review"><p data-design-block="copy.9780dbc6198cd2d5.14"><ScreenText id="CloseoutPage.bc9bdc4ef1b422cf">Net sales: </ScreenText><strong><ScreenText id="CloseoutPage.09fc96082d34c2df">$</ScreenText>{netSales || 'Not entered'}</strong></p><p data-design-block="copy.9780dbc6198cd2d5.15"><ScreenText id="CloseoutPage.0ca82121e91cc413">Cash deposit: </ScreenText><strong><ScreenText id="CloseoutPage.09fc96082d34c2df">$</ScreenText>{cashDeposit || 'Not entered'}</strong></p><p data-design-block="copy.9780dbc6198cd2d5.16"><ScreenText id="CloseoutPage.898ca3b88156a4c9">Review these amounts against your Toast report. An inaccurate submission does not earn the completion bonus.</ScreenText></p></div>
-
-        {pointResult && !(closeoutDay<serviceDay()&&pastPoints===false) && (
-          <p data-design-block="copy.9780dbc6198cd2d5.17">
-            <strong><ScreenText id="CloseoutPage.8bbb98bfd2fc2d4e">
-              Shift Score:
-            </ScreenText></strong>{' '}
-
-            {
-              pointResult.shiftScore
-            }
-          </p>
-        )}
-
-        <button data-design-block="copy.e9cc5c19684ed3b8.1"
-          type="button"
-          className="primary-button"
-          onClick={
-            submitCloseout
-          }
-          disabled={
-            saving || receiptPending!==0
-          }
-        >
-          {saving
-            ? <PageWord id="copy.8140cc7f00ecd5df.1">{"Submitting..."}</PageWord>
-            : <PageWord id="copy.e5df344566429541.1">{"Submit Daily Closeout"}</PageWord>}
-        </button>
-      </div>
-
-      {receiptDraft.key&&<ReceiptSubmissionLog location={locationId} day={closeoutDay} closeoutKey={receiptRows.length?receiptDraft.key:(submittedReceiptKey||receiptDraft.key)}/>}
-      <div
-        style={{
-          height: 160,
-        }}
-      />
-
+        {closeoutHours(clockInTime,clockOutTime)!==null&&<p>{closeoutHours(clockInTime,clockOutTime)!.toFixed(2)} hours · after-midnight end times count toward this shift.</p>}
+        {!targetState.ready&&<p role="status">Target unavailable: {targetState.reason} No sales-target points are estimated without a target.</p>}<button type="button" disabled={targetState.loading} onClick={()=>setTargetRefresh(v=>v+1)}>Refresh target</button>
+        <details><summary>Tables worked · {selectedTables.length}</summary><p>{floorTablesNotice}</p><label>Floor shift (optional)<select value={floorShiftId} onChange={e=>setFloorShiftId(e.target.value)}><option value="">All my assignments this day</option>{floorShifts.map(s=><option key={s.id} value={s.id}>{s.shift_name}</option>)}</select></label><button type="button" onClick={()=>{touched.current.tables=true;void pullFloorTables()}}>Reload my Floor tables</button>{Object.entries(groupedTables).map(([room,rows])=><div key={room}><h3>{room}</h3><div className="closeout-table-grid">{rows.map(t=><button type="button" key={t.id} aria-pressed={selectedTableIds.includes(t.id)} className={'table-select-button'+(selectedTableIds.includes(t.id)?' selected':'')} onClick={()=>{touched.current.tables=true;toggleTable(t.id)}}>{t.table_name}</button>)}</div></div>)}</details>
+        <details><summary>Different service date / approved past closeout</summary><PastCloseoutControls location={locationId} day={closeoutDay} disabled={saving} onDay={changeServiceDay} onPolicy={pastPolicy}/></details>
+      </details>{fieldError('shift')}
     </DesignSection>
-  )
+    <DesignSection as="section" data-design-block="closeout.quick.totals" className="card" id="quick-totals">
+      <h2>2. Sales &amp; cash</h2><div className="quick-grid">
+        {shown('staff_3')&&<label>{questionLabel(config,'staff_3','Net sales')}<input aria-label="Net sales" type="number" inputMode="decimal" min="0" step="0.01" value={netSales} onChange={e=>setNetSales(e.target.value)}/></label>}
+        {shown('staff_5')&&<label>{questionLabel(config,'staff_5','Cash deposit')}<input aria-label="Cash deposit" type="number" inputMode="decimal" min="0" step="0.01" value={cashDeposit} onChange={e=>setCashDeposit(e.target.value)}/></label>}
+      </div>
+      {shown('staff_14')&&Number(cashDeposit)>0&&<label>{questionLabel(config,'staff_14','Cash given to')}<select value={moneyTurnedInTo} onChange={e=>setMoneyTurnedInTo(e.target.value)}><option value="">Choose recipient</option>{employees.map(p=><option key={p.user_id} value={p.user_id}>{employeeName(p)}</option>)}</select></label>}
+      {shown('staff_3')&&netSales.trim()!==''&&Number(netSales)===0&&<div className="quick-note"><label className="quick-check"><input type="checkbox" checked={zeroSalesConfirmed} onChange={e=>setZeroSalesConfirmed(e.target.checked)}/>I checked my report: $0 sales is correct.</label><label>Why were sales zero?<input value={zeroSalesReason} maxLength={2000} onChange={e=>setZeroSalesReason(e.target.value)} placeholder="For example, worked a non-selling role"/></label></div>}
+      {fieldError('totals')}
+      <div id="quick-receipts" className="quick-receipts"><p><strong>Receipts</strong> · {receiptPending===null?'Status unverified':receiptRows.length+' attached'+(receiptPending?' · '+receiptPending+' need details':'')}</p>
+      {receiptDraft.key&&<CloseoutReceiptWallet closeoutOnly key={receiptDraft.key} location={locationId} day={closeoutDay} closeoutKey={receiptDraft.key} shiftId={floorShiftId||undefined} onPendingChange={setReceiptPending} onChange={rows=>setReceiptRows(rows)}/>}
+      <p>Wallet drafts stay private and do not block this closeout. Attach all receipts supporting your POS void and comp totals.</p>
+      <div className="quick-grid"><label>{questionLabel(config,'staff_6','POS void total')}<input aria-label="POS void total" type="number" min="0" step="0.01" inputMode="decimal" value={voidValue} onChange={e=>setVoidValue(e.target.value)}/><small>Attached receipts: {money(String(receiptTotals.voidTotal))}</small></label><label>{questionLabel(config,'staff_7','POS comps / discounts')}<input aria-label="POS comps / discounts" type="number" min="0" step="0.01" inputMode="decimal" value={discountValue} onChange={e=>setDiscountValue(e.target.value)}/><small>Attached receipts: {money(String(receiptTotals.compTotal))}</small></label></div>
+      {receiptRows.length===0?<button type="button" disabled={receiptPending!==0} onClick={()=>{setVoidCount('0');setVoidValue('0');setDiscountValue('0')}}>No voids or comps</button>:<button type="button" disabled={receiptPending!==0} onClick={()=>{setVoidCount(String(receiptTotals.voidCount));setVoidValue(String(receiptTotals.voidTotal));setDiscountValue(String(receiptTotals.compTotal))}}>Use attached receipt totals</button>}
+      <small>Use only after comparing with your POS report. Enter 0 explicitly when there were none.</small>{fieldError('receipts')}</div>
+      {jobRole==='main_bartender'&&shown('staff_8')&&<div id="quick-register"><h3>Register</h3><label>{questionLabel(config,'staff_8','Cash left in register')}<input type="number" min="0" step="0.01" value={registerCash} onChange={e=>setRegisterCash(e.target.value)}/></label>{registerCash!==''&&Number(registerCash)!==200&&<><label>{questionLabel(config,'staff_9','Reason for difference')}<textarea value={registerImbalanceReason} onChange={e=>setRegisterImbalanceReason(e.target.value)}/></label><label>{questionLabel(config,'staff_10','Verified by')}<select value={registerVerifiedBy} onChange={e=>setRegisterVerifiedBy(e.target.value)}><option value="">Choose verifier</option>{employees.map(p=><option key={p.user_id} value={p.user_id}>{employeeName(p)}</option>)}</select></label></>}{fieldError('register')}</div>}
+    </DesignSection>
+    <DesignSection as="section" data-design-block="closeout.quick.report" className="card" id="quick-report">
+      <h2>3. Anything to report?</h2><div className="quick-actions"><button type="button" aria-pressed={hasStockItems==='no'&&!notes.trim()} onClick={()=>{setHasStockItems('no');setStockItems('');setReportOpen(!!notes.trim())}}>No new stock shortages</button><button type="button" onClick={()=>setReportOpen(true)}>Add an issue / note</button></div>
+      <details open={reportOpen||hasStockItems==='yes'} onToggle={e=>setReportOpen(e.currentTarget.open)}><summary>Stock shortages &amp; shift notes{notes.trim()?' · note added':''}</summary><CloseoutStockQuestion answer={hasStockItems} items={stockItems} disabled={saving} onAnswer={v=>{setHasStockItems(v);if(v!=='yes')setStockItems('')}} onItems={setStockItems}/><label>Guest issues, discrepancies or shift notes<textarea rows={3} value={notes} onChange={e=>setNotes(e.target.value)}/></label><small>Keep any applicable custom questions below complete.</small></details>
+      {fieldError('report')}
+      {staffQuestions.length>0&&<div id="quick-questions"><CloseoutQuestions config={config} audience="staff" answers={answers} onChange={setAnswers}/>{fieldError('questions')}</div>}
+      {(shown('staff_11')||(shown('staff_15')&&jobRole==='server'))&&<details><summary>Optional recognition &amp; drink support</summary>{shown('staff_15')&&jobRole==='server'&&<label>{questionLabel(config,'staff_15','Who made your drinks?')}<select value={drinkMaker} onChange={e=>setDrinkMaker(e.target.value)}><option value="">Not applicable</option>{employees.map(p=><option key={p.user_id} value={p.user_id}>{employeeName(p)}</option>)}</select></label>}{shown('staff_11')&&<><label>Recognize a teammate<select value={peerVoteEmployeeId} onChange={e=>setPeerVoteEmployeeId(e.target.value)}><option value="">Skip recognition</option>{employees.filter(p=>p.user_id!==ownerId).map(p=><option key={p.user_id} value={p.user_id}>{employeeName(p)}</option>)}</select></label>{peerVoteEmployeeId&&<label>What did they do?<textarea maxLength={500} value={peerVoteOtherReason} onChange={e=>setPeerVoteOtherReason(e.target.value)}/></label>}</>}</details>}
+    </DesignSection>
+    <section className="card quick-submit" id="quick-submit"><h2>Review &amp; submit</h2><p>Sales <strong>{money(netSales)}</strong> · Deposit <strong>{money(cashDeposit)}</strong> · {receiptRows.length} attached receipts</p>
+      <label className="quick-check"><input type="checkbox" checked={certified} onChange={e=>setCertified(e.target.checked)}/>I checked my POS report and confirm this closeout is accurate.</label>{fieldError('submit')}
+      <button type="button" className="primary-button" disabled={saving} onClick={()=>void submitCloseout()}>{saving?'Submitting…':'Submit closeout'}</button>
+      <details><summary>Points breakdown</summary>{closeoutDay<serviceDay()&&pastPoints===false?<p>No point changes for this approved past-date closeout.</p>:pointResult?<><p>Estimated shift score: {pointResult.shiftScore}. Final points are calculated by the server.</p>{pointResult.adjustments.map(a=><p key={a.code}>{a.description}: {a.points>0?'+':''}{a.points}</p>)}</>:<p>Enter actual clock times to estimate points.</p>}</details>
+    </section></fieldset>
+    {submittedReceiptKey&&<details><summary>Submitted receipt log</summary><ReceiptSubmissionLog location={locationId} day={closeoutDay} closeoutKey={submittedReceiptKey}/></details>}
+    <Link to="/closeout">Back to closeouts</Link>
+  </DesignSection>
 }

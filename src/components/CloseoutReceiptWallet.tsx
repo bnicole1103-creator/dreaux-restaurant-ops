@@ -7,7 +7,7 @@ import {PageWord} from './PageDesign'
 import {DesignSection} from './DesignSection'
 import {EmployeeReceiptWallet} from './EmployeeReceiptWallet'
 import './ReceiptWallet.css'
-type Props={submittedOnly?:boolean;managerCloseout?:boolean;inline?:boolean;location:string;day?:string;from?:string;to?:string;userId?:string;closeoutKey?:string;shiftId?:string;onChange?:(rows:CloseoutReceipt[])=>void;onSaved?:()=>void;onPendingChange?:(count:number|null)=>void;label?:string}
+type Props={closeoutOnly?:boolean;submittedOnly?:boolean;managerCloseout?:boolean;inline?:boolean;location:string;day?:string;from?:string;to?:string;userId?:string;closeoutKey?:string;shiftId?:string;onChange?:(rows:CloseoutReceipt[])=>void;onSaved?:()=>void;onPendingChange?:(count:number|null)=>void;label?:string}
 export function CloseoutReceiptWallet(props:Props){return <EmployeeReceiptWallet {...props}/>}
 export function useReceiptDraft(location:string,day=serviceDay()){
  const [key,setKey]=useState(''),[identity,setIdentity]=useState('')
