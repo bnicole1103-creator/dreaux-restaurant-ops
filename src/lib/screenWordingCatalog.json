@@ -1792,7 +1792,7 @@
   {
     "id": "LoginPage.aa65239e06fea8f7",
     "page": "LoginPage",
-    "text": "Your GM must approve location access after signup."
+    "text": "Your General Manager must approve location access after signup."
   },
   {
     "id": "LoginPage.cd3c2c8d0734931c",
@@ -2017,7 +2017,7 @@
   {
     "id": "ManagerCloseoutPage.30caf0d1c89056fc",
     "page": "ManagerCloseoutPage",
-    "text": "Only the submitting MOD, owner, or GM can edit this saved closeout."
+    "text": "Only the submitting manager, Owner, or General Manager can edit this saved closeout."
   },
   {
     "id": "PermissionsPage.89412119744c72b5",
@@ -3452,7 +3452,7 @@
   {
     "id": "CloseoutCorrectionEditor.195b413a6828df65",
     "page": "CloseoutCorrectionEditor",
-    "text": "Correcting the form does not automatically restore this bonus. The GM can restore it from the Points page. Leave this unchecked for a clarification to an otherwise accurate submission."
+    "text": "Correcting the form does not automatically restore this bonus. Management can restore it from the Points page. Leave this unchecked for a clarification to an otherwise accurate submission."
   },
   {
     "id": "CloseoutCorrectionEditor.1abf9b4fc9a29c70",
@@ -3742,7 +3742,7 @@
   {
     "id": "PointEntryEditor.e125db0089fa554f",
     "page": "PointEntryEditor",
-    "text": "Edit Point Entries \u00b7 GM Only"
+    "text": "Edit Point Entries \u00b7 Management"
   },
   {
     "id": "PointEntryEditor.df72d5e83c0d2ad7",
@@ -4217,12 +4217,12 @@
   {
     "id": "QuizRequiredStaff.a9847e1e69e60381",
     "page": "QuizRequiredStaff",
-    "text": "Late submission does not remove the missed-quiz deduction. The GM can waive it in Points."
+    "text": "Late submission does not remove the missed-quiz deduction. Management can waive it in Points."
   },
   {
     "id": "QuizRequiredStaff.347f969be1df5343",
     "page": "QuizRequiredStaff",
-    "text": "The deadline has passed. Point corrections are available to the GM in Points."
+    "text": "The deadline has passed. Point corrections are available to Management in Points."
   },
   {
     "id": "QuizRequiredStaff.e76e1c7e28631c9c",
@@ -4607,7 +4607,7 @@
   {
     "id": "SignupGate.ae7887eeffcd78ce",
     "page": "SignupGate",
-    "text": "Open the registration link from your GM to request access to your location."
+    "text": "Open the registration link from Management to request access to your location."
   },
   {
     "id": "SignupGate.01e2b13809a92be9",

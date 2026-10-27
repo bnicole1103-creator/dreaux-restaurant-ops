@@ -71,7 +71,7 @@ export function NotificationManagement() {
 
   <DesignSection as="article" data-design-block="section.cc57b0dece248baa7334" className="task-card">
    <h2><PageWord id="sectioncopy.8c50f9314c3fc79b2dfd">{"Required work and points"}</PageWord></h2>
-   <p><PageWord id="sectioncopy.30eca7c7d8ff71e3f79e">{"Staff marked as quiz-required by recurring controls or a daily roster must complete each published quiz: −5 points per missed quiz."}</PageWord></p>
+   <p><PageWord id="sectioncopy.30eca7c7d8ff71e3f79e">{"Staff marked as quiz-required by recurring controls or a daily roster must complete each published quiz: −10 points per missed quiz."}</PageWord></p>
    <p><PageWord id="sectioncopy.d49b6260a2612e869bf0">{"Each shift marked “Closeout required” needs a submission: −10 points per missing shift closeout."}</PageWord></p>
    <p><PageWord id="sectioncopy.41cecde861259c0e330f">{"Complete every assigned task list: −5 points per incomplete list, not per unchecked task."}</PageWord></p>
    <p><PageWord id="sectioncopy.fb0ce43f3091f5fbefa8">{"Quizzes and closeouts are due by 4 AM after the service day. Task lists use their assigned due time, or the same 4 AM cutoff. Push on/off does not change these requirements."}</PageWord></p>

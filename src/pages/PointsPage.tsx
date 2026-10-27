@@ -24,7 +24,6 @@ export function PointsPage() {
   const [locationId, setLocationId] = useState('')
   const [userId, setUserId] = useState('')
   const [manager, setManager] = useState(false)
-  const [gm,setGm]=useState(false)
   const [refresh,setRefresh]=useState(0)
   const [dashboard, setDashboard] = useState<Dashboard>({ standings: [], history: [], mine: null, published: null })
   const [loading, setLoading] = useState(true)
@@ -40,9 +39,7 @@ export function PointsPage() {
         if (userError) throw userError
         const permission = await supabase.rpc('mod_is_manager', { p_location_id: location.id })
         if (permission.error) throw permission.error
-        const generalManager=await supabase.rpc('closeout_is_gm',{p_location_id:location.id})
-        if(generalManager.error)throw generalManager.error
-        if (active) { setUserId(data.user?.id ?? ''); setManager(!!permission.data); setGm(!!generalManager.data); setLocationId(location.id) }
+        if (active) { setUserId(data.user?.id ?? ''); setManager(!!permission.data); setLocationId(location.id) }
       } catch (e) {
         if (active) { setError(String((e as { message?: string }).message ?? e)); setLoading(false) }
       }
@@ -75,7 +72,7 @@ export function PointsPage() {
     <div data-design-block="copy.3f7c7eb5092ef959.1" className="page-heading"><p data-design-block="copy.f6a7ab23d63be064.1" className="eyebrow"><ScreenText id="PointsPage.262da4df982b420d">LNX Systems</ScreenText></p><h1 data-design-block="copy.f38aa4d1b5095c0c.1"><ScreenText id="PointsPage.7227d397db4a9148">Points & Leaderboard</ScreenText></h1>
       <p data-design-block="copy.ba8f526071f4b63b.1" className="muted"><ScreenText id="PointsPage.29c57305376b3dd7">Track your progress and celebrate the team.</ScreenText></p></div>
     {manager && <p data-design-block="copy.aaa41820a7b2efd3.1"><Link to="/closeout/awards"><ScreenText id="PointsPage.c2ae010ecda1aae1">Award / Deduct Points →</ScreenText></Link></p>}
-    {(view === 'individual' || gm) && <label data-design-block="copy.fb586aab6aca00ba.1"><ScreenText id="PointsPage.92018619691663a6">Month </ScreenText><input type="month" value={month} required onChange={e => { if (e.target.value) setMonth(e.target.value) }} /></label>}
+    {(view === 'individual' || manager) && <label data-design-block="copy.fb586aab6aca00ba.1"><ScreenText id="PointsPage.92018619691663a6">Month </ScreenText><input type="month" value={month} required onChange={e => { if (e.target.value) setMonth(e.target.value) }} /></label>}
     <p data-design-block="copy.ba8f526071f4b63b.2" className="muted"><ScreenText id="PointsPage.85dcf42e118af84f">100 starting points each month. Winner: $100 + spotlight. Runner-up: $50 + first-cut pass.</ScreenText></p>
     <div data-design-block="copy.9a17d5d17d36fbf0.1" className="points-switch" role="group" aria-label="Points views">
       <AccessSection page="points" section="mine"><button data-design-block="copy.cc7ca8c8c6bc5a4f.1" type="button" aria-pressed={view === 'individual'} onClick={() => setView('individual')}><ScreenText id="PointsPage.c62c430488cafb76">My Points</ScreenText></button></AccessSection>
@@ -98,10 +95,10 @@ export function PointsPage() {
       </DesignSection></AccessSection>
     </> : <AccessSection page="points" section="leaderboard"><DesignSection as="article" data-design-block="copy.8bd6e18cc9706408.4" className="points-card"><PublishedLeaderboard
       locationId={locationId} month={month} publication={dashboard.published}
-      preview={gm ? dashboard.standings : []} gm={gm}
+      preview={manager ? dashboard.standings : []} manager={manager}
       onPublished={() => setRefresh(v => v + 1)}
     /></DesignSection></AccessSection>)}
-    {gm && <PointEntryEditor location={locationId} month={month} onChanged={()=>setRefresh(v=>v+1)} />}
+    {manager && <PointEntryEditor location={locationId} month={month} onChanged={()=>setRefresh(v=>v+1)} />}
   </DesignSection>
 }
 

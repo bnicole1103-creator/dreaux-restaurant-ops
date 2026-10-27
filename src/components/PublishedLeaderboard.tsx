@@ -4,7 +4,8 @@ import { supabase } from '../lib/supabase'
 
 export type Standing = { user_id: string; name: string; total: number; rank: number }
 export type LeaderboardPublication = {
-  id: string; month: string; published_at: string; standings: Standing[]
+  id: string; month: string; week_start?: string; revision?: number;
+  replaces_id?: string | null; published_at: string; standings: Standing[]
 }
 export function publicationLabel(publication: LeaderboardPublication) {
   return new Intl.DateTimeFormat('en-US', {
@@ -22,26 +23,40 @@ function StandingsTable({ rows, caption, locationId }: {
     </td><td>{row.total}</td></tr>)}</tbody>
   </table></div>
 }
-export function PublishedLeaderboard({ locationId, month, publication, preview, gm, onPublished }: {
+function currentWeekStart() {
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'America/Chicago', year: 'numeric', month: '2-digit', day: '2-digit',
+  }).formatToParts(new Date())
+  const value = (type: Intl.DateTimeFormatPartTypes) => parts.find(part => part.type === type)?.value ?? ''
+  const central = `${value('year')}-${value('month')}-${value('day')}`
+  const day = new Date(`${central}T12:00:00Z`)
+  const offset = (day.getUTCDay() + 6) % 7
+  day.setUTCDate(day.getUTCDate() - offset)
+  return day.toISOString().slice(0, 10)
+}
+export function PublishedLeaderboard({ locationId, month, publication, preview, manager, onPublished }: {
   locationId: string; month: string; publication: LeaderboardPublication | null;
-  preview: Standing[]; gm: boolean; onPublished: () => void
+  preview: Standing[]; manager: boolean; onPublished: () => void
 }) {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
   const locked = useRef(false)
   async function publish() {
-    if (!gm || locked.current || !preview.length) return
+    if (!manager || locked.current || !preview.length) return
     locked.current = true
     setSaving(true); setError(''); setMessage('')
     try {
-      const result = await supabase.rpc('publish_points_leaderboard', {
+      const result = await supabase.rpc('publish_weekly_points_leaderboard', {
         p_location_id: locationId, p_month: `${month}-01`,
+        p_week_start: currentWeekStart(),
         p_expected_publication: publication?.id ?? null, p_expected_standings: preview,
       })
       if (result.error) throw result.error
       if (!result.data?.id) throw new Error('Publication could not be confirmed. Refresh before trying again.')
-      setMessage('Leaderboard published. Staff will see these standings until you publish again.')
+      setMessage(publication?.week_start === currentWeekStart()
+        ? 'Replacement leaderboard published. Staff now see the corrected weekly standings.'
+        : 'Weekly leaderboard published. Staff now see these standings.')
       onPublished()
     } catch (e) {
       setError(String((e as { message?: string }).message ?? e))
@@ -50,13 +65,13 @@ export function PublishedLeaderboard({ locationId, month, publication, preview, 
   return <>
     <h2>Published Team Leaderboard</h2>
     {publication ? <>
-      <p>Published {publicationLabel(publication)} · Points month: {publication.month.slice(0, 7)}</p>
-      <p className="muted">These standings stay the same until the next publication. Tied totals share a rank.</p>
+      <p>{publication.week_start ? `Week of ${publication.week_start}` : `Points month ${publication.month.slice(0, 7)}`} · Published {publicationLabel(publication)}{(publication.revision ?? 1) > 1 ? ` · Replacement ${publication.revision}` : ''}</p>
+      <p className="muted">These weekly standings stay frozen until Management publishes a replacement or the next week. Tied totals share a rank.</p>
       <StandingsTable locationId={locationId} rows={publication.standings} caption="Last published standings"/>
     </> : <p>The leaderboard hasn’t been published yet.</p>}
-    {gm && <details className="leaderboard-publish">
-      <summary>GM: preview and publish leaderboard</summary>
-      <p>Private live preview for {month}. Review these standings, then publish your weekly update when you are ready.</p>
+    {manager && <details className="leaderboard-publish">
+      <summary>Management: preview and publish weekly rank</summary>
+      <p>Private live preview for {month}. Publishing again during the same week creates a replacement and preserves the audit history.</p>
       <StandingsTable locationId={locationId} rows={preview} caption={`Private preview · ${month}`}/>
       <button type="button" onClick={onPublished} disabled={saving}>Refresh preview</button>{' '}
       <button type="button" onClick={() => void publish()} disabled={saving || !preview.length}>
