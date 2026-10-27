@@ -1,3 +1,4 @@
+import {PrepareDayPage} from './pages/PrepareDayPage'
 import {ServiceTrainingPage} from './pages/ServiceTrainingPage'
 import {PageCanvas} from './components/PageLayout'
 import {CrewSchedulePage} from './pages/CrewSchedulePage'
@@ -143,6 +144,7 @@ export default function App() {
       <Routes>
         <Route path="/settings/staff-view" element={<ManagementOnly gmOnly><StaffViewPage/></ManagementOnly>}/>
         <Route path="/inventory" element={<InventoryPage />} />
+        <Route path="/prepare-day" element={<ManagementOnly><PrepareDayPage /></ManagementOnly>} />
         <Route path="/schedule" element={<CrewSchedulePage />} />
         <Route path="/reports" element={<ManagementOnly gmOnly><ReportsPage /></ManagementOnly>} />
         <Route path="/calendar" element={<CalendarPage />} />
