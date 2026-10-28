@@ -1,7 +1,8 @@
+import './FloorWorkspace.css'
 import {orderRooms} from '../lib/roomOrder'
 import {DesignSection} from '../components/DesignSection'
 import { TeamProfileName } from '../components/TeamProfileName'
-import {AccessSection} from '../components/AppAccess'
+import {AccessSection,useAppAccess} from '../components/AppAccess'
 // page-designer-instrumented
 import { PageWord, PageInput, PageOption } from "../components/PageDesign"
 import { ManualReservation, reservationToday } from '../components/ManualReservation'
@@ -135,6 +136,8 @@ type RotationLogEntry = {
 }
 
 export function FloorPage() {
+ const floorAccess=useAppAccess()
+ const [floorView,setFloorView]=useState<'map'|'sections'|'crew'|'tools'>('map')
   const [pendingWalkin,setPendingWalkin]=useState<Walkin|null>(null)
   const [walkinRefresh,setWalkinRefresh]=useState(0)
   const [smartDay,setSmartDay]=useState(serviceDay)
@@ -1758,6 +1761,7 @@ const [partySize, setPartySize] = useState(1)
     }catch(e){setError(String((e as {message?:string}).message??e))}finally{setSaving(false)}
   }
   function openSectionEditor(card?:typeof sectionCards[number],tableIds=selectedTableIds){
+    setFloorView('sections')
     setError('');setShowTablePanel(false);setSelectedTableIds(tableIds)
     const plan=card?activePlans.find(p=>p.id===card.id):undefined
     if(plan){setScheduleEditRequest({id:plan.id,nonce:Date.now()});return}
@@ -1822,7 +1826,7 @@ const [partySize, setPartySize] = useState(1)
   }
 
   return (
-    <DesignSection as="section" data-design-block="copy.e0e08178068651dc.1">
+    <DesignSection as="section" data-design-block="copy.e0e08178068651dc.1" className="floor-workspace">
       <div data-design-block="copy.f7ffc53a3422b77e.1" className="page-heading">
         <p data-design-block="copy.b78f32efa3eeed28.1" className="eyebrow"><ScreenText id="FloorPage.5e1b43a1ec471952">
           FloorFlow
@@ -1836,14 +1840,21 @@ const [partySize, setPartySize] = useState(1)
       </div>
 
 
+      <nav className="floor-workspace-nav" aria-label="Floor workspace"><button type="button" aria-pressed={floorView==='map'} onClick={()=>setFloorView('map')}>Floor map</button>{floorAccess.can('floor','sections')&&<button type="button" aria-pressed={floorView==='sections'} onClick={()=>setFloorView('sections')}>Sections</button>}<button type="button" aria-pressed={floorView==='crew'} onClick={()=>setFloorView('crew')}>Crew & walk-ins</button><button type="button" aria-pressed={floorView==='tools'} onClick={()=>setFloorView('tools')}>More tools</button>{floorAccess.can('floor','reservations')&&<button type="button" onClick={()=>setShowReservationsPanel(true)}>Reservations ({reservations.length})</button>}{arrangeMode&&<button type="button" onClick={()=>{setArrangeMode(false);setFloorView('map')}}>Done arranging</button>}</nav>
+      {floorNotice&&<p role="status">{floorNotice}</p>}
+      {pendingWalkin&&floorView!=='crew'&&<p role="status">Seating {pendingWalkin.guest_name} · select tables on the map, then Seat.</p>}
+      <div hidden={floorView!=='crew'} className="floor-workspace-panel">
       <AccessSection page="floor" section="schedule"><FloorScheduleBox location={locationId} date={activeShift?.shift_date??serviceDay()}/></AccessSection>
-      <WalkinPanel locationId={locationId} refreshKey={walkinRefresh} onSeat={row=>{setPendingWalkin(row);setGuestName(row.guest_name);setGuestPhone(row.phone);setGuestEmail(row.email);setPartySize(row.party_size);if(selectedTableIds.length)openSeating()}} />
+      <WalkinPanel locationId={locationId} refreshKey={walkinRefresh} onSeat={row=>{setFloorView('map');setPendingWalkin(row);setGuestName(row.guest_name);setGuestPhone(row.phone);setGuestEmail(row.email);setPartySize(row.party_size);if(selectedTableIds.length)openSeating()}} />
       {pendingWalkin&&<div data-design-block="copy.eb305b57f537aed6.1" className="wt-card" role="status"><strong><ScreenText id="FloorPage.72ad81f5e33ac981">Seating </ScreenText>{pendingWalkin.guest_name}<ScreenText id="FloorPage.0e1b1fe85997c7d1"> · party of </ScreenText>{pendingWalkin.party_size}</strong><p data-design-block="copy.0cae27057d8f304b.1"><ScreenText id="FloorPage.aaf48aa3abcc020d">Select their tables, then press Seat. Their check-in is marked seated when seating succeeds.</ScreenText></p><button data-design-block="copy.b1a3fd87f11bd6fb.1" type="button" disabled={saving} onClick={()=>{setPendingWalkin(null);setGuestName('');setGuestPhone('');setGuestEmail('');setPartySize(1)}}><ScreenText id="FloorPage.a3bf126804af00d4">Cancel walk-in selection</ScreenText></button></div>}
 
-      {/* FLOOR SECTIONS AT TOP */}
-      <SectionSchedule editRequest={scheduleEditRequest} refreshKey={scheduleRefresh} locationId={locationId} selectedTableIds={selectedTableIds} tables={tables} employees={team.map(m=>({id:m.user_id,name:memberName(m.user_id)}))} onLoaded={(plans,offset)=>{setSectionPlans(plans);setServerClockOffset(offset);if(activeShiftId)void Promise.all([loadAssignments(activeShiftId),loadSections(activeShiftId)]).catch(e=>setError(String((e as Error).message??e)))}} onSelect={setSelectedTableIds}>
+      </div>
+      <div hidden={floorView!=='sections'} className="floor-workspace-panel"><p><button type="button" onClick={()=>setFloorView('map')}>Select tables on the map →</button></p>
+      {/* FLOOR SECTIONS */}
+      <SectionSchedule onShowTables={ids=>{setSelectedTableIds(ids);const first=tables.find(t=>ids.includes(t.id));if(first)setActiveRoomId(first.room_id);setFloorView('map')}} editRequest={scheduleEditRequest} refreshKey={scheduleRefresh} locationId={locationId} selectedTableIds={selectedTableIds} tables={tables} employees={team.map(m=>({id:m.user_id,name:memberName(m.user_id)}))} onLoaded={(plans,offset)=>{setSectionPlans(plans);setServerClockOffset(offset);if(activeShiftId)void Promise.all([loadAssignments(activeShiftId),loadSections(activeShiftId)]).catch(e=>setError(String((e as Error).message??e)))}} onSelect={setSelectedTableIds}>
       {baseSectionCards.length>0 && <AccessSection page="floor" section="sections"><DesignSection as="section" data-design-block="copy.12756fa73e4e31ea.1" className="floor-section-summary"><p data-design-block="copy.b78f32efa3eeed28.2" className="eyebrow"><ScreenText id="FloorPage.2e081cd59ce390e4">Current Floor</ScreenText></p><h2 data-design-block="copy.2e495f44a1c1f630.1"><ScreenText id="FloorPage.773db4a763e3d6a3">Untimed sections · set an end time</ScreenText></h2><button data-design-block="copy.dbe356ad805f296d.1" type="button" disabled={saving||arrangeMode} onClick={()=>void clearSectionAssignments(true)}><ScreenText id="FloorPage.abe16c2c033d7292">Clear all sections</ScreenText></button><div data-design-block="copy.542b94986fcaef05.1">{baseSectionCards.map(c=><div data-design-block="copy.e57c5b6f760b6b51.1" key={c.id} onClick={()=>openSectionEditor(c,c.tableIds)}><strong>{c.name}</strong><span className="section-server">{c.employeeId?<TeamProfileName locationId={locationId} userId={c.employeeId} name={memberName(c.employeeId)}/>:c.guestName||'Unlinked team member'}</span><span>{tables.filter(t=>c.tableIds.includes(t.id)).map(t=>t.table_name).join(', ')}</span><span>{c.tableIds.length}<ScreenText id="FloorPage.7b01d68c1fbd4367"> tables · </ScreenText>{c.totalSeats}<ScreenText id="FloorPage.5a8f27d4d02c6b32"> seats</ScreenText></span><button type="button">Edit section</button></div>)}</div></DesignSection></AccessSection>}
-      </SectionSchedule>
+      </SectionSchedule></div>
+      <div hidden={floorView!=='tools'} className="floor-workspace-panel"><h2>Shift & floor tools</h2>
 
       <div data-design-block="copy.4502244f66f4abcd.1" className="shift-toolbar">
         {shifts.length > 0 ? (
@@ -1916,6 +1927,7 @@ const [partySize, setPartySize] = useState(1)
         <button data-design-block="copy.2f0aa4cae0ed315c.1"
           onClick={() => {
             setArrangeMode((current) => !current)
+            setFloorView('map')
             setSelectedTableIds([])
           }}
           disabled={!activeRoomId}
@@ -1938,7 +1950,7 @@ const [partySize, setPartySize] = useState(1)
         ><ScreenText id="FloorPage.b15408ef8847a3b6">
           Rotation
         </ScreenText></button>
-      </div>
+      </div></div>
 
       {error && (
         <div data-design-block="copy.4bbaffa62d8f3dc5.1" className="inline-error">
@@ -1946,6 +1958,7 @@ const [partySize, setPartySize] = useState(1)
         </div>
       )}
 
+      <div hidden={floorView!=='map'} className="floor-workspace-panel">
       {arrangeMode && (
         <div data-design-block="copy.49af0c766e6ec77b.1"
           style={{
@@ -1980,14 +1993,6 @@ const [partySize, setPartySize] = useState(1)
         ))}
       </div>
 
-      <AccessSection page="floor" section="sections"><DesignSection as="section" data-design-block="copy.324b51b1153c4928.1" className="floor-section-tools" aria-label="Section assignment">
-        <div data-design-block="copy.542b94986fcaef05.2"><strong><ScreenText id="FloorPage.7ae0af4dfe409f5d">Sections & tables</ScreenText></strong><p data-design-block="copy.0cae27057d8f304b.2"><ScreenText id="FloorPage.4ac45f2a6bb70ad0">Tap tables to select them. Switch rooms to include more tables.</ScreenText></p></div>
-        <div data-design-block="copy.c68b2a1ad42b0b85.1" className="floor-selection-list">{selectedTables.length?selectedTables.map(t=><button data-design-block="copy.9af7597dafc26b77.1" type="button" key={t.id} onClick={()=>toggleTable(t.id)}>{t.table_name}<PageWord id="copy.c20d59400a2510cd.1">×</PageWord></button>):<span><ScreenText id="FloorPage.f8add3ec5d2c9bb7">No tables selected</ScreenText></span>}</div>
-        <div data-design-block="copy.f878dc5ab1a1444d.1" className="floor-selection-actions"><button data-design-block="copy.e67ad1dc8c087646.1" type="button" disabled={!selectedTableIds.length || smartLoading || saving || arrangeMode} onClick={()=>void handleSmartSection()}>{smartLoading?<PageWord id="copy.27e48bc48b13bca4.1">{"Analyzing…"}</PageWord>:<PageWord id="copy.cae5e560b5f3e2ab.1">{"✨ Smart Section"}</PageWord>}</button><button data-design-block="copy.e8620a9be264f089.1" type="button" disabled={!selectedTableIds.length || saving || arrangeMode} onClick={()=>openSectionEditor()}><ScreenText id="FloorPage.3df282d311f231b2">Assign / schedule section</ScreenText></button><button data-design-block="copy.539b53736d89f9b4.1" type="button" disabled={!selectedTableIds.length || saving || arrangeMode} onClick={openSeating}><ScreenText id="FloorPage.ec891dc9c52cf729">Seat selected tables</ScreenText></button><button data-design-block="copy.d859f8f24a8250d7.1" type="button" disabled={!selectedTableIds.length} onClick={()=>setSelectedTableIds([])}><ScreenText id="FloorPage.2a943581190c3312">Clear selection</ScreenText></button><button data-design-block="copy.25c73b70cd111940.1" type="button" disabled={!selectedTableIds.length||saving||arrangeMode} onClick={()=>void clearSectionAssignments()}><ScreenText id="FloorPage.310acd98ecea24b1">Clear assignments</ScreenText></button></div>
-
-        {floorNotice && <p data-design-block="copy.d70411190a777647.1" role="status">{floorNotice}</p>}
-      </DesignSection></AccessSection>
-      
        <p data-design-block="copy.47e8f14106004bf5.1" className="floor-map-hint"><ScreenText id="FloorPage.f3780ffe48f2e882">Swipe left or right to switch floor plans. Tap multiple tables to select them.</ScreenText></p>
        {/* LIVE FLOOR */}
        <div data-design-block="copy.04d68e17bc6f50c2.1" className="floor-map-scroll" style={arrangeMode?undefined:{touchAction:'pan-y',overflowX:'hidden'}}
@@ -2192,12 +2197,11 @@ const [partySize, setPartySize] = useState(1)
             Seat
           </ScreenText></button>
 
-          <button data-design-block="copy.1d791020f9ee2372.1" disabled><ScreenText id="FloorPage.bcb4cdbb6790706c">
-            Status
-          </ScreenText></button>
+          <AccessSection page="floor" section="sections"><button type="button" disabled={saving||arrangeMode} onClick={()=>void clearSectionAssignments()}>Clear assignments</button></AccessSection>
         </div>
       )}
 
+      </div>
       {/* OPEN SHIFT PANEL */}
       {showShiftPanel && (
         <div data-design-block="copy.4c37ee59da8684e0.1" className="modal-backdrop">
@@ -2445,7 +2449,7 @@ const [partySize, setPartySize] = useState(1)
                       }}
                       onClick={() => {
                         setShowSmartPanel(false)
-                        setScheduleEditRequest({id:'',nonce:Date.now(),employee_id:recommendation.employeeId.startsWith('schedule:')?undefined:recommendation.employeeId,guest_name:recommendation.employeeId.startsWith('schedule:')?recommendation.employeeName:undefined,date:smartDay})
+                        setFloorView('sections');setScheduleEditRequest({id:'',nonce:Date.now(),employee_id:recommendation.employeeId.startsWith('schedule:')?undefined:recommendation.employeeId,guest_name:recommendation.employeeId.startsWith('schedule:')?recommendation.employeeName:undefined,date:smartDay})
                       }}
                     ><ScreenText id="FloorPage.2e430a58775b49a6">
                       Use this employee
