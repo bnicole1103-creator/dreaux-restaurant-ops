@@ -1,3 +1,4 @@
+import {FloorFloatingPanel} from '../components/FloorFloatingPanel'
 import './FloorWorkspace.css'
 import {orderRooms} from '../lib/roomOrder'
 import {DesignSection} from '../components/DesignSection'
@@ -137,7 +138,11 @@ type RotationLogEntry = {
 
 export function FloorPage() {
  const floorAccess=useAppAccess()
- const [floorView,setFloorView]=useState<'map'|'sections'|'crew'|'tools'>('map')
+ const [floorView,setFloorView]=useState<'map'|'sections'|'crew'|'tools'|'rooms'>('map')
+  const [seatReservationId,setSeatReservationId]=useState('')
+  const [seatingHistory,setSeatingHistory]=useState<{session_id:string;server_id:string;server_name:string;table_names:string;party_size:number;source:string;seated_at:string;closed_at:string|null;status:string}[]>([])
+  const [historyError,setHistoryError]=useState('')
+  const seatingRequest=useRef<{key:string;id:string}|null>(null),seatingLock=useRef(false)
   const [pendingWalkin,setPendingWalkin]=useState<Walkin|null>(null)
   const [walkinRefresh,setWalkinRefresh]=useState(0)
   const [smartDay,setSmartDay]=useState(serviceDay)
@@ -232,6 +237,9 @@ export function FloorPage() {
     ...baseAssignments.filter(a=>!plannedTables.has(a.table_id)),
     ...activePlans.flatMap(p=>p.table_ids.map(id=>({id:`${p.id}:${id}`,table_id:id,server_id:p.employee_id,guest_name:p.guest_name})))
   ],[baseAssignments,activePlans,plannedTables])
+  const serverPalette=['#bce5ff','#f9cfaa','#c9edb5','#e0c9fa','#ffc4d7','#a9e8de','#f7e999','#c6d2ff','#e8d1b9','#d8ecce','#f4bedf','#bce0ed']
+  const serverKeys=[...new Set(assignments.map(a=>a.server_id||'guest:'+a.guest_name))].sort()
+  const serverSwatch=(key:string)=>{const i=Math.max(0,serverKeys.indexOf(key));return i<serverPalette.length?serverPalette[i]:`hsl(${(i*137.508)%360} 65% 80%)`}
   const sectionCards=useMemo(()=>[
     ...baseSectionCards.map(c=>({...c,tableIds:c.tableIds.filter(id=>!plannedTables.has(id)),totalSeats:c.tableIds.filter(id=>!plannedTables.has(id)).reduce((sum,id)=>sum+(tables.find(t=>t.id===id)?.seat_count??0),0)})).filter(c=>c.tableIds.length),
     ...activePlans.map(p=>({id:p.id,configurationId:p.id,name:`${p.name} (scheduled)`,employeeId:p.employee_id,guestName:p.guest_name,tableIds:p.table_ids,totalSeats:p.table_ids.reduce((sum,id)=>sum+(tables.find(t=>t.id===id)?.seat_count??0),0)}))
@@ -318,7 +326,10 @@ const [partySize, setPartySize] = useState(1)
         if (roomResult.error) throw roomResult.error
         if (tableResult.error) throw tableResult.error
 
-        const nextRooms = orderRooms(roomResult.data ?? [])
+        const defaultRooms = orderRooms(roomResult.data ?? [])
+        let savedOrder:string[]=[]
+        try{savedOrder=JSON.parse(localStorage.getItem('floor-room-order:'+location.id)??'[]');if(!Array.isArray(savedOrder))savedOrder=[]}catch{savedOrder=[]}
+        const nextRooms = [...defaultRooms].sort((a,b)=>{const ai=savedOrder.indexOf(a.id),bi=savedOrder.indexOf(b.id);return (ai<0?999:ai)-(bi<0?999:bi)})
         const nextShifts = shiftResult ?? []
 
         setRooms(nextRooms)
@@ -1263,6 +1274,21 @@ const [partySize, setPartySize] = useState(1)
     setRotationLog((data ?? []) as RotationLogEntry[])
   }
 
+  async function loadSeatingHistory(shiftId:string){
+    const r=await supabase.rpc('floor_seating_history_load_v1',{p_location_id:locationId,p_shift_id:shiftId})
+    if(r.error){setHistoryError(r.error.message);return}
+    setHistoryError('');setSeatingHistory(r.data??[])
+  }
+  useEffect(()=>{let live=true;setSeatingHistory([]);setHistoryError('');if(!locationId||!activeShiftId)return;
+    const refresh=async()=>{const r=await supabase.rpc('floor_seating_history_load_v1',{p_location_id:locationId,p_shift_id:activeShiftId});if(!live)return;if(r.error)setHistoryError(r.error.message);else{setHistoryError('');setSeatingHistory(r.data??[])}}
+    void refresh();const timer=setInterval(()=>{if(document.visibilityState==='visible'){void refresh();void loadRotation(activeShiftId)}},30000);return()=>{live=false;clearInterval(timer)}
+  },[locationId,activeShiftId])
+  async function recordFloorSeating(tableIds:string[],serverId:string,covers:number,reservationId=seatReservationId,walkin=pendingWalkin){
+    const payload={p_location_id:locationId,p_shift_id:activeShiftId,p_table_ids:[...tableIds].sort(),p_server_id:serverId||null,p_guest_name:guestName,p_guest_phone:guestPhone,p_guest_email:guestEmail,p_party_size:covers,p_source:reservationId?'reservation':'walk_in',p_reservation_id:reservationId||null,p_walkin_id:walkin?.id??null,p_walkin_version:walkin?.version??null}
+    const key=JSON.stringify(payload);if(seatingRequest.current?.key!==key)seatingRequest.current={key,id:crypto.randomUUID()}
+    const r=await supabase.rpc('floor_seat_and_rotate_v1',{...payload,p_request_id:seatingRequest.current.id});if(r.error)throw r.error
+    await Promise.all([loadRotation(activeShiftId),loadRotationLog(activeShiftId),loadTableSessions(activeShiftId),loadSeatingHistory(activeShiftId)])
+  }
   function resizeRotationSetup(countValue: number) {
     const count = Math.max(1, Math.min(20, countValue))
 
@@ -1419,7 +1445,7 @@ const [partySize, setPartySize] = useState(1)
     const table = tables.find((item) => item.id === tableId)
 
     if (!table) {
-      setError(`Choose a table for $<TeamProfileName userId={server.user_id} locationId={locationId} name={server.display_name}/>.`)
+      setError(`Choose a table for ${server.display_name}.`)
       return
     }
 
@@ -1433,47 +1459,22 @@ const [partySize, setPartySize] = useState(1)
       ),
     )
 
+    if(seatingLock.current)return
+    seatingLock.current=true
     try {
       setSaving(true)
       setError('')
 
-      const actualDelta = await updateRotationCounter(
-        rotationId,
-        covers,
-      )
-
-      if (actualDelta === null) return
-
-      const {
-        data: { user },
-      } = await supabase.auth.getUser()
-
-      const { error: logError } = await supabase
-        .from('rotation_log')
-        .insert({
-          organization_id: organizationId,
-          location_id: locationId,
-          shift_id: activeShiftId,
-          rotation_counter_id: rotationId,
-          user_id: server.user_id,
-          display_name: server.display_name,
-          table_id: table.id,
-          table_name: table.table_name,
-          covers_delta: actualDelta,
-          action: 'seated',
-          created_by: user?.id ?? null,
-        })
-
-      if (logError) {
-        await updateRotationCounter(rotationId, -actualDelta)
-        throw logError
-      }
-
+      if(!server.user_id)throw Error('Link this rotation server to an employee account before seating on the map.')
+      const assigned=assignments.find(a=>a.table_id===table.id)?.server_id
+      if(assigned&&assigned!==server.user_id&&!window.confirm(`This table belongs to ${memberName(assigned)}. Seat it with ${server.display_name} instead?`))return
+      await recordFloorSeating([table.id],server.user_id,covers,seatReservationId,null)
       setRotationCoversByServer((current) => ({
         ...current,
         [rotationId]: table.seat_count,
       }))
 
+      setSeatReservationId('');setGuestName('');setGuestPhone('');setGuestEmail('')
       await loadRotationLog(activeShiftId)
     } catch (caughtError) {
       setError(
@@ -1482,6 +1483,7 @@ const [partySize, setPartySize] = useState(1)
           : 'Unable to record the rotation seating.',
       )
     } finally {
+      seatingLock.current=false
       setSaving(false)
     }
   }
@@ -1781,17 +1783,14 @@ const [partySize, setPartySize] = useState(1)
       return
     }
 
+    if(seatingLock.current)return
+    seatingLock.current=true
     try {
       setSaving(true)
       setError('')
 
-      const r=await supabase.rpc(pendingWalkin?'floor_seat_walkin':'floor_seat_party',{
-        ...(pendingWalkin?{p_walkin_id:pendingWalkin.id,p_version:pendingWalkin.version}:{}),
-        p_location_id:locationId,p_shift_id:activeShiftId,p_table_ids:selectedTableIds,
-        p_server_id:seatServerId || null,p_guest_name:guestName,p_guest_phone:guestPhone,
-        p_guest_email:guestEmail,p_party_size:partySize,
-      })
-      if(r.error)throw r.error
+      await recordFloorSeating(selectedTableIds,seatServerId,partySize)
+      setSeatReservationId('')
       setPendingWalkin(null)
       setWalkinRefresh(v=>v+1)
       await loadTableSessions(activeShiftId)
@@ -1809,6 +1808,7 @@ const [partySize, setPartySize] = useState(1)
           : 'Unable to seat guests.',
       )
     } finally {
+      seatingLock.current=false
       setSaving(false)
     }
   }
@@ -1840,21 +1840,35 @@ const [partySize, setPartySize] = useState(1)
       </div>
 
 
-      <nav className="floor-workspace-nav" aria-label="Floor workspace"><button type="button" aria-pressed={floorView==='map'} onClick={()=>setFloorView('map')}>Floor map</button>{floorAccess.can('floor','sections')&&<button type="button" aria-pressed={floorView==='sections'} onClick={()=>setFloorView('sections')}>Sections</button>}<button type="button" aria-pressed={floorView==='crew'} onClick={()=>setFloorView('crew')}>Crew & walk-ins</button><button type="button" aria-pressed={floorView==='tools'} onClick={()=>setFloorView('tools')}>More tools</button>{floorAccess.can('floor','reservations')&&<button type="button" onClick={()=>setShowReservationsPanel(true)}>Reservations ({reservations.length})</button>}{arrangeMode&&<button type="button" onClick={()=>{setArrangeMode(false);setFloorView('map')}}>Done arranging</button>}</nav>
+      <nav className="floor-workspace-nav" aria-label="Floor tools">
+        {floorAccess.can('floor','sections')&&<button type="button" aria-expanded={floorView==='sections'} onClick={()=>setFloorView(floorView==='sections'?'map':'sections')}>Sections ▾</button>}
+        <button type="button" aria-expanded={floorView==='crew'} onClick={()=>setFloorView(floorView==='crew'?'map':'crew')}>Crew & walk-ins ▾</button>
+        {floorAccess.can('floor','reservations')&&<><button type="button" aria-expanded={showReservationsPanel} onClick={()=>setShowReservationsPanel(v=>!v)}>Reservations ({reservations.length}) ▾</button><button type="button" disabled={!locationId||!organizationId} onClick={()=>setManualReservation(true)}>+ Reservation</button></>}
+        <button type="button" disabled={!activeShiftId} aria-expanded={showRotationPanel} onClick={()=>setShowRotationPanel(v=>!v)}>Rotation & seating ▾</button>
+        <button type="button" aria-expanded={floorView==='rooms'} onClick={()=>setFloorView(floorView==='rooms'?'map':'rooms')}>Rooms & layout ▾</button>
+        <button type="button" aria-expanded={floorView==='tools'} onClick={()=>setFloorView(floorView==='tools'?'map':'tools')}>More tools ▾</button>
+        {arrangeMode&&<button type="button" onClick={()=>setArrangeMode(false)}>Done arranging</button>}
+      </nav>
+      <FloorFloatingPanel title="Rooms & layout" open={floorView==='rooms'} onClose={()=>setFloorView('map')}>
+        <button type="button" onClick={()=>{setArrangeMode(v=>!v);setSelectedTableIds([]);setFloorView('map')}}>{arrangeMode?'Done arranging tables':'Arrange tables on map'}</button>
+        <p>Room order on this device. Use the arrows to rearrange the room tabs.</p>
+        {rooms.map((room,i)=><div className="floor-room-order-row" key={room.id}><button type="button" onClick={()=>setActiveRoomId(room.id)} aria-pressed={activeRoomId===room.id}>{room.name}</button>{[-1,1].map(direction=><button key={direction} type="button" aria-label={`Move ${room.name} ${direction<0?'earlier':'later'}`} disabled={i+direction<0||i+direction>=rooms.length} onClick={()=>{const next=[...rooms];[next[i],next[i+direction]]=[next[i+direction],next[i]];setRooms(next);try{localStorage.setItem('floor-room-order:'+locationId,JSON.stringify(next.map(r=>r.id)))}catch{setFloorNotice('Room order changed for this session; device storage is unavailable.')}}}>{direction<0?'↑':'↓'}</button>)}</div>)}
+      </FloorFloatingPanel>
       {floorNotice&&<p role="status">{floorNotice}</p>}
+      {seatReservationId&&!showSeatPanel&&<p role="status">Select tables for the chosen reservation, then tap Seat.</p>}
       {pendingWalkin&&floorView!=='crew'&&<p role="status">Seating {pendingWalkin.guest_name} · select tables on the map, then Seat.</p>}
-      <div hidden={floorView!=='crew'} className="floor-workspace-panel">
+      <FloorFloatingPanel title="Crew & walk-ins" open={floorView==='crew'} onClose={()=>setFloorView('map')}>
       <AccessSection page="floor" section="schedule"><FloorScheduleBox location={locationId} date={activeShift?.shift_date??serviceDay()}/></AccessSection>
-      <WalkinPanel locationId={locationId} refreshKey={walkinRefresh} onSeat={row=>{setFloorView('map');setPendingWalkin(row);setGuestName(row.guest_name);setGuestPhone(row.phone);setGuestEmail(row.email);setPartySize(row.party_size);if(selectedTableIds.length)openSeating()}} />
+      <WalkinPanel locationId={locationId} refreshKey={walkinRefresh} onSeat={row=>{setSeatReservationId('');setFloorView('map');setPendingWalkin(row);setGuestName(row.guest_name);setGuestPhone(row.phone);setGuestEmail(row.email);setPartySize(row.party_size);if(selectedTableIds.length)openSeating()}} />
       {pendingWalkin&&<div data-design-block="copy.eb305b57f537aed6.1" className="wt-card" role="status"><strong><ScreenText id="FloorPage.72ad81f5e33ac981">Seating </ScreenText>{pendingWalkin.guest_name}<ScreenText id="FloorPage.0e1b1fe85997c7d1"> · party of </ScreenText>{pendingWalkin.party_size}</strong><p data-design-block="copy.0cae27057d8f304b.1"><ScreenText id="FloorPage.aaf48aa3abcc020d">Select their tables, then press Seat. Their check-in is marked seated when seating succeeds.</ScreenText></p><button data-design-block="copy.b1a3fd87f11bd6fb.1" type="button" disabled={saving} onClick={()=>{setPendingWalkin(null);setGuestName('');setGuestPhone('');setGuestEmail('');setPartySize(1)}}><ScreenText id="FloorPage.a3bf126804af00d4">Cancel walk-in selection</ScreenText></button></div>}
 
-      </div>
-      <div hidden={floorView!=='sections'} className="floor-workspace-panel"><p><button type="button" onClick={()=>setFloorView('map')}>Select tables on the map →</button></p>
+      </FloorFloatingPanel>
+      <FloorFloatingPanel title="Sections" open={floorView==='sections'} onClose={()=>setFloorView('map')}><p><button type="button" onClick={()=>setFloorView('map')}>Select tables on the map →</button></p>
       {/* FLOOR SECTIONS */}
       <SectionSchedule onShowTables={ids=>{setSelectedTableIds(ids);const first=tables.find(t=>ids.includes(t.id));if(first)setActiveRoomId(first.room_id);setFloorView('map')}} editRequest={scheduleEditRequest} refreshKey={scheduleRefresh} locationId={locationId} selectedTableIds={selectedTableIds} tables={tables} employees={team.map(m=>({id:m.user_id,name:memberName(m.user_id)}))} onLoaded={(plans,offset)=>{setSectionPlans(plans);setServerClockOffset(offset);if(activeShiftId)void Promise.all([loadAssignments(activeShiftId),loadSections(activeShiftId)]).catch(e=>setError(String((e as Error).message??e)))}} onSelect={setSelectedTableIds}>
       {baseSectionCards.length>0 && <AccessSection page="floor" section="sections"><DesignSection as="section" data-design-block="copy.12756fa73e4e31ea.1" className="floor-section-summary"><p data-design-block="copy.b78f32efa3eeed28.2" className="eyebrow"><ScreenText id="FloorPage.2e081cd59ce390e4">Current Floor</ScreenText></p><h2 data-design-block="copy.2e495f44a1c1f630.1"><ScreenText id="FloorPage.773db4a763e3d6a3">Untimed sections · set an end time</ScreenText></h2><button data-design-block="copy.dbe356ad805f296d.1" type="button" disabled={saving||arrangeMode} onClick={()=>void clearSectionAssignments(true)}><ScreenText id="FloorPage.abe16c2c033d7292">Clear all sections</ScreenText></button><div data-design-block="copy.542b94986fcaef05.1">{baseSectionCards.map(c=><div data-design-block="copy.e57c5b6f760b6b51.1" key={c.id} onClick={()=>openSectionEditor(c,c.tableIds)}><strong>{c.name}</strong><span className="section-server">{c.employeeId?<TeamProfileName locationId={locationId} userId={c.employeeId} name={memberName(c.employeeId)}/>:c.guestName||'Unlinked team member'}</span><span>{tables.filter(t=>c.tableIds.includes(t.id)).map(t=>t.table_name).join(', ')}</span><span>{c.tableIds.length}<ScreenText id="FloorPage.7b01d68c1fbd4367"> tables · </ScreenText>{c.totalSeats}<ScreenText id="FloorPage.5a8f27d4d02c6b32"> seats</ScreenText></span><button type="button">Edit section</button></div>)}</div></DesignSection></AccessSection>}
-      </SectionSchedule></div>
-      <div hidden={floorView!=='tools'} className="floor-workspace-panel"><h2>Shift & floor tools</h2>
+      </SectionSchedule></FloorFloatingPanel>
+      <FloorFloatingPanel title="Shift & floor tools" open={floorView==='tools'} onClose={()=>setFloorView('map')}>
 
       <div data-design-block="copy.4502244f66f4abcd.1" className="shift-toolbar">
         {shifts.length > 0 ? (
@@ -1895,7 +1909,7 @@ const [partySize, setPartySize] = useState(1)
         </PageWord></button>
 
         <button data-design-block="copy.f03c552abafd44da.1" type="button" disabled={saving||!locationId||!organizationId} onClick={()=>setManualReservation(true)}><PageWord id="copy.75e5959cee5f0713.1">+ Add reservation</PageWord></button>
-        {manualReservation&&<ManualReservation location={locationId} organization={organizationId} tables={tables} onClose={()=>setManualReservation(false)} onSaved={message=>{setReservationUploadMessage(message);setShowReservationsPanel(true);void loadReservations(locationId)}}/>}
+
 
         <label data-design-block="copy.38ae5fbf9ddddc5e.1"
           style={{
@@ -1950,7 +1964,7 @@ const [partySize, setPartySize] = useState(1)
         ><ScreenText id="FloorPage.b15408ef8847a3b6">
           Rotation
         </ScreenText></button>
-      </div></div>
+      </div></FloorFloatingPanel>
 
       {error && (
         <div data-design-block="copy.4bbaffa62d8f3dc5.1" className="inline-error">
@@ -1958,7 +1972,7 @@ const [partySize, setPartySize] = useState(1)
         </div>
       )}
 
-      <div hidden={floorView!=='map'} className="floor-workspace-panel">
+      <div className="floor-workspace-panel floor-map-workspace">
       {arrangeMode && (
         <div data-design-block="copy.49af0c766e6ec77b.1"
           style={{
@@ -1994,6 +2008,7 @@ const [partySize, setPartySize] = useState(1)
       </div>
 
        <p data-design-block="copy.47e8f14106004bf5.1" className="floor-map-hint"><ScreenText id="FloorPage.f3780ffe48f2e882">Swipe left or right to switch floor plans. Tap multiple tables to select them.</ScreenText></p>
+       {!!serverKeys.length&&<div className="floor-server-legend" aria-label="Server colors">{serverKeys.map(key=>{const assignment=assignments.find(a=>(a.server_id||'guest:'+a.guest_name)===key)!;return <span key={key}><i style={{background:serverSwatch(key)}}/>{assignment.server_id?memberName(assignment.server_id):assignment.guest_name||'Unlinked team member'}</span>})}</div>}
        {/* LIVE FLOOR */}
        <div data-design-block="copy.04d68e17bc6f50c2.1" className="floor-map-scroll" style={arrangeMode?undefined:{touchAction:'pan-y',overflowX:'hidden'}}
         onTouchStart={e=>{suppressTableClick.current=false;swipeStart.current=!arrangeMode&&e.touches.length===1?{x:e.touches[0].clientX,y:e.touches[0].clientY}:null}}
@@ -2024,6 +2039,8 @@ const [partySize, setPartySize] = useState(1)
           const assignedServer =
             tableServer(table.id)
 
+          const tableAssignment=assignments.find(a=>a.table_id===table.id)
+          const serverTint=tableAssignment?serverSwatch(tableAssignment.server_id||'guest:'+tableAssignment.guest_name):undefined
           const activeSession =
             tableSession(table.id)
 
@@ -2044,12 +2061,9 @@ const [partySize, setPartySize] = useState(1)
               }`}
               style={{
                 ...floorTableGeometry(table),
-                background: activeSession
-                  ? statusColor(activeSession.status)
-                  : undefined,
-                color: activeSession
-                  ? '#ffffff'
-                  : undefined,
+                background: serverTint ?? (activeSession ? statusColor(activeSession.status) : undefined),
+                color: serverTint ? '#241b17' : activeSession ? '#ffffff' : undefined,
+                boxShadow: selected ? '0 0 0 3px #241b17, 0 0 0 6px white' : serverTint ? '0 0 10px '+serverTint : undefined,
                 border: selected
                   ? '3px solid var(--app-accent, #d7b795)'
                   : arrangeMode
@@ -2253,9 +2267,9 @@ const [partySize, setPartySize] = useState(1)
         </div>
       )}
 
+      {manualReservation&&<ManualReservation floating location={locationId} organization={organizationId} tables={tables} onClose={()=>setManualReservation(false)} onSaved={message=>{setReservationUploadMessage(message);setShowReservationsPanel(true);void loadReservations(locationId)}}/>}
       {showReservationsPanel && (
-        <AccessSection page="floor" section="reservations"><div data-design-block="copy.4c37ee59da8684e0.3" className="modal-backdrop">
-          <div data-design-block="copy.7d0744713f5fc9bb.3" className="modal-card">
+        <AccessSection page="floor" section="reservations"><FloorFloatingPanel title="Reservations" open onClose={()=>setShowReservationsPanel(false)}>
             <p data-design-block="copy.b78f32efa3eeed28.3" className="eyebrow"><ScreenText id="FloorPage.58f3288ba914ecb7">Reservations</ScreenText></p>
             <AccessSection page="floor" section="reservations"><h2 data-design-block="copy.2e495f44a1c1f630.4"><ScreenText id="FloorPage.def1336055c8be14">Today's Reservations</ScreenText></h2></AccessSection>
 
@@ -2320,6 +2334,7 @@ const [partySize, setPartySize] = useState(1)
                     </div>
                     {reservation.assigned_server_id && <p><PageWord id="sectioncopy.4322959eecd190a1ccfd">{"Server: "}</PageWord>{memberName(reservation.assigned_server_id)}</p>}
                     {reservation.notes && <p>{reservation.notes}</p>}
+                    <button type="button" disabled={reservation.status==='cancelled'} onClick={()=>{setSeatReservationId(reservation.id);setPendingWalkin(null);setGuestName(reservation.guest_name);setGuestPhone(reservation.phone??'');setGuestEmail(reservation.email??'');setPartySize(reservation.party_size);setSelectedTableIds(reservation.table_ids?.length?reservation.table_ids:reservation.table_id?[reservation.table_id]:[]);setSeatServerId(reservation.assigned_server_id??'');setShowReservationsPanel(false);setShowSeatPanel(true)}}>Seat reservation</button>
                     <ReservationEditor reservation={reservation} locationId={locationId} tables={tables} team={team} onSaved={()=>{void loadReservations(locationId)}} />
                   </div>
                 ))
@@ -2336,8 +2351,7 @@ const [partySize, setPartySize] = useState(1)
             ><ScreenText id="FloorPage.8d3f00a24cc68549">
               Close
             </ScreenText></button>
-          </div>
-        </div></AccessSection>
+        </FloorFloatingPanel></AccessSection>
       )}
 
       {showSmartPanel && (
@@ -2482,11 +2496,13 @@ const [partySize, setPartySize] = useState(1)
 
 
       {showRotationPanel && (
-        <div data-design-block="copy.4c37ee59da8684e0.5" className="modal-backdrop">
-          <div data-design-block="copy.7d0744713f5fc9bb.5" className="modal-card">
+        <FloorFloatingPanel title="Rotation & seating" open onClose={()=>setShowRotationPanel(false)}>
             <p data-design-block="copy.b78f32efa3eeed28.5" className="eyebrow"><ScreenText id="FloorPage.36533d646910fe8a">Quick Rotation</ScreenText></p>
+            {error&&<p role="alert">{error}</p>}
             <h2 data-design-block="copy.2e495f44a1c1f630.6"><ScreenText id="FloorPage.4bbc2c8e9674777f">Cover Counter</ScreenText></h2>
 
+            <label>Guest source<select disabled={!!pendingWalkin} value={seatReservationId} onChange={e=>{setSeatReservationId(e.target.value);const r=reservations.find(r=>r.id===e.target.value);if(r){setGuestName(r.guest_name);setPartySize(r.party_size);setGuestPhone(r.phone??'');setGuestEmail(r.email??'');setRotationCoversByServer(Object.fromEntries(rotationServers.map(server=>[server.id,r.party_size])))}}}><option value="">Walk-in</option>{reservations.map(r=><option key={r.id} value={r.id}>{r.reservation_time} · {r.guest_name} · {r.party_size} guests</option>)}</select></label>
+            <details open><summary>Recent seating · {seatingHistory.length} parties</summary><button type="button" onClick={()=>void loadSeatingHistory(activeShiftId)}>Refresh seating</button>{historyError&&<p role="alert">Seating history unavailable: {historyError}</p>}{!historyError&&!seatingHistory.length&&<p>No seating recorded by the connected tracker for this shift yet.</p>}<ol className="floor-seating-history">{seatingHistory.map(h=><li key={h.session_id}><strong>{h.table_names} · {h.party_size} guests</strong><span>{new Date(h.seated_at).toLocaleTimeString('en-US',{timeZone:'America/Chicago',hour:'numeric',minute:'2-digit'})} Central · {h.source==='reservation'?'Reservation':'Walk-in'}</span><span>{h.server_name} · {h.closed_at?'Cleared':h.status.replace(/_/g,' ')}</span></li>)}</ol></details>
             {rotationServers.length === 0 ? (
               <>
                 <label data-design-block="copy.3d1e6e08d094dff9.4"><ScreenText id="FloorPage.e90fea599ed4cb12">
@@ -2912,13 +2928,11 @@ const [partySize, setPartySize] = useState(1)
             ><ScreenText id="FloorPage.0178fa9eedc6fab6">
               Close
             </ScreenText></button>
-          </div>
-        </div>
+        </FloorFloatingPanel>
       )}
 
       {showRotationLogPanel && (
-        <div data-design-block="copy.4c37ee59da8684e0.6" className="modal-backdrop">
-          <div data-design-block="copy.7d0744713f5fc9bb.6" className="modal-card">
+        <FloorFloatingPanel title="Rotation activity" open onClose={()=>setShowRotationLogPanel(false)}>
             <p data-design-block="copy.b78f32efa3eeed28.6" className="eyebrow"><ScreenText id="FloorPage.2b12726504638ada">Rotation Log</ScreenText></p>
             <h2 data-design-block="copy.2e495f44a1c1f630.7"><ScreenText id="FloorPage.e53bc7ea45411714">Seating History</ScreenText></h2>
 
@@ -3016,8 +3030,7 @@ const [partySize, setPartySize] = useState(1)
             ><ScreenText id="FloorPage.b0a9402496a5997a">
               Close Log
             </ScreenText></button>
-          </div>
-        </div>
+        </FloorFloatingPanel>
       )}
 
       {showTableEditor && (
@@ -3393,8 +3406,7 @@ const [partySize, setPartySize] = useState(1)
       )}
 
       {showSeatPanel && selectedTableIds.length > 0 && (
-        <div data-design-block="copy.4c37ee59da8684e0.10" className="modal-backdrop">
-          <div data-design-block="copy.7d0744713f5fc9bb.10" className="modal-card">
+        <FloorFloatingPanel title="Seat guests" open onClose={()=>{if(!saving)setShowSeatPanel(false)}}>
             <p data-design-block="copy.b78f32efa3eeed28.10" className="eyebrow"><ScreenText id="FloorPage.7699845ffa5f9e0f">Seat Guests</ScreenText></p>{error && <p data-design-block="copy.83c54cb8d7aa1605.2" role="alert">{error}</p>}
 
             <h2 data-design-block="copy.2e495f44a1c1f630.11">
@@ -3415,6 +3427,7 @@ const [partySize, setPartySize] = useState(1)
                 .join(', ')}
             </div>
 
+            <label>Guest source<select disabled={!!pendingWalkin} value={seatReservationId} onChange={e=>{setSeatReservationId(e.target.value);const r=reservations.find(r=>r.id===e.target.value);if(r){setGuestName(r.guest_name);setPartySize(r.party_size);setGuestPhone(r.phone??'');setGuestEmail(r.email??'');setRotationCoversByServer(Object.fromEntries(rotationServers.map(server=>[server.id,r.party_size])))}}}><option value="">Walk-in</option>{reservations.map(r=><option key={r.id} value={r.id}>{r.reservation_time} · {r.guest_name} · {r.party_size} guests</option>)}</select></label>
             <label data-design-block="copy.3d1e6e08d094dff9.7"><ScreenText id="FloorPage.e3fc8c139dc34fa7">Server</ScreenText><select value={seatServerId} onChange={e=>setSeatServerId(e.target.value)}><PageOption designId="copy.189336433fd632f3.1" value=""><ScreenText plain id="FloorPage.384d6bb051c367b8">Choose server</ScreenText></PageOption>{team.map(m=><option key={m.user_id} value={m.user_id}>{memberName(m.user_id)}</option>)}</select></label>
             <p data-design-block="copy.0cae27057d8f304b.4"><ScreenText id="FloorPage.531998f4645e3d0d">One party will occupy all selected tables. Choose the server responsible for the party.</ScreenText></p>
             <label data-design-block="copy.3d1e6e08d094dff9.8"><ScreenText id="FloorPage.e44aeebd7e732765">
@@ -3489,8 +3502,7 @@ const [partySize, setPartySize] = useState(1)
                 {saving ? <PageWord id="copy.a0a40f399cc29220.1">{"Seating…"}</PageWord> : <PageWord id="copy.b872eb79d876f747.1">{"Seat selected tables"}</PageWord>}
               </button>
             </div>
-          </div>
-        </div>
+        </FloorFloatingPanel>
       )}
     </DesignSection>
   )
