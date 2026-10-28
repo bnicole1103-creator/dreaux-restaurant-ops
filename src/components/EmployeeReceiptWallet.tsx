@@ -12,7 +12,7 @@ import './EmployeeReceiptWallet.css'
 type Row=CloseoutReceipt&{created_by?:string;manager_shift_id?:string|null;attachable?:boolean;responsibility_response?:'accepted'|'declined'|null;responsibility_override?:'accepted'|'declined'|null;responsibility_override_reason?:string|null;responsibility_responded_at?:string|null;responsibility_overridden_at?:string|null}
 type Source=PurchaseReceipt&{origin_bucket?:string}
 type Data={tag_people?:{user_id:string;name:string}[];requests?:Row[];rows:Row[];photos:Source[];manager:boolean;employee_name?:string;assignment_people?:{key:string;name:string}[]}
-type Props={closeoutOnly?:boolean;submittedOnly?:boolean;location:string;day?:string;from?:string;to?:string;userId?:string;closeoutKey?:string;shiftId?:string;managerCloseout?:boolean;onChange?:(rows:CloseoutReceipt[])=>void;onSaved?:()=>void;onPendingChange?:(count:number|null)=>void}
+type Props={initialExpanded?:boolean;onEditorState?:(state:{busy:boolean;dirty:boolean})=>void;closeoutOnly?:boolean;submittedOnly?:boolean;location:string;day?:string;from?:string;to?:string;userId?:string;closeoutKey?:string;shiftId?:string;managerCloseout?:boolean;onChange?:(rows:CloseoutReceipt[])=>void;onSaved?:()=>void;onPendingChange?:(count:number|null)=>void}
 const err=(e:unknown)=>String((e as {message?:string})?.message??e)
 const timestamp=(value?:string|null)=>value?new Date(value).toLocaleString('en-US',{timeZone:'America/Chicago',year:'numeric',month:'short',day:'numeric',hour:'numeric',minute:'2-digit',second:'2-digit'})+' CT':'Time not recorded'
 const reviewed=(r:Row)=>r.ready&&!!r.details_saved_at&&!!r.verifier_name?.trim()&&r.has_file!==false
@@ -24,10 +24,11 @@ function Photo({row,large=false}:{row:{file_path:string|null;file_mime:string|nu
  return <figure className={large?'employee-receipt-photo large':'employee-receipt-photo'}>{error?<p role="alert">{error}</p>:!url?<span>Loading photo…</span>:row.file_mime==='application/pdf'?(large?<iframe src={url} title="Original receipt PDF"/>:<span>PDF receipt · select Review</span>):<img src={url} alt="Saved receipt" loading="lazy"/>}<figcaption>{timestamp(row.created_at)}</figcaption></figure>
 }
 
-export function EmployeeReceiptWallet({closeoutOnly=false,submittedOnly=false,location,day=serviceDay(),from=day,to=day,userId,closeoutKey,shiftId,managerCloseout=false,onChange,onSaved,onPendingChange}:Props){
- const [data,setData]=useState<Data|null>(null),[me,setMe]=useState(''),[loading,setLoading]=useState(true),[busy,setBusy]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState(''),[folder,setFolder]=useState<'pending'|'saved'>('pending'),[expanded,setExpanded]=useState(false),[purchaseOpen,setPurchaseOpen]=useState(false)
+export function EmployeeReceiptWallet({initialExpanded=false,onEditorState,closeoutOnly=false,submittedOnly=false,location,day=serviceDay(),from=day,to=day,userId,closeoutKey,shiftId,managerCloseout=false,onChange,onSaved,onPendingChange}:Props){
+ const [data,setData]=useState<Data|null>(null),[me,setMe]=useState(''),[loading,setLoading]=useState(true),[busy,setBusy]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState(''),[folder,setFolder]=useState<'pending'|'saved'>('pending'),[expanded,setExpanded]=useState(initialExpanded),[purchaseOpen,setPurchaseOpen]=useState(false)
  const [editing,setEditing]=useState<Row|null>(null),[kind,setKind]=useState<Row['kind']>('void'),[reason,setReason]=useState(''),[amount,setAmount]=useState(''),[check,setCheck]=useState(''),[verifier,setVerifier]=useState(''),[notes,setNotes]=useState(''),[correction,setCorrection]=useState(''),[assignee,setAssignee]=useState(''),[dirty,setDirty]=useState(false)
  const [captureKind,setCaptureKind]=useState<ReceiptKind>('void'),[purchaseFile,setPurchaseFile]=useState<File|null>(null),[purchaseReceipt,setPurchaseReceipt]=useState<PurchaseReceipt|null>(null)
+ useEffect(()=>{onEditorState?.({busy:busy||purchaseOpen,dirty})},[busy,purchaseOpen,dirty,onEditorState])
  const recipientReview=!!editing&&editing.user_id!==me&&editing.assigned_user_id===me
  const editorId='wallet.'+(closeoutKey||shiftId||userId||'mine')
  const camera=useRef<HTMLInputElement>(null),upload=useRef<HTMLInputElement>(null),lock=useRef(false),sequence=useRef(0),changeRef=useRef(onChange),savedRef=useRef(onSaved),pendingRef=useRef(onPendingChange),reviewRef=useRef<HTMLElement>(null)

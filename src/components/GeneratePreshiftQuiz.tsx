@@ -58,6 +58,7 @@ export function GeneratePreshiftQuiz({location,date,title,body,disabled,allowPas
     try{const context=(r.error as {context?:Response}).context;if(context)detail=(await context.json()).error??''}catch{}
     throw Error(detail||r.error.message)
    }
+   if(r.data?.generator_version!=='2026-10-28-practical-v2')throw Error('Deploy the updated preshift-quiz-generate function to use the practical question generator. Your source is still here.')
    const result={...r.data,location,date:actualDate}
    if(!validGeneratedQuiz(result))throw Error('No usable questions were generated. Add more specific source information.')
    setDraft(result);request.current=null
@@ -67,7 +68,7 @@ export function GeneratePreshiftQuiz({location,date,title,body,disabled,allowPas
  function changed(){request.current=null}
  return <DesignSection as="article" data-design-block="section.18490ee77f1ddb9b4a85" className="feed-card quiz-source-workflow">
   <h3>{heading??(allowPaste?'Create a quiz from any content':'Generate a quiz from this pre-shift')}</h3>
-  <p><PageWord id="sectioncopy.f7f5c11ec4fbb95094f3">{"Paste pre-shift notes, recipes, menu details, or training content. Choose a question count; the editor opens with the questions already added."}</PageWord></p>
+  <p><PageWord id="sectioncopy.f7f5c11ec4fbb95094f3">{"Use daily notes, recipes and menu details to test realistic guest situations, recipe mistakes and service decisions. Questions must be supported by your source. Review the generated editor, then save or publish for the chosen day."}</PageWord></p>
   {allowPaste&&<WorkflowTabs id="quiz-source" label="Generate quiz steps" tabs={[{key:'content',label:'1 · Content'},{key:'generate',label:'2 · Generate'}]} active={generatorTab} disabled={busy} onChange={setGeneratorTab}/>}
   <div role="tabpanel" id="quiz-source-content-panel" aria-labelledby="quiz-source-content-tab" hidden={allowPaste&&generatorTab!=='content'}>
   {allowPaste&&<fieldset data-design-block="section.1b2ff3be7fbcc375755e" disabled={busy||disabled}>

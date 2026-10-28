@@ -8,8 +8,9 @@ import './StockBoard.css'
 type Item={id:string;name:string;version:number;added_by_name:string;added_at:string;restocked_by_name?:string;restocked_at?:string}
 type Event={id:number;item_name:string;action:string;actor_name:string;created_at:string;note:string}
 export const stockStamp=(value:string)=>new Intl.DateTimeFormat('en-US',{timeZone:'America/Chicago',month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit'}).format(new Date(value))
-export function StockBoard({location,readOnly=false,date}:{location:string;readOnly?:boolean;date?:string}){
+export function StockBoard({location,readOnly=false,date,onEditorState}:{location:string;readOnly?:boolean;date?:string;onEditorState?:(state:{busy:boolean;dirty:boolean})=>void}){
  const [items,setItems]=useState<Item[]>([]),[events,setEvents]=useState<Event[]>([]),[name,setName]=useState(''),[note,setNote]=useState(''),[busy,setBusy]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState(''),[loading,setLoading]=useState(true),[history,setHistory]=useState(false)
+ useEffect(()=>{onEditorState?.({busy,dirty:!!(name.trim()||note.trim()||request.current)})},[busy,name,note,onEditorState])
  const request=useRef<string|null>(null),sequence=useRef(0)
  async function refresh(){const ticket=++sequence.current;try{const r=await supabase.rpc('stock_board_load',{p_location_id:location,p_date:date??null});if(r.error)throw r.error;if(ticket===sequence.current){setItems(r.data.items);setEvents(r.data.events);setError('')}}catch(e){if(ticket===sequence.current)setError(String((e as {message?:string}).message??e))}finally{if(ticket===sequence.current)setLoading(false)}}
  useEffect(()=>{if(!location)return;setItems([]);setEvents([]);setLoading(true);void refresh();const timer=setInterval(()=>{if(document.visibilityState==='visible')void refresh()},15000),focus=()=>void refresh();window.addEventListener('focus',focus);return()=>{sequence.current++;clearInterval(timer);window.removeEventListener('focus',focus)}},[location,date])

@@ -1,9 +1,9 @@
+import {HomeQuickActions} from '../components/HomeQuickActions'
 import {HomeShiftRoutine} from '../components/HomeShiftRoutine'
 import {MediaLinkText} from '../components/MediaLinkText'
 import {DesignSection} from '../components/DesignSection'
 import {LayoutSection,CustomPageSections} from '../components/PageLayout'
 import {PersonalHome} from '../components/PersonalSpace'
-import { ReceiptWalletHome } from '../components/ReceiptWallet'
 import {DashboardPostPreview} from '../components/DashboardPostPreview'
 import {PreshiftMinuteRule} from '../components/PreshiftMinuteRule'
 import {PostNotificationControl} from '../components/PostNotificationControl'
@@ -15,7 +15,6 @@ import { PushPreferences } from '../components/PushPreferences'
 import { PreshiftOpenTracker } from '../components/PreshiftActivity'
 // page-designer-instrumented
 import { PageWord } from "../components/PageDesign"
-import { CompactStockBoard } from '../components/CompactStockBoard'
 import '../components/HomeArrangement.css'
 import { PreshiftReadReceipt,usePreshiftReadReceipts } from '../components/PreshiftReadReceipts'
 import { ScreenText } from "../components/ScreenText"
@@ -45,7 +44,7 @@ export function DashboardPage(){
  if(feed.status==='fulfilled'&&!feed.value.error){setPosts((feed.value.data?.posts??[]).filter((p:Post)=>p.shift_date===today));setPostError('')}else{setPostError(String(feed.status==='rejected'?feed.reason:feed.value.error?.message));setPosts([])}
  if(quizData.status==='fulfilled'&&!quizData.value.error){setQuiz(quizData.value.data?.quiz??null);setQuizCount(quizData.value.data?.quiz_count??(quizData.value.data?.quiz?1:0));setResult(quizData.value.data?.result??null);setQuizError('')}else{setQuizError(String(quizData.status==='rejected'?quizData.reason:quizData.value.error?.message));setQuiz(null);setResult(null)}setLoading(false)
  })();return()=>{live=false}},[location,today,refresh])
- return <PersonalHome location={location} brand={name}>{postAccess.gm&&!new URLSearchParams(window.location.search).has('wording-preview')&&<Link data-editor-ignore="true" className="home-customize-link" to="/settings/wording">Customize Home →</Link>}<LayoutSection id="home.overview" label="Welcome and service date"><p data-design-block="copy.7ee3c1a7b2ddf9eb.1" className="eyebrow"><ScreenText id="DashboardPage.bc6d13d141d31c9c">Your shift starts here</ScreenText></p><div className="home-top-row"><DesignSection as="header" data-design-block="section.5ac222737cf1d689251f" className="home-calendar-heading"><p data-design-block="home.calendar.date">{quizDateLabel(today)}</p></DesignSection>{location&&<div className="home-utility-boxes" data-design-block="home.utilities" data-layout-group="home.utilities" data-layout-label="Home utility cards"><LayoutSection id="home.stock" label="86 board"><AccessSection page="home" section="stock"><CompactStockBoard location={location}/></AccessSection></LayoutSection><LayoutSection id="home.wallet" label="Receipt wallet"><div className="home-wallet-box"><ReceiptWalletHome location={location}/></div></LayoutSection></div>}</div></LayoutSection>{error&&<p data-design-block="copy.62d9558d8b2361ee.1" role="alert">{error}</p>}{!location&&!error&&<p data-design-block="copy.e04a9fe2c54afaaf.1" role="status"><ScreenText id="DashboardPage.a1d1c867053fcd8f">Loading your restaurant…</ScreenText></p>}
+ return <PersonalHome location={location} brand={name}>{location&&<HomeQuickActions key={location} location={location}/>}{postAccess.gm&&!new URLSearchParams(window.location.search).has('wording-preview')&&<Link data-editor-ignore="true" className="home-customize-link" to="/settings/wording">Customize Home →</Link>}<LayoutSection id="home.overview" label="Welcome and service date"><p data-design-block="copy.7ee3c1a7b2ddf9eb.1" className="eyebrow"><ScreenText id="DashboardPage.bc6d13d141d31c9c">Your shift starts here</ScreenText></p><div className="home-top-row"><DesignSection as="header" data-design-block="section.5ac222737cf1d689251f" className="home-calendar-heading"><p data-design-block="home.calendar.date">{quizDateLabel(today)}</p></DesignSection></div></LayoutSection>{error&&<p data-design-block="copy.62d9558d8b2361ee.1" role="alert">{error}</p>}{!location&&!error&&<p data-design-block="copy.e04a9fe2c54afaaf.1" role="status"><ScreenText id="DashboardPage.a1d1c867053fcd8f">Loading your restaurant…</ScreenText></p>}
  {location&&<>
 <LayoutSection id="home.routine" label="Start my shift"><HomeShiftRoutine key={location+day+today} location={location} day={day} quizDate={today} refresh={refresh}/></LayoutSection>
 <LayoutSection id="home.notifications" label="Notifications"><AccessSection page="home" section="notifications"><PushPreferences/></AccessSection></LayoutSection>
