@@ -1,3 +1,4 @@
+import {RestaurantGamesPage} from './pages/RestaurantGamesPage'
 import {PrepareDayPage} from './pages/PrepareDayPage'
 import {ServiceTrainingPage} from './pages/ServiceTrainingPage'
 import {PageCanvas} from './components/PageLayout'
@@ -151,6 +152,7 @@ export default function App() {
         <Route path="/reservation-inquiries" element={<ReservationInquiryPage />} />
         <Route path="/inquiry-studio" element={<ManagementOnly><InquiryStudioPage /></ManagementOnly>} />
         <Route path="/inquiry-inbox" element={<GuestServicesPage />} />
+        <Route path="/training/games" element={<RestaurantGamesPage />} />
         <Route path="/training" element={<TrainingPage />} />
         <Route path="/training/cocktails" element={<AccessSection page="training" section="cocktails"><CocktailTrainingPage /></AccessSection>} />
         <Route path="/training/service" element={<AccessSection page="training" section="service"><ServiceTrainingPage /></AccessSection>} />
