@@ -1,3 +1,6 @@
+import {cleanGuideStyle,guideCSS} from '../lib/trainingGuideStyle'
+import {TrainingGuideMedia} from './TrainingGuideMedia'
+import './TrainingGuideStyle.css'
 import {PageWord} from './PageDesign'
 import {useEffect,useRef,useState} from 'react'
 import {assetBytes,assetType,pdfLibrary,pdfOptions,type TrainingDocument} from '../lib/trainingContent'
@@ -9,5 +12,6 @@ function PdfPages({data}:{data:string}){
 export function TrainingDocumentView({document:doc}:{document:TrainingDocument}){
  const type=assetType(doc.asset_data??'')
  function download(){const blob=type?new Blob([assetBytes(doc.asset_data!)],{type}):new Blob([doc.body],{type:'text/plain;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=doc.filename||doc.title+'.txt';a.click();setTimeout(()=>URL.revokeObjectURL(url),10000)}
- return <article className="training-document"><h3>{doc.title}</h3>{type==='application/pdf'?<PdfPages data={doc.asset_data!}/>:type.startsWith('image/')?<img className="training-document-image" src={doc.asset_data} alt={doc.title}/>:null}{type?<details><summary><PageWord id="training.content.300bbdc39d867d5a">{"Readable text used for generation"}</PageWord></summary><p className="training-text">{doc.body}</p></details>:<div className="training-document-paper">{doc.body.split(/\n\s*\n/).map((p,i)=><p key={i} className="training-text">{p}</p>)}</div>}<button type="button" onClick={download}><PageWord id="training.content.7b3dab9e7ef60722">{"Download content"}</PageWord></button></article>
+ const style=cleanGuideStyle(doc.presentation)
+ return <article className={'training-document training-guide-styled guide-layout-'+style.layout} style={guideCSS(style)}><h3><span className="guide-icon">{style.icon}</span>{doc.title}</h3>{doc.category&&<p className="guide-metadata">{doc.category}{doc.tags?.length?' · '+doc.tags.join(' · '):''}</p>}<TrainingGuideMedia path={doc.video_path} url={doc.video_url}/><div className="guide-body">{doc.body.split(/\n\s*\n/).map((p,i)=><p key={i} className="guide-reading-text">{p}</p>)}</div>{type&&<details><summary>Original uploaded document</summary>{type==='application/pdf'?<PdfPages data={doc.asset_data!}/>:type.startsWith('image/')?<img className="training-document-image" src={doc.asset_data} alt={doc.title}/>:null}</details>}<button type="button" onClick={download}>Download original / text</button></article>
 }

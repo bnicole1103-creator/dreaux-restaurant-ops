@@ -1,6 +1,7 @@
+import type {GuideStyle} from './trainingGuideStyle'
 import {supabase} from './supabase'
 export type TrainingKind='food'|'cocktails'|'service'
-export type TrainingDocument={id:string;version:number;shelf:'menu'|'service';title:string;body:string;filename:string;asset_data?:string;created_at?:string}
+export type TrainingDocument={id:string;version:number;shelf:'menu'|'service';title:string;body:string;filename:string;asset_data?:string;created_at?:string;category?:string;tags?:string[];presentation?:GuideStyle;video_path?:string;video_url?:string}
 export const uploadAccept='.pdf,.png,.jpg,.jpeg,.webp,.txt,.md'
 export const sourceLimit=12000
 export function assetType(data:string){return /^data:(application\/pdf|image\/(?:png|jpeg|webp));base64,[A-Za-z0-9+/]+={0,2}$/.exec(data)?.[1]??''}
