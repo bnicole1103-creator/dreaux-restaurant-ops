@@ -1,3 +1,4 @@
+export {HomeSalesQuick as ProfileSalesTargets} from './HomeSalesQuick'
 import {MenuSalesPlanner} from './MenuSalesPlanner'
 import {MonthlySalesTracker} from './MonthlySalesTracker'
 import {DesignSection} from './DesignSection'
@@ -12,7 +13,7 @@ import './ProfileSalesTargets.css'
 type Targets={can_manage?:boolean;ready:boolean;date:string;reason?:string;team_target?:number|null;individual_target?:number|null}
 const currentMenu=():MenuService=>{const d=new Date(),day=new Intl.DateTimeFormat('en-US',{timeZone:'America/Chicago',weekday:'short'}).format(d),hour=Number(new Intl.DateTimeFormat('en-GB',{timeZone:'America/Chicago',hour:'2-digit',hourCycle:'h23'}).format(d));return ['Fri','Sat','Sun'].includes(day)&&hour>=11&&hour<16?'brunch':'regular'}
 const message=(e:unknown)=>String((e as {message?:string})?.message??e)
-export function ProfileSalesTargets({location}:{location:string}){
+export function DetailedSalesTargets({location}:{location:string}){
  const [data,setData]=useState<Targets|null>(null),[date,setDate]=useState(serviceDay),[loading,setLoading]=useState(true),[error,setError]=useState(''),[refresh,setRefresh]=useState(0)
  const [potential,setPotential]=useState({team:'',individual:''})
  const [scope,setScope]=useState<'team'|'individual'>('team'),[current,setCurrent]=useState({team:'',individual:''}),[spend,setSpend]=useState('35'),[menu,setMenu]=useState<SalesMenuItem[]>([]),[menuError,setMenuError]=useState(''),[menuLoading,setMenuLoading]=useState(false),[open,setOpen]=useState(false)

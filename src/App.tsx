@@ -19,6 +19,7 @@ import { GuestFeedbackPage } from './pages/GuestFeedbackPage'
 import { GuestFeedbackInbox } from './pages/GuestFeedbackInbox'
 import { WalkInPage } from './pages/WalkInPage'
 import { useLocation } from 'react-router-dom'
+import {SalesCalculatorPage} from './pages/SalesCalculatorPage'
 import { SalesTargetsPage } from './pages/SalesTargetsPage'
 import { TasksPage } from './pages/TasksPage'
 import { SettingsPage } from './pages/SettingsPage'
@@ -157,6 +158,7 @@ export default function App() {
         <Route path="/training/cocktails" element={<AccessSection page="training" section="cocktails"><CocktailTrainingPage /></AccessSection>} />
         <Route path="/training/service" element={<AccessSection page="training" section="service"><ServiceTrainingPage /></AccessSection>} />
         <Route path="/training/food" element={<AccessSection page="training" section="food"><CocktailTrainingPage key="food" kind="food" /></AccessSection>} />
+        <Route path="/sales-targets" element={<SalesCalculatorPage />} />
         <Route path="/settings/sales-targets" element={<ManagementOnly gmOnly><SalesTargetsPage /></ManagementOnly>} />
         <Route path="/settings/wording" element={<ManagementOnly gmOnly><ScreenWordingPage /></ManagementOnly>} />
         <Route path="/guest-feedback" element={<ManagementOnly><GuestFeedbackInbox /></ManagementOnly>} />
