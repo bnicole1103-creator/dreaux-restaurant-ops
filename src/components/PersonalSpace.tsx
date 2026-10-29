@@ -12,6 +12,7 @@ import {personalThemes,personalDecals,defaultPersonalConfig,safePersonalConfig,p
 import {stickerBank} from '../lib/stickerBank'
 import {wallPatterns} from '../lib/chatWallStyle'
 import './PersonalSpace.css'
+import './HomeResponsive.css'
 type Space={config:PersonalConfig;version:number;user_id:string;name:string;photo:string|null}
 async function call(name:string,args:Record<string,unknown>){const c=new AbortController();let timer:ReturnType<typeof setTimeout>|undefined;try{const r=await Promise.race([supabase.rpc(name,args).abortSignal(c.signal),new Promise<never>((_,reject)=>{timer=setTimeout(()=>{c.abort();reject(Error('Your profile customization did not respond. Reload to check the saved version.'))},25000)})]);if(r.error)throw r.error;return r.data}finally{if(timer)clearTimeout(timer)}}
 export function PersonalDecor({config}:{config:unknown}){const c=safePersonalConfig(config),motifs={none:'',sparkles:'✦ · ✧ · ✦',botanical:'❧ · ❀ · ❧',ribbon:'୨୧ · ୨୧',film:'▣ · ▣ · ▣'};return <div className={'personal-decor personal-decal-'+c.decal} aria-hidden="true">{c.decal!=='none'&&<div className="personal-decal">{motifs[c.decal]}</div>}{c.stickers.length>0&&<div className="personal-stickers">{(['left','center','right'] as const).map(spot=><div key={spot}>{c.stickers.filter(s=>s.spot===spot).map((s,i)=><span key={i} style={{fontSize:s.size,transform:`rotate(${s.rotation}deg)`}}>{stickerBank.find(b=>b[0]===s.id)?.[1]}</span>)}</div>)}</div>}</div>}

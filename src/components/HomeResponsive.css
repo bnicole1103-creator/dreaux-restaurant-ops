@@ -1,0 +1,26 @@
+/* Home sizing only: keep section order, content, themes and popup behavior. */
+.personal-home.page.staff-home{box-sizing:border-box;min-width:0;width:100%;max-width:100%;padding:clamp(10px,2vw,18px);gap:12px}
+.personal-home .personal-home-header{box-sizing:border-box;min-width:0;margin-bottom:0;padding:clamp(12px,2vw,20px)}
+.personal-home .personal-profile-top{grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);gap:12px;min-width:0}
+.personal-home .personal-profile-top>.personal-identity{min-width:0;max-width:100%}
+.personal-home .personal-profile-top .header-chat-strip{box-sizing:border-box;min-width:0;max-width:100%;display:block;overflow-wrap:anywhere}
+.personal-home .header-chat-speakers{box-sizing:border-box;width:100%;max-width:100%;overflow-x:auto}
+.personal-home .header-chat-empty{white-space:normal}
+.personal-home .personal-profile-brand{overflow-wrap:anywhere}
+.personal-home .page-layout-section{box-sizing:border-box;min-width:0;max-width:100%}
+.personal-home .page-layout-section>.profile-next-shift{box-sizing:border-box;width:100%;max-width:none;margin-top:0}
+.personal-home .home-sales-simple{box-sizing:border-box;width:100%;max-width:100%;margin:12px 0 0}
+.personal-home .home-sales-simple header{flex-wrap:wrap}
+.personal-home .home-sales-simple-fields{grid-template-columns:repeat(2,minmax(0,1fr))}
+.personal-home .home-sales-simple button{max-width:100%;white-space:normal}
+.personal-home .home-quick-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:0}
+.personal-home .home-quick-actions button{box-sizing:border-box;min-width:0;max-width:100%;padding:10px 8px;font-size:.85rem;overflow-wrap:anywhere;white-space:normal}
+.personal-home .home-quick-actions svg{flex-shrink:0}
+.personal-home :is(input,select,textarea,video){box-sizing:border-box;max-width:100%;min-width:0}
+@media(max-width:420px){
+ .personal-home .personal-profile-top{gap:8px}
+ .personal-home .personal-profile-top>.personal-identity{flex-direction:column;align-items:flex-start}
+ .personal-home .home-quick-actions button{flex-direction:column;gap:4px;font-size:.75rem}
+ .personal-home .home-shift-routine li{grid-template-columns:auto minmax(0,1fr);gap:8px}
+ .personal-home .home-shift-routine li>a{grid-column:2;white-space:normal}
+}
