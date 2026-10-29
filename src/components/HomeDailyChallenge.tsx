@@ -1,0 +1,7 @@
+import {useState} from 'react'
+import {TaskDialog} from './TaskDialog'
+import {RestaurantGamesPage} from '../pages/RestaurantGamesPage'
+import {gameCatalog,dailyGame,type GameId} from '../lib/extraRestaurantGames'
+import {useAppAccess} from './AppAccess'
+import {serviceDay} from '../lib/serviceDay'
+export function HomeDailyChallenge(){const access=useAppAccess(),[game,setGame]=useState<GameId|null>(null),[choice,setChoice]=useState<GameId|'daily'>('daily');const available=gameCatalog.filter(g=>g[3]==='floor'?access.can('floor','sections'):access.can('training',g[3]));const daily=dailyGame(serviceDay(),available.map(g=>g[0]));if(!daily)return null;return <section className="home-daily-challenge"><div><strong>⭐ Daily Challenge</strong><small>One saved round · results attach to your employee profile</small></div><select aria-label="Choose a game round" value={choice} onChange={e=>setChoice(e.target.value as GameId|'daily')}><option value="daily">Today: {gameCatalog.find(g=>g[0]===daily)?.[2]}</option>{available.map(g=><option key={g[0]} value={g[0]}>{g[1]} {g[2]}</option>)}</select><button onClick={()=>setGame(choice==='daily'?daily:choice)}>Play a round</button>{game&&<TaskDialog title="Daily Challenge" onClose={()=>{if(window.confirm('Close this practice window? Finish the round to save its score.'))setGame(null)}}><RestaurantGamesPage initialGame={game} embedded dailyChallenge/></TaskDialog>}</section>}

@@ -1,3 +1,4 @@
+import {HomeDailyChallenge} from '../components/HomeDailyChallenge'
 import {HomeQuickActions} from '../components/HomeQuickActions'
 import {HomeShiftRoutine} from '../components/HomeShiftRoutine'
 import {MediaLinkText} from '../components/MediaLinkText'
@@ -46,6 +47,7 @@ export function DashboardPage(){
  })();return()=>{live=false}},[location,today,refresh])
  return <PersonalHome location={location} brand={name}>{location&&<HomeQuickActions key={location} location={location}/>}{postAccess.gm&&!new URLSearchParams(window.location.search).has('wording-preview')&&<Link data-editor-ignore="true" className="home-customize-link" to="/settings/wording">Customize Home →</Link>}<LayoutSection id="home.overview" label="Welcome and service date"><p data-design-block="copy.7ee3c1a7b2ddf9eb.1" className="eyebrow"><ScreenText id="DashboardPage.bc6d13d141d31c9c">Your shift starts here</ScreenText></p><div className="home-top-row"><DesignSection as="header" data-design-block="section.5ac222737cf1d689251f" className="home-calendar-heading"><p data-design-block="home.calendar.date">{quizDateLabel(today)}</p></DesignSection></div></LayoutSection>{error&&<p data-design-block="copy.62d9558d8b2361ee.1" role="alert">{error}</p>}{!location&&!error&&<p data-design-block="copy.e04a9fe2c54afaaf.1" role="status"><ScreenText id="DashboardPage.a1d1c867053fcd8f">Loading your restaurant…</ScreenText></p>}
  {location&&<>
+<LayoutSection id="home.challenge" label="Daily Challenge"><HomeDailyChallenge/></LayoutSection>
 <LayoutSection id="home.routine" label="Start my shift"><HomeShiftRoutine key={location+day+today} location={location} day={day} quizDate={today} refresh={refresh}/></LayoutSection>
 <LayoutSection id="home.notifications" label="Notifications"><AccessSection page="home" section="notifications"><PushPreferences/></AccessSection></LayoutSection>
 <LayoutSection id="home.calendar" label="Weekly calendar"><AccessSection page="home" section="calendar"><WeeklyCalendar location={location}/></AccessSection></LayoutSection>
