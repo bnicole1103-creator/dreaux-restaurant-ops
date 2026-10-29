@@ -17,6 +17,7 @@ import './FloorMap.css'
 import './ReservationTables.css'
 import { serviceDay } from '../lib/serviceDay'
 import { recommendSections } from '../lib/smartSections'
+import {FutureReservations} from '../components/FutureReservations'
 import { ReservationEditor } from '../components/ReservationEditor'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { supabase } from '../lib/supabase'
@@ -2269,7 +2270,7 @@ const [partySize, setPartySize] = useState(1)
 
       {manualReservation&&<ManualReservation floating location={locationId} organization={organizationId} tables={tables} onClose={()=>setManualReservation(false)} onSaved={message=>{setReservationUploadMessage(message);setShowReservationsPanel(true);void loadReservations(locationId)}}/>}
       {showReservationsPanel && (
-        <AccessSection page="floor" section="reservations"><FloorFloatingPanel title="Reservations" open onClose={()=>setShowReservationsPanel(false)}>
+        <AccessSection page="floor" section="reservations"><FloorFloatingPanel title="Reservations" open onClose={()=>setShowReservationsPanel(false)}><FutureReservations location={locationId} onChanged={()=>void loadReservations(locationId)}/>
             <p data-design-block="copy.b78f32efa3eeed28.3" className="eyebrow"><ScreenText id="FloorPage.58f3288ba914ecb7">Reservations</ScreenText></p>
             <AccessSection page="floor" section="reservations"><h2 data-design-block="copy.2e495f44a1c1f630.4"><ScreenText id="FloorPage.def1336055c8be14">Today's Reservations</ScreenText></h2></AccessSection>
 
