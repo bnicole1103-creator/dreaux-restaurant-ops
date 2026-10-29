@@ -13,7 +13,7 @@ if(typeof window!=='undefined'&&editorPreviewActive(window.location.search,windo
 }
 import type {FontName} from '../lib/appearance'
 import {designCss,syncOrderHosts,validId,ensureElementIds} from '../lib/pageEditor'
-export type DesignChange={offsetX?:number;offsetY?:number;width?:number;minHeight?:number;iconSize?:number;presentation?:'inline'|'collapse'|'popup';panelTitle?:string;defaultOpen?:boolean;color?:string;background?:string;borderColor?:string;fontSize?:number;align?:'left'|'center'|'right';kind?:'note'|'link';title?:string;href?:string;linkLabel?:string;font?:FontName;text?:string;hidden?:boolean;x?:number;y?:number;order?:number;parent?:string}
+export type DesignChange={offsetX?:number;offsetY?:number;width?:number;height?:number;minHeight?:number;iconSize?:number;presentation?:'inline'|'collapse'|'popup';panelTitle?:string;defaultOpen?:boolean;color?:string;background?:string;borderColor?:string;fontSize?:number;align?:'left'|'center'|'right';kind?:'note'|'link';title?:string;href?:string;linkLabel?:string;font?:FontName;text?:string;hidden?:boolean;x?:number;y?:number;order?:number;parent?:string}
 export type Design={version:number;changes:Record<string,DesignChange>}
 let current:Design={version:0,changes:{}}
 const subscribers=new Set<()=>void>()

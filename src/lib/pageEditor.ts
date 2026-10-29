@@ -115,8 +115,11 @@ export function designCss(changes:Record<string,DesignChange>,preview:boolean,de
   }
   const offsetX=v.offsetX??v.x,offsetY=v.offsetY??v.y
   if(offsetX||offsetY||v.offsetX===0||v.offsetY===0)css+=block+'{position:relative!important;left:'+(Number.isFinite(offsetX)?offsetX:0)+'px!important;top:'+(Number.isFinite(offsetY)?offsetY:0)+'px!important;}'
-  if(Number.isInteger(v.width)&&v.width!>=44&&v.width!<=2000)css+=block+'{box-sizing:border-box!important;width:'+v.width+'px!important;max-width:calc(100vw - 24px)!important;}'
-  if(Number.isInteger(v.minHeight)&&v.minHeight!>=44&&v.minHeight!<=2000)css+=block+'{min-height:'+v.minHeight+'px!important;}'
+  if(Number.isInteger(v.width)&&v.width!>=44&&v.width!<=2000)css+=block+'{box-sizing:border-box!important;width:'+v.width+'px!important;max-width:100%!important;min-width:0!important;flex-shrink:0!important;}'
+  if(Number.isInteger(v.width)&&v.width!>=44&&v.width!<=2000)css+=block+'[data-layout-item] > :not([data-theme-section]),'+block+'[data-layout-item] > [data-theme-section] > *{box-sizing:border-box!important;width:100%!important;max-width:100%!important;min-width:0!important;}'
+  // Explicit height is a scrollable viewport, independent of the content's natural height.
+  if(Number.isInteger(v.height)&&v.height!>=44&&v.height!<=2000)css+=block+'{box-sizing:border-box!important;height:'+v.height+'px!important;min-height:0!important;max-height:none!important;overflow:auto!important;flex-shrink:0!important;}'
+  if(v.height===undefined&&Number.isInteger(v.minHeight)&&v.minHeight!>=44&&v.minHeight!<=2000)css+=block+'{min-height:'+v.minHeight+'px!important;}'
   if(Number.isInteger(v.iconSize)&&v.iconSize!>=16&&v.iconSize!<=160)css+=block+' svg{width:'+v.iconSize+'px!important;height:'+v.iconSize+'px!important;}'
   let typography=''
   if(v.font&&Object.prototype.hasOwnProperty.call(appFonts,v.font))typography+='font-family:'+appFonts[v.font].css+'!important;'
