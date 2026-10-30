@@ -1,1 +1,14 @@
 .home-sales-simple{border:1px solid var(--app-border,#d6c5b5);border-radius:12px;padding:12px;margin:10px 0;background:var(--app-card,#fff8ef);min-width:0;box-sizing:border-box}.home-sales-simple header{display:flex;justify-content:space-between;align-items:center;gap:8px}.home-sales-simple h2{font-size:1rem;margin:0}.home-sales-simple header a{font-size:.8rem}.home-sales-simple-fields{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}.home-sales-simple label{display:grid;gap:4px;font-size:.8rem;min-width:0}.home-sales-simple input,.home-sales-simple select,.home-sales-simple textarea{width:100%;min-width:0;max-width:100%;box-sizing:border-box;font:inherit;padding:8px;min-height:44px}.home-sales-simple button{min-height:44px;font:inherit;padding:8px 12px;margin-top:6px}.home-sales-simple p{font-size:.85rem;margin:8px 0}.home-sales-simple-total{display:flex;gap:12px;justify-content:space-between;flex-wrap:wrap}.home-sales-simple small{display:block;font-size:.7rem;margin-top:6px;line-height:1.35}.home-sales-simple textarea{resize:vertical}
+
+/* Compact Home controls; the full planner stays on Sales targets. */
+.personal-home .home-sales-simple{height:auto!important;min-height:0!important;padding:12px!important}
+.personal-home .home-sales-simple h2{font-size:1rem!important;line-height:1.3!important;margin:0!important}
+.personal-home .home-sales-simple :is(input,select,button){min-height:44px!important;height:auto!important;padding:8px 10px!important;font-size:.85rem!important;line-height:1.25!important}
+.personal-home .home-sales-simple label{font-size:.8rem!important;gap:4px!important}
+.personal-home .home-sales-simple-fields{margin:8px 0!important;gap:8px!important}
+.personal-home .home-sales-simple-total{margin:8px 0!important;justify-content:flex-start;gap:6px 20px}
+.personal-home .home-sales-simple-total span{margin-left:auto}
+.home-sales-script-row{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:end;gap:8px}
+.personal-home .home-sales-script-row>button{margin:0!important}
+.personal-home .home-sales-simple small{font-size:.7rem!important}
+@media(max-width:520px){.home-sales-script-row{grid-template-columns:minmax(0,1fr)}.personal-home .home-sales-script-row>button{justify-self:start}}

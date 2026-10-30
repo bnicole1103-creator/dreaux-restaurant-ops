@@ -24,3 +24,12 @@
  .personal-home .home-shift-routine li{grid-template-columns:auto minmax(0,1fr);gap:8px}
  .personal-home .home-shift-routine li>a{grid-column:2;white-space:normal}
 }
+
+/* Keep utility actions in their own flow row, above the branded profile. */
+.personal-home.page.staff-home{display:flex;flex-direction:column;align-items:stretch}
+.personal-home>.home-actions-flow{position:relative!important;inset:auto!important;transform:none!important;translate:none!important;width:100%!important;height:auto!important;min-height:0!important;order:-2!important;flex:none;isolation:isolate}
+.personal-home>.personal-home-header{position:relative!important;inset:auto!important;transform:none!important;translate:none!important;width:100%!important;height:auto!important;min-height:0!important;order:-1!important;flex:none}
+.personal-home .home-actions-flow .home-quick-actions{position:static!important;inset:auto!important;transform:none!important;translate:none!important;width:100%!important;height:auto!important;min-height:0!important;margin:0!important}
+.personal-home .home-actions-flow .home-quick-actions>button{position:static!important;inset:auto!important;transform:none!important;translate:none!important;height:auto!important;min-height:44px!important}
+.personal-home .personal-home-header>.personal-profile-brand{position:static!important;inset:auto!important;transform:none!important;translate:none!important;height:auto!important;min-height:0!important;margin:0 0 12px!important;line-height:1.35!important}
+.personal-home .personal-profile-brand [data-design-word]{position:static!important;inset:auto!important;transform:none!important}
