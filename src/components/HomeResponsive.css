@@ -33,3 +33,38 @@
 .personal-home .home-actions-flow .home-quick-actions>button{position:static!important;inset:auto!important;transform:none!important;translate:none!important;height:auto!important;min-height:44px!important}
 .personal-home .personal-home-header>.personal-profile-brand{position:static!important;inset:auto!important;transform:none!important;translate:none!important;height:auto!important;min-height:0!important;margin:0 0 12px!important;line-height:1.35!important}
 .personal-home .personal-profile-brand [data-design-word]{position:static!important;inset:auto!important;transform:none!important}
+
+/* Full-width Home calendar */
+.personal-home [data-design-block="home.calendar"],
+.personal-home .home-week-calendar,
+.personal-home .calendar-week-scroll {
+  box-sizing: border-box !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  height: auto !important;
+  position: relative !important;
+  inset: auto !important;
+  transform: none !important;
+  translate: none !important;
+  align-self: stretch !important;
+}
+.personal-home .calendar-week {
+  display: grid !important;
+  grid-template-columns: repeat(7,minmax(90px,1fr)) !important;
+  width: 100% !important;
+  min-width: 678px !important;
+  gap: 8px !important;
+}
+.personal-home .calendar-week-day {
+  width: auto !important;
+  max-width: none !important;
+  min-width: 0 !important;
+  height: auto !important;
+  position: relative !important;
+  inset: auto !important;
+  transform: none !important;
+}
+.personal-home .calendar-week-scroll {
+  overflow-x: auto !important;
+}
