@@ -1,0 +1,102 @@
+// Modeled PostgreSQL tests. This never connects to Supabase or changes production.
+const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
+const {PGlite}=require(process.env.PGLITE_MODULE||'@electric-sql/pglite');
+const root=path.resolve(__dirname,'..'),sql=n=>fs.readFileSync(path.join(root,'supabase/migrations',n),'utf8');
+function fn(file,name){const s=sql(file),m=new RegExp('create or replace function '+name.replace(/[.]/g,'\\.')+'\\s*\\(','i').exec(s);assert(m,'Missing function '+name);const rest=s.slice(m.index),d=/\bas\s+(\$[a-z_]*\$)/i.exec(rest);assert(d,'Missing body '+name);const end=rest.indexOf(d[1],d.index+d[0].length);return rest.slice(0,end+d[1].length)+';'}
+const loc='10000000-0000-0000-0000-000000000001',otherLoc='10000000-0000-0000-0000-000000000002';
+const ids=Array.from({length:6},(_,i)=>'20000000-0000-0000-0000-00000000000'+(i+1));
+const uuid=n=>'30000000-0000-0000-0000-'+String(n).padStart(12,'0');
+let checks=0;async function check(label,run){await run();checks++;console.log('PASS '+label)}
+(async()=>{
+const db=new PGlite();const q=async(s,a=[])=>(await db.query(s,a)).rows;
+const uid=async id=>{await q("select set_config('test.uid',$1,false)",[id])};
+const fail=async(run,re)=>assert.rejects(run,re);
+await db.exec(`CREATE ROLE anon;CREATE ROLE authenticated;CREATE SCHEMA auth;CREATE SCHEMA storage;CREATE SCHEMA board_private;CREATE SCHEMA rebuild_private;CREATE SCHEMA staff_ops_private;CREATE SCHEMA leaderboard_private;
+CREATE TABLE auth.users(id uuid primary key);
+CREATE FUNCTION auth.uid() RETURNS uuid LANGUAGE sql STABLE AS $$SELECT nullif(current_setting('test.uid',true),'')::uuid$$;
+CREATE TABLE locations(id uuid primary key);CREATE TABLE profiles(id uuid primary key,full_name text,preferred_name text);
+CREATE TABLE location_memberships(location_id uuid,user_id uuid,role text,status text);
+CREATE TABLE closeout_permissions(location_id uuid,user_id uuid,access_level text);
+CREATE FUNCTION closeout_is_member(l uuid) RETURNS boolean LANGUAGE sql STABLE AS $$SELECT auth.uid() IS NOT NULL AND EXISTS(SELECT 1 FROM public.location_memberships WHERE location_id=l AND user_id=auth.uid() AND status='active')$$;
+CREATE FUNCTION mod_is_manager(l uuid) RETURNS boolean LANGUAGE sql STABLE AS $$SELECT public.closeout_is_member(l) AND EXISTS(SELECT 1 FROM public.location_memberships WHERE location_id=l AND user_id=auth.uid() AND role IN ('manager','general_manager','owner'))$$;
+CREATE FUNCTION closeout_is_gm(l uuid) RETURNS boolean LANGUAGE sql STABLE AS $$SELECT public.closeout_is_member(l) AND EXISTS(SELECT 1 FROM public.location_memberships WHERE location_id=l AND user_id=auth.uid() AND role IN ('general_manager','owner'))$$;
+CREATE FUNCTION app_access_assert(l uuid,p text,s text) RETURNS void LANGUAGE plpgsql AS $$BEGIN IF NOT public.closeout_is_member(l) THEN RAISE EXCEPTION 'Location access required';END IF;END$$;
+CREATE FUNCTION app_access_allowed(l uuid,p text,s text) RETURNS boolean LANGUAGE sql AS $$SELECT public.closeout_is_member(l)$$;
+CREATE TABLE storage.objects(bucket_id text,name text);
+CREATE TABLE shifts(id uuid primary key,location_id uuid,shift_date date);
+CREATE TABLE purchase_receipts(id uuid primary key,location_id uuid,user_id uuid,purchase_date date,file_path text,file_mime text,data jsonb,total numeric);
+CREATE TABLE daily_closeouts(created_at timestamptz default now(),id uuid primary key,location_id uuid,user_id uuid,closeout_date date,status text,deleted_at timestamptz,receipt_reason_policy boolean,correction_note text,drinks_made_by uuid,job_role text,shift_type text,omitted_questions jsonb default '[]',points_summary jsonb default '[]',points_delta integer,shift_score integer,void_count integer default 0,void_value numeric default 0,discount_value numeric default 0);
+CREATE TABLE mod_closeouts(id uuid,shift_id uuid);
+CREATE FUNCTION receipt_is_submitted(p uuid) RETURNS boolean LANGUAGE sql AS $$SELECT EXISTS(SELECT 1 FROM public.daily_closeouts c JOIN public.closeout_receipts r ON r.closeout_key=c.id WHERE r.id=p AND c.status='submitted')$$;
+` .replace(/CREATE FUNCTION receipt_is_submitted[\s\S]*$/,''));
+await db.exec(sql('20261022_closeout_receipt_reasons.sql').split('create or replace function public.closeout_receipt_file_access')[0]);
+await db.exec('ALTER TABLE closeout_receipts ADD COLUMN assigned_user_id uuid,ADD COLUMN manager_shift_id uuid,ADD COLUMN verifier_name text,ADD COLUMN details_saved_at timestamptz,ADD COLUMN verified_by uuid;');
+await db.exec(`CREATE FUNCTION receipt_is_submitted(p uuid) RETURNS boolean LANGUAGE sql AS $$SELECT EXISTS(SELECT 1 FROM public.daily_closeouts c JOIN public.closeout_receipts r ON r.closeout_key=c.id WHERE r.id=p AND c.status='submitted')$$;
+CREATE FUNCTION closeout_manager_correct(p_location_id uuid,p_closeout_id uuid,p_version integer,p_values jsonb,p_reason text,p_inaccurate boolean) RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $$DECLARE next_row public.daily_closeouts; keys text[]:=array['job_role','shift_type'];BEGIN SELECT * INTO next_row FROM public.daily_closeouts WHERE id=p_closeout_id;UPDATE public.daily_closeouts SET job_role=next_row.job_role,shift_type=next_row.shift_type WHERE id=next_row.id;RETURN to_jsonb(next_row);END$$;
+CREATE FUNCTION receipt_recipient_details_save(uuid,uuid,integer,jsonb,text) RETURNS jsonb LANGUAGE sql AS $$SELECT '{}'::jsonb$$;
+CREATE FUNCTION board_private.form_policy() RETURNS trigger LANGUAGE plpgsql AS $$DECLARE hidden jsonb:='["staff_15"]';BEGIN new.omitted_questions:=hidden;if hidden ? 'staff_15' then new.drinks_made_by:=null;end if;RETURN new;END$$;
+CREATE TRIGGER zx_closeout_form_policy BEFORE INSERT ON daily_closeouts FOR EACH ROW EXECUTE FUNCTION board_private.form_policy();
+`);
+await db.exec(fn('20261022_closeout_receipt_reasons.sql','public.closeout_receipt_save').replace('FUNCTION public.closeout_receipt_save','FUNCTION public.closeout_receipt_save').replace('function public.closeout_receipt_save(','function public.closeout_receipt_save_before_assignment('));
+if(!process.env.COMBINED_REPAIR_SQL)await db.exec(sql('20261030_drink_attribution_receipt_edit.sql'));
+await db.exec(sql('20261028_receipt_menu_links.sql').slice(0));
+// Menus are queried at call time, so tables can follow function creation.
+await db.exec(`CREATE TABLE restaurant_menu_items(id uuid,location_id uuid,archived boolean,data jsonb);CREATE TABLE menu_inventory_items(id uuid,location_id uuid,archived boolean,name text);
+CREATE FUNCTION closeout_receipts_load(uuid,date,date,uuid,uuid) RETURNS jsonb LANGUAGE sql AS $$SELECT '{"rows":[]}'::jsonb$$;`);
+await check('repair installs and can run twice without changing wrappers',async()=>{await db.exec((process.env.COMBINED_REPAIR_SQL?fs.readFileSync(process.env.COMBINED_REPAIR_SQL,'utf8'):sql('20261031_closeout_receipt_reliability.sql')));await db.exec((process.env.COMBINED_REPAIR_SQL?fs.readFileSync(process.env.COMBINED_REPAIR_SQL,'utf8'):sql('20261031_closeout_receipt_reliability.sql')));assert((await q("select to_regprocedure('closeout_receipt_save_before_wallet_flow(uuid,uuid,integer,jsonb,text)') r"))[0].r)});
+await q('INSERT INTO locations VALUES($1),($2)',[loc,otherLoc]);
+for(let i=0;i<ids.length;i++){await q('INSERT INTO auth.users VALUES($1)',[ids[i]]);await q('INSERT INTO profiles VALUES($1,$2,null)',[ids[i],'Employee '+i]);await q('INSERT INTO location_memberships VALUES($1,$2,$3,$4)',[i===5?otherLoc:loc,ids[i],['server','server','manager','general_manager','owner','server'][i],i===1?'inactive':'active'])}
+await uid(ids[0]);
+const save=async(id,version,v)=> (await q('select closeout_receipt_save_before_wallet_flow($1,$2,$3,$4,$5) r',[loc,id,version,JSON.stringify(v),'']))[0].r;
+await check('restored helper saves a photo, checks version and writes audit',async()=>{const r=await save(uuid(1),0,{business_date:'2026-01-01',file_mime:'image/jpeg'});assert.equal(r.version,1);assert.equal((await q('select count(*)::int n from closeout_receipt_audit'))[0].n,1);await fail(()=>save(uuid(1),0,{notes:'stale'}),/Receipt changed/)});
+await check('helper denies inactive, anonymous, wrong-owner and wrong-location users',async()=>{await uid(ids[1]);await fail(()=>save(uuid(1),1,{notes:'bad'}),/Location access/);await uid('');await fail(()=>save(uuid(1),1,{notes:'bad'}),/Location access/);await uid(ids[5]);await fail(()=>save(uuid(1),1,{notes:'bad'}),/Location access/);await uid(ids[0]);await q('update location_memberships set status=$1 where user_id=$2',['active',ids[1]]);await uid(ids[1]);await fail(()=>save(uuid(1),1,{notes:'bad'}),/Receipt access denied/);await uid(ids[0])});
+await check('required drink attribution survives hidden form setting',async()=>{await q("INSERT INTO daily_closeouts(id,location_id,user_id,status,job_role,drinks_made_by) VALUES($1,$2,$3,'submitted','server',$4)",[uuid(2),loc,ids[0],ids[2]]);assert.equal((await q('select drinks_made_by,omitted_questions from daily_closeouts where id=$1',[uuid(2)]))[0].drinks_made_by,ids[2]);await fail(()=>q("INSERT INTO daily_closeouts(id,location_id,status,job_role) VALUES($1,$2,'submitted','server')",[uuid(3),loc]),/Choose who made/)});
+await check('recipient can edit only the sent receipt item links',async()=>{await q('update closeout_receipts set assigned_user_id=$1 where id=$2',[ids[1],uuid(1)]);await uid(ids[1]);let r=(await q("select receipt_item_links($1,$2,'closeout','[]',0) r",[loc,uuid(1)]))[0].r;assert.equal(r.version,1);await uid(ids[2]);await fail(()=>q("select receipt_item_links($1,$2,'closeout','[]',1)",[loc,uuid(1)]),/Receipt access required/);await uid(ids[1]);await fail(()=>q("select receipt_item_links($1,$2,'closeout','[]',0)",[loc,uuid(1)]),/changed/)});
+await check('raw helper remains inaccessible to authenticated and anonymous roles',async()=>{const r=(await q("select has_function_privilege('authenticated','closeout_receipt_save_before_wallet_flow(uuid,uuid,integer,jsonb,text)','EXECUTE') a,has_function_privilege('anon','closeout_receipt_save_before_wallet_flow(uuid,uuid,integer,jsonb,text)','EXECUTE') b"))[0];assert.equal(r.a,false);assert.equal(r.b,false)});
+await check('wrapper-shaped core is rejected atomically instead of causing recursion',async()=>{await db.exec('DROP FUNCTION closeout_receipt_save_before_wallet_flow(uuid,uuid,integer,jsonb,text);');await db.exec(`CREATE OR REPLACE FUNCTION closeout_receipt_save_before_assignment(p_location_id uuid,p_id uuid,p_version integer,p_values jsonb,p_change_note text default '') RETURNS jsonb LANGUAGE plpgsql AS $$BEGIN RETURN public.closeout_receipt_save(p_location_id,p_id,p_version,p_values,p_change_note);END$$;`);await fail(()=>db.exec((process.env.COMBINED_REPAIR_SQL?fs.readFileSync(process.env.COMBINED_REPAIR_SQL,'utf8'):sql('20261031_closeout_receipt_reliability.sql'))),/not the expected/);await db.exec('ROLLBACK');assert.equal((await q("select to_regprocedure('closeout_receipt_save_before_wallet_flow(uuid,uuid,integer,jsonb,text)') r"))[0].r,null)});
+await db.exec(fn('20261022_closeout_receipt_reasons.sql','public.closeout_receipt_score'));
+await db.exec('CREATE TRIGGER zzz_closeout_receipt_score BEFORE INSERT OR UPDATE ON daily_closeouts FOR EACH ROW EXECUTE FUNCTION closeout_receipt_score();');
+await check('void and comp server errors each deduct 5 without old dollar-threshold penalties',async()=>{
+ await uid(ids[0]);
+ for(const [n,kind,reason] of [[20,'void','server_error'],[21,'comp','server_error'],[22,'comp','kitchen_error']])await q("INSERT INTO closeout_receipts(id,location_id,user_id,created_by,business_date,closeout_key,kind,reason,amount,file_path,file_mime,ready) VALUES($1,$2,$3,$3,'2026-01-01',$4,$5,$6,10,$7,'image/jpeg',true)",[uuid(n),loc,ids[0],uuid(23),kind,reason,'fixture/'+n]);
+ await q("INSERT INTO daily_closeouts(id,location_id,user_id,closeout_date,status,job_role,drinks_made_by,void_count,void_value,discount_value,points_summary) VALUES($1,$2,$3,'2026-01-01','submitted','server',$4,1,10,20,$5)",[uuid(23),loc,ids[0],ids[2],JSON.stringify([{code:'LATE_30_PLUS',points:-40},{code:'SALES_110',points:30},{code:'CLOSEOUT_COMPLETE',points:5},{code:'VOID_OVER_15',points:-20}])]);
+ let r=(await q('select * from daily_closeouts where id=$1',[uuid(23)]))[0];assert.equal(r.points_delta,-15);assert.equal(r.shift_score,85);assert(!r.points_summary.some(x=>x.code==='VOID_OVER_15'));
+ await q("update closeout_receipts set reason='kitchen_error' where id=$1",[uuid(21)]);await q('update daily_closeouts set correction_note=$1 where id=$2',['Receipt correction',uuid(23)]);r=(await q('select * from daily_closeouts where id=$1',[uuid(23)]))[0];assert.equal(r.points_delta,-10);assert(!r.points_summary.some(x=>x.code==='COMP_SERVER_ERROR'));
+});
+// Quizzes: run the repository's actual RPCs and point functions with fixture tables.
+await db.exec(sql('20261002_daily_quizzes.sql'));
+await db.exec(sql('20261002_quiz_monthly_scores.sql'));
+await db.exec(`CREATE TABLE reward_point_transactions(id uuid,user_id uuid,business_date date,location_id uuid,closeout_id uuid,points integer,description text);CREATE TABLE mod_rating_points(user_id uuid,business_date date,location_id uuid,source_key text,points integer);CREATE TABLE manager_point_awards(location_id uuid,request_id uuid,rule_snapshot jsonb);`);
+await db.exec(sql('20261002_quiz_policy_and_point_edits.sql'));
+await db.exec(`CREATE FUNCTION staff_ops_private.sync_quizzes(uuid,date) RETURNS void LANGUAGE plpgsql AS $$BEGIN END$$;`);
+await db.exec(sql('20261023_rebuild_quizzes.sql'));
+await uid(ids[2]);
+const qs=Array.from({length:5},(_,i)=>({prompt:'Service question '+i,category:'Service',explanation:'Verified source',options:['Right','Wrong'],correct:0}));
+const create=async(id,version=0,release=false,questions=qs)=>(await q('select quiz_manager_save_v2($1,$2,$3,$4,$5,$6,true,$7,$8) r',[loc,id,'2026-01-01','Quiz '+id,'Instructions',JSON.stringify(questions),version,release]))[0].r;
+const submit=async(id,v,answers)=>(await q('select quiz_staff_submit($1,$2,$3) r',[id,v,JSON.stringify(answers)]))[0].r;
+await check('two quizzes publish on the same date with independent identities',async()=>{await create(uuid(10));await create(uuid(11));await uid(ids[0]);assert.equal((await q('select quiz_staff_day_v2($1,$2) r',[loc,'2026-01-01']))[0].r.quizzes.length,2)});
+await check('server scoring awards +5 perfect and +3 at 80%, hides answers, and avoids duplicate attempts',async()=>{const a=await submit(uuid(10),1,[0,0,0,0,0]),b=await submit(uuid(11),1,[0,0,0,0,1]);assert.equal(a.reward_points,5);assert.equal(b.reward_points,3);assert.equal(a.questions.length,0);assert.equal((await submit(uuid(10),1,[1,1,1,1,1])).score,5);assert.equal((await q('select count(*)::int n from daily_quiz_attempts'))[0].n,2)});
+await check('edits preserve saved attempt score/version, reject stale edits, and can release saved answers',async()=>{await uid(ids[2]);await create(uuid(10),1,true,qs.map(x=>({...x,correct:1})));await fail(()=>create(uuid(10),1),/Quiz changed/);await uid(ids[0]);const a=await submit(uuid(10),2,[1,1,1,1,1]);assert.equal(a.score,5);assert.equal(a.questions.length,5);assert.equal((await q('select quiz_version from daily_quiz_attempts where quiz_id=$1',[uuid(10)]))[0].quiz_version,1)});
+await check('two missed quizzes create separate -10 entries',async()=>{await q("insert into quiz_requirements(quiz_id,user_id,due_at,assigned_by) values($1,$3,'2026-01-02',$4),($2,$3,'2026-01-02',$4)",[uuid(10),uuid(11),ids[1],ids[2]]);const a=await q("select * from points_source_entries($1) where user_id=$2 and entry_key like 'missed:%'",[loc,ids[1]]);assert.equal(a.length,2);assert.equal(a.reduce((s,x)=>s+x.points,0),-20)});
+await check('monthly points include quiz rewards and reset to 100 in an empty month',async()=>{const a=(await q('select mod_points_dashboard($1,$2) r',[loc,'2026-01-01']))[0].r,b=(await q('select mod_points_dashboard($1,$2) r',[loc,'2026-02-01']))[0].r;assert.equal(a.standings.find(x=>x.user_id===ids[0]).total,108);assert.equal(a.standings.find(x=>x.user_id===ids[1]).total,80);assert(b.standings.every(x=>x.total===100))});
+await db.exec(fn('20261002_quiz_policy_and_point_edits.sql','public.mod_points_dashboard').replace('function public.mod_points_dashboard(','function leaderboard_private.live_dashboard('));
+await db.exec(`CREATE TABLE leaderboard_private.publications(id uuid primary key default gen_random_uuid(),location_id uuid,month date,week_start date,revision integer,replaces_id uuid,standings jsonb,published_by uuid,published_at timestamptz default clock_timestamp(),UNIQUE(location_id,week_start,revision));`);
+await db.exec(fn('20261027_weekly_rank_role_policy.sql','public.mod_points_dashboard'));
+await db.exec(fn('20261027_weekly_rank_role_policy.sql','public.publish_weekly_points_leaderboard'));
+await check('staff ranks stay hidden until published, remain frozen, then change only with replacement',async()=>{
+ await uid(ids[0]);let data=(await q('select mod_points_dashboard($1,$2) r',[loc,'2026-01-01']))[0].r;assert.equal(data.standings.length,0);assert.equal(data.mine.rank,null);
+ await uid(ids[2]);data=(await q('select mod_points_dashboard($1,$2) r',[loc,'2026-01-01']))[0].r;
+ const publish=async(expected,standings)=>(await q('select publish_weekly_points_leaderboard($1,$2,$3,$4,$5) r',[loc,'2026-01-01','2025-12-29',expected,JSON.stringify(standings)]))[0].r;
+ let first=await publish(null,data.standings);assert.equal(first.revision,1);
+ await q("insert into reward_point_transactions values($1,$2,'2026-01-01',$3,null,200,'Test improvement')",[uuid(50),ids[1],loc]);
+ await uid(ids[0]);data=(await q('select mod_points_dashboard($1,$2) r',[loc,'2026-01-01']))[0].r;assert.deepEqual(data.standings,first.standings);
+ await fail(()=>publish(first.id,first.standings),/Management access/);
+ await uid(ids[2]);data=(await q('select mod_points_dashboard($1,$2) r',[loc,'2026-01-01']))[0].r;await fail(()=>publish(first.id,first.standings),/Points changed/);
+ let replacement=await publish(first.id,data.standings);assert.equal(replacement.revision,2);assert.equal(replacement.replaces_id,first.id);await fail(()=>publish(first.id,data.standings),/newer leaderboard/);
+ await uid(ids[0]);data=(await q('select mod_points_dashboard($1,$2) r',[loc,'2026-01-01']))[0].r;assert.deepEqual(data.standings,replacement.standings);assert.equal(data.mine.rank,2);assert.equal((await q('select count(*)::int n from leaderboard_private.publications'))[0].n,2);
+});
+await db.exec(fn('20261027_weekly_rank_role_policy.sql','public.management_can_edit_user'));
+await check('Management can edit staff; Owner and General Manager can edit management; wrong location is denied',async()=>{await uid(ids[2]);assert.equal((await q('select management_can_edit_user($1,$2) ok',[loc,ids[0]]))[0].ok,true);assert.equal((await q('select management_can_edit_user($1,$2) ok',[loc,ids[3]]))[0].ok,false);for(const id of [ids[3],ids[4]]){await uid(id);assert.equal((await q('select management_can_edit_user($1,$2) ok',[loc,ids[2]]))[0].ok,true)}assert.equal((await q('select management_can_edit_user($1,$2) ok',[otherLoc,ids[5]]))[0].ok,false)});
+await check('staff cannot publish quizzes or use another location',async()=>{await uid(ids[0]);await fail(()=>create(uuid(12)),/Manager access/);await fail(()=>q('select quiz_staff_day_v2($1,$2)',[otherLoc,'2026-01-01']),/Location access/)});
+await db.close();console.log(`${checks} modeled database checks passed. Production behavior remains unverified.`);
+})().catch(e=>{console.error(e);process.exit(1)});
