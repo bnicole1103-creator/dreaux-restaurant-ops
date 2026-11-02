@@ -2,7 +2,7 @@ import { useRef, useState } from 'react'
 import { TeamProfileName } from './TeamProfileName'
 import { supabase } from '../lib/supabase'
 
-export type Standing = { user_id: string; name: string; total: number; rank: number }
+export type Standing = { user_id: string; name: string; total: number; rank: number|null; eligible?: boolean; combined_score?: number|null; points_rank?: number; sales_rank?: number|null; performance_rank?: number|null; reason?: string }
 export type LeaderboardPublication = {
   id: string; month: string; week_start?: string; revision?: number;
   replaces_id?: string | null; published_at: string; standings: Standing[]
@@ -17,10 +17,11 @@ function StandingsTable({ rows, caption, locationId }: {
 }) {
   return <div className="points-table-wrap"><table className="points-table">
     <caption>{caption}</caption>
-    <thead><tr><th scope="col">Rank</th><th scope="col">Team Member</th><th scope="col">Points</th></tr></thead>
-    <tbody>{rows.map(row => <tr key={row.user_id}><td>{row.rank}</td><td>
+    <thead><tr><th scope="col">Rank</th><th scope="col">Team Member</th><th scope="col">Combined</th><th scope="col">Points</th><th scope="col">Sales</th><th scope="col">Performance</th></tr></thead>
+    <tbody>{rows.map(row => <tr key={row.user_id}><td>{row.rank??'Not ranked'}</td><td>
       <TeamProfileName userId={row.user_id} locationId={locationId} name={row.name}/>
-    </td><td>{row.total}</td></tr>)}</tbody>
+      {row.rank===null&&row.reason&&<small>{row.reason}</small>}
+    </td><td>{row.combined_score==null?'—':row.combined_score.toFixed(2)}</td><td>{row.total} · #{row.points_rank??'—'}</td><td>{row.sales_rank==null?'—':'#'+row.sales_rank}</td><td>{row.performance_rank==null?'—':'#'+row.performance_rank}</td></tr>)}</tbody>
   </table></div>
 }
 function currentWeekStart() {
@@ -66,12 +67,12 @@ export function PublishedLeaderboard({ locationId, month, publication, preview, 
     <h2>Published Team Leaderboard</h2>
     {publication ? <>
       <p>{publication.week_start ? `Week of ${publication.week_start}` : `Points month ${publication.month.slice(0, 7)}`} · Published {publicationLabel(publication)}{(publication.revision ?? 1) > 1 ? ` · Replacement ${publication.revision}` : ''}</p>
-      <p className="muted">These weekly standings stay frozen until Management publishes a replacement or the next week. Tied totals share a rank.</p>
+      <p className="muted">Combined rank: 50% points, 25% sales rank and 25% performance rank. These standings stay frozen until Management publishes a replacement or the next week.</p>
       <StandingsTable locationId={locationId} rows={publication.standings} caption="Last published standings"/>
     </> : <p>The leaderboard hasn’t been published yet.</p>}
     {manager && <details className="leaderboard-publish">
       <summary>Management: preview and publish weekly rank</summary>
-      <p>Private live preview for {month}. Publishing again during the same week creates a replacement and preserves the audit history.</p>
+      <p>Private live preview for {month}. Combined rank is 50% points, 25% sales rank and 25% performance rank. Publishing again during the same week creates a replacement and preserves the audit history.</p>
       <StandingsTable locationId={locationId} rows={preview} caption={`Private preview · ${month}`}/>
       <button type="button" onClick={onPublished} disabled={saving}>Refresh preview</button>{' '}
       <button type="button" onClick={() => void publish()} disabled={saving || !preview.length}>
