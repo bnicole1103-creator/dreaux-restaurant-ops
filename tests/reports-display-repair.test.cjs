@@ -1,0 +1,12 @@
+const fs=require('node:fs'),assert=require('node:assert');
+const css=fs.readFileSync('src/pages/ReportsPage.css','utf8');
+const inventory=fs.readFileSync('src/components/InventoryOperationsReports.tsx','utf8');
+const builder=fs.readFileSync('src/components/OperationsReportBuilder.tsx','utf8');
+assert(css.includes('width:max-content;min-width:100%;table-layout:auto'));
+assert(css.includes('min-width:130px'));
+assert(css.includes('position:sticky;left:0'));
+assert(!css.includes('white-space:pre-wrap;overflow-wrap:anywhere;max-width:300px'));
+assert(inventory.includes('Bottle disposal results are loaded.'));
+assert(inventory.includes("x.category!=='linked_disposal'"));
+assert(builder.includes("c.category!=='linked_disposal'"));
+console.log('reports display repair checks passed');
