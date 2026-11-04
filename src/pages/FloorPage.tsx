@@ -1,3 +1,4 @@
+import {ReservationInquiryPage} from './ReservationInquiryPage'
 import {ReservationFileUpload} from '../components/ReservationFileUpload'
 import {reservationFilesImport} from '../lib/reservationCsv'
 import {ReservationGuestbook} from '../components/ReservationGuestbook'
@@ -158,6 +159,7 @@ export function FloorPage() {
   const [smartError,setSmartError]=useState('')
   const [floorNotice,setFloorNotice]=useState('')
   const [seatServerId,setSeatServerId]=useState('')
+  const [largePartyInquiry,setLargePartyInquiry]=useState(false)
   const [manualReservation,setManualReservation]=useState(false)
   const [organizationId, setOrganizationId] = useState('')
   const [locationId, setLocationId] = useState('')
@@ -1613,7 +1615,7 @@ const [partySize, setPartySize] = useState(1)
       <nav className="floor-workspace-nav" aria-label="Floor tools">
         {floorAccess.can('floor','sections')&&<button type="button" aria-expanded={floorView==='sections'} onClick={()=>setFloorView(floorView==='sections'?'map':'sections')}>Sections ▾</button>}
         <button type="button" aria-expanded={floorView==='crew'} onClick={()=>setFloorView(floorView==='crew'?'map':'crew')}>Crew & walk-ins ▾</button>
-        {floorAccess.can('floor','reservations')&&<><button type="button" aria-expanded={showReservationsPanel} onClick={()=>setShowReservationsPanel(v=>!v)}>Reservations ({reservations.length}) ▾</button><button type="button" disabled={!locationId||!organizationId} onClick={()=>setManualReservation(true)}>+ Reservation</button><ReservationFileUpload location={locationId} organization={organizationId} initialDate={activeShift?.shift_date??reservationToday()} onSaved={message=>{setReservationUploadMessage(message);void loadReservations(locationId)}}/></>}
+        {floorAccess.can('floor','reservations')&&<><button type="button" aria-expanded={showReservationsPanel} onClick={()=>setShowReservationsPanel(v=>!v)}>Reservations ({reservations.length}) ▾</button><button type="button" disabled={!locationId||!organizationId} onClick={()=>setManualReservation(true)}>+ Reservation</button>{floorAccess.can('guests','host')&&<button type="button" disabled={!locationId} onClick={()=>setLargePartyInquiry(true)}>+ Large Party Inquiry</button>}<ReservationFileUpload location={locationId} organization={organizationId} initialDate={activeShift?.shift_date??reservationToday()} onSaved={message=>{setReservationUploadMessage(message);void loadReservations(locationId)}}/></>}
         <button type="button" disabled={!activeShiftId} aria-expanded={showRotationPanel} onClick={()=>setShowRotationPanel(v=>!v)}>Rotation & seating ▾</button>
         <button type="button" aria-expanded={floorView==='rooms'} onClick={()=>setFloorView(floorView==='rooms'?'map':'rooms')}>Rooms & layout ▾</button>
         <button type="button" aria-expanded={floorView==='tools'} onClick={()=>setFloorView(floorView==='tools'?'map':'tools')}>More tools ▾</button>
@@ -2038,6 +2040,7 @@ const [partySize, setPartySize] = useState(1)
         </div>
       )}
 
+      {largePartyInquiry&&<FloorFloatingPanel title="Large party inquiry" open onClose={()=>{if(window.confirm('Close inquiry form? Save your inquiry first to keep entered details.'))setLargePartyInquiry(false)}}><ReservationInquiryPage largeParty initialDate={activeShift?.shift_date}/></FloorFloatingPanel>}
       {manualReservation&&<ManualReservation floating location={locationId} organization={organizationId} tables={tables} initialDate={activeShift?.shift_date??reservationToday()} onClose={()=>setManualReservation(false)} onSaved={message=>{setReservationUploadMessage(message);setShowReservationsPanel(true);void loadReservations(locationId)}}/>}
       {showReservationsPanel && (
         <AccessSection page="floor" section="reservations"><FloorFloatingPanel title="Reservations" open onClose={()=>setShowReservationsPanel(false)}><FutureReservations location={locationId} onChanged={()=>void loadReservations(locationId)}/>

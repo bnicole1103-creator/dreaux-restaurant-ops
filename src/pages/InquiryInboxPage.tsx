@@ -1,3 +1,4 @@
+import {InquiryReservationDialog,type InquiryReservationSource} from '../components/InquiryReservationDialog'
 import {DesignSection} from '../components/DesignSection'
 import {PageWord} from '../components/PageDesign'
 import { useCallback, useEffect, useState } from 'react'
@@ -12,6 +13,8 @@ type Row = { id:string; source:'Guest form'|'Host'; name:string; email:string; p
 const statuses = ['New','Ready for review','Awaiting guest','Contacted','Confirmed','Closed']
 
 export function InquiryInboxPage() {
+  const [linked,setLinked]=useState<Record<string,string>>({})
+  const [converting,setConverting]=useState<InquiryReservationSource|null>(null)
   const [location,setLocation] = useState('')
   const [rows,setRows] = useState<Row[]>([])
   const [error,setError] = useState('')
@@ -35,6 +38,7 @@ export function InquiryInboxPage() {
     setLoading(true);setError('')
     const results = await Promise.allSettled([request(loc),supabase.rpc('inquiry_combined_host_load',{p_location_id:loc})])
     const next:Row[]=[];const errors:string[]=[]
+    const links=await supabase.rpc('inquiry_reservation_links',{p_location_id:loc});if(links.error){setLinked({});errors.push('Reservation links could not load: '+links.error.message)}else setLinked(Object.fromEntries((links.data??[]).map((r:{source:string;inquiry_id:string;reservation_date:string})=>[r.source+':'+r.inquiry_id,r.reservation_date])))
     if(results[0].status==='fulfilled') for(const r of results[0].value.inquiries) {
       let details:Record<string,unknown>={};try{details=JSON.parse(r.details)}catch{details={Details:r.details}}
       next.push({id:r.id,source:'Guest form',name:r.name,email:r.email,phone:r.phone,guests:r.guests,date:r.event_date,received:r.received,status:r.status,notes:r.notes,details:{...details,Package:r.package_name,'Guest follow-up':r.response,'Email delivery':r.mail_status}})
@@ -54,9 +58,11 @@ export function InquiryInboxPage() {
     {error&&<p role="alert">{error}<PageWord id="sectioncopy.eddabafadd26ff5df215">{" Loaded records below may be incomplete."}</PageWord></p>}
     {loading&&<p role="status"><PageWord id="sectioncopy.c7111ee8b3b6a805ad7b">{"Loading inquiries…"}</PageWord></p>}
     {!loading&&!error&&!shown.length&&<p><PageWord id="sectioncopy.320aad7ba48b3e3d44c1">{"No matching inquiries."}</PageWord></p>}
-    {shown.map(r=><article data-design-block="section.9f410a1bf4ed864f0f65" className="card" key={`${r.source}:${r.id}`}><h2>{r.name}</h2><p>{r.source}<PageWord id="sectioncopy.4af45b03cd6436663472">{" · "}</PageWord>{r.status}<PageWord id="sectioncopy.001a5a201305e22c2f0f">{" · "}</PageWord>{r.guests}<PageWord id="sectioncopy.08b53abd2b71cb843e09">{" guests · "}</PageWord>{r.date||'Date not supplied'}</p><p><PageWord id="sectioncopy.d374c2c72cdc3f5cb74e">{"Received "}</PageWord>{new Date(r.received).toLocaleString()}</p><button onClick={()=>setSelected({...r})}><PageWord id="sectioncopy.d61ec54f5738fbed8170">{"View inquiry"}</PageWord></button></article>)}
+    {shown.map(r=><article data-design-block="section.9f410a1bf4ed864f0f65" className="card" key={`${r.source}:${r.id}`}><h2>{r.name}</h2><p>{r.source}<PageWord id="sectioncopy.4af45b03cd6436663472">{" · "}</PageWord>{r.status}<PageWord id="sectioncopy.001a5a201305e22c2f0f">{" · "}</PageWord>{r.guests}<PageWord id="sectioncopy.08b53abd2b71cb843e09">{" guests · "}</PageWord>{r.date||'Date not supplied'}</p><p><PageWord id="sectioncopy.d374c2c72cdc3f5cb74e">{"Received "}</PageWord>{new Date(r.received).toLocaleString()}</p><button onClick={()=>setSelected({...r})}><PageWord id="sectioncopy.d61ec54f5738fbed8170">{"View inquiry"}</PageWord></button><button type="button" onClick={()=>setConverting({...r})}>{linked[r.source+':'+r.id]?'View linked reservation':'Create reservation'}</button>{linked[r.source+':'+r.id]&&<p>Reservation linked · {linked[r.source+':'+r.id]}</p>}</article>)}
+    {converting&&<InquiryReservationDialog location={location} inquiry={converting} onClose={()=>setConverting(null)} onSaved={()=>void reload(location)}/>}
     {selected&&<DesignSection as="section" data-design-block="section.72a4b02d3f662c0d2d8e" className="card" aria-label="Inquiry details"><h2>{selected.name}</h2><p>{selected.source}<PageWord id="sectioncopy.f03736627a1135d38c4e">{" · "}</PageWord>{selected.guests}<PageWord id="sectioncopy.d51a288f9b3b5045ba03">{" guests · "}</PageWord>{selected.date||'Date not supplied'}</p><p><a href={`mailto:${selected.email}`}>{selected.email}</a><PageWord id="sectioncopy.b71237b57292e952c6ba">{" · "}</PageWord><a href={`tel:${selected.phone}`}>{selected.phone}</a></p><dl>{Object.entries(selected.details).filter(([k,v])=>v&&!['name','email','phone','category','guests','eventDate','budget','website'].includes(k)).map(([k,v])=><div key={k}><dt>{k}</dt><dd>{String(v)}</dd></div>)}</dl>
       {selected.source==='Guest form'?<><label><PageWord id="sectioncopy.670dd7efec6c85bd423f">{"Status"}</PageWord><select value={selected.status} onChange={e=>setSelected({...selected,status:e.target.value})}>{statuses.map(s=><option key={s}>{s}</option>)}</select></label><label><PageWord id="sectioncopy.a7fd0deb507b0c2bf677">{"Internal notes"}</PageWord><textarea value={selected.notes} maxLength={10000} onChange={e=>setSelected({...selected,notes:e.target.value})}/></label><button disabled={saving} onClick={async()=>{setSaving(true);try{await request(location,{id:selected.id,status:selected.status,notes:selected.notes});setSelected(null);await reload(location)}catch(e){setError(e instanceof Error?e.message:'Could not save.')}finally{setSaving(false)}}}>{saving?'Saving…':'Save follow-up'}</button></>:<p><PageWord id="sectioncopy.198f0acbc70f2da29c9f">{"Internal notes: "}</PageWord>{selected.notes||'None'}</p>}
+      <button type="button" disabled={saving} onClick={()=>setConverting({...selected})}>{linked[selected.source+':'+selected.id]?'View linked reservation':'Create reservation'}</button><p>Existing inquiry links are checked before a new booking is created.</p>
       <button onClick={()=>setSelected(null)}><PageWord id="sectioncopy.7e43ffe46f5cb3578932">{"Close details"}</PageWord></button>
     </DesignSection>}
   </DesignSection>

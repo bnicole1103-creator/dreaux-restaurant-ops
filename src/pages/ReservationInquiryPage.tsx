@@ -60,7 +60,7 @@ function renderTemplate(template: string, values: Record<string, string>) {
   )
 }
 
-export function ReservationInquiryPage() {
+export function ReservationInquiryPage({largeParty=false,initialDate}:{largeParty?:boolean;initialDate?:string}={}) {
   const [locationId, setLocationId] = useState('')
   const [locationName, setLocationName] = useState('JusTini’s')
   const [presets, setPresets] = useState<Preset[]>([])
@@ -83,8 +83,8 @@ export function ReservationInquiryPage() {
   const [guestName, setGuestName] = useState('')
   const [phone, setPhone] = useState('')
   const [email, setEmail] = useState('')
-  const [partySize, setPartySize] = useState('2')
-  const [preferredDate, setPreferredDate] = useState(todayCentral)
+  const [partySize, setPartySize] = useState(largeParty?'16':'2')
+  const [preferredDate, setPreferredDate] = useState(initialDate??todayCentral())
   const [preferredTime, setPreferredTime] = useState('')
   const [secondTime, setSecondTime] = useState('')
   const [thirdTime, setThirdTime] = useState('')
@@ -189,7 +189,7 @@ export function ReservationInquiryPage() {
       setGuestName('')
       setPhone('')
       setEmail('')
-      setPartySize('2')
+      setPartySize(largeParty?'16':'2')
       setPreferredDate(todayCentral())
       setPreferredTime('')
       setSecondTime('')
