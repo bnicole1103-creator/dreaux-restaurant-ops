@@ -656,7 +656,9 @@ const [partySize, setPartySize] = useState(1)
       setError(
         caughtError instanceof Error
           ? caughtError.message
-          : 'Unable to upload reservations.',
+          : caughtError && typeof caughtError === 'object' && 'message' in caughtError
+            ? String(caughtError.message)
+            : 'Unable to upload reservations.',
       )
     } finally {
       setSaving(false)
