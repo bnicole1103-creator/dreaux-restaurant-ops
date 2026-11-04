@@ -22,16 +22,17 @@ export function reservationImport(text:string,fileDate:string,location:string,or
  if(!rows.length||rows.length>2000)throw Error('Import 1 to 2,000 reservations.')
  return rows.map((r,index)=>{
  const prefix=`CSV row ${headerAt+index+2}: `,name=get(r,names).trim()
- if(!name||name.length>200)throw Error(prefix+'guest name is required (up to 200 characters).')
+ if(name.length>200)throw Error(prefix+'guest name is required (up to 200 characters).')
  const rawDate=get(r,['reservation_date','date','booking_date','service_date']),day=rawDate?reservationFileDate(rawDate):headingDate
  if(!day)throw Error(prefix+'a complete reservation date is required in the row, file heading or filename. Include the year.')
- const party=Number(get(r,['party_size','covers','guests','guest_count','size']))
- if(!Number.isInteger(party)||party<1||party>500)throw Error(prefix+'party size must be a whole number from 1 to 500.')
+ const rawParty=get(r,['party_size','covers','guests','guest_count','size']).trim(),party=rawParty?Number(rawParty):null
+ if(party!==null&&(!Number.isInteger(party)||party<1||party>500))throw Error(prefix+'party size must be a whole number from 1 to 500.')
  const raw=get(r,['reservation_time','time','booking_time','start_time']).replace(/\./g,'').trim()
  const t=/^(\d{1,2})(?::(\d{2}))?(?::\d{2})?\s*(AM|PM)?$/i.exec(raw)
- if(!t||(!t[2]&&!t[3])||Number(t[2]??0)>59||Number(t[1])>(t[3]?12:23)||Number(t[1])<(t[3]?1:0))throw Error(prefix+'a valid time is required, such as 6:30 PM or 18:30.')
- let h=Number(t[1]);if(t[3])h=h%12+(t[3].toUpperCase()==='PM'?12:0)
- const time=String(h).padStart(2,'0')+':'+(t[2]??'00')
+ if(raw&&(!t||(!t[2]&&!t[3])||Number(t[2]??0)>59||Number(t[1])>(t[3]?12:23)||Number(t[1])<(t[3]?1:0)))throw Error(prefix+'a valid time is required, such as 6:30 PM or 18:30.')
+ let h=Number(t?.[1]??0);if(t?.[3])h=h%12+(t[3].toUpperCase()==='PM'?12:0)
+ const time=raw?String(h).padStart(2,'0')+':'+(t?.[2]??'00'):null
+ if(!get(r,['phone','phone_number','mobile']).trim())throw Error(prefix+'phone number is required.');
  const occasion=get(r,['occasion','special_occasion']),notes=get(r,['notes','guest_notes','reservation_notes','special_requests'])
  const guestData=Object.fromEntries(keys.map((column,i)=>[column||`column_${i+1}`,r[i]??'']).filter(([,value])=>String(value).trim()!==''))
  return {location_id:location,organization_id:organization,reservation_date:day,reservation_time:time,guest_name:name,party_size:party,
@@ -49,14 +50,14 @@ export type ReservationImportBatch={
 }
 
 /** Read a set of exports as one import while keeping each file's own service date. */
-export async function reservationFilesImport(files:File[],location:string,organization:string):Promise<ReservationImportBatch>{
+export async function reservationFilesImport(files:File[],location:string,organization:string,fallbackDate=''):Promise<ReservationImportBatch>{
  if(!files.length)throw Error('Choose at least one reservation CSV.')
  if(files.length>25)throw Error('Choose up to 25 reservation files at once.')
  const rows:ReturnType<typeof reservationImport>=[]
  for(const file of files){
   if(file.size>5*1024*1024)throw Error(`${file.name}: choose a CSV smaller than 5 MB.`)
   if(!/\.csv$/i.test(file.name)&&file.type!=='text/csv'&&file.type!=='application/vnd.ms-excel')throw Error(`${file.name}: choose a CSV reservation export.`)
-  try{rows.push(...reservationImport(await file.text(),reservationFileDate(file.name),location,organization))}
+  try{rows.push(...reservationImport(await file.text(),reservationFileDate(file.name)||fallbackDate,location,organization))}
   catch(error){throw Error(`${file.name}: ${String((error as Error).message??error)}`)}
  }
  if(rows.length>10000)throw Error('Import up to 10,000 reservations in one batch.')
