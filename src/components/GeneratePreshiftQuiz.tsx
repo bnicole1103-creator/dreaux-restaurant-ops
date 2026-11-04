@@ -58,7 +58,7 @@ export function GeneratePreshiftQuiz({location,date,title,body,disabled,allowPas
     try{const context=(r.error as {context?:Response}).context;if(context)detail=(await context.json()).error??''}catch{}
     throw Error(detail||r.error.message)
    }
-   if(r.data?.generator_version!=='2026-10-28-practical-v2')throw Error('Deploy the updated preshift-quiz-generate function to use the practical question generator. Your source is still here.')
+   if(r.data?.generator_version!=='2026-11-02-varied-v3')throw Error('Deploy the updated preshift-quiz-generate function to use the practical question generator. Your source is still here.')
    const result={...r.data,location,date:actualDate}
    if(!validGeneratedQuiz(result))throw Error('No usable questions were generated. Add more specific source information.')
    setDraft(result);request.current=null
@@ -87,7 +87,7 @@ export function GeneratePreshiftQuiz({location,date,title,body,disabled,allowPas
   <button type="button" className="primary-button"
    disabled={disabled||busy||!location||!actualDate||actualBody.trim().length<30||!Number.isInteger(count)||count<1||count>30}
    onClick={()=>void generate()}>{busy?'Generating quiz…':'Generate quiz'}</button>
-  <p><PageWord id="sectioncopy.ecb0e61eb781235f59d9">{"Generated answers are checked against the source before questions are saved to the question bank by subject and source date. The quiz itself remains a draft until you save or publish. Limited source material may produce fewer questions."}</PageWord></p>
+  <p><PageWord id="sectioncopy.ecb0e61eb781235f59d9">{"Generated answers are checked against the source before questions are saved to the question bank by subject and source date. The quiz itself remains a draft until you save or publish. The generator avoids the last 30 days of saved questions and checks extra candidates before returning your requested count. Limited or repetitive source material may produce fewer questions."}</PageWord></p>
   </div>
   {error&&<p role="alert">{error}</p>}
   {draft&&<QuizDraftModal draft={draft} onClose={()=>{setDraft(null);onSaved?.()}}/>}
