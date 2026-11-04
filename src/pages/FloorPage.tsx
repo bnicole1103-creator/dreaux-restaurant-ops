@@ -1,4 +1,5 @@
-import {reservationImport} from '../lib/reservationCsv'
+import {reservationFilesImport} from '../lib/reservationCsv'
+import {ReservationGuestbook} from '../components/ReservationGuestbook'
 import {notifyReservationsChanged} from '../lib/reservationSync'
 import {activeReservations,useReservationRevision} from '../lib/reservationSync'
 import {FloorFloatingPanel} from '../components/FloorFloatingPanel'
@@ -626,9 +627,9 @@ const [partySize, setPartySize] = useState(1)
   async function handleReservationUpload(
     event: React.ChangeEvent<HTMLInputElement>,
   ) {
-    const file = event.target.files?.[0]
+    const files = Array.from(event.target.files??[])
 
-    if (!file || !locationId) {
+    if (!files.length || !locationId) {
       return
     }
 
@@ -637,8 +638,8 @@ const [partySize, setPartySize] = useState(1)
       setError('')
       setReservationUploadMessage('Reading reservation file…')
 
-      const csvText = await file.text()
-      const insertRows = reservationImport(csvText,'',locationId,organizationId).map(row=>{
+      const batch=await reservationFilesImport(files,locationId,organizationId)
+      const insertRows = batch.rows.map(row=>{
         const table=tables.find(t=>t.table_name.trim().toLowerCase()===row.table_name?.trim().toLowerCase())
         return {...row,table_id:table?.id??null}
       })
@@ -648,7 +649,7 @@ const [partySize, setPartySize] = useState(1)
       notifyReservationsChanged()
       await loadReservations(locationId)
 
-      setReservationUploadMessage(`${merge.data.added} new reservations added · ${merge.data.duplicates} duplicates skipped · ${merge.data.matched} new reservations matched to tables · Dates: ${[...new Set(insertRows.map(r=>r.reservation_date))].join(', ')} (Central time)`)
+      setReservationUploadMessage(`${batch.files} files read · ${merge.data.added} new reservations added · ${merge.data.duplicates} duplicates skipped · ${merge.data.matched} new reservations matched to tables · ${merge.data.guests??0} guestbook profiles updated · Dates: ${batch.dates.join(', ')} (Central time)`)
 
       setShowReservationsPanel(true)
     } catch (caughtError) {
@@ -1688,9 +1689,10 @@ const [partySize, setPartySize] = useState(1)
             whiteSpace: 'nowrap',
           }}
         ><ScreenText id="FloorPage.346926535ae5abe0">
-          Upload CSV
+          Upload reservation files
           </ScreenText><input
             type="file"
+            multiple
             accept=".csv,text/csv"
             onChange={handleReservationUpload}
             style={{ display: 'none' }}
@@ -2036,6 +2038,7 @@ const [partySize, setPartySize] = useState(1)
       {manualReservation&&<ManualReservation floating location={locationId} organization={organizationId} tables={tables} onClose={()=>setManualReservation(false)} onSaved={message=>{setReservationUploadMessage(message);setShowReservationsPanel(true);void loadReservations(locationId)}}/>}
       {showReservationsPanel && (
         <AccessSection page="floor" section="reservations"><FloorFloatingPanel title="Reservations" open onClose={()=>setShowReservationsPanel(false)}><FutureReservations location={locationId} onChanged={()=>void loadReservations(locationId)}/>
+            <ReservationGuestbook location={locationId}/>
             <p data-design-block="copy.b78f32efa3eeed28.3" className="eyebrow"><ScreenText id="FloorPage.58f3288ba914ecb7">Reservations</ScreenText></p>
             <AccessSection page="floor" section="reservations"><h2 data-design-block="copy.2e495f44a1c1f630.4"><ScreenText id="FloorPage.def1336055c8be14">Today's Reservations</ScreenText></h2></AccessSection>
 
