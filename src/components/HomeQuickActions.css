@@ -10,3 +10,10 @@
 @media(max-width:600px){.home-quick-actions-sticky{top:4px}.home-quick-actions-sticky .home-quick-actions{gap:4px;grid-template-columns:1fr 1fr 1.2fr}.home-corner-stock{padding:3px}.home-corner-stock>button{font-size:.8rem}.home-corner-stock ul{font-size:.75rem;max-height:56px}}
 /* Let the sticky quick bar use the full Home page as its scroll boundary. */
 .personal-home>.home-actions-flow{display:contents!important}
+
+/* Keep operational controls ahead of saved Home section ordering. */
+.personal-home>.home-quick-actions-sticky{order:-100!important;grid-column:1/-1}
+.personal-home>.personal-home-header{order:-90!important}
+.personal-home>.home-daily-challenge{order:-80!important;grid-column:1/-1}
+.personal-home>.home-target-flow{order:-70!important;grid-column:1/-1;position:relative!important;inset:auto!important;transform:none!important;min-width:0;width:100%}
+.home-target-flow .home-sales-simple{position:relative!important;inset:auto!important;transform:none!important;translate:none!important;width:100%!important;box-sizing:border-box}
