@@ -1,3 +1,5 @@
+import {reservationImport} from '../lib/reservationCsv'
+import {notifyReservationsChanged} from '../lib/reservationSync'
 import {activeReservations,useReservationRevision} from '../lib/reservationSync'
 import {FloorFloatingPanel} from '../components/FloorFloatingPanel'
 import './FloorWorkspace.css'
@@ -621,114 +623,6 @@ const [partySize, setPartySize] = useState(1)
     setReservations(activeReservations((data ?? []) as ReservationRecord[]))
   }
 
-  function normalizeCsvHeader(value: string) {
-    return value
-      .trim()
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '_')
-      .replace(/^_+|_+$/g, '')
-  }
-
-  function parseCsv(csvText: string) {
-    const rows: string[][] = []
-    let row: string[] = []
-    let cell = ''
-    let quoted = false
-
-    for (let index = 0; index < csvText.length; index += 1) {
-      const character = csvText[index]
-      const next = csvText[index + 1]
-
-      if (character === '"' && quoted && next === '"') {
-        cell += '"'
-        index += 1
-        continue
-      }
-
-      if (character === '"') {
-        quoted = !quoted
-        continue
-      }
-
-      if (character === ',' && !quoted) {
-        row.push(cell.trim())
-        cell = ''
-        continue
-      }
-
-      if (
-        (character === '\n' || character === '\r') &&
-        !quoted
-      ) {
-        if (character === '\r' && next === '\n') {
-          index += 1
-        }
-
-        row.push(cell.trim())
-        cell = ''
-
-        if (row.some((value) => value.length > 0)) {
-          rows.push(row)
-        }
-
-        row = []
-        continue
-      }
-
-      cell += character
-    }
-
-    row.push(cell.trim())
-
-    if (row.some((value) => value.length > 0)) {
-      rows.push(row)
-    }
-
-    if (rows.length < 2) {
-      return []
-    }
-
-    const headers = rows[0].map(normalizeCsvHeader)
-
-    return rows.slice(1).map((values) => {
-      const record: Record<string, string> = {}
-
-      headers.forEach((header, index) => {
-        record[header] = values[index] ?? ''
-      })
-
-      return record
-    })
-  }
-
-  function csvValue(
-    row: Record<string, string>,
-    aliases: string[],
-  ) {
-    for (const alias of aliases) {
-      const value = row[normalizeCsvHeader(alias)]
-
-      if (value?.trim()) {
-        return value.trim()
-      }
-    }
-
-    return ''
-  }
-
-  function truthyCsv(value: string) {
-    const normalized = value.trim().toLowerCase()
-
-    return [
-      'yes',
-      'y',
-      'true',
-      '1',
-      'vip',
-      'birthday',
-    ].includes(normalized)
-  }
-
   async function handleReservationUpload(
     event: React.ChangeEvent<HTMLInputElement>,
   ) {
@@ -744,157 +638,17 @@ const [partySize, setPartySize] = useState(1)
       setReservationUploadMessage('Reading reservation file…')
 
       const csvText = await file.text()
-      const rows = parseCsv(csvText)
-
-      if (rows.length === 0) {
-        throw new Error(
-          'The CSV did not contain any reservation rows.',
-        )
-      }
-
-      const reservationDate =
-        reservationToday()
-
-      const insertRows = rows
-        .map((row) => {
-          const guestName = csvValue(row, [
-            'guest_name',
-            'guest',
-            'name',
-            'customer_name',
-            'reservation_name',
-          ])
-
-          if (!guestName) {
-            return null
-          }
-
-          const tableName = csvValue(row, [
-            'table',
-            'table_name',
-            'table_number',
-            'tables',
-          ])
-
-          const matchedTable = tableName
-            ? tables.find(
-                (table) =>
-                  table.table_name.toLowerCase() ===
-                  tableName.toLowerCase(),
-              )
-            : undefined
-
-          const occasion = csvValue(row, [
-            'occasion',
-            'special_occasion',
-          ])
-
-          const notes = csvValue(row, [
-            'notes',
-            'guest_notes',
-            'reservation_notes',
-            'special_requests',
-          ])
-
-          const birthdayValue = csvValue(row, [
-            'birthday',
-            'is_birthday',
-          ])
-
-          const vipValue = csvValue(row, [
-            'vip',
-            'is_vip',
-            'vip_status',
-          ])
-
-          const combinedFlags =
-            `${occasion} ${notes}`.toLowerCase()
-
-          const partySize = Math.max(
-            1,
-            Number(
-              csvValue(row, [
-                'party_size',
-                'covers',
-                'guests',
-                'guest_count',
-                'size',
-              ]),
-            ) || 1,
-          )
-
-          return {
-            organization_id: organizationId,
-            location_id: locationId,
-            reservation_date: reservationDate,
-            reservation_time:
-              csvValue(row, [
-                'reservation_time',
-                'time',
-                'booking_time',
-                'start_time',
-              ]) || null,
-            guest_name: guestName,
-            party_size: partySize,
-            phone:
-              csvValue(row, [
-                'phone',
-                'phone_number',
-                'mobile',
-              ]) || null,
-            email:
-              csvValue(row, ['email', 'email_address']) ||
-              null,
-            table_id: matchedTable?.id ?? null,
-            table_name: tableName || null,
-            status:
-              csvValue(row, [
-                'status',
-                'reservation_status',
-              ]) || 'booked',
-            occasion: occasion || null,
-            is_birthday:
-              truthyCsv(birthdayValue) ||
-              combinedFlags.includes('birthday'),
-            is_vip:
-              truthyCsv(vipValue) ||
-              combinedFlags.includes('vip'),
-            dining_area:
-              csvValue(row, [
-                'dining_area',
-                'area',
-                'room',
-                'section',
-              ]) || null,
-            notes: notes || null,
-            imported_source: 'csv',
-            external_reservation_id:
-              csvValue(row, [
-                'reservation_id',
-                'booking_id',
-                'confirmation_number',
-              ]) || null,
-          }
-        })
-        .filter(
-          (
-            row,
-          ): row is NonNullable<typeof row> =>
-            row !== null,
-        )
-
-      if (insertRows.length === 0) {
-        throw new Error(
-          'No usable reservations were found in the CSV.',
-        )
-      }
-
+      const insertRows = reservationImport(csvText,'',locationId,organizationId).map(row=>{
+        const table=tables.find(t=>t.table_name.trim().toLowerCase()===row.table_name?.trim().toLowerCase())
+        return {...row,table_id:table?.id??null}
+      })
       const merge=await supabase.rpc('reservation_merge',{p_location_id:locationId,p_rows:insertRows})
       if(merge.error)throw merge.error
 
+      notifyReservationsChanged()
       await loadReservations(locationId)
 
-      setReservationUploadMessage(`${merge.data.added} new reservations added · ${merge.data.duplicates} duplicates skipped · ${merge.data.matched} new reservations matched to tables`)
+      setReservationUploadMessage(`${merge.data.added} new reservations added · ${merge.data.duplicates} duplicates skipped · ${merge.data.matched} new reservations matched to tables · Dates: ${[...new Set(insertRows.map(r=>r.reservation_date))].join(', ')} (Central time)`)
 
       setShowReservationsPanel(true)
     } catch (caughtError) {
