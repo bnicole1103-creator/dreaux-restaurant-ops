@@ -1,3 +1,4 @@
+import {activeReservations,useReservationRevision} from '../lib/reservationSync'
 import {FloorFloatingPanel} from '../components/FloorFloatingPanel'
 import './FloorWorkspace.css'
 import {orderRooms} from '../lib/roomOrder'
@@ -580,6 +581,9 @@ const [partySize, setPartySize] = useState(1)
     setActiveSessions(nextSessions)
   }
 
+  const reservationRevision=useReservationRevision(locationId)
+  useEffect(()=>{if(locationId)void loadReservations(locationId)},[locationId,reservationRevision])
+
   async function loadReservations(locationIdValue: string) {
     const reservationDate =
       reservationToday()
@@ -614,7 +618,7 @@ const [partySize, setPartySize] = useState(1)
       return
     }
 
-    setReservations((data ?? []) as ReservationRecord[])
+    setReservations(activeReservations((data ?? []) as ReservationRecord[]))
   }
 
   function normalizeCsvHeader(value: string) {
@@ -1769,7 +1773,7 @@ const [partySize, setPartySize] = useState(1)
     const plan=card?activePlans.find(p=>p.id===card.id):undefined
     if(plan){setScheduleEditRequest({id:plan.id,nonce:Date.now()});return}
     const original=card?baseSectionCards.find(c=>c.id===card.id):undefined
-    setScheduleEditRequest({id:'',nonce:Date.now(),legacy:original?{id:original.id,name:original.name,employee_id:original.employeeId,guest_name:original.guestName??null,table_ids:original.tableIds}:undefined})
+    setScheduleEditRequest({id:'',nonce:Date.now(),legacy:original?{id:original.id,name:original.name,employee_id:original.employeeId,guest_name:original.guestName??null,table_ids:original.tableIds}:undefined,...(!original&&activeShift?.shift_date&&activeShift.shift_date!==serviceDay()?{date:activeShift.shift_date}:{})})
   }
   if (loading) {
     return (
@@ -1841,6 +1845,13 @@ const [partySize, setPartySize] = useState(1)
       </div>
 
 
+      <div className="floor-day-strip" aria-label="Day and section assignment">
+        <label>Day / shift<select aria-label="Floor day and shift" value={activeShiftId} onChange={e=>{setActiveShiftId(e.target.value);setSelectedTableIds([])}}><option value="">Choose shift</option>{shifts.map(s=><option key={s.id} value={s.id}>{s.shift_date} · {s.shift_name} · {s.status}</option>)}</select></label>
+        <span aria-live="polite">{selectedTableIds.length?tables.filter(t=>selectedTableIds.includes(t.id)).map(t=>t.table_name).join(', '):'Tap tables to select a section'}</span>
+        {floorAccess.can('floor','sections')&&<button type="button" disabled={saving||arrangeMode||!selectedTableIds.length} onClick={()=>openSectionEditor()}>Assign {selectedTableIds.length||''} tables</button>}
+        {selectedTableIds.length>0&&<button type="button" onClick={()=>setSelectedTableIds([])}>Clear</button>}
+        <label>Current section<select aria-label="Show or edit current section" value="" onChange={e=>{const c=sectionCards.find(c=>c.id===e.target.value);if(c){setSelectedTableIds(c.tableIds);const t=tables.find(t=>c.tableIds.includes(t.id));if(t)setActiveRoomId(t.room_id);if(floorAccess.can('floor','sections'))openSectionEditor(c,c.tableIds)}}}><option value="">{sectionCards.length} assigned sections</option>{sectionCards.map(c=><option key={c.id} value={c.id}>{c.name} · {c.employeeId?memberName(c.employeeId):c.guestName} · {c.tableIds.length} tables</option>)}</select></label>
+      </div>
       <nav className="floor-workspace-nav" aria-label="Floor tools">
         {floorAccess.can('floor','sections')&&<button type="button" aria-expanded={floorView==='sections'} onClick={()=>setFloorView(floorView==='sections'?'map':'sections')}>Sections ▾</button>}
         <button type="button" aria-expanded={floorView==='crew'} onClick={()=>setFloorView(floorView==='crew'?'map':'crew')}>Crew & walk-ins ▾</button>

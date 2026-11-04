@@ -1,3 +1,4 @@
+import {notifyReservationsChanged} from '../lib/reservationSync'
 import {PageWord} from './PageDesign'
 import { useState } from 'react'
 import { supabase } from '../lib/supabase'
@@ -20,7 +21,7 @@ export function ReservationEditor({reservation,locationId,tables,team,onSaved}:{
     try {
       const result=await supabase.rpc('reservation_edit_tables',{p_location_id:locationId,p_reservation_id:reservation.id,p_version:version,p_party_size:Number(size),p_table_ids:tableIds,p_server_id:server||null,p_notes:notes})
       if(result.error)throw result.error
-      setEditing(false);onSaved()
+      setEditing(false);notifyReservationsChanged();onSaved()
     }catch(e){setError((e as Error).message)}finally{setBusy(false)}
   }
   if(!editing)return <button type="button" onClick={open}><ScreenText id="ReservationEditor.edit">Edit reservation</ScreenText></button>

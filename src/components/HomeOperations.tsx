@@ -1,3 +1,4 @@
+import {activeReservations,useReservationRevision} from '../lib/reservationSync'
 import {DesignSection} from './DesignSection'
 import { TeamProfileName } from './TeamProfileName'
 // page-designer-instrumented
@@ -13,17 +14,18 @@ type Schedule={rows:Shift[];synced_at:string|null;error?:string;configured?:bool
 export function reservationClock(value:string){const m=/^(\d{1,2}):(\d{2})/.exec(value);if(!m)return value;const h=Number(m[1]);return `${h%12||12}:${m[2]} ${h>=12?'PM':'AM'}`}
 const clock=(value:string)=>new Intl.DateTimeFormat('en-US',{timeZone:'America/Chicago',hour:'numeric',minute:'2-digit',hour12:true}).format(new Date(value))
 export function HomeOperations({location,today,refresh}:{location:string;today:string;refresh:number}){
+ const reservationRevision=useReservationRevision(location)
  const [reservations,setReservations]=useState<Reservation[]>([]),[reservationError,setReservationError]=useState(''),[schedule,setSchedule]=useState<Schedule|null>(null),[scheduleError,setScheduleError]=useState(''),[loading,setLoading]=useState(true)
  useEffect(()=>{let live=true;setReservations([]);setSchedule(null);setLoading(true)
  void Promise.allSettled([
   supabase.from('reservations').select('id,reservation_time,guest_name,party_size,status,table_name,occasion,is_birthday,is_vip').eq('location_id',location).eq('reservation_date',today).order('reservation_time'),
   supabase.functions.invoke('home-schedule',{body:{location_id:location}})
  ]).then(([r,s])=>{if(!live)return
-  if(r.status==='fulfilled'&&!r.value.error){setReservations(r.value.data??[]);setReservationError('')}else setReservationError('Unable to load reservations. '+(r.status==='fulfilled'?r.value.error?.message:String(r.reason)))
+  if(r.status==='fulfilled'&&!r.value.error){setReservations(activeReservations(r.value.data??[]));setReservationError('')}else setReservationError('Unable to load reservations. '+(r.status==='fulfilled'?r.value.error?.message:String(r.reason)))
   if(s.status==='fulfilled'&&!s.value.error){setSchedule(s.value.data);setScheduleError('')}else setScheduleError('Unable to load 7shifts. The connection may still need setup.')
   setLoading(false)
  });return()=>{live=false}
- },[location,today,refresh])
+ },[location,today,refresh,reservationRevision])
  return <><DesignSection as="section" data-design-block="copy.40eb9216c25d8811.1" className="home-section home-reservations"><div data-design-block="copy.bf267f5c1edd127d.1" className="home-section-heading"><h2 data-design-block="copy.72ab130350b2968f.1"><ScreenText id="HomeOperations.ef9a2e6ea79fd49e">Today’s Reservations</ScreenText></h2><Link to="/floor"><ScreenText id="HomeOperations.525371addd04800c">Floor / Upload →</ScreenText></Link></div>
  {loading&&<p data-design-block="copy.88ce4574481569a0.1" role="status"><ScreenText id="HomeOperations.4b5b6fd9f16ece53">Loading reservations…</ScreenText></p>}{reservationError&&<p data-design-block="copy.a41267cb28b10e13.1" role="alert">{reservationError}</p>}{!loading&&!reservationError&&!reservations.length&&<p data-design-block="copy.ba846a938057c707.1"><ScreenText id="HomeOperations.038a1540ce774c1f">No reservations uploaded for today.</ScreenText></p>}
  {!reservationError&&reservations.length>0&&<details className="home-reservation-disclosure" key={`${location}:${today}`}><summary><strong>{reservations.length}<ScreenText id="HomeOperations.5bfc9304f46db128"> reservations · </ScreenText>{reservations.filter(r=>!['cancelled','canceled','no_show'].includes(r.status)).reduce((n,r)=>n+(r.party_size??0),0)}<ScreenText id="HomeOperations.3e37fafca1f8ec5f"> guests expected</ScreenText></strong><span><ScreenText id="HomeOperations.23ab780df5c1456d">View list</ScreenText></span></summary>

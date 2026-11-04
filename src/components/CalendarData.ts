@@ -1,3 +1,4 @@
+import {useReservationRevision} from '../lib/reservationSync'
 import type { CalendarLook } from '../lib/calendarLook'
 import type { CalendarAudience } from '../lib/calendarAudience'
 import {useEffect,useState} from 'react'
@@ -8,6 +9,7 @@ export type CalendarShift={id:string;name:string;role:string;station:string;star
 export type CalendarDay={rows:CalendarShift[];synced_at:string|null;error:string|null;reservations:number;posts?:number}
 export type CalendarData={events:CalendarEvent[];days:Record<string,CalendarDay>;styles?:Record<string,{config:CalendarLook;version:number}>}
 export function useCalendarData(location:string,from:string,to:string){
+ const reservationRevision=useReservationRevision(location)
  const [data,setData]=useState<CalendarData>({events:[],days:{}}),[loading,setLoading]=useState(true),[error,setError]=useState(''),[scheduleError,setScheduleError]=useState(''),[refresh,setRefresh]=useState(0)
  useEffect(()=>{let live=true,running=false;setData({events:[],days:{}});setError('');setScheduleError('');if(!location){setLoading(false);return}
   async function load(){if(running)return;running=true;setLoading(true)
@@ -21,5 +23,6 @@ export function useCalendarData(location:string,from:string,to:string){
   void load();const focus=()=>{if(document.visibilityState==='visible')void load()};const timer=setInterval(focus,300000);window.addEventListener('focus',focus)
   return()=>{live=false;clearInterval(timer);window.removeEventListener('focus',focus)}
  },[location,from,to,refresh])
+ useEffect(()=>{let live=true;if(location)void supabase.rpc('calendar_read',{p_location_id:location,p_from:from,p_to:to}).then(r=>{if(live&&!r.error)setData(r.data)});return()=>{live=false}},[location,from,to,reservationRevision])
  return {data,loading,error,scheduleError,reload:()=>setRefresh(v=>v+1)}
 }
