@@ -1,0 +1,1 @@
+export const productCategories=['Vodka','Tequila','Mezcal','Rum','Gin','Whiskey / Bourbon','Scotch','Cognac','Brandy','Liqueur / Cordial','Wine','Sparkling wine','Beer / Cider','Non-alcoholic','Other'] as const
