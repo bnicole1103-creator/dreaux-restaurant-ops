@@ -5,3 +5,5 @@ export function weekDays(day:string){const offset=(new Date(day+'T12:00:00Z').ge
 export function monthDays(month:string){const first=month+'-01',next=new Date(first+'T12:00:00Z');next.setUTCMonth(next.getUTCMonth()+1);const last=addDays(next.toISOString().slice(0,10),-1);return {first,last,grid:Array.from({length:Math.ceil((new Date(first+'T12:00:00Z').getUTCDay()+Number(last.slice(-2)))/7)*7},(_,i)=>addDays(addDays(first,-new Date(first+'T12:00:00Z').getUTCDay()),i))}}
 export const dateLabel=(day:string,short=false)=>new Intl.DateTimeFormat('en-US',{timeZone:'UTC',weekday:'short',month:short?'short':'long',day:'numeric',year:short?undefined:'numeric'}).format(new Date(day+'T12:00:00Z'))
 export const shiftClock=(date:string)=>new Intl.DateTimeFormat('en-US',{timeZone:'America/Chicago',hour:'numeric',minute:'2-digit'}).format(new Date(date))
+
+export function sundayWeekDays(day:string){const start=addDays(day,-new Date(day+'T12:00:00Z').getUTCDay());return Array.from({length:7},(_,i)=>addDays(start,i))}
