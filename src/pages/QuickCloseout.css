@@ -20,3 +20,8 @@
 .quick-closeout [aria-invalid=true]{outline:3px solid #a52320;outline-offset:3px}
 .quick-closeout input[type=time]{min-height:48px}
 .quick-closeout .employee-receipt-review>details{margin:8px 0}
+
+.quick-closeout .closeout-main-section>summary{font-size:1.15rem;padding:12px 0;font-weight:750;cursor:pointer}
+.quick-closeout .closeout-section-questions{padding-top:8px;display:grid;gap:12px}
+.quick-closeout .employee-receipt-wallet>summary{display:none}
+.quick-closeout .closeout-question-group,.quick-closeout .receipt-question-group{border-top:1px solid var(--warm-border,#d4c1b0);padding-top:10px}
