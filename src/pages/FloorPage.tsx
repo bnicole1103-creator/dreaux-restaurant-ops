@@ -1,3 +1,4 @@
+import '../components/FloorCompactStatus.css'
 import {ReservationInquiryPage} from './ReservationInquiryPage'
 import {ReservationFileUpload} from '../components/ReservationFileUpload'
 import {reservationFilesImport} from '../lib/reservationCsv'
@@ -379,6 +380,8 @@ const [partySize, setPartySize] = useState(1)
       setAssignments([])
       setSectionCards([])
       setActiveSessions([])
+      setSessionCountShift('')
+      sessionLoadSequence.current++
       return
     }
 
@@ -512,7 +515,10 @@ const [partySize, setPartySize] = useState(1)
     }
   }
 
+  const [sessionCountShift,setSessionCountShift]=useState('')
+  const sessionLoadSequence=useRef(0)
   async function loadTableSessions(shiftId: string) {
+    const request=++sessionLoadSequence.current;setSessionCountShift('')
     const { data: sessions, error: sessionError } =
       await supabase
         .from('table_sessions')
@@ -529,6 +535,7 @@ const [partySize, setPartySize] = useState(1)
         .eq('shift_id', shiftId)
         .is('closed_at', null)
 
+    if(request!==sessionLoadSequence.current)return
     if (sessionError) {
       setError(sessionError.message)
       return
@@ -538,6 +545,7 @@ const [partySize, setPartySize] = useState(1)
 
     if (sessionRows.length === 0) {
       setActiveSessions([])
+      setSessionCountShift(shiftId)
       return
     }
 
@@ -549,6 +557,7 @@ const [partySize, setPartySize] = useState(1)
         .select('table_session_id, table_id')
         .in('table_session_id', sessionIds)
 
+    if(request!==sessionLoadSequence.current)return
     if (linkError) {
       setError(linkError.message)
       return
@@ -585,6 +594,7 @@ const [partySize, setPartySize] = useState(1)
       })
 
     setActiveSessions(nextSessions)
+    setSessionCountShift(shiftId)
   }
 
   const reservationRevision=useReservationRevision(locationId)
@@ -1605,6 +1615,7 @@ const [partySize, setPartySize] = useState(1)
       </div>
 
 
+      <div className="floor-top-status"><AccessSection page="floor" section="schedule"><FloorScheduleBox compact location={locationId} date={activeShift?.shift_date??serviceDay()}/></AccessSection><div className="floor-seating-counts" aria-live="polite"><strong>{activeShiftId&&sessionCountShift===activeShiftId?[...new Map(activeSessions.map(row=>[row.id,row])).values()].reduce((sum,row)=>sum+(Number(row.partySize)||0),0):'—'} guests seated now</strong><span>{activeShiftId&&sessionCountShift===activeShiftId?new Set(activeSessions.flatMap(row=>row.tableIds.length?row.tableIds:[row.primaryTableId])).size:'—'} occupied tables · {tables.reduce((sum,table)=>sum+(Number(table.seat_count)||0),0)} total seats</span><small>{activeShiftId?'Selected shift · current open parties, counted once per party':'Choose a shift to load current seating.'}</small></div></div>
       <div className="floor-day-strip" aria-label="Day and section assignment">
         <label>Day / shift<select aria-label="Floor day and shift" value={activeShiftId} onChange={e=>{setActiveShiftId(e.target.value);setSelectedTableIds([])}}><option value="">Choose shift</option>{shifts.map(s=><option key={s.id} value={s.id}>{s.shift_date} · {s.shift_name} · {s.status}</option>)}</select></label>
         <span aria-live="polite">{selectedTableIds.length?tables.filter(t=>selectedTableIds.includes(t.id)).map(t=>t.table_name).join(', '):'Tap tables to select a section'}</span>
@@ -1630,7 +1641,7 @@ const [partySize, setPartySize] = useState(1)
       {seatReservationId&&!showSeatPanel&&<p role="status">Select tables for the chosen reservation, then tap Seat.</p>}
       {pendingWalkin&&floorView!=='crew'&&<p role="status">Seating {pendingWalkin.guest_name} · select tables on the map, then Seat.</p>}
       <FloorFloatingPanel title="Crew & walk-ins" open={floorView==='crew'} onClose={()=>setFloorView('map')}>
-      <AccessSection page="floor" section="schedule"><FloorScheduleBox location={locationId} date={activeShift?.shift_date??serviceDay()}/></AccessSection>
+      
       <WalkinPanel locationId={locationId} refreshKey={walkinRefresh} onSeat={row=>{setSeatReservationId('');setFloorView('map');setPendingWalkin(row);setGuestName(row.guest_name);setGuestPhone(row.phone);setGuestEmail(row.email);setPartySize(row.party_size);if(selectedTableIds.length)openSeating()}} />
       {pendingWalkin&&<div data-design-block="copy.eb305b57f537aed6.1" className="wt-card" role="status"><strong><ScreenText id="FloorPage.72ad81f5e33ac981">Seating </ScreenText>{pendingWalkin.guest_name}<ScreenText id="FloorPage.0e1b1fe85997c7d1"> · party of </ScreenText>{pendingWalkin.party_size}</strong><p data-design-block="copy.0cae27057d8f304b.1"><ScreenText id="FloorPage.aaf48aa3abcc020d">Select their tables, then press Seat. Their check-in is marked seated when seating succeeds.</ScreenText></p><button data-design-block="copy.b1a3fd87f11bd6fb.1" type="button" disabled={saving} onClick={()=>{setPendingWalkin(null);setGuestName('');setGuestPhone('');setGuestEmail('');setPartySize(1)}}><ScreenText id="FloorPage.a3bf126804af00d4">Cancel walk-in selection</ScreenText></button></div>}
 
@@ -3282,4 +3293,5 @@ const [partySize, setPartySize] = useState(1)
     </DesignSection>
   )
 }
+
 
