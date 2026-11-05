@@ -11,7 +11,7 @@ import './QuickCloseout.css'
 import { quickCloseoutIssues, roleFromSchedule, centralTime, type QuickShift } from '../lib/quickCloseout'
 import { serviceDay } from '../lib/serviceDay'
 import { ScreenText } from "../components/ScreenText"
-import { ClockTime } from '../components/ClockTime'
+import {focusCloseoutIssue} from '../lib/closeoutFocus'
 import { closeoutHours } from '../lib/closeoutHours'
 import './CloseoutMobile.css'
 import { submissionLabel } from '../lib/submissionTime'
@@ -362,6 +362,7 @@ export function CloseoutPage() {
   closeoutRequest.current=receiptDraft.key
   const [submittedReceiptKey,setSubmittedReceiptKey]=useState('')
   const [receiptPending,setReceiptPending]=useState<number|null>(null)
+  const [receiptEditor,setReceiptEditor]=useState({busy:false,dirty:false})
   const [receiptRows,setReceiptRows]=useState<CloseoutReceipt[]>([])
   const receiptTotals=summarizeCloseoutReceipts(receiptRows)
   const [floorShiftId,setFloorShiftId]=useState(''),[floorShifts,setFloorShifts]=useState<{id:string;shift_name:string;status:string}[]>([]),[floorTablesNotice,setFloorTablesNotice]=useState('')
@@ -903,7 +904,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
       setMessage('')
       const failures=currentIssues()
       setIssues(failures)
-      if(failures.length){setShiftOpen(failures.some(x=>x.field==='shift'));setReportOpen(failures.some(x=>x.field==='report'));requestAnimationFrame(()=>document.getElementById('closeout-errors')?.focus());return}
+      if(failures.length){setShiftOpen(failures.some(x=>x.field==='shift'));setReportOpen(failures.some(x=>x.field==='report'));focusCloseoutIssue(failures[0]);return}
       const reportedStockItems=closeoutStockItems(hasStockItems,stockItems)
       const customAnswers = checkAnswers(config, 'staff', answers)
       const {data:{user},error:userError}=await supabase.auth.getUser()
@@ -946,7 +947,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
           stock_items: reportedStockItems,
           zero_sales_confirmed: Number(netSales)===0 && zeroSalesConfirmed,
           zero_sales_reason: Number(netSales)===0 ? zeroSalesReason.trim() : null,
-          shift_type: shiftType || 'PM',
+          shift_type: shiftType || 'TO_VOLUME',
           custom_answers: customAnswers,
           organization_id:
             organizationId,
@@ -1141,7 +1142,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
     return()=>{live=false;controller.abort();clearTimeout(timer)}
   },[locationId,closeoutDay,tables,draftReady,draftKey])
   function currentIssues(){
-    return quickCloseoutIssues({config,configError,shown,scheduledTime,clockInTime,clockOutTime,shiftType,jobRole,netSales,cashDeposit,voidCount,voidValue,discountValue,moneyTurnedInTo,drinkMaker,certified,zeroSalesConfirmed,zeroSalesReason,hasStockItems,stockItems,registerCash,registerImbalanceReason,registerVerifiedBy,answers,receiptPending,receiptKey:receiptDraft.key,receiptRows,targetLoading:targetState.loading,ownerId,peerVoteEmployeeId,ready:!!organizationId&&!!locationId&&draftReady===draftKey})
+    return quickCloseoutIssues({config,configError,shown,scheduledTime,clockInTime,clockOutTime,shiftType,jobRole,netSales,cashDeposit,voidCount,voidValue,discountValue,moneyTurnedInTo,drinkMaker,certified,zeroSalesConfirmed,zeroSalesReason,hasStockItems,stockItems,registerCash,registerImbalanceReason,registerVerifiedBy,answers,receiptPending,receiptEditing:receiptEditor.busy||receiptEditor.dirty,receiptKey:receiptDraft.key,receiptRows,targetLoading:targetState.loading,ownerId,peerVoteEmployeeId,ready:!!organizationId&&!!locationId&&draftReady===draftKey})
   }
   const visibleIssues=issues.length?currentIssues():[]
   const fieldError=(field:string)=>visibleIssues.filter(x=>x.field===field).map(x=><p key={x.message} className="quick-field-error">{x.message}</p>)
@@ -1149,23 +1150,22 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
   const staffQuestions=config?.questions.filter(q=>q.active&&!q.builtin&&q.audience==='staff')??[]
   if(loading)return <section className="page closeout-mobile"><h1>Staff closeout</h1><p role="status">Loading your closeout…</p></section>
   return <DesignSection as="section" data-design-block="closeout.quick.page" className="page closeout-mobile quick-closeout">
-    <header><p>{locationName} · {closeoutDay}</p><h1>Finish my shift</h1><p>Check your shift, enter your totals, and submit.</p><small role="status">{draftStatus}</small></header>
+    <header><p>{locationName} · {closeoutDay}</p><h1>Finish my shift</h1><p>Enter your times and totals, add any receipts, then submit. Missing details will open automatically.</p><small role="status">{draftStatus}</small></header>
     {closeoutDay!==serviceDay()&&<p role="status">You are closing out {closeoutDay}. Today’s service date is {serviceDay()}.</p>}
     {message&&<p className="quick-success" role="status">{message}</p>}
     {error&&<p role="alert" className="quick-field-error">{error}</p>}
-    {visibleIssues.length>0&&<section id="closeout-errors" tabIndex={-1} role="alert" className="quick-errors"><h2>Finish these before submitting</h2><ul>{visibleIssues.map(x=><li key={x.message}><a href={'#quick-'+x.field} onClick={()=>{if(x.field==='shift')setShiftOpen(true);if(x.field==='report')setReportOpen(true)}}>{x.message}</a></li>)}</ul></section>}
+    {visibleIssues.length>0&&<section id="closeout-errors" tabIndex={-1} role="alert" className="quick-errors"><h2>Finish these before submitting</h2><ul>{visibleIssues.map(x=><li key={x.message}><a href={'#quick-'+x.field} onClick={e=>{e.preventDefault();if(x.field==='shift')setShiftOpen(true);if(x.field==='report')setReportOpen(true);focusCloseoutIssue(x)}}>{x.message}</a></li>)}</ul></section>}
     <fieldset disabled={saving} className="quick-fields">
     <DesignSection as="section" data-design-block="closeout.quick.shift" className="card" id="quick-shift">
-      <h2>1. Your shift</h2><p><strong>{ROLE_LABELS[jobRole]}</strong> · {shiftType||'Choose shift'} · {scheduledTime||'Start needed'}{clockOutTime?' – '+clockOutTime:''}</p>
+      <h2>1. Your shift</h2><p><strong>{ROLE_LABELS[jobRole]}</strong> · {scheduledTime||'Start needed'}{clockOutTime?' – '+clockOutTime:''}</p>
       <p>{selectedTables.length?selectedTables.map(t=>t.table_name).join(', '):'Tables not selected'} · Target: {targetState.loading?'Loading…':targetState.ready?money(salesTarget):'Unavailable'}</p>
-        {shown('staff_1')&&<div className="quick-grid"><label>Actual clock-in<ClockTime required label="Clock-in time" value={clockInTime} onChange={setClockInTime}/></label><label>Actual clock-out<ClockTime required label="Clock-out time" value={clockOutTime} onChange={setClockOutTime}/></label></div>}
+        {shown('staff_1')&&<div className="quick-grid"><label data-closeout-field="clockInTime">Actual clock-in<input aria-label="Clock-in time" type="time" required value={clockInTime} onChange={e=>setClockInTime(e.target.value)}/></label><label data-closeout-field="clockOutTime">Actual clock-out<input aria-label="Clock-out time" type="time" required value={clockOutTime} onChange={e=>setClockOutTime(e.target.value)}/></label></div>}
       <details open={shiftOpen||(!scheduledTime&&!quickShifts.length)} onToggle={e=>setShiftOpen(e.currentTarget.open)}><summary>Check / change shift details</summary>
         <p role="status">{scheduleNotice}</p>
         {quickShifts.length>0&&<label>Confirmed shift<select value={quickShift} onChange={e=>{const s=quickShifts.find(s=>s.key===e.target.value);if(s)chooseQuickShift(s)}}><option value="">Select shift</option>{quickShifts.map(s=><option key={s.key} value={s.key}>{s.role} · {centralTime(s.start)} – {centralTime(s.end)}</option>)}</select></label>}
         <div className="quick-grid">
-          {shown('staff_0')&&<label>{questionLabel(config,'staff_0','Scheduled start')}<ClockTime required label="Scheduled start" value={scheduledTime} onChange={v=>{touched.current.shift=true;setScheduledTime(v)}}/></label>}
+          {shown('staff_0')&&<label data-closeout-field="scheduledTime">{questionLabel(config,'staff_0','Scheduled start')}<input aria-label="Scheduled start" type="time" required value={scheduledTime} onChange={e=>{touched.current.shift=true;setScheduledTime(e.target.value)}}/></label>}
           <label>Role worked<select value={jobRole} onChange={e=>{touched.current.shift=true;setJobRole(e.target.value as JobRole)}}>{Object.entries(ROLE_LABELS).map(([id,label])=><option key={id} value={id}>{label}</option>)}</select></label>
-          {shown('staff_2')&&<label>{questionLabel(config,'staff_2','Shift')}<select value={shiftType} onChange={e=>setShiftType(e.target.value)}><option value="">Choose shift</option><option value="AM">AM</option><option value="PM">PM</option><option value="TO_VOLUME">To Volume</option></select></label>}
         </div>
         {closeoutHours(clockInTime,clockOutTime)!==null&&<p>{closeoutHours(clockInTime,clockOutTime)!.toFixed(2)} hours · after-midnight end times count toward this shift.</p>}
         {!targetState.ready&&<p role="status">Target unavailable: {targetState.reason} No sales-target points are estimated without a target.</p>}<button type="button" disabled={targetState.loading} onClick={()=>setTargetRefresh(v=>v+1)}>Refresh target</button>
@@ -1175,29 +1175,29 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
     </DesignSection>
     <DesignSection as="section" data-design-block="closeout.quick.totals" className="card" id="quick-totals">
       <h2>2. Sales &amp; cash</h2><div className="quick-grid">
-        {shown('staff_3')&&<label>{questionLabel(config,'staff_3','Net sales')}<input aria-label="Net sales" type="number" inputMode="decimal" min="0" step="0.01" value={netSales} onChange={e=>setNetSales(e.target.value)}/></label>}
-        {shown('staff_5')&&<label>{questionLabel(config,'staff_5','Cash deposit')}<input aria-label="Cash deposit" type="number" inputMode="decimal" min="0" step="0.01" value={cashDeposit} onChange={e=>setCashDeposit(e.target.value)}/></label>}
+        {shown('staff_3')&&<label>{questionLabel(config,'staff_3','Net sales')}<input data-closeout-field="netSales" aria-label="Net sales" type="number" inputMode="decimal" min="0" step="0.01" value={netSales} onChange={e=>setNetSales(e.target.value)}/></label>}
+        {shown('staff_5')&&<label>{questionLabel(config,'staff_5','Cash deposit')}<input data-closeout-field="cashDeposit" aria-label="Cash deposit" type="number" inputMode="decimal" min="0" step="0.01" value={cashDeposit} onChange={e=>setCashDeposit(e.target.value)}/></label>}
       </div>
-      {shown('staff_14')&&Number(cashDeposit)>0&&<label>{questionLabel(config,'staff_14','Cash given to')}<select value={moneyTurnedInTo} onChange={e=>setMoneyTurnedInTo(e.target.value)}><option value="">Choose recipient</option>{employees.map(p=><option key={p.user_id} value={p.user_id}>{employeeName(p)}</option>)}</select></label>}
-      {shown('staff_3')&&netSales.trim()!==''&&Number(netSales)===0&&<div className="quick-note"><label className="quick-check"><input type="checkbox" checked={zeroSalesConfirmed} onChange={e=>setZeroSalesConfirmed(e.target.checked)}/>I checked my report: $0 sales is correct.</label><label>Why were sales zero?<input value={zeroSalesReason} maxLength={2000} onChange={e=>setZeroSalesReason(e.target.value)} placeholder="For example, worked a non-selling role"/></label></div>}
+      {shown('staff_14')&&Number(cashDeposit)>0&&<label data-closeout-field="cashRecipient">{questionLabel(config,'staff_14','Cash given to')}<select value={moneyTurnedInTo} onChange={e=>setMoneyTurnedInTo(e.target.value)}><option value="">Choose recipient</option>{employees.map(p=><option key={p.user_id} value={p.user_id}>{employeeName(p)}</option>)}</select></label>}
+      {shown('staff_3')&&netSales.trim()!==''&&Number(netSales)===0&&<div className="quick-note" data-closeout-field="zeroSales"><label className="quick-check"><input type="checkbox" checked={zeroSalesConfirmed} onChange={e=>setZeroSalesConfirmed(e.target.checked)}/>I checked my report: $0 sales is correct.</label><label>Why were sales zero?<input value={zeroSalesReason} maxLength={2000} onChange={e=>setZeroSalesReason(e.target.value)} placeholder="For example, worked a non-selling role"/></label></div>}
       {fieldError('totals')}
       <div id="quick-receipts" className="quick-receipts"><p><strong>Receipts</strong> · {receiptPending===null?'Status unverified':receiptRows.length+' attached'+(receiptPending?' · '+receiptPending+' need details':'')}</p>
-      {receiptDraft.key&&<CloseoutReceiptWallet closeoutOnly key={receiptDraft.key} location={locationId} day={closeoutDay} closeoutKey={receiptDraft.key} shiftId={floorShiftId||undefined} onPendingChange={setReceiptPending} onChange={rows=>setReceiptRows(rows)}/>}
-      <p>Wallet drafts stay private and do not block this closeout. Attach all receipts supporting your POS void and comp totals.</p>
-      <div className="quick-grid"><label>{questionLabel(config,'staff_6','POS void total')}<input aria-label="POS void total" type="number" min="0" step="0.01" inputMode="decimal" value={voidValue} onChange={e=>setVoidValue(e.target.value)}/><small>Attached receipts: {money(String(receiptTotals.voidTotal))}</small></label><label>{questionLabel(config,'staff_7','POS comps / discounts')}<input aria-label="POS comps / discounts" type="number" min="0" step="0.01" inputMode="decimal" value={discountValue} onChange={e=>setDiscountValue(e.target.value)}/><small>Attached receipts: {money(String(receiptTotals.compTotal))}</small></label></div>
+      {receiptDraft.key&&<CloseoutReceiptWallet closeoutOnly initialExpanded onEditorState={setReceiptEditor} key={receiptDraft.key} location={locationId} day={closeoutDay} closeoutKey={receiptDraft.key} shiftId={floorShiftId||undefined} onPendingChange={setReceiptPending} onChange={rows=>setReceiptRows(rows)}/>}
+      <p>Take or upload a photo, enter its details, then tap Save &amp; add to closeout. Finish the open receipt before submitting.</p>
+      <div className="quick-grid"><label>{questionLabel(config,'staff_6','POS void total')}<input data-closeout-field="voidValue" aria-label="POS void total" type="number" min="0" step="0.01" inputMode="decimal" value={voidValue} onChange={e=>setVoidValue(e.target.value)}/><small>Attached receipts: {money(String(receiptTotals.voidTotal))}</small></label><label>{questionLabel(config,'staff_7','POS comps / discounts')}<input data-closeout-field="discountValue" aria-label="POS comps / discounts" type="number" min="0" step="0.01" inputMode="decimal" value={discountValue} onChange={e=>setDiscountValue(e.target.value)}/><small>Attached receipts: {money(String(receiptTotals.compTotal))}</small></label></div>
       {receiptRows.length===0?<button type="button" disabled={receiptPending!==0} onClick={()=>{setVoidCount('0');setVoidValue('0');setDiscountValue('0')}}>No voids or comps</button>:<button type="button" disabled={receiptPending!==0} onClick={()=>{setVoidCount(String(receiptTotals.voidCount));setVoidValue(String(receiptTotals.voidTotal));setDiscountValue(String(receiptTotals.compTotal))}}>Use attached receipt totals</button>}
       <small>Use only after comparing with your POS report. Enter 0 explicitly when there were none.</small>{fieldError('receipts')}</div>
-      {jobRole==='main_bartender'&&shown('staff_8')&&<div id="quick-register"><h3>Register</h3><label>{questionLabel(config,'staff_8','Cash left in register')}<input type="number" min="0" step="0.01" value={registerCash} onChange={e=>setRegisterCash(e.target.value)}/></label>{registerCash!==''&&Number(registerCash)!==200&&<><label>{questionLabel(config,'staff_9','Reason for difference')}<textarea value={registerImbalanceReason} onChange={e=>setRegisterImbalanceReason(e.target.value)}/></label><label>{questionLabel(config,'staff_10','Verified by')}<select value={registerVerifiedBy} onChange={e=>setRegisterVerifiedBy(e.target.value)}><option value="">Choose verifier</option>{employees.map(p=><option key={p.user_id} value={p.user_id}>{employeeName(p)}</option>)}</select></label></>}{fieldError('register')}</div>}
+      {jobRole==='main_bartender'&&shown('staff_8')&&<div id="quick-register" data-closeout-field="register"><h3>Register</h3><label>{questionLabel(config,'staff_8','Cash left in register')}<input type="number" min="0" step="0.01" value={registerCash} onChange={e=>setRegisterCash(e.target.value)}/></label>{registerCash!==''&&Number(registerCash)!==200&&<><label>{questionLabel(config,'staff_9','Reason for difference')}<textarea value={registerImbalanceReason} onChange={e=>setRegisterImbalanceReason(e.target.value)}/></label><label>{questionLabel(config,'staff_10','Verified by')}<select value={registerVerifiedBy} onChange={e=>setRegisterVerifiedBy(e.target.value)}><option value="">Choose verifier</option>{employees.map(p=><option key={p.user_id} value={p.user_id}>{employeeName(p)}</option>)}</select></label></>}{fieldError('register')}</div>}
     </DesignSection>
     <DesignSection as="section" data-design-block="closeout.quick.report" className="card" id="quick-report">
       <h2>3. Anything to report?</h2><div className="quick-actions"><button type="button" aria-pressed={hasStockItems==='no'&&!notes.trim()} onClick={()=>{setHasStockItems('no');setStockItems('');setReportOpen(!!notes.trim())}}>No new stock shortages</button><button type="button" onClick={()=>setReportOpen(true)}>Add an issue / note</button></div>
-      <details open={reportOpen||hasStockItems==='yes'} onToggle={e=>setReportOpen(e.currentTarget.open)}><summary>Stock shortages &amp; shift notes{notes.trim()?' · note added':''}</summary><CloseoutStockQuestion answer={hasStockItems} items={stockItems} disabled={saving} onAnswer={v=>{setHasStockItems(v);if(v!=='yes')setStockItems('')}} onItems={setStockItems}/><label>Guest issues, discrepancies or shift notes<textarea rows={3} value={notes} onChange={e=>setNotes(e.target.value)}/></label><small>Keep any applicable custom questions below complete.</small></details>
+      <details open={reportOpen||hasStockItems==='yes'} onToggle={e=>setReportOpen(e.currentTarget.open)}><summary>Stock shortages &amp; shift notes{notes.trim()?' · note added':''}</summary><div data-closeout-field="stock"><CloseoutStockQuestion answer={hasStockItems} items={stockItems} disabled={saving} onAnswer={v=>{setHasStockItems(v);if(v!=='yes')setStockItems('')}} onItems={setStockItems}/></div><label>Guest issues, discrepancies or shift notes<textarea rows={3} value={notes} onChange={e=>setNotes(e.target.value)}/></label><small>Keep any applicable custom questions below complete.</small></details>
       {fieldError('report')}
       {staffQuestions.length>0&&<div id="quick-questions"><CloseoutQuestions config={config} audience="staff" answers={answers} onChange={setAnswers}/>{fieldError('questions')}</div>}
-      {jobRole==='server'&&<label id="quick-drinks">{questionLabel(config,'staff_15','Who made your drinks?')} (required)<select required value={drinkMaker} onChange={e=>setDrinkMaker(e.target.value)}><option value="">Choose who made your drinks</option>{employees.map(p=><option key={p.user_id} value={p.user_id}>{employeeName(p)}</option>)}</select>{fieldError('drinks')}</label>}{shown('staff_11')&&<details><summary>Optional teammate recognition</summary><label>Recognize a teammate<select value={peerVoteEmployeeId} onChange={e=>setPeerVoteEmployeeId(e.target.value)}><option value="">Skip recognition</option>{employees.filter(p=>p.user_id!==ownerId).map(p=><option key={p.user_id} value={p.user_id}>{employeeName(p)}</option>)}</select></label>{peerVoteEmployeeId&&<label>What did they do?<textarea maxLength={500} value={peerVoteOtherReason} onChange={e=>setPeerVoteOtherReason(e.target.value)}/></label>}</details>}
+      {jobRole==='server'&&<label id="quick-drinks" data-closeout-field="drinkMaker">{questionLabel(config,'staff_15','Who made your drinks?')} (required)<select required value={drinkMaker} onChange={e=>setDrinkMaker(e.target.value)}><option value="">Choose who made your drinks</option>{employees.map(p=><option key={p.user_id} value={p.user_id}>{employeeName(p)}</option>)}</select>{fieldError('drinks')}</label>}{shown('staff_11')&&<details><summary>Optional teammate recognition</summary><label>Recognize a teammate<select value={peerVoteEmployeeId} onChange={e=>setPeerVoteEmployeeId(e.target.value)}><option value="">Skip recognition</option>{employees.filter(p=>p.user_id!==ownerId).map(p=><option key={p.user_id} value={p.user_id}>{employeeName(p)}</option>)}</select></label>{peerVoteEmployeeId&&<label>What did they do?<textarea maxLength={500} value={peerVoteOtherReason} onChange={e=>setPeerVoteOtherReason(e.target.value)}/></label>}</details>}
     </DesignSection>
     <section className="card quick-submit" id="quick-submit"><h2>Review &amp; submit</h2><p>Sales <strong>{money(netSales)}</strong> · Deposit <strong>{money(cashDeposit)}</strong> · {receiptRows.length} attached receipts</p>
-      <label className="quick-check"><input type="checkbox" checked={certified} onChange={e=>setCertified(e.target.checked)}/>I checked my POS report and confirm this closeout is accurate.</label>{fieldError('submit')}
+      <label className="quick-check"><input data-closeout-field="certified" type="checkbox" checked={certified} onChange={e=>setCertified(e.target.checked)}/>I checked my POS report and confirm this closeout is accurate.</label>{fieldError('submit')}
       <button type="button" className="primary-button" disabled={saving} onClick={()=>void submitCloseout()}>{saving?'Submitting…':'Submit closeout'}</button>
       <details><summary>Points breakdown</summary>{closeoutDay<serviceDay()&&pastPoints===false?<p>No point changes for this approved past-date closeout.</p>:pointResult?<><p>Estimated shift score: {pointResult.shiftScore}. Final points are calculated by the server.</p>{pointResult.adjustments.map(a=><p key={a.code}>{a.description}: {a.points>0?'+':''}{a.points}</p>)}</>:<p>Enter actual clock times to estimate points.</p>}</details>
     </section></fieldset>

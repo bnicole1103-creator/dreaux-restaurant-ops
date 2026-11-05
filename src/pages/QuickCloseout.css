@@ -14,3 +14,9 @@
 .quick-closeout .receipt-camera-icon{min-width:76px;min-height:70px}.quick-closeout .quick-submit>.primary-button{width:100%;min-height:54px;font-size:1.1rem}
 .quick-closeout [id^=quick-]{scroll-margin-top:100px}.quick-closeout .card .card{box-shadow:none;border:0;padding:0;margin:8px 0}
 @media(max-width:550px){.quick-closeout .quick-grid{grid-template-columns:1fr}.quick-closeout .quick-fields>.card{padding:14px}.quick-closeout .employee-receipt-grid{grid-template-columns:1fr}.quick-closeout .employee-receipt-capture{flex-wrap:wrap}}
+
+/* Guided validation stays clear of the app header and mobile navigation. */
+.quick-closeout [data-closeout-field]{scroll-margin-block:150px 120px}
+.quick-closeout [aria-invalid=true]{outline:3px solid #a52320;outline-offset:3px}
+.quick-closeout input[type=time]{min-height:48px}
+.quick-closeout .employee-receipt-review>details{margin:8px 0}
