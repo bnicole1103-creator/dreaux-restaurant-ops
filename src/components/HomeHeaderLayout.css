@@ -17,3 +17,18 @@
 .personal-home .home-header-controls .home-86-preview-card small{display:block!important;margin:6px 0!important;font-size:.8rem;overflow-wrap:anywhere}
 .personal-home .home-header-controls button:focus-visible{outline:3px solid currentColor;outline-offset:3px}
 @media(max-width:650px){.personal-home .home-header-controls{grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;gap:10px!important}.personal-home .home-header-controls .personal-profile-brand{font-size:clamp(1.3rem,4.5vw,1.8rem)!important}.personal-home .home-header-controls .home-header-action-row>button{width:100%!important;font-size:.8rem!important}.personal-home .home-header-controls .home-86-preview-card{padding:7px!important}.personal-home .home-header-controls .home-86-preview-card>button{font-size:.8rem!important}.personal-home .home-header-controls .home-86-preview-card ul{font-size:.78rem!important;padding-left:16px!important}}
+
+/* Keep the single Home actions block at the very top. */
+.personal-home.page.staff-home > .home-actions-flow {
+  display: block !important;
+  order: -100 !important;
+  grid-column: 1 / -1 !important;
+  position: relative !important;
+  inset: auto !important;
+  transform: none !important;
+  translate: none !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  height: auto !important;
+  margin: 0 0 18px !important;
+}
