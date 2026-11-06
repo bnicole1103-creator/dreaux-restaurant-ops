@@ -1,3 +1,5 @@
+import {ReservationCapacityPlanner} from '../components/ReservationCapacityPlanner'
+// reservation-capacity-planner-v1
 import './FloorCompactCards.css'
 import '../components/FloorCompactStatus.css'
 import {ReservationInquiryPage} from './ReservationInquiryPage'
@@ -1632,6 +1634,7 @@ const [partySize, setPartySize] = useState(1)
         <p className="muted">Published sections for this day stay visible here. Timed assignments light up on the map while active. Use Sections to edit.</p>
       </section>
       <nav className="floor-workspace-nav" aria-label="Floor tools">
+        <AccessSection page="floor" section="reservations"><ReservationCapacityPlanner location={locationId} initialDate={activeShift?.shift_date??serviceDay()}/></AccessSection>
         {floorAccess.can('floor','sections')&&<button type="button" aria-expanded={floorView==='sections'} onClick={()=>setFloorView(floorView==='sections'?'map':'sections')}>Sections ▾</button>}
         <button type="button" aria-expanded={floorView==='crew'} onClick={()=>setFloorView(floorView==='crew'?'map':'crew')}>Walk-ins ▾</button>
         {floorAccess.can('floor','reservations')&&<><button type="button" aria-expanded={showReservationsPanel} onClick={()=>setShowReservationsPanel(v=>!v)}>Reservations ({reservations.length}) ▾</button></>}
