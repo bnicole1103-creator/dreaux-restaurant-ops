@@ -1,3 +1,5 @@
+import {time12} from '../lib/time12'
+import {TimeInput12} from './TimeInput12'
 import {DesignSection} from './DesignSection'
 import {PageWord} from './PageDesign'
 import { useRef, useState } from 'react'
@@ -54,14 +56,14 @@ export function BulkTaskAssignment({ location, day, templates, staff, disabled, 
       <label><PageWord id="sectioncopy.48ee43402cd57eae7b32">{"Find task groups"}</PageWord><input type="search" value={search} onChange={e => setSearch(e.target.value)} /></label>
       <div className="task-staff">{visible.map(t => <div key={t.id}>
         <label><input type="checkbox" disabled={!t.reviewed || (!ids.includes(t.id) && ids.length >= 40)} checked={ids.includes(t.id)} onChange={e => { setIds(v => e.target.checked ? [...v, t.id] : v.filter(id => id !== t.id)); change() }} />
-          <span>{t.title}<small>{t.items.length}<PageWord id="sectioncopy.42c7d4a30e22580a87a6">{" tasks · "}</PageWord>{t.reviewed ? (t.due_time ? `Due ${t.due_time.slice(0, 5)}` : 'No preset due time') : 'Review this group before assigning'}</small></span>
+          <span>{t.title}<small>{t.items.length}<PageWord id="sectioncopy.42c7d4a30e22580a87a6">{" tasks · "}</PageWord>{t.reviewed ? (t.due_time ? `Due ${time12(t.due_time)}` : 'No preset due time') : 'Review this group before assigning'}</small></span>
         </label>
         <details><summary><PageWord id="sectioncopy.937db82a1fb1b9e6a8ae">{"Preview tasks"}</PageWord></summary><ol>{t.items.map((item, i) => <li key={i}>{item}</li>)}</ol></details>
       </div>)}</div>
       {!visible.length && <p><PageWord id="sectioncopy.18cc692bd696d5b62db3">{"No matching task groups."}</PageWord></p>}
       <button type="button" onClick={() => { setIds([]); change() }}><PageWord id="sectioncopy.dc9e5efcd851f51d4e99">{"Clear selection"}</PageWord></button>
       <label><PageWord id="sectioncopy.18226ad244aef3bad482">{"Shift or area (optional)"}</PageWord><input maxLength={100} value={shift} onChange={e => { setShift(e.target.value); change() }} /></label>
-      <label><PageWord id="sectioncopy.27e0ce704fb948c7d4de">{"Common due time (optional, New Orleans time)"}</PageWord><input type="time" value={due} onChange={e => { setDue(e.target.value); change() }} /></label>
+      <label><PageWord id="sectioncopy.27e0ce704fb948c7d4de">{"Common due time (optional, New Orleans time)"}</PageWord><TimeInput12  value={due} onChange={e => { setDue(e.target.value); change() }} /></label>
       <p><PageWord id="sectioncopy.2dadfe4d749f92570ec9">{"Leave the time blank to keep each group's default due time."}</PageWord></p>
       <p>{ids.length}<PageWord id="sectioncopy.4f6771649856d2102a45">{" groups selected · "}</PageWord>{selected.reduce((n, t) => n + t.items.length, 0)}<PageWord id="sectioncopy.41a8995e0ef7f19242dc">{" tasks · "}</PageWord>{serviceDateLabel(day)}</p>
       {selected.length > 0 && <ul>{selected.map(t => <li key={t.id}>{t.title}</li>)}</ul>}

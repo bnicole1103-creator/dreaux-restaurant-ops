@@ -1,3 +1,4 @@
+import {TimeInput12} from '../components/TimeInput12'
 import {DesignSection} from '../components/DesignSection'
 // page-designer-instrumented
 import { PageWord } from "../components/PageDesign"
@@ -140,6 +141,7 @@ export function ReservationInquiryPage({largeParty=false,initialDate}:{largePart
     }
   }, [])
 
+  async function removeInquiry(row:Inquiry){if(saving||!window.confirm('Remove this inquiry? Its record and any linked reservation will be kept.'))return;setSaving(true);setError('');try{const r=await supabase.rpc('inquiry_archive',{p_location_id:locationId,p_source:'Host',p_id:row.id});if(r.error)throw r.error;setRecent(rows=>rows.filter(x=>x.id!==row.id))}catch(e){setError(String((e as Error).message??e))}finally{setSaving(false)}}
   async function load(location: string) {
     setLoading(true)
     setError('')
@@ -151,7 +153,9 @@ export function ReservationInquiryPage({largeParty=false,initialDate}:{largePart
       setCanManage(Boolean(result.data?.can_manage))
       setPresets((result.data?.presets ?? []) as Preset[])
       setDraftPresets((result.data?.presets ?? []) as Preset[])
-      setRecent((result.data?.recent ?? []) as Inquiry[])
+      const archived=await supabase.rpc('inquiry_archive_list',{p_location_id:location});if(archived.error)throw archived.error
+      const hidden=new Set((archived.data??[]).filter((a:{source:string})=>a.source==='Host').map((a:{inquiry_id:string})=>a.inquiry_id))
+      setRecent(((result.data?.recent ?? []) as Inquiry[]).filter(r=>!hidden.has(r.id)))
     } catch (caught) {
       setError(String((caught as { message?: string }).message ?? caught))
     } finally {
@@ -216,7 +220,7 @@ export function ReservationInquiryPage({largeParty=false,initialDate}:{largePart
       setCanManage(Boolean(result.data?.can_manage))
       setPresets((result.data?.presets ?? []) as Preset[])
       setDraftPresets((result.data?.presets ?? []) as Preset[])
-      setRecent((result.data?.recent ?? []) as Inquiry[])
+      await load(locationId)
       setEditingPresets(false)
     } catch (caught) {
       setError(String((caught as { message?: string }).message ?? caught))
@@ -325,15 +329,15 @@ export function ReservationInquiryPage({largeParty=false,initialDate}:{largePart
                   </label>
                   <label>
                     <ScreenText id="ReservationInquiryPage.firstTime">First preferred time</ScreenText>
-                    <input required type="time" value={preferredTime} onChange={(event) => setPreferredTime(event.target.value)} />
+                    <TimeInput12 required  value={preferredTime} onChange={(event) => setPreferredTime(event.target.value)} />
                   </label>
                   <label>
                     <ScreenText id="ReservationInquiryPage.secondTime">Second preferred time</ScreenText>
-                    <input type="time" value={secondTime} onChange={(event) => setSecondTime(event.target.value)} />
+                    <TimeInput12  value={secondTime} onChange={(event) => setSecondTime(event.target.value)} />
                   </label>
                   <label>
                     <ScreenText id="ReservationInquiryPage.thirdTime">Third preferred time</ScreenText>
-                    <input type="time" value={thirdTime} onChange={(event) => setThirdTime(event.target.value)} />
+                    <TimeInput12  value={thirdTime} onChange={(event) => setThirdTime(event.target.value)} />
                   </label>
                   <label>
                     <ScreenText id="ReservationInquiryPage.tableNotes">Guest requests or notes</ScreenText>
@@ -425,7 +429,7 @@ export function ReservationInquiryPage({largeParty=false,initialDate}:{largePart
                   <p>{new Date(row.created_at).toLocaleString('en-US', { timeZone: 'America/Chicago' })}<PageWord id="sectioncopy.5024fcdf97b20a4624ea">{" Central"}</PageWord></p>
                   {(row.phone || row.email) && <p>{[row.phone, row.email].filter(Boolean).join(' · ')}</p>}
                   {row.preferred_date && <p>{row.preferred_date}<PageWord id="sectioncopy.ca8208864a7e20457497">{" · "}</PageWord>{[timeLabel(row.preferred_time ?? ''), timeLabel(row.second_preferred_time ?? ''), timeLabel(row.third_preferred_time ?? '')].filter(Boolean).join(' / ')}</p>}
-                  {row.guest_notes && <p className="gf-message">{row.guest_notes}</p>}
+                  {row.guest_notes && <p className="gf-message">{row.guest_notes}</p>}<button type="button" disabled={saving} onClick={()=>void removeInquiry(row)}>Remove inquiry</button>
                 </article>
               ))
             )}

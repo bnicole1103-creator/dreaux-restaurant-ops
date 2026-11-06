@@ -8,7 +8,7 @@ import './StockBoard.css'
 type Item={id:string;name:string;version:number;added_by_name:string;added_at:string;restocked_by_name?:string;restocked_at?:string;affected_menu?:string[]}
 type CatalogChoice={kind:'ingredient'|'menu';id:string;name:string;affected_menu:string[]}
 type Event={id:number;item_name:string;action:string;actor_name:string;created_at:string;note:string}
-export const stockStamp=(value:string)=>new Intl.DateTimeFormat('en-US',{timeZone:'America/Chicago',month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit'}).format(new Date(value))
+export const stockStamp=(value:string)=>new Intl.DateTimeFormat('en-US',{timeZone:'America/Chicago',month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit',hour12:true}).format(new Date(value))
 export function StockBoard({location,readOnly=false,date,onEditorState}:{location:string;readOnly?:boolean;date?:string;onEditorState?:(state:{busy:boolean;dirty:boolean})=>void}){
  const [items,setItems]=useState<Item[]>([]),[events,setEvents]=useState<Event[]>([]),[catalog,setCatalog]=useState<CatalogChoice[]>([]),[linked,setLinked]=useState(''),[name,setName]=useState(''),[note,setNote]=useState(''),[busy,setBusy]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState(''),[loading,setLoading]=useState(true),[history,setHistory]=useState(false)
  useEffect(()=>{onEditorState?.({busy,dirty:!!(name.trim()||note.trim()||request.current)})},[busy,name,note,onEditorState])

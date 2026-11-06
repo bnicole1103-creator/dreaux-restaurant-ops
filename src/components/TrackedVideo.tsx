@@ -45,7 +45,7 @@ export function TrackedVideo({source,path,...props}:VideoHTMLAttributes<HTMLVide
   void (async()=>{try{const r=await supabase.rpc('video_watch_report',{p_source:source,p_path:path});if(r.error)throw r.error;if(active)setReport(r.data)}catch(e){if(active)setReportError(String((e as {message?:string}).message||'Unable to load viewing analytics.'))}finally{if(active)setLoading(false)}})()
   return()=>{active=false}
  },[open,refresh,source,path])
- const dateTime=(s:string)=>new Date(s).toLocaleString('en-US',{timeZone:'America/Chicago',month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit',second:'2-digit'})
+ const dateTime=(s:string)=>new Date(s).toLocaleString('en-US',{timeZone:'America/Chicago',month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit',second:'2-digit',hour12:true})
  return <div className="tracked-video"><video {...props} ref={video}/>
   <small className="video-watch-note">In-app playback time is recorded for management. External video links are not tracked.</small>
   {trackingError&&<p className="video-watch-note" role="status">Playback analytics could not sync. Recorded time may be incomplete.</p>}

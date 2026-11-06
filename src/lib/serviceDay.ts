@@ -15,7 +15,7 @@ export function nextServiceBoundary(at = new Date()) {
  const next=new Date(`${serviceDay(at)}T04:00:00Z`)
  next.setUTCDate(next.getUTCDate()+1)
  const target=next.getTime()
- const f=new Intl.DateTimeFormat('en-US',{timeZone:'America/Chicago',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23'})
+ const f=new Intl.DateTimeFormat('en-US',{timeZone:'America/Chicago',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23',hour12:true})
  let instant=target
  for(let i=0;i<3;i++){
   const parts=f.formatToParts(new Date(instant))

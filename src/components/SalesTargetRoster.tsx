@@ -1,3 +1,4 @@
+import {TimeInput12} from './TimeInput12'
 import {TeamProfileName} from './TeamProfileName'
 import {useEffect,useState} from 'react'
 import {supabase} from '../lib/supabase'
@@ -7,7 +8,7 @@ type Person={id:string;name:string;role:string;employee_key:string}
 type Data={role_groups:Record<string,TargetGroup>;version:number;manual:boolean;locked:boolean;can_edit:boolean;employees:Person[];rows:(SalesShift&{user_id?:string|null})[];overrides:TargetInputs['overrides']}
 type Draft={id:string;user_id:string;employee_key:string;role:string;group:TargetGroup;start_time:string;hours:string;name:string}
 type Props={location:string;date:string;disabled:boolean;onDirty:(dirty:boolean)=>void;onSaved:()=>void}
-const localTime=(value:string)=>{const d=new Date(value);return Number.isFinite(d.getTime())?new Intl.DateTimeFormat('en-GB',{timeZone:'America/Chicago',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(d):''}
+const localTime=(value:string)=>{const d=new Date(value);return Number.isFinite(d.getTime())?new Intl.DateTimeFormat('en-GB',{timeZone:'America/Chicago',hour:'2-digit',minute:'2-digit',hourCycle:'h23',hour12:true}).format(d):''}
 const unlinkedKey=()=> 'unlinked:'+crypto.randomUUID()
 export function SalesTargetRoster({location,date,disabled,onDirty,onSaved}:Props){
  const [data,setData]=useState<Data|null>(null),[rows,setRows]=useState<Draft[]>([]),[adding,setAdding]=useState(''),[busy,setBusy]=useState(false),[error,setError]=useState(''),[dirty,setDirty]=useState(false)
@@ -41,7 +42,7 @@ export function SalesTargetRoster({location,date,disabled,onDirty,onSaved}:Props
  {!r.user_id&&<label>Employee name<input maxLength={200} value={r.name} onChange={e=>change(r.id,{name:e.target.value})}/></label>}
  <label>Position<input value={r.role} maxLength={100} onChange={e=>change(r.id,{role:e.target.value})}/></label>
  <label>Pool<select value={r.group} onChange={e=>change(r.id,{group:e.target.value as TargetGroup})}><option value="bar">Bar</option><option value="floor">Floor</option><option value="exclude">Exclude</option></select></label>
- <label>Start time (Central)<input type="time" value={r.start_time} onChange={e=>change(r.id,{start_time:e.target.value})}/></label>
+ <label>Start time (Central)<TimeInput12  value={r.start_time} onChange={e=>change(r.id,{start_time:e.target.value})}/></label>
  <label>Scheduled duration (hours)<input type="number" min="0.01" max="24" step="0.01" value={r.hours} onChange={e=>change(r.id,{hours:e.target.value})}/></label></div>
  <button type="button" onClick={()=>{setRows(v=>v.filter(x=>x.id!==r.id));edited()}}>Remove from this date</button></article>)}
  {!rows.length&&<p>No employees on this target list.</p>}<p>Employees without accounts keep their sales targets. They can be linked later on an unlocked date. Removing a row changes only this date’s allocation.</p>

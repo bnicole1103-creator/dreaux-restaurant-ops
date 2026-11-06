@@ -1,3 +1,4 @@
+import {TimeInput12} from './TimeInput12'
 import { TeamProfileName } from './TeamProfileName'
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
@@ -6,7 +7,7 @@ type Staff = { id: string; name: string; employee_key: string | null; role: stri
 type Row = { shift_key: string; user_id: string; start_at: string; end_at: string; role_name: string; requires_closeout: boolean }
 type Imported = { id: string; employee_key: string; assigned: boolean; role: string; start: string; end: string }
 type Data = { confirmed_at: string | null; staff: Staff[]; shifts: Row[]; schedule: { rows: Imported[] } | null }
-const localTime = (value: string) => new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Chicago', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(new Date(value))
+const localTime = (value: string) => new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Chicago', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' ,hour12:true}).format(new Date(value))
 type Draft = Omit<Row, 'start_at' | 'end_at'> & { start: string; end: string }
 function initial(data: Data): Draft[] {
  const rows = data.confirmed_at ? data.shifts : (data.schedule?.rows ?? []).filter(s => s.assigned).map(s => ({
@@ -57,8 +58,8 @@ export function RequiredWorkRoster({ location, day, data, onSaved }: { location:
     </select></label>
     <p><TeamProfileName locationId={location} userId={r.user_id} name={data.staff.find(p=>p.id===r.user_id)?.name??'Choose employee'}/></p><label>Position <input value={r.role_name} maxLength={100} onChange={e => change(r.shift_key,{role_name:e.target.value})}/></label>
     <div style={{display:'flex',flexWrap:'wrap',gap:16}}>
-     <label>Start time <input type="time" value={r.start} onChange={e => change(r.shift_key,{start:e.target.value})}/></label>
-     <label>End time <input type="time" value={r.end} onChange={e => change(r.shift_key,{end:e.target.value})}/></label>
+     <label>Start time <TimeInput12  value={r.start} onChange={e => change(r.shift_key,{start:e.target.value})}/></label>
+     <label>End time <TimeInput12  value={r.end} onChange={e => change(r.shift_key,{end:e.target.value})}/></label>
     </div>
     <label><input type="checkbox" checked={r.requires_closeout} onChange={e => change(r.shift_key,{requires_closeout:e.target.checked})}/> Closeout required</label>
     <button type="button" onClick={() => {setRows(v => v.filter(s => s.shift_key !== r.shift_key));setDirty(true);setMessage('')}}>Remove from this day</button>

@@ -1,0 +1,1 @@
+export function time12(value:string|null|undefined){if(!value)return 'Time not set';const m=value.match(/^(\d{1,2}):(\d{2})(?::\d{2})?$/);if(!m)return value;const h=Number(m[1]);return `${h%12||12}:${m[2]} ${h>=12?'PM':'AM'}`}

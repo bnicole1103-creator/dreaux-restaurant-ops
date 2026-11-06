@@ -9,7 +9,7 @@ export function scheduledHours(s:SalesShift,inputs:TargetInputs){const hours=inp
 export function shiftHours(s:SalesShift,inputs:TargetInputs){
  const duration=scheduledHours(s,inputs),day=inputs.dining_day;if(!day)return null;if(day.closed)return 0;if(duration==null)return null;
  const start=new Date(s.start);if(!Number.isFinite(start.getTime()))return null;
- const parts=Object.fromEntries(new Intl.DateTimeFormat('en-CA',{timeZone:'America/Chicago',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23'}).formatToParts(start).map(p=>[p.type,p.value]));
+ const parts=Object.fromEntries(new Intl.DateTimeFormat('en-CA',{timeZone:'America/Chicago',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23',hour12:true}).formatToParts(start).map(p=>[p.type,p.value]));
  const at=Number(parts.hour)*60+Number(parts.minute)+Number(parts.second)/60;
  const minutes=(t:string)=>{const [h,m]=t.split(':').map(Number);return h*60+m};
  let op=minutes(day.open),cl=minutes(day.close);if(op<240)op+=1440;if(cl<240)cl+=1440;

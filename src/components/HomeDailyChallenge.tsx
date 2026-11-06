@@ -11,7 +11,7 @@ type Challenge={id:string;game_id:GameId;starts_at:string;ends_at:string;focus:s
 type ChallengeState={manager:boolean;active:Challenge|null;next:Challenge|null}
 
 const localInput=(iso?:string)=>{const date=iso?new Date(iso):new Date(),offset=date.getTimezoneOffset()*60000;return new Date(date.getTime()-offset).toISOString().slice(0,16)}
-const labelTime=(iso:string)=>new Intl.DateTimeFormat('en-US',{timeZone:'America/Chicago',weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit',timeZoneName:'short'}).format(new Date(iso))
+const labelTime=(iso:string)=>new Intl.DateTimeFormat('en-US',{timeZone:'America/Chicago',weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit',timeZoneName:'short',hour12:true}).format(new Date(iso))
 
 export function HomeDailyChallenge({locationId}:{locationId?:string}){
  const access=useAppAccess(),[location,setLocation]=useState(''),[data,setData]=useState<ChallengeState|null>(null),[game,setGame]=useState<GameId|null>(null),[error,setError]=useState(''),[notice,setNotice]=useState(''),[busy,setBusy]=useState(false),[editing,setEditing]=useState(false),[choice,setChoice]=useState<GameId>('order'),[starts,setStarts]=useState(localInput()),[ends,setEnds]=useState(localInput(new Date(Date.now()+24*60*60*1000).toISOString())),[focus,setFocus]=useState('')

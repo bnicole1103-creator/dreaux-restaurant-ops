@@ -15,7 +15,7 @@ type Source=PurchaseReceipt&{origin_bucket?:string}
 type Data={tag_people?:{user_id:string;name:string}[];requests?:Row[];rows:Row[];photos:Source[];manager:boolean;employee_name?:string;assignment_people?:{key:string;name:string}[]}
 type Props={initialExpanded?:boolean;onEditorState?:(state:{busy:boolean;dirty:boolean})=>void;closeoutOnly?:boolean;submittedOnly?:boolean;location:string;day?:string;from?:string;to?:string;userId?:string;closeoutKey?:string;shiftId?:string;managerCloseout?:boolean;onChange?:(rows:CloseoutReceipt[])=>void;onSaved?:()=>void;onPendingChange?:(count:number|null)=>void}
 const err=(e:unknown)=>String((e as {message?:string})?.message??e)
-const timestamp=(value?:string|null)=>value?new Date(value).toLocaleString('en-US',{timeZone:'America/Chicago',year:'numeric',month:'short',day:'numeric',hour:'numeric',minute:'2-digit',second:'2-digit'})+' CT':'Time not recorded'
+const timestamp=(value?:string|null)=>value?new Date(value).toLocaleString('en-US',{timeZone:'America/Chicago',year:'numeric',month:'short',day:'numeric',hour:'numeric',minute:'2-digit',second:'2-digit',hour12:true})+' CT':'Time not recorded'
 const reviewed=(r:Row)=>r.ready&&!!r.details_saved_at&&!!r.verifier_name?.trim()&&r.has_file!==false
 const changed=()=>window.dispatchEvent(new Event('closeout-receipts-changed'))
 

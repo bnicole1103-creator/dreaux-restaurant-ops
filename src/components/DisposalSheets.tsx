@@ -15,7 +15,7 @@ export type DisposalSheet = {
 const sizes = ['1.75 L', '1 L', '750 mL', 'Pint']
 const message = (e: unknown) => String((e as {message?: string})?.message ?? e)
 function timestamp(value: string) {
- return new Date(value).toLocaleString('en-US', {timeZone:'America/Chicago',month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit'})+' CT'
+ return new Date(value).toLocaleString('en-US', {timeZone:'America/Chicago',month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit',hour12:true})+' CT'
 }
 function validate(lines: DisposalLine[]) {
  if (!lines.length || lines.length > 100) throw Error('Enter 1 to 100 disposal rows.')

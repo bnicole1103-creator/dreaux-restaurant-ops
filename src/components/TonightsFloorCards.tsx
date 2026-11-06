@@ -72,8 +72,7 @@ function formatTime(value?: string | null) {
   if (!Number.isNaN(date.getTime())) {
     return date.toLocaleTimeString([], {
       hour: 'numeric',
-      minute: '2-digit',
-    })
+      minute: '2-digit',hour12:true})
   }
 
   return String(value)

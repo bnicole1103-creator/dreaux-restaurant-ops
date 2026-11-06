@@ -1,3 +1,4 @@
+import {TimeInput12} from '../components/TimeInput12'
 import {CloseoutSection} from '../components/CloseoutSection'
 import { CloseoutReceiptWallet, ReceiptSubmissionLog, useReceiptDraft } from '../components/CloseoutReceiptWallet'
 import { summarizeCloseoutReceipts, type CloseoutReceipt } from '../lib/closeoutReceipts'
@@ -1160,12 +1161,12 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
     <DesignSection as="section" data-design-block="closeout.quick.shift" className="card" id="quick-shift">
       <CloseoutSection title="1. Your shift" initialOpen><p><strong>{ROLE_LABELS[jobRole]}</strong> · {scheduledTime||'Start needed'}{clockOutTime?' – '+clockOutTime:''}</p>
       <p>{selectedTables.length?selectedTables.map(t=>t.table_name).join(', '):'Tables not selected'} · Target: {targetState.loading?'Loading…':targetState.ready?money(salesTarget):'Unavailable'}</p>
-        {shown('staff_1')&&<div className="quick-grid"><label data-closeout-field="clockInTime">Actual clock-in<input aria-label="Clock-in time" type="time" required value={clockInTime} onChange={e=>setClockInTime(e.target.value)}/></label><label data-closeout-field="clockOutTime">Actual clock-out<input aria-label="Clock-out time" type="time" required value={clockOutTime} onChange={e=>setClockOutTime(e.target.value)}/></label></div>}
+        {shown('staff_1')&&<div className="quick-grid"><label data-closeout-field="clockInTime">Actual clock-in<TimeInput12 aria-label="Clock-in time"  required value={clockInTime} onChange={e=>setClockInTime(e.target.value)}/></label><label data-closeout-field="clockOutTime">Actual clock-out<TimeInput12 aria-label="Clock-out time"  required value={clockOutTime} onChange={e=>setClockOutTime(e.target.value)}/></label></div>}
       <div className="closeout-question-group"><h3>Shift details</h3>
         <p role="status">{scheduleNotice}</p>
         {quickShifts.length>0&&<label>Confirmed shift<select value={quickShift} onChange={e=>{const s=quickShifts.find(s=>s.key===e.target.value);if(s)chooseQuickShift(s)}}><option value="">Select shift</option>{quickShifts.map(s=><option key={s.key} value={s.key}>{s.role} · {centralTime(s.start)} – {centralTime(s.end)}</option>)}</select></label>}
         <div className="quick-grid">
-          {shown('staff_0')&&<label data-closeout-field="scheduledTime">{questionLabel(config,'staff_0','Scheduled start')}<input aria-label="Scheduled start" type="time" required value={scheduledTime} onChange={e=>{touched.current.shift=true;setScheduledTime(e.target.value)}}/></label>}
+          {shown('staff_0')&&<label data-closeout-field="scheduledTime">{questionLabel(config,'staff_0','Scheduled start')}<TimeInput12 aria-label="Scheduled start"  required value={scheduledTime} onChange={e=>{touched.current.shift=true;setScheduledTime(e.target.value)}}/></label>}
           <label>Role worked<select value={jobRole} onChange={e=>{touched.current.shift=true;setJobRole(e.target.value as JobRole)}}>{Object.entries(ROLE_LABELS).map(([id,label])=><option key={id} value={id}>{label}</option>)}</select></label>
         </div>
         {closeoutHours(clockInTime,clockOutTime)!==null&&<p>{closeoutHours(clockInTime,clockOutTime)!.toFixed(2)} hours · after-midnight end times count toward this shift.</p>}

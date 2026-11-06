@@ -5,7 +5,7 @@ import {dateLabel} from '../lib/calendarDates'
 import './TaskAssignmentTools.css'
 type Shift={id:string;user_id:string|null;name:string;role:string;station?:string;start:string;end:string;close?:boolean;business_decline?:boolean;assigned?:boolean}
 type Schedule={rows:Shift[];override:boolean;confirmed_at?:string|null;source_error?:string|null}
-const clock=(value:string)=>{const date=new Date(value);return Number.isFinite(date.getTime())?new Intl.DateTimeFormat('en-US',{timeZone:'America/Chicago',hour:'numeric',minute:'2-digit'}).format(date):'Time unavailable'}
+const clock=(value:string)=>{const date=new Date(value);return Number.isFinite(date.getTime())?new Intl.DateTimeFormat('en-US',{timeZone:'America/Chicago',hour:'numeric',minute:'2-digit',hour12:true}).format(date):'Time unavailable'}
 const message=(e:unknown)=>String((e as {message?:string})?.message??e)
 export function TaskScheduleRoster({location,day,users,activeUsers,disabled,onUsers}:{location:string;day:string;users:string[];activeUsers:string[];disabled:boolean;onUsers:(users:string[])=>void}){
  const [data,setData]=useState<Schedule|null>(null),[loading,setLoading]=useState(true),[syncing,setSyncing]=useState(false),[error,setError]=useState(''),[syncError,setSyncError]=useState(''),[refresh,setRefresh]=useState(0)

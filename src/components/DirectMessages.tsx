@@ -10,7 +10,7 @@ type Inbox={me:string;people:Person[];threads:Thread[];unread:number}
 type Message={id:string;seq:number;sender_id:string;body:string;created_at:string}
 type Draft={body:string;request:string|null}
 const errorMessage=(e:unknown)=>String((e as {message?:string})?.message??e)
-const stamp=(v:string)=>new Date(v).toLocaleString('en-US',{timeZone:'America/Chicago',month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit'})+' CT'
+const stamp=(v:string)=>new Date(v).toLocaleString('en-US',{timeZone:'America/Chicago',month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit',hour12:true})+' CT'
 async function rpc<T>(name:string,args:Record<string,unknown>,signal?:AbortSignal):Promise<T>{const controller=new AbortController(),abort=()=>controller.abort();signal?.addEventListener('abort',abort);const timer=setTimeout(abort,20000);try{const r=await supabase.rpc(name,args).abortSignal(controller.signal);if(r.error)throw r.error;return r.data as T}finally{clearTimeout(timer);signal?.removeEventListener('abort',abort)}}
 export function MessageEmployeeButton({location,userId,onOpen}:{location:string;userId:string;onOpen?:()=>void}){const [me,setMe]=useState<string|null>(null);useEffect(()=>{let live=true;void supabase.auth.getUser().then(r=>{if(live)setMe(r.data.user?.id??null)});return()=>{live=false}},[]);if(me===userId)return null;return <button type="button" onClick={()=>{onOpen?.();window.dispatchEvent(new CustomEvent('direct-message-open',{detail:{location,userId}}))}}>Message employee</button>}
 function Conversation({location,peer,me,draft,onDraft,onRefresh}:{location:string;peer:string;me:string;draft:Draft;onDraft:(d:Draft)=>void;onRefresh:()=>void}){
