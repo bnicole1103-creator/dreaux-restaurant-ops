@@ -8,7 +8,7 @@ export type SectionEditRequest={id:string;nonce:number;employee_id?:string;guest
 type Table={id:string;table_name:string;seat_count:number}
 type Preset={id:string;name:string;table_ids:string[];version:number}
 const zone='America/Chicago'
-function parts(value:Date){const p=new Intl.DateTimeFormat('en-CA',{timeZone:zone,year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23',hour12:true}).formatToParts(value);const get=(key:string)=>p.find(x=>x.type===key)?.value;return {date:`${get('year')}-${get('month')}-${get('day')}`,time:`${get('hour')}:${get('minute')}`}}
+function parts(value:Date){const p=new Intl.DateTimeFormat('en-CA',{timeZone:zone,year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(value);const get=(key:string)=>p.find(x=>x.type===key)?.value;return {date:`${get('year')}-${get('month')}-${get('day')}`,time:`${get('hour')}:${get('minute')}`}}
 const label=(value:string)=>new Date(value).toLocaleString('en-US',{timeZone:zone,month:'short',day:'numeric',hour:'numeric',minute:'2-digit',hour12:true})
 const msg=(e:unknown)=>String((e as Error).message??e)
 export function SectionSchedule({editRequest,refreshKey=0,locationId,selectedTableIds,tables,employees,onLoaded,onSelect,onShowTables,children}:{onShowTables?:(ids:string[])=>void;editRequest?:SectionEditRequest;refreshKey?:number;locationId:string;selectedTableIds:string[];tables:Table[];employees:{id:string;name:string}[];onLoaded:(plans:SectionPlan[],offset:number)=>void;onSelect:(ids:string[])=>void;children?:ReactNode}){

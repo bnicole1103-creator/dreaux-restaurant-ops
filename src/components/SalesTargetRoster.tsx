@@ -1,3 +1,5 @@
+import {usePrepareWorkStatus} from './PrepareWorkStatus'
+import {usePreparedAction} from './PrepareRelease'
 import {TimeInput12} from './TimeInput12'
 import {TeamProfileName} from './TeamProfileName'
 import {useEffect,useState} from 'react'
@@ -8,7 +10,7 @@ type Person={id:string;name:string;role:string;employee_key:string}
 type Data={role_groups:Record<string,TargetGroup>;version:number;manual:boolean;locked:boolean;can_edit:boolean;employees:Person[];rows:(SalesShift&{user_id?:string|null})[];overrides:TargetInputs['overrides']}
 type Draft={id:string;user_id:string;employee_key:string;role:string;group:TargetGroup;start_time:string;hours:string;name:string}
 type Props={location:string;date:string;disabled:boolean;onDirty:(dirty:boolean)=>void;onSaved:()=>void}
-const localTime=(value:string)=>{const d=new Date(value);return Number.isFinite(d.getTime())?new Intl.DateTimeFormat('en-GB',{timeZone:'America/Chicago',hour:'2-digit',minute:'2-digit',hourCycle:'h23',hour12:true}).format(d):''}
+const localTime=(value:string)=>{const d=new Date(value);return Number.isFinite(d.getTime())?new Intl.DateTimeFormat('en-GB',{timeZone:'America/Chicago',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(d):''}
 const unlinkedKey=()=> 'unlinked:'+crypto.randomUUID()
 export function SalesTargetRoster({location,date,disabled,onDirty,onSaved}:Props){
  const [data,setData]=useState<Data|null>(null),[rows,setRows]=useState<Draft[]>([]),[adding,setAdding]=useState(''),[busy,setBusy]=useState(false),[error,setError]=useState(''),[dirty,setDirty]=useState(false)
@@ -26,9 +28,12 @@ export function SalesTargetRoster({location,date,disabled,onDirty,onSaved}:Props
  function addWithoutAccount(){setRows(v=>[...v,{id:'manual:'+crypto.randomUUID(),user_id:'',employee_key:unlinkedKey(),name:'',role:'server',group:'floor',start_time:'16:00',hours:'6'}]);edited()}
  const invalid=rows.some(r=>!r.name.trim()||!r.role.trim()||!r.start_time||!r.hours||!Number.isFinite(Number(r.hours))||Number(r.hours)<=0||Number(r.hours)>24)
  async function save(){if(!data||busy||invalid||disabled||data.locked||!data.can_edit)return;setBusy(true);setError('');try{
-  const r=await supabase.rpc('sales_target_roster_save',{p_location_id:location,p_date:date,p_version:data.version,p_rows:rows.map(r=>({...r,user_id:r.user_id||null,hours:Number(r.hours)}))});if(r.error)throw r.error;setData({...data,version:data.version+1,manual:true});setDirty(false);onDirty(false);onSaved()
+  if(prepared.stage('sales_target_roster_save',{p_location_id:location,p_date:date,p_version:data.version,p_rows:rows.map(r=>({...r,user_id:r.user_id||null,hours:Number(r.hours)}))})){onDirty(false);return;}
+const r=await supabase.rpc('sales_target_roster_save',{p_location_id:location,p_date:date,p_version:data.version,p_rows:rows.map(r=>({...r,user_id:r.user_id||null,hours:Number(r.hours)}))});if(r.error)throw r.error;setData({...data,version:data.version+1,manual:true});setDirty(false);onDirty(false);onSaved()
  }catch(e){setError(String((e as Error).message??e))}finally{setBusy(false)}}
- return <section className="task-card" aria-label="Sales target employees"><h2>Manage sales target employees</h2>
+ const prepared=usePreparedAction('target-roster','target-roster','Sales target employee roster',[date,rows,data?.version])
+ usePrepareWorkStatus({id:'target-roster',phase:'service',label:'Sales target roster',dirty,busy:busy||!data&&!error,error,detail:prepared.queued?'Queued for release.':'Existing sales roster loaded.'})
+ return <section className="task-card" aria-label="Sales target employees"><h2>Manage sales target employees</h2>{prepared.queued&&<p role="status">Roster queued for final release; not saved yet.</p>}
  <p>App accounts are optional. Save imported employees as they are, or add a name without an account. You can link an account later. Start time and scheduled duration describe the full shift. Only the overlap with dining hours counts toward sales targets; prep and closing duties remain on the schedule.</p>
  {error&&<p role="alert">{error}</p>}{!data&&!error&&<p role="status">Loading sales target employees…</p>}
  {data&&<><p>{data.manual?'Using your saved employee list.':'Starting from the imported schedule.'} {data.locked?'This day is locked by a submitted closeout.':''}</p>
@@ -48,6 +53,6 @@ export function SalesTargetRoster({location,date,disabled,onDirty,onSaved}:Props
  {!rows.length&&<p>No employees on this target list.</p>}<p>Employees without accounts keep their sales targets. They can be linked later on an unlocked date. Removing a row changes only this date’s allocation.</p>
  {dirty&&<p role="status">Unsaved employee changes. Save the list before changing calculation settings.</p>}
  {invalid&&<p>Enter a name, position, start time and valid expected hours for every employee. An app account is not required.</p>}
- <button type="button" disabled={(!dirty&&data.manual)||invalid} onClick={()=>void save()}>{busy?'Saving…':'Save sales target employees'}</button></fieldset></>}
+ <button type="button" disabled={(!dirty&&data.manual)||invalid} onClick={()=>void save()}>{busy?'Working…':prepared.active?'Queue roster for release':'Save sales target employees'}</button></fieldset></>}
  </section>
 }

@@ -1,3 +1,4 @@
+import {usePrepareRelease} from './PrepareRelease'
 import {DesignSection} from './DesignSection'
 import {PageWord} from './PageDesign'
 import { useEffect,useRef,useState } from 'react'
@@ -10,11 +11,12 @@ import type { GeneratedQuiz } from '../lib/generatedQuiz'
 import './GeneratedQuizModal.css'
 import { WorkflowTabs } from './WorkflowTabs'
 export function QuizDraftModal({draft,onClose}:{draft:GeneratedQuiz;onClose:()=>void}) {
+ const release=usePrepareRelease()
  const dialog=useRef<HTMLDialogElement>(null)
  const state=useRef({dirty:false,busy:true})
  function close(){
   if(state.current.busy)return
-  if(state.current.dirty&&!window.confirm('Discard unsaved quiz changes? Your saved bank questions will remain available.'))return
+  if(state.current.dirty&&!release?.hasPrepared('quiz-editor')&&!window.confirm('Discard unsaved quiz changes? Your saved bank questions will remain available.'))return
   onClose()
  }
  const closeRef=useRef(close);closeRef.current=close
