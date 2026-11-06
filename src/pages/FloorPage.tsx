@@ -1653,7 +1653,7 @@ const [partySize, setPartySize] = useState(1)
       {pendingWalkin&&floorView!=='crew'&&<p role="status">Seating {pendingWalkin.guest_name} · select tables on the map, then Seat.</p>}
       <FloorFloatingPanel title="Walk-ins" open={floorView==='crew'} onClose={()=>setFloorView('map')}>
       
-      <WalkinPanel locationId={locationId} refreshKey={walkinRefresh} onSeat={row=>{setSeatReservationId('');setFloorView('map');setPendingWalkin(row);setGuestName(row.guest_name);setGuestPhone(row.phone);setGuestEmail(row.email);setPartySize(row.party_size);if(selectedTableIds.length)openSeating()}} />
+      <WalkinPanel locationId={locationId} refreshKey={walkinRefresh} onSeat={row=>{setSeatReservationId('');setFloorView('map');setPendingWalkin(row);setGuestName(row.guest_name);setGuestPhone(row.phone);setGuestEmail(row.email);setPartySize(row.party_size);setSelectedTableIds([]);setShowSeatPanel(true)}} />
       {pendingWalkin&&<div data-design-block="copy.eb305b57f537aed6.1" className="wt-card" role="status"><strong><ScreenText id="FloorPage.72ad81f5e33ac981">Seating </ScreenText>{pendingWalkin.guest_name}<ScreenText id="FloorPage.0e1b1fe85997c7d1"> · party of </ScreenText>{pendingWalkin.party_size}</strong><p data-design-block="copy.0cae27057d8f304b.1"><ScreenText id="FloorPage.aaf48aa3abcc020d">Select their tables, then press Seat. Their check-in is marked seated when seating succeeds.</ScreenText></p><button data-design-block="copy.b1a3fd87f11bd6fb.1" type="button" disabled={saving} onClick={()=>{setPendingWalkin(null);setGuestName('');setGuestPhone('');setGuestEmail('');setPartySize(1)}}><ScreenText id="FloorPage.a3bf126804af00d4">Cancel walk-in selection</ScreenText></button></div>}
 
       </FloorFloatingPanel>
@@ -3087,8 +3087,8 @@ const [partySize, setPartySize] = useState(1)
         </div>
       )}
 
-      {showSeatPanel && selectedTableIds.length > 0 && (
-        <FloorFloatingPanel title="Seat guests" open onClose={()=>{if(!saving)setShowSeatPanel(false)}}>
+      {showSeatPanel && (
+        <FloorFloatingPanel title="Seat guests" open onClose={()=>{if(!saving)setShowSeatPanel(false)}}><p>Confirm the party, then choose its table below. Occupied tables cannot be selected here. Check upcoming reservations before confirming.</p><label>Room<select value={activeRoomId} disabled={saving} onChange={e=>setActiveRoomId(e.target.value)}>{rooms.map(r=><option key={r.id} value={r.id}>{r.name}</option>)}</select></label><div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(95px,1fr))',gap:8,margin:'12px 0'}}>{tables.filter(t=>t.room_id===activeRoomId).sort((a,b)=>a.table_name.localeCompare(b.table_name,undefined,{numeric:true})).map(t=>{const occupied=activeSessions.some(session=>session.tableIds.includes(t.id));return <button type="button" key={t.id} disabled={saving||occupied} aria-pressed={selectedTableIds.includes(t.id)} onClick={()=>{toggleTable(t.id);const server=assignments.find(a=>a.table_id===t.id)?.server_id;if(!seatServerId&&server)setSeatServerId(server)}} style={{outline:selectedTableIds.includes(t.id)?'3px solid currentColor':undefined}}>{t.table_name} · {t.seat_count} seats{occupied?' · Occupied':''}</button>})}</div><p role="status">{selectedTables.map(t=>t.table_name).join(' + ')||'Choose a table'} · {selectedTables.reduce((sum,t)=>sum+t.seat_count,0)} selected seats for {partySize} guests</p>
             <p data-design-block="copy.b78f32efa3eeed28.10" className="eyebrow"><ScreenText id="FloorPage.7699845ffa5f9e0f">Seat Guests</ScreenText></p>{error && <p data-design-block="copy.83c54cb8d7aa1605.2" role="alert">{error}</p>}
 
             <h2 data-design-block="copy.2e495f44a1c1f630.11">
@@ -3179,7 +3179,7 @@ const [partySize, setPartySize] = useState(1)
               <button data-design-block="copy.ddaa3c75cf087367.1"
                 className="primary-button"
                 onClick={handleSeatGuests}
-                disabled={saving}
+                disabled={saving||!selectedTableIds.length||!seatServerId||activeShift?.status!=='open'||selectedTables.reduce((sum,t)=>sum+t.seat_count,0)<partySize}
               >
                 {saving ? <PageWord id="copy.a0a40f399cc29220.1">{"Seating…"}</PageWord> : <PageWord id="copy.b872eb79d876f747.1">{"Seat selected tables"}</PageWord>}
               </button>
