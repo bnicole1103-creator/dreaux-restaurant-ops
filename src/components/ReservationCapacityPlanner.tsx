@@ -1,3 +1,4 @@
+import {useWorkspaceRecovery} from '../lib/workspaceRecovery'
 import {useEffect,useMemo,useRef,useState} from 'react'
 import {FloorFloatingPanel} from './FloorFloatingPanel'
 import {TimeInput12} from './TimeInput12'
@@ -11,27 +12,39 @@ export function ReservationCapacityPlanner({location,initialDate}:{location:stri
  const [open,setOpen]=useState(false),[day,setDay]=useState(initialDate??today()),[data,setData]=useState<CapacityData|null>(null),[config,setConfig]=useState<CapacityConfig|null>(null),[error,setError]=useState(''),[notice,setNotice]=useState(''),[loading,setLoading]=useState(false),[busy,setBusy]=useState(false),[party,setParty]=useState('2'),[room,setRoom]=useState(''),[duration,setDuration]=useState(90),[desired,setDesired]=useState('18:00'),[chosen,setChosen]=useState<number|null>(null),[name,setName]=useState(''),[phone,setPhone]=useState(''),[email,setEmail]=useState(''),[group,setGroup]=useState<string[]>([]),[revision,setRevision]=useState(0),[groupRoom,setGroupRoom]=useState('')
  const settingsDirty=useRef(false),loadedContext=useRef('')
  const liveRevision=useReservationRevision(open?location:''),seq=useRef(0),lock=useRef(false),request=useRef(crypto.randomUUID())
- useEffect(()=>{if(open)return;setDay(initialDate??today())},[initialDate,open])
- useEffect(()=>{if(!open||!location)return;const ticket=++seq.current;setLoading(true);setError('');const context=location+':'+day;const changed=loadedContext.current!==context;if(changed){setData(null);setConfig(null);setGroup([]);setChosen(null);settingsDirty.current=false}let active=true;
+ const [searchKey,setSearchKey]=useState('')
+ const inputsKey=JSON.stringify([day,party,room,duration,desired])
+ const recovery=useWorkspaceRecovery('capacity-draft:'+location+':'+day,{party,room,duration,desired,group,groupRoom,config:settingsDirty.current?config:null},saved=>{
+  if(typeof saved.party==='string')setParty(saved.party)
+  if(typeof saved.room==='string')setRoom(saved.room)
+  if(Number.isFinite(saved.duration))setDuration(saved.duration)
+  if(typeof saved.desired==='string')setDesired(saved.desired)
+  if(Array.isArray(saved.group))setGroup(saved.group)
+  if(typeof saved.groupRoom==='string')setGroupRoom(saved.groupRoom)
+  if(saved.config){setConfig(saved.config);settingsDirty.current=true}
+  loadedContext.current=location+':'+day
+  setNotice('Capacity draft restored on this device. Find availability again to check current tables.')
+ })
+ useEffect(()=>{if(!open||!location||!recovery.ready)return;const ticket=++seq.current;setLoading(true);setError('');const context=location+':'+day;const changed=loadedContext.current!==context;if(changed){setData(null);setConfig(null);setGroup([]);setChosen(null);settingsDirty.current=false}let active=true;
   void Promise.resolve(supabase.rpc('reservation_capacity_load',{p_location_id:location,p_day:day})).then(r=>{if(!active||ticket!==seq.current)return;if(r.error){setError(r.error.message);return}setData(r.data);if(changed||!settingsDirty.current)setConfig(r.data.config);if(changed)setDuration(r.data.config.duration);loadedContext.current=context}).catch(e=>{if(active)setError(String(e.message??e))}).finally(()=>{if(active)setLoading(false)})
   return()=>{active=false;seq.current++}
- },[open,location,day,revision,liveRevision])
+ },[open,location,day,revision,liveRevision,recovery.ready])
  useEffect(()=>{setChosen(null);request.current=crypto.randomUUID()},[day,party,room,duration,desired])
  const base=useMemo(()=>data?planCapacity(data):null,[data])
  const rooms=useMemo(()=>data?[...new Map(data.tables.map(t=>[t.room,t.roomName])).entries()]:[],[data])
- const matchingSlots=useMemo(()=>{
-  if(!data||!data.configured||data.config.closed||!Number.isInteger(Number(party))||Number(party)<1||Number(party)>500||duration<15||duration>480)return []
-  return data.slots.filter(s=>s.value>=data.now&&s.value+duration+data.config.buffer<=data.close).map(s=>{
-   const row:CapacityBooking={id:'candidate',name:'New reservation',party:Number(party),start:s.value,end:s.value+duration,tableIds:[],room,version:0};return {...s,result:planCapacity(data,row,10000)}
-  })
- },[data,party,room,duration])
  const clockMinute=(minute:number)=>{const parts=new Intl.DateTimeFormat('en-GB',{timeZone:'America/Chicago',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(new Date(minute*60000)).split(':').map(Number);return parts[0]*60+parts[1]}
  const [dh,dm]=desired.split(':').map(Number),openingMinute=data?clockMinute(data.open):0,closingMinute=data?clockMinute(data.close):0
  const desiredMinute=dh*60+dm+(data&&closingMinute<=openingMinute&&dh*60+dm<=closingMinute?1440:0)
+ const matchingSlots=useMemo(()=>{
+  if(searchKey!==inputsKey||!data||!data.configured||data.config.closed||!Number.isInteger(Number(party))||Number(party)<1||Number(party)>500||duration<15||duration>480)return []
+  return data.slots.filter(s=>{const m=clockMinute(s.value);return m+(m<openingMinute?1440:0)>=desiredMinute}).filter(s=>s.value>=data.now&&s.value+duration+data.config.buffer<=data.close).map(s=>{
+   const row:CapacityBooking={id:'candidate',name:'New reservation',party:Number(party),start:s.value,end:s.value+duration,tableIds:[],room,version:0};return {...s,result:planCapacity(data,row,10000)}
+  })
+ },[data,party,room,duration,desired,searchKey,inputsKey])
  const available=matchingSlots.filter(s=>s.result.ok),selected=matchingSlots.find(s=>s.value===chosen)
  const next=available.filter(s=>clockMinute(s.value)+(clockMinute(s.value)<openingMinute?1440:0)>=desiredMinute).slice(0,6)
  const tableNames=(ids:string[]|undefined)=>ids?.map(id=>data?.tables.find(t=>t.id===id)?.name??'?').join(' + ')||'Needs assignment'
- async function settings(){if(!config||busy)return;setBusy(true);setError('');try{const r=await supabase.rpc('reservation_capacity_settings',{p_location_id:location,p_day:day,p_config:config});if(r.error)throw r.error;settingsDirty.current=false;setNotice('Service settings saved for '+day);setRevision(v=>v+1)}catch(e){setError(String((e as Error).message??e))}finally{setBusy(false)}}
+ async function settings(){if(!config||busy)return;setBusy(true);setError('');try{const r=await supabase.rpc('reservation_capacity_settings',{p_location_id:location,p_day:day,p_config:config});if(r.error)throw r.error;settingsDirty.current=false;recovery.save({party,room,duration,desired,group,groupRoom,config:null});setNotice('Service settings saved for '+day);setRevision(v=>v+1)}catch(e){setError(String((e as Error).message??e))}finally{setBusy(false)}}
  async function apply(book:boolean){if(!data||lock.current)return;const result=book?selected?.result:base;if(!result?.ok)return;if(book&&!window.confirm(`Book ${party} guests on ${day} at ${capacityClock(chosen!)}? This saves the suggested table plan and reservation.`))return;lock.current=true;setBusy(true);setError('');try{
   const r=await supabase.rpc('reservation_capacity_apply',{p_location_id:location,p_day:day,p_fingerprint:data.fingerprint,p_assignments:result.assignments,p_booking:book?{name:name.trim(),phone:phone.trim(),email:email.trim(),party:Number(party),room:rooms.find(([id])=>id===room)?.[1]??'',start:chosen,duration,request:request.current}:null});if(r.error)throw r.error;
   setNotice(book?'Reservation and table plan saved. No guest message was sent.':'Table plan saved.');setName('');setPhone('');setEmail('');setChosen(null);request.current=crypto.randomUUID();notifyReservationsChanged();setRevision(v=>v+1)
@@ -53,7 +66,7 @@ export function ReservationCapacityPlanner({location,initialDate}:{location:stri
  <div className="capacity-bookings">{[...data.bookings].sort((a,b)=>(a.start??0)-(b.start??0)).map(b=><article key={b.id}><strong>{b.name} · {b.party||'?'} guests</strong><span>{b.start==null?'Time missing':capacityClock(b.start)} – {b.end==null?'?':capacityClock(b.end)}{b.live?' · Currently seated':''}</span><span>{b.tableIds.length?'Assigned: ':'Suggested: '}{tableNames(b.tableIds.length?b.tableIds:base?.assignments[b.id])}</span>{b.room&&<small>Requested room: {b.room}</small>}</article>)}</div>
  <button type="button" disabled={busy||!data.configured||data.config.closed||!base?.ok||!data.bookings.some(b=>!b.tableIds.length)} onClick={()=>void apply(false)}>Apply suggested table plan</button>
  <h3>Find a reservation space</h3><fieldset disabled={busy||!data.configured||data.config.closed}><div className="capacity-fields"><label>Guests<input type="number" min={1} max={500} value={party} onChange={e=>setParty(e.target.value)}/></label><label>Requested time<TimeInput12 required aria-label="Requested time" value={desired} onChange={e=>setDesired(e.target.value)}/></label><label>Dining minutes<input type="number" min={15} max={480} value={duration} onChange={e=>setDuration(Number(e.target.value))}/></label><label>Room<select value={room} onChange={e=>setRoom(e.target.value)}><option value="">Any room</option>{rooms.map(([id,label])=><option key={id} value={id}>{label}</option>)}</select></label></div>
- <p>Next available times at or after your requested time:</p><div className="capacity-slots">{next.map(s=><button key={s.value} type="button" aria-pressed={chosen===s.value} onClick={()=>setChosen(s.value)}>{s.label} · {tableNames(s.result.assignments.candidate)}</button>)}</div>{!next.length&&data.configured&&<p role="status">No verified space found at or after that time. Try an earlier time, a different room or another day. Unresolved booking details can also prevent availability.</p>}
+ <button type="button" disabled={loading||!recovery.ready} onClick={()=>{setChosen(null);setSearchKey(inputsKey)}}>Find availability</button>{searchKey!==inputsKey&&<p role="status">Choose guests, time and room, then tap Find availability.</p>}<p>Next available times at or after your requested time:</p><div className="capacity-slots">{next.map(s=><button key={s.value} type="button" aria-pressed={chosen===s.value} onClick={()=>setChosen(s.value)}>{s.label} · {tableNames(s.result.assignments.candidate)}</button>)}</div>{searchKey===inputsKey&&!next.length&&data.configured&&<p role="status">No verified space found at or after that time. Try an earlier time, a different room or another day. Unresolved booking details can also prevent availability.</p>}
  {selected?.result.ok&&<><p><strong>{capacityClock(selected.value)} · {tableNames(selected.result.assignments.candidate)}</strong></p><div className="capacity-fields"><label>Guest name<input value={name} maxLength={200} onChange={e=>setName(e.target.value)}/></label><label>Phone<input type="tel" value={phone} maxLength={100} onChange={e=>setPhone(e.target.value)}/></label><label>Email (optional)<input type="email" value={email} maxLength={250} onChange={e=>setEmail(e.target.value)}/></label></div><button type="button" disabled={!name.trim()||!phone.trim()} onClick={()=>void apply(true)}>Book selected time & tables</button><p>Saving rechecks the full table plan against current bookings and seating. Guest confirmation messages are separate.</p></>}
  </fieldset></>}
  </div></FloorFloatingPanel></>
