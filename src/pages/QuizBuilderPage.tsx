@@ -1,3 +1,4 @@
+import {usePrepareWorkStatus} from '../components/PrepareWorkStatus'
 import {DesignSection} from '../components/DesignSection'
 import {AccessSection} from '../components/AppAccess'
 // page-designer-instrumented
@@ -45,6 +46,7 @@ export function QuizBuilderPage({publishedView=false,initialDate,generatedDraft,
  const [generated,setGenerated]=useState<GeneratedQuiz|null>(null)
  const [loadFailed,setLoadFailed]=useState(false)
  const importedDraft=useRef<GeneratedQuiz|null>(null)
+ usePrepareWorkStatus({id:'quiz-editor',phase:'quizzes',label:'Quiz editor',dirty,busy,error,detail:quizId?(published?'Published quiz loaded or saved.':'Quiz draft saved; not published.'):'No quiz saved from this editor yet.'})
  useEffect(()=>{onStateChange?.({dirty,busy})},[dirty,busy])
  useEffect(()=>{
   if(!generatedDraft||generatedDraft.location!==location||generatedDraft.date!==date||busy||loadFailed||importedDraft.current===generatedDraft)return

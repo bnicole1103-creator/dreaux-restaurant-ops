@@ -1,3 +1,4 @@
+import {usePrepareWorkStatus} from '../components/PrepareWorkStatus'
 import {MonthlyGoalPlanner} from '../components/MonthlyGoalPlanner'
 import {IndividualTargetEditor} from '../components/IndividualTargetEditor'
 import {DesignSection} from '../components/DesignSection'
@@ -32,6 +33,7 @@ export function SalesTargetsPage({initialDate}:{initialDate?:string}={}){
  }catch(e){setError(String((e as Error).message));return false}finally{setSaving(false)}}
  const effective=inputs?{...inputs,history:[],weekday_totals:weekdays.flatMap((_,weekday)=>history[String(weekday)]?.trim()?[{weekday,total:Number(history[String(weekday)]),through_date:through}]:[])}:null
  const result=effective?calculateTargets(date,effective,shifts):null,locked=loading||saving
+ usePrepareWorkStatus({id:'target-settings',phase:'service',label:'Target settings & roster',dirty:dirty||rosterDirty,busy:loading||saving,error:error||scheduleError,detail:message|| (inputs?'Existing target settings loaded.':'Target settings not loaded.')})
  return <DesignSection as="section" data-design-block="copy.ae2f7c61d09d06e3.1" className="page sales-target-page"><Link to="/settings"><ScreenText id="SalesTargetsPage.ad38ada26e3e5960">← Settings</ScreenText></Link><p><Link to="/sales-targets">Open detailed sales calculator & coaching →</Link></p><h1 data-design-block="copy.c212a7bfc5748bce.1"><ScreenText id="SalesTargetsPage.80824852a0f51869">Sales target setup</ScreenText></h1><p data-design-block="copy.7989bfe05c00ff24.1"><ScreenText id="SalesTargetsPage.5633c1a02ead3c1e">Enter one combined net sales total per weekday for the past six weeks. For example, add all six Tuesdays and enter that total once. The system divides it by six. Blank means missing; 0 means a confirmed zero total.</ScreenText></p>
  {location&&<MonthlyGoalPlanner location={location}/>}
  <label data-design-block="copy.e63e1b0127ac67c1.1"><ScreenText id="SalesTargetsPage.fed6ba6c4a47b680">Target date</ScreenText><input type="date" value={date} disabled={locked||!!initialDate} onChange={e=>{if(!e.target.value)return;if((dirty||rosterDirty)&&!window.confirm('Discard unsaved sales target changes?'))return;setDate(e.target.value)}}/></label><button data-design-block="copy.465b2d9248557489.1" type="button" disabled={locked} onClick={()=>{if((!dirty&&!rosterDirty)||window.confirm('Discard changes and reload?'))setRefresh(v=>v+1)}}><ScreenText id="SalesTargetsPage.63b224b233660386">Reload schedule &amp; inputs</ScreenText></button>
