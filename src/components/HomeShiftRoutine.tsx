@@ -1,4 +1,5 @@
-import {useEffect,useState} from 'react'
+import {loadHomeFeed} from '../lib/homeFeed'
+import {useEffect,useRef,useState} from 'react'
 import {Link} from 'react-router-dom'
 import {useAppAccess} from './AppAccess'
 import {PageWord} from './PageDesign'
@@ -19,10 +20,11 @@ export function HomeShiftRoutine({location,day,quizDate,refresh=0}:{location:str
  const access=useAppAccess(),postsAllowed=access.ready&&access.can('home','posts')&&access.can('posts','feed'),quizAllowed=access.ready&&access.can('home','quiz')&&access.can('quizzes','published'),sectionsAllowed=access.ready&&access.can('home','sections')&&access.can('floor','sections'),tasksAllowed=access.ready&&access.can('home','tasks')&&access.can('tasks','mine'),targetsAllowed=access.ready&&access.can('home','targets')
  const preview=new URLSearchParams(window.location.search).has('wording-preview')||new URLSearchParams(window.location.search).has('staff-preview')
  const [state,setState]=useState<State>(blank),[loading,setLoading]=useState(true),[retry,setRetry]=useState(0)
+ const loadedContext=useRef('')
  useEffect(()=>{
-  let live=true;const controllers=new Set<AbortController>();setState(blank());setLoading(true)
+  let live=true;const controllers=new Set<AbortController>();const context=location+':'+day+':'+quizDate;if(loadedContext.current!==context){setState(blank());loadedContext.current=context}setLoading(true)
   if(!location||!access.ready||preview){setLoading(false);return}
-  async function call(name:string,args:Record<string,unknown>){const c=new AbortController();controllers.add(c);const timer=setTimeout(()=>c.abort(),20000);try{const r=await supabase.rpc(name,args).abortSignal(c.signal);if(r.error)throw r.error;return r.data}finally{clearTimeout(timer);controllers.delete(c)}}
+  async function call(name:string,args:Record<string,unknown>){if(name==='preshift_feed'){const r=await loadHomeFeed(location,refresh);if(r.error)throw r.error;return r.data}const c=new AbortController();controllers.add(c);const timer=setTimeout(()=>c.abort(),20000);try{const r=await supabase.rpc(name,args).abortSignal(c.signal);if(r.error)throw r.error;return r.data}finally{clearTimeout(timer);controllers.delete(c)}}
   async function source<K extends keyof State>(key:K,read:()=>Promise<State[K]['data']>){try{const data=await read();if(live)setState(s=>({...s,[key]:{data,error:''}}))}catch(e){if(live)setState(s=>({...s,[key]:{data:null,error:message(e)}}))}}
   const jobs:Promise<void>[]=[]
   if(postsAllowed)jobs.push(source('posts',async()=>{const d=await call('preshift_feed',{p_location_id:location,p_limit:1000});if(!Array.isArray(d?.posts))throw Error('Pre-shift posts were not returned.');const posts=(d.posts as Post[]).filter(p=>p.shift_date===quizDate);if(d.posts.length>=1000)throw Error('The feed may be incomplete. Open the post feed to check today’s posts.');

@@ -1,3 +1,4 @@
+import {loadHomeFeed} from '../lib/homeFeed'
 import {HomeQuickActions} from '../components/HomeQuickActions'
 import {HomeShiftRoutine} from '../components/HomeShiftRoutine'
 import {MediaLinkText} from '../components/MediaLinkText'
@@ -40,7 +41,7 @@ export function DashboardPage(){
  const reads=usePreshiftReadReceipts(location,posts)
  useEffect(()=>{let live=true;void loadTenantData().then(t=>{const loc=t.locations[0];if(!loc)throw Error('No active location found.');if(live){setLocation(loc.id);setName(loc.name||t.organization.name)}}).catch(e=>{if(live)setError(String((e as {message?:string}).message??e))});return()=>{live=false}},[])
  useEffect(()=>{const update=()=>{if(document.visibilityState==='visible'){setDay(serviceDay());setToday(quizToday());setRefresh(v=>v+1)}};const timer=setInterval(update,30000);window.addEventListener('focus',update);document.addEventListener('visibilitychange',update);return()=>{clearInterval(timer);window.removeEventListener('focus',update);document.removeEventListener('visibilitychange',update)}},[])
- useEffect(()=>{if(!location)return;let live=true;setLoading(true);void(async()=>{const [feed,quizData]=await Promise.allSettled([supabase.rpc('preshift_feed',{p_location_id:location,p_limit:1000}),supabase.rpc('quiz_staff_load',{p_location_id:location,p_date:today})]);if(!live)return
+ useEffect(()=>{if(!location)return;let live=true;setLoading(true);void(async()=>{const [feed,quizData]=await Promise.allSettled([loadHomeFeed(location,refresh),supabase.rpc('quiz_staff_load',{p_location_id:location,p_date:today})]);if(!live)return
  if(feed.status==='fulfilled'&&!feed.value.error){setPosts((feed.value.data?.posts??[]).filter((p:Post)=>p.shift_date===today));setPostError('')}else{setPostError(String(feed.status==='rejected'?feed.reason:feed.value.error?.message));setPosts([])}
  if(quizData.status==='fulfilled'&&!quizData.value.error){setQuiz(quizData.value.data?.quiz??null);setQuizCount(quizData.value.data?.quiz_count??(quizData.value.data?.quiz?1:0));setResult(quizData.value.data?.result??null);setQuizError('')}else{setQuizError(String(quizData.status==='rejected'?quizData.reason:quizData.value.error?.message));setQuiz(null);setResult(null)}setLoading(false)
  })();return()=>{live=false}},[location,today,refresh])
