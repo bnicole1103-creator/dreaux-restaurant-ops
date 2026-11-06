@@ -1,3 +1,4 @@
+import './FloorCompactCards.css'
 import '../components/FloorCompactStatus.css'
 import {ReservationInquiryPage} from './ReservationInquiryPage'
 import {ReservationFileUpload} from '../components/ReservationFileUpload'
@@ -1619,7 +1620,7 @@ const [partySize, setPartySize] = useState(1)
       <div className="floor-top-status"><AccessSection page="floor" section="schedule"><FloorScheduleBox compact location={locationId} date={activeShift?.shift_date??serviceDay()}/></AccessSection><div className="floor-seating-counts" aria-live="polite"><strong>{activeShiftId&&sessionCountShift===activeShiftId?[...new Map(activeSessions.map(row=>[row.id,row])).values()].reduce((sum,row)=>sum+(Number(row.partySize)||0),0):'—'} guests seated now</strong><span>{activeShiftId&&sessionCountShift===activeShiftId?new Set(activeSessions.flatMap(row=>row.tableIds.length?row.tableIds:[row.primaryTableId])).size:'—'} occupied tables · {tables.reduce((sum,table)=>sum+(Number(table.seat_count)||0),0)} total seats</span><small>{activeShiftId?'Selected shift · current open parties, counted once per party':'Choose a shift to load current seating.'}</small></div></div>
       <div className="floor-day-strip" aria-label="Day and section assignment">
         <label>Day / shift<select aria-label="Floor day and shift" value={activeShiftId} onChange={e=>{setActiveShiftId(e.target.value);setSelectedTableIds([])}}><option value="">Choose shift</option>{shifts.map(s=><option key={s.id} value={s.id}>{s.shift_date} · {s.shift_name} · {s.status}</option>)}</select></label>
-        <button type="button" onClick={()=>setShowShiftPanel(true)}>Open shift</button>
+        <button type="button" disabled={saving||activeShift?.status==='open'} onClick={()=>setShowShiftPanel(true)}>{activeShift?.status==='open'?'Shift open':'Open shift'}</button>
 
       </div>
       <section className="floor-published-sections" aria-label="Published sections">
@@ -1633,7 +1634,7 @@ const [partySize, setPartySize] = useState(1)
       <nav className="floor-workspace-nav" aria-label="Floor tools">
         {floorAccess.can('floor','sections')&&<button type="button" aria-expanded={floorView==='sections'} onClick={()=>setFloorView(floorView==='sections'?'map':'sections')}>Sections ▾</button>}
         <button type="button" aria-expanded={floorView==='crew'} onClick={()=>setFloorView(floorView==='crew'?'map':'crew')}>Walk-ins ▾</button>
-        {floorAccess.can('floor','reservations')&&<><button type="button" aria-expanded={showReservationsPanel} onClick={()=>setShowReservationsPanel(v=>!v)}>Reservations ({reservations.length}) ▾</button><button type="button" disabled={!locationId||!organizationId} onClick={()=>setManualReservation(true)}>+ Reservation</button>{floorAccess.can('guests','host')&&<button type="button" disabled={!locationId} onClick={()=>setLargePartyInquiry(true)}>+ Large Party Inquiry</button>}<ReservationFileUpload location={locationId} organization={organizationId} initialDate={activeShift?.shift_date??reservationToday()} onSaved={message=>{setReservationUploadMessage(message);void loadReservations(locationId)}}/></>}
+        {floorAccess.can('floor','reservations')&&<><button type="button" aria-expanded={showReservationsPanel} onClick={()=>setShowReservationsPanel(v=>!v)}>Reservations ({reservations.length}) ▾</button></>}
         <button type="button" disabled={!activeShiftId} aria-expanded={showRotationPanel} onClick={()=>setShowRotationPanel(v=>!v)}>Rotation & seating ▾</button>
         <button type="button" aria-expanded={floorView==='rooms'} onClick={()=>setFloorView(floorView==='rooms'?'map':'rooms')}>Rooms & layout ▾</button>
 
@@ -1947,7 +1948,7 @@ const [partySize, setPartySize] = useState(1)
       {largePartyInquiry&&<FloorFloatingPanel title="Large party inquiry" open onClose={()=>{if(window.confirm('Close inquiry form? Save your inquiry first to keep entered details.'))setLargePartyInquiry(false)}}><ReservationInquiryPage largeParty initialDate={activeShift?.shift_date}/></FloorFloatingPanel>}
       {manualReservation&&<ManualReservation floating location={locationId} organization={organizationId} tables={tables} initialDate={activeShift?.shift_date??reservationToday()} onClose={()=>setManualReservation(false)} onSaved={message=>{setReservationUploadMessage(message);setShowReservationsPanel(true);void loadReservations(locationId)}}/>}
       {showReservationsPanel && (
-        <AccessSection page="floor" section="reservations"><FloorFloatingPanel title="Reservations" open onClose={()=>setShowReservationsPanel(false)}><FutureReservations location={locationId} onChanged={()=>void loadReservations(locationId)}/>
+        <AccessSection page="floor" section="reservations"><FloorFloatingPanel title="Reservations" open onClose={()=>setShowReservationsPanel(false)}><div className="feed-actions"><button type="button" disabled={!locationId||!organizationId} onClick={()=>setManualReservation(true)}>+ Reservation</button>{floorAccess.can('guests','host')&&<button type="button" disabled={!locationId} onClick={()=>setLargePartyInquiry(true)}>+ Large Party Inquiry</button>}<ReservationFileUpload location={locationId} organization={organizationId} initialDate={activeShift?.shift_date??reservationToday()} onSaved={message=>{setReservationUploadMessage(message);void loadReservations(locationId)}}/></div><FutureReservations location={locationId} onChanged={()=>void loadReservations(locationId)}/>
             <ReservationGuestbook location={locationId}/>
             <p data-design-block="copy.b78f32efa3eeed28.3" className="eyebrow"><ScreenText id="FloorPage.58f3288ba914ecb7">Reservations</ScreenText></p>
             <AccessSection page="floor" section="reservations"><h2 data-design-block="copy.2e495f44a1c1f630.4"><ScreenText id="FloorPage.def1336055c8be14">Today's Reservations</ScreenText></h2></AccessSection>
