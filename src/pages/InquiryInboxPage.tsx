@@ -45,11 +45,13 @@ export function InquiryInboxPage() {
     if(!response.ok) throw Error(body.error||'Guest inbox unavailable.')
     return body
   },[])
+  const reloadSequence=useRef(0),editingInquiry=useRef(false);editingInquiry.current=!!selected||saving||!!restoring
   const reload = useCallback(async (loc:string) => {
-    setLoading(true);setError('')
+    const ticket=++reloadSequence.current;setLoading(true);setError('')
+    try{
     const results = await Promise.allSettled([request(loc),supabase.rpc('inquiry_combined_host_load',{p_location_id:loc})])
     const next:Row[]=[];const errors:string[]=[]
-    const links=await supabase.rpc('inquiry_reservation_links',{p_location_id:loc});if(links.error){setLinked({});errors.push('Reservation links could not load: '+links.error.message)}else setLinked(Object.fromEntries((links.data??[]).map((r:{source:string;inquiry_id:string;reservation_date:string})=>[r.source+':'+r.inquiry_id,r.reservation_date])))
+    const links=await supabase.rpc('inquiry_reservation_links',{p_location_id:loc});if(links.error)errors.push('Reservation links could not load: '+links.error.message)
     if(results[0].status==='fulfilled') for(const r of results[0].value.inquiries) {
       let details:Record<string,unknown>={};try{details=JSON.parse(r.details)}catch{details={Details:r.details}}
       next.push({id:r.id,source:'Guest form',name:r.name,email:r.email,phone:r.phone,guests:r.guests,date:r.event_date,received:r.received,status:r.status,notes:r.notes,details:{...details,Package:r.package_name,'Guest follow-up':r.response,'Email delivery':r.mail_status}})
@@ -57,12 +59,16 @@ export function InquiryInboxPage() {
     if(results[1].status==='fulfilled'&&!results[1].value.error) for(const r of results[1].value.data||[]) next.push({id:r.id,source:'Host',name:r.guest_name,email:r.email||'',phone:r.phone||'',guests:r.party_size,date:r.preferred_date||'',received:r.created_at,status:r.status,notes:r.internal_notes,details:{Type:r.inquiry_type,'First time':r.preferred_time,'Second time':r.second_preferred_time,'Third time':r.third_preferred_time,'Guest notes':r.guest_notes,Package:r.preset_label}})
     else errors.push('Host inquiries could not load. Run the inquiry connection SQL.')
     const archived=await supabase.rpc('inquiry_archive_list',{p_location_id:loc});if(archived.error)errors.push('Archive filter: '+archived.error.message)
+    if(ticket!==reloadSequence.current)return
+    if(errors.length)throw Error(errors.join(' ')+' The previous inbox is retained; refresh before acting on stale records.')
+    setLinked(Object.fromEntries((links.data??[]).map((r:{source:string;inquiry_id:string;reservation_date:string})=>[r.source+':'+r.inquiry_id,r.reservation_date])))
     const hidden=new Set((archived.data??[]).map((a:{source:string;inquiry_id:string})=>a.source+':'+a.inquiry_id))
     setArchivedRows(next.filter(r=>hidden.has(r.source+':'+r.id)))
-    setRows(next.filter(r=>!hidden.has(r.source+':'+r.id)).sort((a,b)=>b.received.localeCompare(a.received)));setError(errors.join(' '));setLoading(false)
+    setRows(next.filter(r=>!hidden.has(r.source+':'+r.id)).sort((a,b)=>b.received.localeCompare(a.received)));setError('')
+    }catch(e){if(ticket===reloadSequence.current)setError(String((e as Error).message??e))}finally{if(ticket===reloadSequence.current)setLoading(false)}
   },[request])
   useEffect(()=>{let live=true;void loadTenantData().then(t=>{if(!live)return;const loc=t.locations[0]?.id;if(!loc)throw Error('No location found.');setLocation(loc)}).catch(e=>{if(live){setError(e.message);setLoading(false)}});return()=>{live=false}},[])
-  useEffect(()=>{if(!location)return;void reload(location);const timer=window.setInterval(()=>{if(document.visibilityState==='visible')void reload(location)},60000);return()=>window.clearInterval(timer)},[location,reload])
+  useEffect(()=>{if(!location)return;void reload(location);const timer=window.setInterval(()=>{if(document.visibilityState==='visible'&&!editingInquiry.current)void reload(location)},60000);return()=>{reloadSequence.current++;window.clearInterval(timer)}},[location,reload])
   async function saveFollowup(row:Row){
     if(saveLock.current)return;saveLock.current=true;setSaving(true);setEditError('');setNotice('')
     try{
