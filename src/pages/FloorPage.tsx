@@ -1,4 +1,4 @@
-import {suggestSingleTables} from '../lib/seatingSuggestions'
+import {suggestTableGroups} from '../lib/seatingSuggestions'
 import {ReservationCapacityPlanner} from '../components/ReservationCapacityPlanner'
 // reservation-capacity-planner-v1
 import './FloorCompactCards.css'
@@ -268,6 +268,7 @@ const [showTablePanel, setShowTablePanel] = useState(false)
 
   const [showShiftPanel, setShowShiftPanel] = useState(false)
 const [showSeatPanel, setShowSeatPanel] = useState(false)
+const [approvedSeatGroups,setApprovedSeatGroups]=useState<string[][]>([]),[seatGroupError,setSeatGroupError]=useState('')
 
 const [guestName, setGuestName] = useState('')
 const [guestPhone, setGuestPhone] = useState('')
@@ -780,6 +781,9 @@ const [partySize, setPartySize] = useState(1)
     (shift) => shift.id === activeShiftId,
   )
 
+  useEffect(()=>{let live=true;setApprovedSeatGroups([]);setSeatGroupError('');if(!showSeatPanel||!locationId||!activeShift?.shift_date)return;
+    void Promise.resolve(supabase.rpc('reservation_capacity_load',{p_location_id:locationId,p_day:activeShift.shift_date})).then(r=>{if(!live)return;if(r.error){setSeatGroupError('Joined-table options could not load. Single-table suggestions remain available.');return}if(r.data?.configured&&Array.isArray(r.data.config?.joinGroups))setApprovedSeatGroups(r.data.config.joinGroups)}).catch(()=>{if(live)setSeatGroupError('Joined-table options could not load. Single-table suggestions remain available.')});return()=>{live=false}
+  },[showSeatPanel,locationId,activeShift?.shift_date,reservationRevision])
   function toggleTable(tableId: string) {
     if (arrangeMode) return
 
@@ -904,7 +908,7 @@ const [partySize, setPartySize] = useState(1)
   }
 
   const unavailableForSuggestion=new Set(tables.filter(t=>{const booking=reservationForTable(t.id);return activeSessions.some(p=>p.primaryTableId===t.id||p.tableIds.includes(t.id))||!!booking&&booking.id!==seatReservationId}).map(t=>t.id))
-  const seatingSuggestions=sessionCountShift===activeShiftId?suggestSingleTables(tables,partySize,activeRoomId,unavailableForSuggestion):[]
+  const seatingSuggestions=sessionCountShift===activeShiftId?suggestTableGroups(tables,approvedSeatGroups,partySize,activeRoomId,unavailableForSuggestion):[]
   function tableSession(tableId: string) {
     return (
       activeSessions.find((session) =>
@@ -3091,7 +3095,7 @@ const [partySize, setPartySize] = useState(1)
       )}
 
       {showSeatPanel && (
-        <FloorFloatingPanel title="Seat guests" open onClose={()=>{if(!saving)setShowSeatPanel(false)}}><p>Confirm the party, then choose its table below. Occupied tables cannot be selected here. Check upcoming reservations before confirming.</p><section aria-label="Suggested seating"><h3>Suggested single tables</h3><p>Smallest fitting tables in the selected room. Existing reservations and occupied tables are excluded. Confirm table readiness and upcoming bookings before seating.</p>{seatingSuggestions.map(t=><button type="button" key={t.id} disabled={saving} onClick={()=>{setSelectedTableIds([t.id]);setSeatServerId(assignments.find(a=>a.table_id===t.id)?.server_id??'')}}>{t.table_name} · {t.seat_count} seats{tableServer(t.id)?' · '+tableServer(t.id):' · Choose server'}</button>)}{!seatingSuggestions.length&&<p>No verified single-table suggestion for this room and party. Review another room or choose an approved combination manually.</p>}</section><label>Room<select value={activeRoomId} disabled={saving} onChange={e=>setActiveRoomId(e.target.value)}>{rooms.map(r=><option key={r.id} value={r.id}>{r.name}</option>)}</select></label><div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(95px,1fr))',gap:8,margin:'12px 0'}}>{tables.filter(t=>t.room_id===activeRoomId).sort((a,b)=>a.table_name.localeCompare(b.table_name,undefined,{numeric:true})).map(t=>{const occupied=activeSessions.some(session=>session.tableIds.includes(t.id));return <button type="button" key={t.id} disabled={saving||occupied} aria-pressed={selectedTableIds.includes(t.id)} onClick={()=>{toggleTable(t.id);const server=assignments.find(a=>a.table_id===t.id)?.server_id;if(!seatServerId&&server)setSeatServerId(server)}} style={{outline:selectedTableIds.includes(t.id)?'3px solid currentColor':undefined}}>{t.table_name} · {t.seat_count} seats{occupied?' · Occupied':''}</button>})}</div><p role="status">{selectedTables.map(t=>t.table_name).join(' + ')||'Choose a table'} · {selectedTables.reduce((sum,t)=>sum+t.seat_count,0)} selected seats for {partySize} guests</p>
+        <FloorFloatingPanel title="Seat guests" open onClose={()=>{if(!saving)setShowSeatPanel(false)}}><p>Confirm the party, then choose its table below. Occupied tables cannot be selected here. Check upcoming reservations before confirming.</p><section aria-label="Suggested seating"><h3>Suggested tables</h3><p>Smallest fitting single tables or saved same-room combinations. Occupied tables and other assigned reservations are excluded. Confirm readiness and upcoming bookings.</p>{seatGroupError&&<p role="alert">{seatGroupError}</p>}{seatingSuggestions.map(group=>{const ids=group.map(t=>t.id);return <button type="button" key={[...ids].sort().join(':')} disabled={saving} onClick={()=>{setSelectedTableIds(ids);const servers=[...new Set(ids.map(id=>assignments.find(a=>a.table_id===id)?.server_id).filter(Boolean))];setSeatServerId(servers.length===1?servers[0]??'':'')}}>{group.map(t=>t.table_name).join(' + ')} · {group.reduce((n,t)=>n+t.seat_count,0)} seats{group.length>1?' · Approved combination':''}</button>})}{!seatingSuggestions.length&&<p>No fitting suggestion in this room. Check another room or review saved combinations in Capacity & availability.</p>}</section><label>Room<select value={activeRoomId} disabled={saving} onChange={e=>setActiveRoomId(e.target.value)}>{rooms.map(r=><option key={r.id} value={r.id}>{r.name}</option>)}</select></label><div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(95px,1fr))',gap:8,margin:'12px 0'}}>{tables.filter(t=>t.room_id===activeRoomId).sort((a,b)=>a.table_name.localeCompare(b.table_name,undefined,{numeric:true})).map(t=>{const occupied=activeSessions.some(session=>session.tableIds.includes(t.id));return <button type="button" key={t.id} disabled={saving||occupied} aria-pressed={selectedTableIds.includes(t.id)} onClick={()=>{toggleTable(t.id);const server=assignments.find(a=>a.table_id===t.id)?.server_id;if(!seatServerId&&server)setSeatServerId(server)}} style={{outline:selectedTableIds.includes(t.id)?'3px solid currentColor':undefined}}>{t.table_name} · {t.seat_count} seats{occupied?' · Occupied':''}</button>})}</div><p role="status">{selectedTables.map(t=>t.table_name).join(' + ')||'Choose a table'} · {selectedTables.reduce((sum,t)=>sum+t.seat_count,0)} selected seats for {partySize} guests</p>
             <p data-design-block="copy.b78f32efa3eeed28.10" className="eyebrow"><ScreenText id="FloorPage.7699845ffa5f9e0f">Seat Guests</ScreenText></p>{error && <p data-design-block="copy.83c54cb8d7aa1605.2" role="alert">{error}</p>}
 
             <h2 data-design-block="copy.2e495f44a1c1f630.11">
