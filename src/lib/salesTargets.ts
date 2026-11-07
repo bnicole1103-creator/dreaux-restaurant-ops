@@ -1,3 +1,4 @@
+import {balanceTargets} from './balanceTargets'
 export type TargetGroup='bar'|'floor'|'exclude'
 export type SalesShift={id:string;employee_key?:string;assigned?:boolean;name:string;role:string;station:string;start:string;end:string;close:boolean;business_decline:boolean}
 export type DiningDay={closed:boolean;open:string;close:string}
@@ -22,7 +23,8 @@ export function calculateTargets(date:string,inputs:TargetInputs,shifts:SalesShi
  if(fixed?.ready&&fixed.date===date){
   const people=new Map<string,{key:string;name:string;group:TargetGroup;hours:number;target:number}>()
   for(const s of fixed.rows){const id=s.group+':'+s.employee_key;const p=people.get(id)??{key:s.employee_key,name:s.name??shifts.find(x=>x.employee_key===s.employee_key)?.name??'Employee '+s.employee_key,group:s.group,hours:0,target:0};p.hours+=Number(s.hours);p.target=Math.round((p.target+Number(s.target))*100)/100;people.set(id,p)}
-  return {days:precedingDays(date).filter((_,i)=>i%7===0),missing:[],average:Number(fixed.weekday_total)/6,basisThrough:fixed.through_date,total:Number(fixed.team_target),bar:Number(fixed.bar_target),floor:Number(fixed.floor_target),rows:[...people.values()].map(r=>({...r,target:inputs.personal_targets?.[r.group+':'+r.key]??r.target})),issues:[],ready:true}
+  const balanced=balanceTargets(Number(fixed.team_target),[...people.values()],inputs.personal_targets)
+  return {days:precedingDays(date).filter((_,i)=>i%7===0),missing:[],average:Number(fixed.weekday_total)/6,basisThrough:fixed.through_date,total:Number(fixed.team_target),bar:balanced.rows.filter(r=>r.group==='bar').reduce((n,r)=>n+r.target,0),floor:balanced.rows.filter(r=>r.group==='floor').reduce((n,r)=>n+r.target,0),rows:balanced.rows,issues:balanced.issue?[balanced.issue]:[],ready:!balanced.issue}
  }
  const weekday=new Date(date+'T12:00:00Z').getUTCDay(),entry=inputs.weekday_totals?.find(t=>t.weekday===weekday&&t.total!=null);
  const days=precedingDays(date).filter((_,i)=>i%7===0),byDate=new Map((inputs.weekday_totals?[]:inputs.history).map(h=>[h.date,Number(h.amount)])),missing=entry?[]:days.filter(d=>!byDate.has(d));
@@ -42,6 +44,7 @@ export function calculateTargets(date:string,inputs:TargetInputs,shifts:SalesShi
   const list=[...people.values()].sort((a,b)=>a.key.localeCompare(b.key));if(cents>0&&!list.length)issues.push(`No assigned ${group} staff with usable hours for the ${salesMoney(cents/100)} ${group} pool.`);
   const amounts=list.length?splitCents(cents,list.map(p=>p.hours)):[];rows.push(...list.map((p,i)=>({...p,target:amounts[i]/100})));
  }
- return {days,missing,average,basisThrough:entry?.through_date??null,total:totalCents/100,bar:barCents/100,floor:floorCents/100,rows:rows.map(r=>({...r,target:inputs.personal_targets?.[r.group+':'+r.key]??r.target})),issues:[...new Set(issues)],ready:issues.length===0&&shifts.length>0};
+ const balanced=balanceTargets(totalCents/100,rows,inputs.personal_targets);if(balanced.issue)issues.push(balanced.issue)
+ return {days,missing,average,basisThrough:entry?.through_date??null,total:totalCents/100,bar:Math.round(balanced.rows.filter(r=>r.group==='bar').reduce((n,r)=>n+r.target,0)*100)/100,floor:Math.round(balanced.rows.filter(r=>r.group==='floor').reduce((n,r)=>n+r.target,0)*100)/100,rows:balanced.rows,issues:[...new Set(issues)],ready:issues.length===0&&shifts.length>0};
 }
 export function targetsChunk(date:string,inputs:TargetInputs,shifts:SalesShift[]){const t=calculateTargets(date,inputs,shifts);if(!t.ready)throw Error(t.issues.join(' ')||'No published schedule available.');return `Sales targets · ${date}\nTeam net sales goal: ${salesMoney(t.total)}\nBar: ${salesMoney(t.bar)} · Floor: ${salesMoney(t.floor)}\n\n${t.rows.map(r=>`${r.name} · ${r.group==='bar'?'Bar':'Floor'} · ${salesMoney(r.target)}`).join('\n')}\n\nBased on the six-week weekday total divided by six; individual targets weighted by scheduled hours overlapping dining hours; prep and closing duties are excluded. ${Number(inputs.settings.growth_percent)?`Growth adjustment: ${inputs.settings.growth_percent}%.`:''}`.trim()}
