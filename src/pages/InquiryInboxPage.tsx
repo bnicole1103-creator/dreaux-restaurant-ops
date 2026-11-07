@@ -1,3 +1,4 @@
+import {useManagementAccess} from '../components/ManagementAccess'
 import {inquiryQueue,inquiryNeedsAction} from '../lib/inquiryQueue'
 import {InquiryReservationDialog,type InquiryReservationSource} from '../components/InquiryReservationDialog'
 import {DesignSection} from '../components/DesignSection'
@@ -16,6 +17,9 @@ type Row = { id:string; source:'Guest form'|'Host'; name:string; email:string; p
 const statuses = ['New','Ready for review','Awaiting guest','Contacted','Confirmed','Closed']
 
 export function InquiryInboxPage() {
+  const management=useManagementAccess()
+  const [archivedRows,setArchivedRows]=useState<Row[]>([]),[restoring,setRestoring]=useState('')
+  const restoreLock=useRef(false)
   const [linked,setLinked]=useState<Record<string,string>>({})
   const [converting,setConverting]=useState<InquiryReservationSource|null>(null)
   const [location,setLocation] = useState('')
@@ -54,6 +58,7 @@ export function InquiryInboxPage() {
     else errors.push('Host inquiries could not load. Run the inquiry connection SQL.')
     const archived=await supabase.rpc('inquiry_archive_list',{p_location_id:loc});if(archived.error)errors.push('Archive filter: '+archived.error.message)
     const hidden=new Set((archived.data??[]).map((a:{source:string;inquiry_id:string})=>a.source+':'+a.inquiry_id))
+    setArchivedRows(next.filter(r=>hidden.has(r.source+':'+r.id)))
     setRows(next.filter(r=>!hidden.has(r.source+':'+r.id)).sort((a,b)=>b.received.localeCompare(a.received)));setError(errors.join(' '));setLoading(false)
   },[request])
   useEffect(()=>{let live=true;void loadTenantData().then(t=>{if(!live)return;const loc=t.locations[0]?.id;if(!loc)throw Error('No location found.');setLocation(loc)}).catch(e=>{if(live){setError(e.message);setLoading(false)}});return()=>{live=false}},[])
@@ -70,10 +75,11 @@ export function InquiryInboxPage() {
     if(saveLock.current||!window.confirm('Remove '+row.name+'’s inquiry from the shared inbox? The original record and linked reservation will be kept.'))return
     saveLock.current=true;setSaving(true);setError('');try{const r=await supabase.rpc('inquiry_archive',{p_location_id:location,p_source:row.source,p_id:row.id});if(r.error)throw r.error;setSelected(null);setNotice('Inquiry removed from the shared inbox.');await reload(location)}catch(e){setError(String((e as Error).message??e))}finally{saveLock.current=false;setSaving(false)}
   }
+  async function restoreInquiry(row:Row){if(restoreLock.current||!management.manager)return;restoreLock.current=true;setRestoring(row.source+':'+row.id);setError('');try{const r=await supabase.rpc('inquiry_restore',{p_location_id:location,p_source:row.source,p_id:row.id});if(r.error)throw r.error;await reload(location);setNotice('Inquiry restored. Its original status and linked reservation are unchanged; use All statuses if needed.')}catch(e){setError(String((e as Error).message??e))}finally{restoreLock.current=false;setRestoring('')}}
   const centralToday=new Intl.DateTimeFormat('en-CA',{timeZone:'America/Chicago',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date())
   const shown=inquiryQueue(rows,source,query,queueView,dateView,centralToday)
   return <DesignSection as="section" data-design-block="section.d4d031a214d672d3f8d8" className="page guest-feedback-inbox">
-    <h2><ScreenText id="InquiryInbox.title">Inquiry inbox</ScreenText></h2>
+    <h2><ScreenText id="InquiryInbox.title">Inquiry inbox</ScreenText></h2>{management.manager&&<details><summary>Removed inquiries · {archivedRows.length} loaded</summary><p>Restore returns an inquiry to the shared inbox. It does not create or modify a reservation. Only inquiries available in the loaded source records appear here.</p>{archivedRows.map(row=><article className="card" key={row.source+':'+row.id}><strong>{row.name}</strong><p>{row.source} · {row.date||'Date not entered'} · {normalizeInquiryStatus(row.status)}</p><button type="button" disabled={!!restoring} onClick={()=>void restoreInquiry(row)}>{restoring===row.source+':'+row.id?'Restoring…':'Restore inquiry'}</button></article>)}{!archivedRows.length&&<p>No removed inquiries in the loaded records.</p>}</details>}
     <p><Link to="/reservation-inquiries"><PageWord id="sectioncopy.e7e9355a0602bef7d543">{"Add host inquiry"}</PageWord></Link><PageWord id="sectioncopy.ba2325dd3e7764b36782">{" · "}</PageWord><a href={studio} target="_blank" rel="noopener noreferrer"><PageWord id="sectioncopy.7a02dcdac9ccd7bc8f6c">{"Guest form / QR link"}</PageWord></a><PageWord id="sectioncopy.5977e7e027ef032f7b08">{" · "}</PageWord><Link to="/inquiry-studio"><PageWord id="sectioncopy.f4819c6a9014c609b67c">{"Edit guest forms and packages"}</PageWord></Link></p>
     <p><PageWord id="sectioncopy.39fb9379c837c51df9c6">{"Guest submissions and host inquiries appear here. Each source shows its latest 2,000 requests. An inquiry is confirmed only after availability has been checked."}</PageWord></p>
     <p role="status">{rows.filter(inquiryNeedsAction).length} loaded inquiries need follow-up · {shown.length} shown. Counts cover loaded records only.</p><div className="form-grid"><label>Work queue<select value={queueView} onChange={e=>setQueueView(e.target.value)}><option value="open">Needs follow-up</option><option value="all">All statuses</option>{statuses.map(value=><option key={value} value={value}>{value}</option>)}</select></label><label>Event dates<select value={dateView} onChange={e=>setDateView(e.target.value)}><option value="all">All dates</option><option value="upcoming">Today onward · dated inquiries</option><option value="undated">Missing or unrecognized date</option></select></label><label><PageWord id="sectioncopy.0b49188fa8f3951b37b2">{"Search"}</PageWord><input value={query} onChange={e=>setQuery(e.target.value)} /></label><label><PageWord id="sectioncopy.ba17ef0d759b2e317f55">{"Source"}</PageWord><select value={source} onChange={e=>setSource(e.target.value)}>{['All','Guest form','Host'].map(s=><option key={s}>{s}</option>)}</select></label><button disabled={loading||!location} onClick={()=>void reload(location)}><PageWord id="sectioncopy.2c2196e819e8b728ae6f">{"Refresh"}</PageWord></button></div>
