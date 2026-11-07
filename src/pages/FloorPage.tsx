@@ -1,3 +1,5 @@
+import {useLocation} from 'react-router-dom'
+import {ReservationGuestInfo} from '../components/ReservationGuestInfo'
 import {suggestTableGroups} from '../lib/seatingSuggestions'
 import {ReservationCapacityPlanner} from '../components/ReservationCapacityPlanner'
 // reservation-capacity-planner-v1
@@ -150,6 +152,7 @@ type RotationLogEntry = {
 }
 
 export function FloorPage() {
+ const seatingRoute=useLocation()
  const floorAccess=useAppAccess()
  const [floorView,setFloorView]=useState<'map'|'sections'|'crew'|'tools'|'rooms'>('map')
   const [seatReservationId,setSeatReservationId]=useState('')
@@ -407,6 +410,7 @@ const [partySize, setPartySize] = useState(1)
     if(r.error)throw r.error
     return ((r.data ?? []) as Shift[]).sort((a,b)=>({open:0,scheduled:1,closed:2,cancelled:3}[a.status]-{open:0,scheduled:1,closed:2,cancelled:3}[b.status]))
   }
+  function beginReservationSeating(reservation:ReservationRecord){setSeatReservationId(reservation.id);setPendingWalkin(null);setGuestName(reservation.guest_name);setGuestPhone(reservation.phone??'');setGuestEmail(reservation.email??'');setPartySize(reservation.party_size);setSelectedTableIds(reservation.table_ids?.length?reservation.table_ids:reservation.table_id?[reservation.table_id]:[]);setSeatServerId(reservation.assigned_server_id??'');setShowReservationsPanel(false);setShowSeatPanel(true)}
   function openSeating() {
     if(activeShift?.status!=='open'){setError('Open the shift before seating guests. You can assign sections while it is scheduled or closed.');return}
     const servers=[...new Set(selectedTableIds.map(id=>assignments.find(a=>a.table_id===id)?.server_id).filter(Boolean))]
@@ -714,7 +718,7 @@ const [partySize, setPartySize] = useState(1)
       reservations.find(
         (reservation) =>
           (reservation.table_ids??(reservation.table_id?[reservation.table_id]:[])).includes(tableId) &&
-          !['cancelled', 'canceled', 'seated'].includes(
+          !['cancelled', 'canceled', 'seated','no_show','completed'].includes(
             reservation.status.toLowerCase(),
           ),
       ) ?? null
@@ -784,6 +788,7 @@ const [partySize, setPartySize] = useState(1)
   useEffect(()=>{let live=true;setApprovedSeatGroups([]);setSeatGroupError('');if(!showSeatPanel||!locationId||!activeShift?.shift_date)return;
     void Promise.resolve(supabase.rpc('reservation_capacity_load',{p_location_id:locationId,p_day:activeShift.shift_date})).then(r=>{if(!live)return;if(r.error){setSeatGroupError('Joined-table options could not load. Single-table suggestions remain available.');return}if(r.data?.configured&&Array.isArray(r.data.config?.joinGroups))setApprovedSeatGroups(r.data.config.joinGroups)}).catch(()=>{if(live)setSeatGroupError('Joined-table options could not load. Single-table suggestions remain available.')});return()=>{live=false}
   },[showSeatPanel,locationId,activeShift?.shift_date,reservationRevision])
+  useEffect(()=>{const params=new URLSearchParams(seatingRoute.search),id=params.get('seatReservation');if(!id||!locationId||!shifts.length)return;const shift=shifts.find(s=>s.shift_date===reservationToday()&&s.status==='open');if(!shift){setError('Open today’s service on Floor before seating this reservation.');return}if(activeShiftId!==shift.id){setActiveShiftId(shift.id);return}const row=reservations.find(r=>r.id===id);if(!row)return;if(['cancelled','canceled','no_show','seated','completed'].includes(row.status)){setError('This reservation is not available for seating. Refresh or correct its status first.');return}beginReservationSeating(row);params.delete('seatReservation');window.history.replaceState(window.history.state,'',window.location.pathname+(params.size?'?'+params.toString():''))},[locationId,shifts,activeShiftId,reservations,seatingRoute.search])
   function toggleTable(tableId: string) {
     if (arrangeMode) return
 
@@ -2001,7 +2006,7 @@ const [partySize, setPartySize] = useState(1)
                   >
                     <strong>
                       {formatReservationTime(reservation.reservation_time)}<PageWord id="copy.93d18fae2672d0ce.3">·</PageWord>{' '}
-                      {reservation.guest_name}
+                      <ReservationGuestInfo location={locationId} reservationKey={reservation.id} name={reservation.guest_name} status={reservation.status} onSeat={c=>beginReservationSeating({...reservation,phone:c.phone,email:c.email})}/>
                     </strong>
 
                     <div data-design-block="copy.282e4b288c06818d.1" style={{ marginTop: '4px' }}>
@@ -2024,7 +2029,7 @@ const [partySize, setPartySize] = useState(1)
                     </div>
                     {reservation.assigned_server_id && <p><PageWord id="sectioncopy.4322959eecd190a1ccfd">{"Server: "}</PageWord>{memberName(reservation.assigned_server_id)}</p>}
                     {reservation.notes && <p>{reservation.notes}</p>}
-                    <button type="button" disabled={reservation.status==='cancelled'} onClick={()=>{setSeatReservationId(reservation.id);setPendingWalkin(null);setGuestName(reservation.guest_name);setGuestPhone(reservation.phone??'');setGuestEmail(reservation.email??'');setPartySize(reservation.party_size);setSelectedTableIds(reservation.table_ids?.length?reservation.table_ids:reservation.table_id?[reservation.table_id]:[]);setSeatServerId(reservation.assigned_server_id??'');setShowReservationsPanel(false);setShowSeatPanel(true)}}>Seat reservation</button>
+                    <button type="button" disabled={['cancelled','canceled','no_show','seated','completed'].includes(reservation.status)} onClick={()=>beginReservationSeating(reservation)}>Seat reservation</button>
                     <ReservationEditor reservation={reservation} locationId={locationId} tables={tables} team={team} onSaved={()=>{void loadReservations(locationId)}} />
                   </div>
                 ))
