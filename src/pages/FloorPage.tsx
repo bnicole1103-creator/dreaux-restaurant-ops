@@ -1895,6 +1895,8 @@ const [partySize, setPartySize] = useState(1)
   </ScreenText></button>
 )}
 
+          {floorAccess.can('floor','sections')&&<button type="button" disabled={saving||arrangeMode||!selectedTableIds.length} onClick={()=>openSectionEditor(undefined,[...selectedTableIds])}>Assign section</button>}
+
           <button data-design-block="copy.9058c8ac3ece9938.1"
             disabled={selectedTableIds.length === 0}
             onClick={() => {

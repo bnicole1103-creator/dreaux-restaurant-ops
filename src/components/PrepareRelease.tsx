@@ -1,3 +1,4 @@
+import {normalizeQueuedTargetHours} from '../lib/preparedTargetPreview'
 import {createContext,useCallback,useContext,useEffect,useRef,useState,type ReactNode} from 'react'
 import {supabase} from '../lib/supabase'
 import {useWorkspaceRecovery} from '../lib/workspaceRecovery'
@@ -40,7 +41,7 @@ export function PrepareReleaseProvider({location,day,children}:{location:string;
   if(!recovery.ready)throw Error('Wait for the release plan to restore.')
   if(current.current.result){if(!current.current.attempt||!samePost(current.current.attempt,id,version))throw Error('That completed release belongs to another pre-shift. Choose Prepare another release before publishing this draft.');return verifyReleaseResult(current.current.attempt,current.current.result)}
   if(current.current.attempt){if(!samePost(current.current.attempt,id,version))throw Error('Another release is unresolved. Retry/check that release first.');return send(current.current.attempt)}
-  const entries=current.current.entries.filter(e=>e.selected)
+  const entries=normalizeQueuedTargetHours(current.current.entries.filter(e=>e.selected),day)
   if(entries.some(stale))throw Error('An editor changed after being queued. Queue its latest changes or remove it before releasing.')
   const post:PreparedEntry={id:'post',workId:'post',label:'Pre-shift & included sections',operation:'preshift_draft_publish',args:{p_location_id:location,p_id:id,p_version:version},fingerprint:id+':'+version,selected:true}
   const attempt={request:crypto.randomUUID(),plan:[...entries,post]};update({...current.current,attempt,knownFailure:false});return send(attempt)
