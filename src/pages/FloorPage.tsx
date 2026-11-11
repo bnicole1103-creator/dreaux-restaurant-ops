@@ -1553,6 +1553,7 @@ const [partySize, setPartySize] = useState(1)
       setSelectedTableIds([]);setFloorNotice(all?'Section assignments cleared. Select tables to build new sections.':'Selected table assignments cleared.')
     }catch(e){setError(String((e as {message?:string}).message??e))}finally{setSaving(false)}
   }
+  useEffect(()=>{const params=new URLSearchParams(window.location.search);if(params.get('tool')!=='smart-sections'||!locationId)return;setFloorView('sections');const day=params.get('date')??'';if(/^\d{4}-\d{2}-\d{2}$/.test(day))setSmartDay(day)},[locationId])
   function openSectionEditor(card?:typeof sectionCards[number],tableIds=selectedTableIds){
     setFloorView('sections')
     setError('');setShowTablePanel(false);setSelectedTableIds(tableIds)
