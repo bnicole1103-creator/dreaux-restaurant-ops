@@ -1,0 +1,8 @@
+.live-seating-finder{min-width:0;display:grid;gap:10px}
+.live-seating-finder .live-seating-numbers{display:grid;gap:6px}
+.live-seating-inputs{display:grid;grid-template-columns:minmax(80px,.7fr) minmax(110px,1fr);gap:10px}
+.live-seating-finder label{display:grid;gap:5px}
+.live-seating-finder input,.live-seating-finder select{width:100%;min-width:0;box-sizing:border-box}
+.live-seating-actions{display:flex;flex-wrap:wrap;gap:8px}
+.live-seating-finder p{margin:0}
+.floor-top-status:has(.live-seating-finder){align-items:start}
