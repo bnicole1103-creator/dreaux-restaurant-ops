@@ -1,0 +1,12 @@
+.task-dialog:has(.reservation-table-map){width:min(1100px,96vw);max-width:96vw}
+.reservation-map-legend{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+.reservation-map-legend span{padding:8px 12px;border:2px solid currentColor;border-radius:8px}
+.reservation-map-scroll{overflow:auto;margin:12px 0;border:1px solid #a8a29e;border-radius:12px}
+.reservation-map-canvas{position:relative;min-width:650px;background:#fffaf2}
+.reservation-map-table{position:absolute;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;justify-content:center;border:2px solid #57534e!important;background:#fff!important;color:#292524!important;padding:3px!important;overflow:hidden;line-height:1.1;min-width:0!important}
+.reservation-map-table small{font-size:11px}
+.map-assigned{background:#bfdbfe!important;color:#172554!important;border-color:#2563eb!important}
+.map-suggested{background:#fde68a!important;color:#422006!important;border-color:#b45309!important}
+.map-blocked{background:#d6d3d1!important;color:#44403c!important}
+.reservation-map-table.map-selected{outline:4px solid #15803d;outline-offset:3px;z-index:2}
+.reservation-map-table:disabled{opacity:1;cursor:not-allowed}
