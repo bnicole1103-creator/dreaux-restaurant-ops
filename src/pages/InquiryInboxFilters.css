@@ -1,0 +1,4 @@
+.inquiry-inbox-filters { display:grid !important; grid-template-columns:repeat(auto-fit,minmax(min(100%,180px),1fr)); gap:12px; align-items:end; }
+.inquiry-inbox-filters > label { display:grid; gap:6px; min-width:0; }
+.inquiry-inbox-filters input,.inquiry-inbox-filters select { width:100%; min-width:0; box-sizing:border-box; }
+.inquiry-inbox-filters > button { margin:0; align-self:end; }
