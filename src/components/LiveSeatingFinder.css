@@ -1,8 +1,19 @@
-.live-seating-finder{min-width:0;display:grid;gap:10px}
-.live-seating-finder .live-seating-numbers{display:grid;gap:6px}
-.live-seating-inputs{display:grid;grid-template-columns:minmax(80px,.7fr) minmax(110px,1fr);gap:10px}
+.floor-top-status:has(.live-seating-finder){grid-template-columns:minmax(0,1fr) minmax(280px,340px);align-items:start}
+.floor-seating-counts.live-seating-finder{position:relative;display:grid;align-content:start;gap:6px;width:100%;max-width:340px;box-sizing:border-box;justify-self:end;padding:10px 12px;font-size:.85rem}
+.live-seating-finder .live-seating-numbers{display:flex;justify-content:space-between;gap:8px;line-height:1.2}
+.live-seating-finder .live-seating-quick{display:grid;grid-template-columns:82px minmax(0,1fr);gap:10px;align-items:center}
+.live-seating-finder .live-seating-quick>label{display:flex;align-items:center;gap:5px;font-weight:600}
+.live-seating-quick input{width:50px!important;min-height:36px!important;padding:4px!important}
 .live-seating-finder label{display:grid;gap:5px}
 .live-seating-finder input,.live-seating-finder select{width:100%;min-width:0;box-sizing:border-box}
-.live-seating-actions{display:flex;flex-wrap:wrap;gap:8px}
-.live-seating-finder p{margin:0}
-.floor-top-status:has(.live-seating-finder){align-items:start}
+.live-seating-finder p{margin:0;overflow-wrap:anywhere}
+.live-seating-quick>p{font-size:.78rem;line-height:1.25}
+.live-seating-footer{display:flex;justify-content:space-between;gap:8px;align-items:center}
+.live-seating-footer>small{white-space:nowrap;font-size:.65rem}
+.live-seating-dropdown>summary{cursor:pointer;font-size:.78rem;font-weight:700;min-height:32px;display:flex;align-items:center}
+.live-seating-dropdown-body{position:absolute;right:0;top:calc(100% + 6px);width:min(360px,calc(100vw - 32px));box-sizing:border-box;z-index:100;max-height:65dvh;overflow:auto;display:grid;gap:10px;padding:12px;border:1px solid var(--warm-border,#d4c1b0);border-radius:12px;background:var(--warm-card,#fff8ef);box-shadow:0 10px 32px #0003}
+.live-seating-dropdown:not([open]) .live-seating-dropdown-body{display:none}
+.live-seating-menu-heading,.live-seating-actions{display:flex;gap:8px;justify-content:space-between;align-items:center}
+.live-seating-menu-heading button{min-height:32px!important;padding:3px 10px!important}
+.live-seating-actions{flex-wrap:wrap}
+@media(max-width:700px){.floor-top-status:has(.live-seating-finder){grid-template-columns:minmax(0,1fr)}.floor-seating-counts.live-seating-finder{display:grid;max-width:340px;justify-self:end}}
