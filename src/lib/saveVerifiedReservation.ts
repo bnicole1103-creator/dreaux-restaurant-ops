@@ -4,7 +4,7 @@ export type VerifiedValues={guest_name:string;phone:string;email?:string|null;re
 export async function saveVerifiedReservation(location:string,request:string,values:VerifiedValues,source?:string,inquiry?:string){
  if(!values.guest_name.trim()||!values.phone.trim()||!values.reservation_date||!values.reservation_time||!Number.isInteger(values.party_size)||Number(values.party_size)<1||Number(values.party_size)>500)throw Error('Enter name, phone, date, time and 1–500 guests.')
  const loaded=await supabase.rpc('reservation_capacity_load',{p_location_id:location,p_day:values.reservation_date}).abortSignal(AbortSignal.timeout(15000));if(loaded.error)throw loaded.error;const data=loaded.data as CapacityData
- if(!data.configured||data.config.closed)throw Error('Save open service settings for this date before booking.')
+ if(!data.configured)throw Error('No recurring service setup is available for this weekday. Save its weekly settings once in Floor → Capacity & availability. Special dates can use a date exception.');if(data.config.closed)throw Error('This date is closed in the saved service settings. Review its recurring weekday or add a special-date exception before booking.')
  const start=data.slots.find(s=>new Intl.DateTimeFormat('en-GB',{timeZone:'America/Chicago',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(new Date(s.value*60000))===values.reservation_time.slice(0,5))?.value
  const duration=data.config.duration
  if(start==null||start<data.now||start+duration+data.config.buffer>data.close)throw Error('Choose a future arrival inside the saved service hours.')

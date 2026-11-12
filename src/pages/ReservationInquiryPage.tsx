@@ -1,3 +1,4 @@
+import {InquiryTags} from '../components/InquiryTags'
 import {TimeInput12} from '../components/TimeInput12'
 import {DesignSection} from '../components/DesignSection'
 // page-designer-instrumented
@@ -346,7 +347,7 @@ export function ReservationInquiryPage({largeParty=false,initialDate}:{largePart
                 </DesignSection>
               )}
 
-              <label>
+              <InquiryTags value={internalNotes} onChange={setInternalNotes} disabled={saving}/><label>
                 <ScreenText id="ReservationInquiryPage.internalNotes">Host/internal notes</ScreenText>
                 <textarea rows={3} maxLength={5000} value={internalNotes} onChange={(event) => setInternalNotes(event.target.value)} />
               </label>
