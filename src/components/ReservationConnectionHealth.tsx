@@ -1,0 +1,10 @@
+import {useEffect,useRef,useState} from 'react'
+import {supabase} from '../lib/supabase'
+type Health={checked_at:string;installed:boolean;configured:boolean;last_success:string|null;has_error:boolean;detail:string}
+const clock=(value:string)=>new Date(value).toLocaleString('en-US',{timeZone:'America/Chicago',hour12:true})+' CT'
+export function ReservationConnectionHealth({location,disabled=false}:{location:string;disabled?:boolean}){
+ const [data,setData]=useState<Health|null>(null),[error,setError]=useState(''),[busy,setBusy]=useState(false);const seq=useRef(0),locked=useRef(false)
+ useEffect(()=>{seq.current++;setData(null);setError('');setBusy(false);locked.current=false;return()=>{seq.current++}},[location])
+ async function check(){if(locked.current||!location)return;locked.current=true;const ticket=++seq.current;setBusy(true);setData(null);setError('');try{const r=await supabase.rpc('reservation_connection_health',{p_location_id:location}).abortSignal(AbortSignal.timeout(15000));if(ticket!==seq.current)return;if(r.error)throw r.error;setData(r.data)}catch(e){if(ticket===seq.current)setError(String((e as Error).message??e))}finally{if(ticket===seq.current){setBusy(false);locked.current=false}}}
+ return <details><summary>Inquiry connection health</summary><p>Check the recorded background inquiry sync for this location. This check does not send messages or restart jobs.</p><button type="button" disabled={busy||disabled||!location} onClick={()=>void check()}>{busy?'Checking…':'Check inquiry connection'}</button>{error&&<p role="alert">Health check unavailable: {error}. Connection status is not verified.</p>}{data&&<div role="status"><p>{data.detail}</p><p>Last successful sync: {data.last_success?clock(data.last_success):'Never recorded'}</p><p>Checked: {clock(data.checked_at)}</p></div>}<p>Inbox refresh, guest follow-up alerts, staff-device notifications and guest message delivery are separate. A saved sync timestamp does not verify them. Later guest responses still need the event/reconciliation upgrade.</p></details>
+}
