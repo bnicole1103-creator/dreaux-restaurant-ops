@@ -10,11 +10,10 @@ export function serviceTime(date:string,time:string){
  throw Error('A queued time falls in a daylight-saving clock change. Choose an actual local time.')
 }
 function queuedRows(rows:Row[],date:string,base:SalesShift[],snapshot:Record<string,unknown>[]=[],roster=false){
- return rows.map(r=>{const prior=snapshot.find(s=>s.id===r.id&&s.user_id===r.user_id)??snapshot.find(s=>s.user_id===r.user_id),old=base.find(s=>s.id===r.id),start=serviceTime(date,r.start_time);let end=roster?new Date(Date.parse(start)+Number(r.hours)*3600000).toISOString():serviceTime(date,r.end_time??'')
+ return rows.map(r=>{const prior=snapshot.find(s=>s.id===r.id&&s.user_id===r.user_id)??(r.user_id?snapshot.find(s=>s.user_id===r.user_id):undefined),old=base.find(s=>s.id===r.id),start=serviceTime(date,r.start_time);let end=roster?new Date(Date.parse(start)+Number(r.hours)*3600000).toISOString():serviceTime(date,r.end_time??'')
   if(Date.parse(end)<Date.parse(start))end=new Date(Date.parse(end)+86400000).toISOString()
   const hours=(Date.parse(end)-Date.parse(start))/3600000;if(!Number.isFinite(hours)||hours<=0||hours>24||Date.parse(end)>Date.parse(serviceTime(nextDay(date),'04:00')))throw Error('Queued schedule hours must fit the 4 AM service-day cutoff.')
-  if(!r.user_id&&!roster)throw Error('Link each queued shift to an employee before calculating targets.')
-  return {id:r.id,employee_key:String(r.employee_key??prior?.employee_key??(r.user_id?'app:'+r.user_id:old?.employee_key??'')),assigned:true,name:String(r.name??prior?.name??old?.name??'Selected employee'),role:r.role,station:'',start,end,close:false,business_decline:false} as SalesShift
+  return {id:r.id,employee_key:String(r.employee_key??prior?.employee_key??(r.user_id?'app:'+r.user_id:old?.employee_key??'unlinked:'+r.id)),assigned:true,name:String(r.name??prior?.name??old?.name??'Selected employee'),role:r.role,station:'',start,end,close:false,business_decline:false} as SalesShift
  })
 }
 export function normalizeQueuedTargetHours<T extends Entry>(entries:T[],date:string):T[]{
