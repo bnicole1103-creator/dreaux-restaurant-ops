@@ -13,7 +13,7 @@ export function liveSeatingOptions(data:CapacityData,party:number,room=''){
  }).sort((a,b)=>a.reduce((n,id)=>n+byId.get(id)!.seats,0)-b.reduce((n,id)=>n+byId.get(id)!.seats,0)||a.length-b.length||a.join(':').localeCompare(b.join(':')))
  const option=(ids:string[],start:number):SeatingOption=>({ids,seats:ids.reduce((n,id)=>n+byId.get(id)!.seats,0),label:ids.map(id=>byId.get(id)!.name).join(' + '),room:byId.get(ids[0])!.roomName,start})
  const candidate=(start:number,ids:string[]=[]):CapacityBooking=>({id:'live-finder-candidate',name:'New walk-in',party,start,end:start+data.config.duration,tableIds:ids,room,version:0})
- const fitsWindow=(start:number)=>start>=data.open&&start+data.config.duration+data.config.buffer<=data.close
+ const fitsWindow=(start:number)=>start>=data.open&&start<=data.close-15
  const options:SeatingOption[]=[];let unverified=false,reason=''
  if(fitsWindow(data.now))for(const ids of choices){
   const result=planCapacity(data,candidate(data.now,ids),4000)
