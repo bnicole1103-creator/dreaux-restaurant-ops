@@ -1,3 +1,4 @@
+import {TaskDialog} from './TaskDialog'
 import {notifyReservationsChanged} from '../lib/reservationSync'
 import {PageWord} from './PageDesign'
 import { useState } from 'react'
@@ -25,7 +26,7 @@ export function ReservationEditor({reservation,locationId,tables,team,onSaved}:{
     }catch(e){setError((e as Error).message)}finally{setBusy(false)}
   }
   if(!editing)return <button type="button" onClick={open}><ScreenText id="ReservationEditor.edit">Edit reservation</ScreenText></button>
-  return <form onSubmit={e=>{e.preventDefault();void save()}}>
+  return <TaskDialog title="Edit reservation" busy={busy} onClose={()=>setEditing(false)}><p>Changes to party size, date, time or tables must fit the saved capacity rules. A failed save keeps the original reservation. No guest message is sent automatically.</p><form onSubmit={e=>{e.preventDefault();void save()}}>
     <fieldset data-design-block="section.f8a0b20ec90bec1bfef5" disabled={busy}>
       <label><ScreenText id="ReservationEditor.size">Party size (number of guests)</ScreenText><input required type="number" min={1} max={500} step={1} value={size} onChange={e=>setSize(e.target.value)}/></label>
       <fieldset data-design-block="section.e8efffeff8601455f9c9"><legend><PageWord id="sectioncopy.d9402e7947020969a019">{"Tables (select any number)"}</PageWord></legend><button type="button" onClick={()=>setTableIds([])}><PageWord id="sectioncopy.1b61200f7b799cb0fa2e">{"Clear tables"}</PageWord></button><div className="closeout-table-grid">{tables.map(t=><label key={t.id}><input type="checkbox" checked={tableIds.includes(t.id)} onChange={e=>setTableIds(ids=>e.target.checked?[...ids,t.id]:ids.filter(id=>id!==t.id))}/>{t.table_name}</label>)}</div></fieldset>
@@ -35,5 +36,5 @@ export function ReservationEditor({reservation,locationId,tables,team,onSaved}:{
       <button type="button" onClick={()=>setEditing(false)}><ScreenText id="ReservationEditor.cancel">Cancel</ScreenText></button>
     </fieldset>
     {error&&<p role="alert">{error}</p>}
-  </form>
+  </form></TaskDialog>
 }
