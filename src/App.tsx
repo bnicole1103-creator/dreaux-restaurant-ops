@@ -1,3 +1,5 @@
+import {ReservationPrivacy} from './pages/ReservationPrivacy'
+import {ReservationGuestConfirmation} from './pages/ReservationGuestConfirmation'
 import {RestaurantGamesPage} from './pages/RestaurantGamesPage'
 import {PrepareDayPage} from './pages/PrepareDayPage'
 import {ServiceTrainingPage} from './pages/ServiceTrainingPage'
@@ -57,6 +59,7 @@ import { ReservationInquiryPage } from './pages/ReservationInquiryPage'
 import { InquiryStudioPage } from './pages/InquiryStudioPage'
 
 
+import {ReservationMessagingPage} from './pages/ReservationMessagingPage'
 export default function App() {
   const walkinPath=useLocation().pathname
   const [recovering, setRecovering] = useState(() => {
@@ -114,9 +117,16 @@ export default function App() {
     }
   }, [])
 
+  if (walkinPath === '/privacy' || walkinPath === '/privacy/') return <ReservationPrivacy/>
+  if (walkinPath === '/reservation-confirmation' || walkinPath === '/reservation-confirmation/') return <ReservationGuestConfirmation/>
   if (walkinPath.startsWith('/guest-feedback/')) return <PageCanvas><GuestFeedbackPage key={walkinPath} publicKey={walkinPath.slice('/guest-feedback/'.length)} /></PageCanvas>
 
   if (walkinPath.startsWith('/walk-in/')) return <PageCanvas><WalkInPage key={walkinPath} publicKey={walkinPath.slice('/walk-in/'.length)} /></PageCanvas>
+
+  // Guest-only pages must render before the staff session/loading gate.
+  if (walkinPath.replace(/\/$/,'')==='/reservation-confirmation') return <ReservationGuestConfirmation/>
+  if (['/privacy','/messaging-terms'].includes(walkinPath.replace(/\/$/,''))) return <ReservationPrivacy/>
+  if (walkinPath.replace(/\/$/,'')==='/reservation-messaging') return <ReservationMessagingPage/>
 
   if (loading) {
     return (
