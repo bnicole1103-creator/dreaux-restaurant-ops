@@ -6,7 +6,7 @@ export function suggestTableGroups<T extends SeatingCandidate>(tables:T[],approv
  if(!Number.isInteger(party)||party<1)return []
  const byId=new Map(tables.map(t=>[t.id,t])),seen=new Set<string>(),groups:T[][]=[]
  for(const ids of [...tables.map(t=>[t.id]),...approved]){
-  if(!Array.isArray(ids)||!ids.length||ids.length>6||new Set(ids).size!==ids.length)continue
+  if(!Array.isArray(ids)||!ids.length||ids.length>100||new Set(ids).size!==ids.length)continue
   const key=[...ids].sort().join(':');if(seen.has(key))continue;seen.add(key)
   const group=ids.map(id=>byId.get(id));
   if(group.some(t=>!t||t.room_id!==room||blocked.has(t.id)||!Number.isFinite(t.seat_count)||t.seat_count<1))continue

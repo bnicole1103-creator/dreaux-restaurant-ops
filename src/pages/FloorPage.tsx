@@ -1,3 +1,6 @@
+import {TableMapChoice} from '../components/TableMapChoice'
+import {PartySizeInput} from '../components/PartySizeInput'
+import './FloorPhone.css'
 import {ReservationEntryHistory} from '../components/ReservationEntryHistory'
 import {useLocation} from 'react-router-dom'
 import {ReservationGuestInfo} from '../components/ReservationGuestInfo'
@@ -1573,6 +1576,7 @@ const [partySize, setPartySize] = useState(1)
       </ScreenText></div>
     )
   }
+  async function loadFloorTablesForCorrection(){const r=await supabase.from('floor_tables').select('*').eq('location_id',locationId).eq('is_active',true);if(r.error){setError(r.error.message);return}setTables(r.data as typeof tables)}
   async function handleSeatGuests() {
     if (selectedTableIds.length === 0 || activeShift?.status!=='open') {
       setError('Select at least one table and open a shift first.')
@@ -3107,7 +3111,7 @@ const [partySize, setPartySize] = useState(1)
       )}
 
       {showSeatPanel && (
-        <FloorFloatingPanel title="Seat guests" open onClose={()=>{if(!saving)setShowSeatPanel(false)}}><p>Confirm the party, then choose its table below. Occupied tables cannot be selected here. Check upcoming reservations before confirming.</p><section aria-label="Suggested seating"><h3>Suggested tables</h3><p>Smallest fitting single tables or saved same-room combinations. Occupied tables and other assigned reservations are excluded. Confirm readiness and upcoming bookings.</p>{seatGroupError&&<p role="alert">{seatGroupError}</p>}{seatingSuggestions.map(group=>{const ids=group.map(t=>t.id);return <button type="button" key={[...ids].sort().join(':')} disabled={saving} onClick={()=>{setSelectedTableIds(ids);const servers=[...new Set(ids.map(id=>assignments.find(a=>a.table_id===id)?.server_id).filter(Boolean))];setSeatServerId(servers.length===1?servers[0]??'':'')}}>{group.map(t=>t.table_name).join(' + ')} · {group.reduce((n,t)=>n+t.seat_count,0)} seats{group.length>1?' · Approved combination':''}</button>})}{!seatingSuggestions.length&&<p>No fitting suggestion in this room. Check another room or review saved combinations in Capacity & availability.</p>}</section><label>Room<select value={activeRoomId} disabled={saving} onChange={e=>setActiveRoomId(e.target.value)}>{rooms.map(r=><option key={r.id} value={r.id}>{r.name}</option>)}</select></label><div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(95px,1fr))',gap:8,margin:'12px 0'}}>{tables.filter(t=>t.room_id===activeRoomId).sort((a,b)=>a.table_name.localeCompare(b.table_name,undefined,{numeric:true})).map(t=>{const occupied=activeSessions.some(session=>session.tableIds.includes(t.id));return <button type="button" key={t.id} disabled={saving||occupied} aria-pressed={selectedTableIds.includes(t.id)} onClick={()=>{toggleTable(t.id);const server=assignments.find(a=>a.table_id===t.id)?.server_id;if(!seatServerId&&server)setSeatServerId(server)}} style={{outline:selectedTableIds.includes(t.id)?'3px solid currentColor':undefined}}>{t.table_name} · {t.seat_count} seats{occupied?' · Occupied':''}</button>})}</div><p role="status">{selectedTables.map(t=>t.table_name).join(' + ')||'Choose a table'} · {selectedTables.reduce((sum,t)=>sum+t.seat_count,0)} selected seats for {partySize} guests</p>
+        <FloorFloatingPanel title="Seat guests" open onClose={()=>{if(!saving)setShowSeatPanel(false)}}><p>Confirm the party, then choose its table below. Occupied tables cannot be selected here. Check upcoming reservations before confirming.</p><TableMapChoice location={locationId} selected={selectedTableIds} onChange={setSelectedTableIds} disabled={saving} onTablesChanged={()=>void loadFloorTablesForCorrection()}/><details><summary>Suggested tables & combinations</summary><p>Smallest fitting single tables or saved same-room combinations. Occupied tables and other assigned reservations are excluded. Confirm readiness and upcoming bookings.</p>{seatGroupError&&<p role="alert">{seatGroupError}</p>}{seatingSuggestions.map(group=>{const ids=group.map(t=>t.id);return <button type="button" key={[...ids].sort().join(':')} disabled={saving} onClick={()=>{setSelectedTableIds(ids);const servers=[...new Set(ids.map(id=>assignments.find(a=>a.table_id===id)?.server_id).filter(Boolean))];setSeatServerId(servers.length===1?servers[0]??'':'')}}>{group.map(t=>t.table_name).join(' + ')} · {group.reduce((n,t)=>n+t.seat_count,0)} seats{group.length>1?' · Approved combination':''}</button>})}{!seatingSuggestions.length&&<p>No fitting suggestion in this room. Check another room or review saved combinations in Capacity & availability.</p>}</details><label>Room<select value={activeRoomId} disabled={saving} onChange={e=>setActiveRoomId(e.target.value)}>{rooms.map(r=><option key={r.id} value={r.id}>{r.name}</option>)}</select></label><div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(95px,1fr))',gap:8,margin:'12px 0'}}>{tables.filter(t=>t.room_id===activeRoomId).sort((a,b)=>a.table_name.localeCompare(b.table_name,undefined,{numeric:true})).map(t=>{const occupied=activeSessions.some(session=>session.tableIds.includes(t.id));return <button type="button" key={t.id} disabled={saving||occupied} aria-pressed={selectedTableIds.includes(t.id)} onClick={()=>{toggleTable(t.id);const server=assignments.find(a=>a.table_id===t.id)?.server_id;if(!seatServerId&&server)setSeatServerId(server)}} style={{outline:selectedTableIds.includes(t.id)?'3px solid currentColor':undefined}}>{t.table_name} · {t.seat_count} seats{occupied?' · Occupied':''}</button>})}</div><p role="status">{selectedTables.map(t=>t.table_name).join(' + ')||'Choose a table'} · {selectedTables.reduce((sum,t)=>sum+t.seat_count,0)} selected seats for {partySize} guests</p>
             <p data-design-block="copy.b78f32efa3eeed28.10" className="eyebrow"><ScreenText id="FloorPage.7699845ffa5f9e0f">Seat Guests</ScreenText></p>{error && <p data-design-block="copy.83c54cb8d7aa1605.2" role="alert">{error}</p>}
 
             <h2 data-design-block="copy.2e495f44a1c1f630.11">
@@ -3167,7 +3171,7 @@ const [partySize, setPartySize] = useState(1)
 
             <label data-design-block="copy.84c506c83683b9a2.6" style={{ marginTop: '12px' }}><ScreenText id="FloorPage.6f52ad3b8af5273e">
               Party size
-              </ScreenText><input
+              </ScreenText><PartySizeInput
                 type="number"
                 min="1"
                 value={partySize}
