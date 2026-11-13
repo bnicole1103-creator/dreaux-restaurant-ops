@@ -610,7 +610,7 @@ const [partySize, setPartySize] = useState(1)
   }
 
   const reservationRevision=useReservationRevision(locationId)
-  useEffect(()=>{if(locationId)void loadReservations(locationId)},[locationId,reservationRevision])
+  useEffect(()=>{if(locationId)void loadReservations(locationId);if(activeShiftId){void loadTableSessions(activeShiftId);void loadAssignments(activeShiftId);void loadSections(activeShiftId)}},[locationId,activeShiftId,reservationRevision])
 
   async function loadReservations(locationIdValue: string) {
     const reservationDate =
@@ -1007,6 +1007,7 @@ const [partySize, setPartySize] = useState(1)
       }
 
       await loadTableSessions(activeShiftId)
+      notifyReservationsChanged();setFloorNotice(nextStatus==='ready'?'Party cleared; tables are ready.':'Table status updated.')
 
       if (nextStatus === 'ready') {
         setShowTablePanel(false)
@@ -1080,6 +1081,7 @@ const [partySize, setPartySize] = useState(1)
     const payload={p_location_id:locationId,p_shift_id:activeShiftId,p_table_ids:[...tableIds].sort(),p_server_id:serverId||null,p_guest_name:guestName,p_guest_phone:guestPhone,p_guest_email:guestEmail,p_party_size:covers,p_source:reservationId?'reservation':'walk_in',p_reservation_id:reservationId||null,p_walkin_id:walkin?.id??null,p_walkin_version:walkin?.version??null}
     const key=JSON.stringify(payload);if(seatingRequest.current?.key!==key)seatingRequest.current={key,id:crypto.randomUUID()}
     const r=await supabase.rpc('floor_seat_and_rotate_v1',{...payload,p_request_id:seatingRequest.current.id});if(r.error)throw r.error
+    notifyReservationsChanged();setFloorNotice('Guests seated. Reservation, table and rotation lists updated.')
     await Promise.all([loadRotation(activeShiftId),loadRotationLog(activeShiftId),loadTableSessions(activeShiftId),loadSeatingHistory(activeShiftId)])
   }
   function resizeRotationSetup(countValue: number) {
