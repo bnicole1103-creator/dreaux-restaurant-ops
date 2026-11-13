@@ -9,14 +9,16 @@ import {loadTenantData} from '../lib/tenant'
 type Booking={id:string;guest_name:string;reservation_date:string;reservation_time:string|null;party_size:number|null;phone:string|null}
 type Preview={reservation_id:string;destination:string;body:string;configured:boolean;history:null|{id:string;status:string;provider_status:string|null;error_code:string|null;created_at:string;destination:string;body:string;changed:boolean}}
 const today=()=>new Intl.DateTimeFormat('en-CA',{timeZone:'America/Chicago',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date())
-export function ReservationConfirmations(){
- const [locations,setLocations]=useState<{id:string;name:string}[]>([]),[location,setLocation]=useState(''),[day,setDay]=useState(today),[bookings,setBookings]=useState<Booking[]>([]),[selected,setSelected]=useState(''),[channel,setChannel]=useState<'email'|'sms'>('sms'),[preview,setPreview]=useState<Preview|null>(null),[agreed,setAgreed]=useState(false),[consent,setConsent]=useState(''),[busy,setBusy]=useState(false),[error,setError]=useState(''),[revision,setRevision]=useState(0)
- const [query,setQuery]=useState(''),[offset,setOffset]=useState(0),[hasMore,setHasMore]=useState(false),[listLoading,setListLoading]=useState(false),[listError,setListError]=useState('')
+export function ReservationConfirmations({initialReservation,initialLocation}:{initialReservation?:{id:string;name:string;date:string};initialLocation?:string}={}){
+ const preselected=useRef(false)
+ const [locations,setLocations]=useState<{id:string;name:string}[]>([]),[location,setLocation]=useState(''),[day,setDay]=useState(()=>initialReservation?.date??today()),[bookings,setBookings]=useState<Booking[]>([]),[selected,setSelected]=useState(''),[channel,setChannel]=useState<'email'|'sms'>('sms'),[preview,setPreview]=useState<Preview|null>(null),[agreed,setAgreed]=useState(false),[consent,setConsent]=useState(''),[busy,setBusy]=useState(false),[error,setError]=useState(''),[revision,setRevision]=useState(0)
+ const [query,setQuery]=useState(initialReservation?.name.slice(0,120)??''),[offset,setOffset]=useState(0),[hasMore,setHasMore]=useState(false),[listLoading,setListLoading]=useState(false),[listError,setListError]=useState('')
  function resetSelection(){setSelected('');setPreview(null);setBookings([]);setHasMore(false)}
+ useEffect(()=>{if(!preselected.current&&initialReservation&&bookings.some(b=>b.id===initialReservation.id)){preselected.current=true;setSelected(initialReservation.id)}},[bookings,initialReservation])
  const [gate,setGate]=useState<ConfirmationGate|null>(null),[gateRevision,setGateRevision]=useState(0),[gateError,setGateError]=useState(''),[uncertain,setUncertain]=useState(false);const actionLock=useRef(false)
  useEffect(()=>{let live=true;setGate(null);setGateError('');if(!selected)return;void loadConfirmationGate(selected,channel).then(r=>{if(live)setGate(r)}).catch(e=>{if(live)setGateError(String(e?.message??'Readiness could not load.'))});return()=>{live=false}},[selected,channel,gateRevision])
  useEffect(()=>{setUncertain(false)},[selected,channel])
- useEffect(()=>{let live=true;void loadTenantData().then(t=>{if(live){setLocations(t.locations);setLocation(t.locations[0]?.id??'')}}).catch(e=>{if(live)setError(String(e.message??e))});return()=>{live=false}},[])
+ useEffect(()=>{let live=true;void loadTenantData().then(t=>{if(live){setLocations(t.locations);setLocation(t.locations.find(l=>l.id===initialLocation)?.id??t.locations[0]?.id??'')}}).catch(e=>{if(live)setError(String(e.message??e))});return()=>{live=false}},[])
  useEffect(()=>{
   let live=true;const controller=new AbortController();resetSelection();setListError('');setListLoading(!!location);
   if(!location)return;

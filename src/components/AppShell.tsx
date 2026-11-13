@@ -42,6 +42,7 @@ type Props = PropsWithChildren<{
 }>
 
 const links = [
+  {to:'/reservations',label:'Reservations',icon:CalendarDays},
   {to:'/prepare-day',label:'Prepare day',icon:ClipboardCheck},
   { to: '/reports', label: 'Reports', icon: BarChart3 },
   { to: '/schedule', label: 'Schedule', icon: CalendarDays },

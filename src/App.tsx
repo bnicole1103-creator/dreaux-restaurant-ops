@@ -51,6 +51,7 @@ import { AppShell } from './components/AppShell'
 
 import { LoginPage } from './pages/LoginPage'
 import { DashboardPage } from './pages/DashboardPage'
+import {ReservationsPage} from './pages/ReservationsPage'
 import { FloorPage } from './pages/FloorPage'
 import { PlaceholderPage } from './pages/PlaceholderPage'
 import { TeamPage } from './pages/TeamPage'
@@ -159,6 +160,7 @@ export default function App() {
         <Route path="/prepare-day" element={<ManagementOnly><PrepareDayPage /></ManagementOnly>} />
         <Route path="/schedule" element={<CrewSchedulePage />} />
         <Route path="/reports" element={<ManagementOnly gmOnly><ReportsPage /></ManagementOnly>} />
+        <Route path="/reservations" element={<ReservationsPage />} />
         <Route path="/calendar" element={<CalendarPage />} />
         <Route path="/reservation-inquiries" element={<ReservationInquiryPage />} />
         <Route path="/inquiry-studio" element={<ManagementOnly><InquiryStudioPage /></ManagementOnly>} />
