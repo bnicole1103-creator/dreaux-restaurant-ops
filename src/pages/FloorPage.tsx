@@ -1,3 +1,5 @@
+import {serviceDay as floorSummaryDay} from '../lib/serviceDay'
+import {FloorServiceSummary} from '../components/FloorServiceSummary'
 import {ReservationEntryHistory} from '../components/ReservationEntryHistory'
 import {useLocation} from 'react-router-dom'
 import {ReservationGuestInfo} from '../components/ReservationGuestInfo'
@@ -1623,7 +1625,7 @@ const [partySize, setPartySize] = useState(1)
 
   return (
     <DesignSection as="section" data-design-block="copy.e0e08178068651dc.1" className="floor-workspace">
-      <div data-design-block="copy.f7ffc53a3422b77e.1" className="page-heading">
+      <div className="floor-overview-row"><div data-design-block="copy.f7ffc53a3422b77e.1" className="page-heading">
         <p data-design-block="copy.b78f32efa3eeed28.1" className="eyebrow"><ScreenText id="FloorPage.5e1b43a1ec471952">
           FloorFlow
         </ScreenText></p>
@@ -1633,7 +1635,7 @@ const [partySize, setPartySize] = useState(1)
         <p data-design-block="copy.549a424af7c1bace.1" className="muted">
           {locationName}
         </p>
-      </div>
+      </div><FloorServiceSummary location={locationId} day={activeShift?.shift_date??floorSummaryDay()} tables={tables} onShowTables={ids=>{setSelectedTableIds(ids);const table=tables.find(t=>ids.includes(t.id));if(table)setActiveRoomId(table.room_id);setFloorView('map');}}/></div>
 
 
       <div className="floor-top-status"><AccessSection page="floor" section="schedule"><FloorScheduleBox compact location={locationId} date={activeShift?.shift_date??serviceDay()}/></AccessSection><LiveSeatingFinder location={locationId} canSeat={!saving&&activeShift?.status==='open'&&activeShift.shift_date===reservationToday()} onShow={ids=>{setSelectedTableIds(ids);const table=tables.find(t=>t.id===ids[0]);if(table)setActiveRoomId(table.room_id);setFloorView('map')}} onSeat={(ids,party)=>{if(activeShift?.status!=='open'||activeShift.shift_date!==reservationToday()){setError('Open today’s shift before seating.');return}if((pendingWalkin||seatReservationId||guestName||guestPhone||guestEmail)&&!window.confirm('Replace the current seating draft with this new party?'))return;setPendingWalkin(null);setSeatReservationId('');setGuestName('');setGuestPhone('');setGuestEmail('');setPartySize(party);setSelectedTableIds(ids);const table=tables.find(t=>t.id===ids[0]);if(table)setActiveRoomId(table.room_id);const servers=[...new Set(ids.map(id=>assignments.find(a=>a.table_id===id)?.server_id).filter(Boolean))];setSeatServerId(servers.length===1?servers[0]??'':'');setFloorView('map');setShowReservationsPanel(false);setShowSeatPanel(true)}}/></div>
