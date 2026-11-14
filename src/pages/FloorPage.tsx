@@ -1,3 +1,5 @@
+import {FloorGuestSidebar} from '../components/FloorGuestSidebar'
+import {serviceDay as staffGuestListDay} from '../lib/serviceDay'
 import {serviceDay as floorSummaryDay} from '../lib/serviceDay'
 import {FloorServiceSummary} from '../components/FloorServiceSummary'
 import {ReservationEntryHistory} from '../components/ReservationEntryHistory'
@@ -1625,6 +1627,8 @@ const [partySize, setPartySize] = useState(1)
 
   return (
     <DesignSection as="section" data-design-block="copy.e0e08178068651dc.1" className="floor-workspace">
+<div className="floor-guest-layout"><aside className="floor-guest-rail"><AccessSection page="floor" section="reservations"><FloorGuestSidebar location={locationId} day={activeShift?.shift_date??staffGuestListDay()} tables={tables} onShowTables={ids=>{setSelectedTableIds(ids);const table=tables.find(t=>ids.includes(t.id));if(table)setActiveRoomId(table.room_id);setFloorView('map');}}/></AccessSection></aside><div className="floor-guest-main">
+
       <div className="floor-overview-row"><div data-design-block="copy.f7ffc53a3422b77e.1" className="page-heading">
         <p data-design-block="copy.b78f32efa3eeed28.1" className="eyebrow"><ScreenText id="FloorPage.5e1b43a1ec471952">
           FloorFlow
@@ -3207,7 +3211,8 @@ const [partySize, setPartySize] = useState(1)
             </div>
         </FloorFloatingPanel>
       )}
-    </DesignSection>
+    </div></div>
+</DesignSection>
   )
 }
 
