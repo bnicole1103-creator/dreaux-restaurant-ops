@@ -17,3 +17,14 @@
 .live-seating-menu-heading button{min-height:32px!important;padding:3px 10px!important}
 .live-seating-actions{flex-wrap:wrap}
 @media(max-width:700px){.floor-top-status:has(.live-seating-finder){grid-template-columns:minmax(0,1fr)}.floor-seating-counts.live-seating-finder{display:grid;max-width:340px;justify-self:end}}
+
+/* floor-party-spacing-v1 */
+.live-seating-finder .live-seating-quick{grid-template-columns:minmax(0,1fr);gap:10px;min-width:0}
+.live-seating-finder .live-seating-quick>label{display:flex;flex-wrap:wrap;min-width:0;gap:8px}
+.live-seating-finder .live-seating-quick>label>span{display:grid!important;grid-template-columns:44px minmax(60px,1fr) 44px;gap:8px!important;flex:1;min-width:164px;box-sizing:border-box}
+.live-seating-finder .live-seating-quick input{width:100%!important;min-width:0!important;min-height:44px!important;box-sizing:border-box;text-align:center}
+.live-seating-finder .live-seating-quick>label>span>button{width:44px;min-width:44px!important;min-height:44px!important;padding:4px!important}
+.live-seating-finder .live-seating-quick>p{grid-column:1/-1;min-width:0;overflow-wrap:anywhere;margin:0}
+.live-seating-finder .live-seating-footer{flex-wrap:wrap;align-items:center;gap:8px}
+.live-seating-finder .live-seating-footer>details{flex:1 1 160px;min-width:0}
+.live-seating-finder .live-seating-footer>small{white-space:normal}
