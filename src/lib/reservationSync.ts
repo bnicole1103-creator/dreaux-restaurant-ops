@@ -1,7 +1,7 @@
 import {useEffect,useState} from 'react'
 import {supabase} from './supabase'
 export function activeReservations<T extends {status?:string|null}>(rows:T[]):T[]{
- return rows.filter(row=>!['cancelled','canceled'].includes((row.status??'').trim().toLowerCase()))
+ return rows.filter(row=>!['cancelled','canceled','seated','completed','no_show'].includes((row.status??'').trim().toLowerCase()))
 }
 export function notifyReservationsChanged(){window.dispatchEvent(new Event('reservations-changed'))}
 // Realtime where enabled, with focus and polling fallback for other devices.

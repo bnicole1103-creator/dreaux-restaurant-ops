@@ -2,7 +2,7 @@ import {PartySizeInput} from './PartySizeInput'
 import {ReservationGuestInfo} from './ReservationGuestInfo'
 import {time12} from '../lib/time12'
 import {TimeInput12} from './TimeInput12'
-import {useReservationRevision} from '../lib/reservationSync'
+import {activeReservations,useReservationRevision} from '../lib/reservationSync'
 import {useEffect,useRef,useState} from 'react'
 import {useAppAccess} from './AppAccess'
 import {supabase} from '../lib/supabase'
@@ -13,7 +13,7 @@ export function FutureReservations({location,onChanged,onEditorState}:{location:
  const access=useAppAccess(),canReservations=access.can('floor','reservations')
  const [day,setDay]=useState(reservationToday),[rows,setRows]=useState<Row[]>([]),[draft,setDraft]=useState<Row|null>(null),[busy,setBusy]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState('');const sequence=useRef(0)
  useEffect(()=>{onEditorState?.({busy,dirty:!!draft})},[busy,draft,onEditorState])
- async function load(){const ticket=++sequence.current;const r=await supabase.rpc('reservation_future_load',{p_location_id:location,p_day:day});if(r.error)throw r.error;if(ticket===sequence.current)setRows(r.data??[])}
+ async function load(){const ticket=++sequence.current;const r=await supabase.rpc('reservation_future_load',{p_location_id:location,p_day:day});if(r.error)throw r.error;if(ticket===sequence.current)setRows(activeReservations(r.data??[]))}
  useEffect(()=>{if(!canReservations||draft||busy)return;setError('');void load().catch(e=>setError(String(e.message??e)));return()=>{sequence.current++}},[location,day,reservationRevision,canReservations])
  async function save(row:Row,remove=false){if(busy)return;if(remove&&!window.confirm('Remove '+row.guest_name+'’s reservation on '+row.reservation_date+'? It will be cancelled and kept in the audit history.'))return;setBusy(true);setError('');setNotice('');try{const r=await supabase.rpc('reservation_future_change',{p_location_id:location,p_id:row.id,p_version:row.edit_version,p_remove:remove,p_data:{guest_name:row.guest_name,reservation_date:row.reservation_date,reservation_time:row.reservation_time,party_size:Number(row.party_size),phone:row.phone,email:row.email,notes:row.notes}});if(r.error)throw r.error;setDraft(null);setNotice(remove?'Reservation removed.':'Reservation changes saved.');window.dispatchEvent(new Event('reservations-changed'));onChanged?.();await load()}catch(e){setError(String((e as Error).message??e))}finally{setBusy(false)}}
  if(!canReservations)return null
