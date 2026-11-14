@@ -17,3 +17,9 @@
 .live-seating-menu-heading button{min-height:32px!important;padding:3px 10px!important}
 .live-seating-actions{flex-wrap:wrap}
 @media(max-width:700px){.floor-top-status:has(.live-seating-finder){grid-template-columns:minmax(0,1fr)}.floor-seating-counts.live-seating-finder{display:grid;max-width:340px;justify-self:end}}
+
+/* Party steppers need their full width rather than an 82px column. */
+.live-seating-finder .live-seating-quick{grid-template-columns:minmax(0,1fr);gap:8px}
+.live-seating-finder .live-seating-quick>label{display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px;min-width:0}
+.live-seating-finder .live-seating-quick>label>span{display:grid!important;grid-template-columns:44px minmax(60px,1fr) 44px;min-width:0;width:100%;box-sizing:border-box}
+.live-seating-finder .live-seating-quick input{width:100%!important;min-width:0!important;box-sizing:border-box;text-align:center}

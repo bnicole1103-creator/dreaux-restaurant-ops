@@ -1,3 +1,4 @@
+import {FloorGuestSidebar} from '../components/FloorGuestSidebar'
 import {TableMapChoice} from '../components/TableMapChoice'
 import {PartySizeInput} from '../components/PartySizeInput'
 import './FloorPhone.css'
@@ -205,6 +206,7 @@ export function FloorPage() {
   const [reservations, setReservations] =
     useState<ReservationRecord[]>([])
 
+  const [sidebarReservationId,setSidebarReservationId]=useState('')
   const [showReservationsPanel, setShowReservationsPanel] =
     useState(false)
 
@@ -1645,7 +1647,7 @@ const [partySize, setPartySize] = useState(1)
         <AccessSection page="floor" section="reservations"><ReservationCapacityPlanner location={locationId} initialDate={activeShift?.shift_date??serviceDay()}/></AccessSection>
         {floorAccess.can('floor','sections')&&<button type="button" aria-expanded={floorView==='sections'} onClick={()=>setFloorView(floorView==='sections'?'map':'sections')}>Sections ▾</button>}
         <button type="button" aria-expanded={floorView==='crew'} onClick={()=>setFloorView(floorView==='crew'?'map':'crew')}>Walk-ins ▾</button>
-        {floorAccess.can('floor','reservations')&&<><button type="button" aria-expanded={showReservationsPanel} onClick={()=>setShowReservationsPanel(v=>!v)}>Reservations ({reservations.length}) ▾</button></>}
+
         <button type="button" disabled={!activeShiftId} aria-expanded={showRotationPanel} onClick={()=>setShowRotationPanel(v=>!v)}>Rotation & seating ▾</button>
         <button type="button" aria-expanded={floorView==='rooms'} onClick={()=>setFloorView(floorView==='rooms'?'map':'rooms')}>Rooms & layout ▾</button>
 
@@ -1660,7 +1662,7 @@ const [partySize, setPartySize] = useState(1)
       {seatReservationId&&!showSeatPanel&&<p role="status">Select tables for the chosen reservation, then tap Seat.</p>}
       {pendingWalkin&&floorView!=='crew'&&<p role="status">Seating {pendingWalkin.guest_name} · select tables on the map, then Seat.</p>}
       <FloorFloatingPanel title="Walk-ins" open={floorView==='crew'} onClose={()=>setFloorView('map')}>
-      
+
       <WalkinPanel locationId={locationId} refreshKey={walkinRefresh} onSeat={row=>{setSeatReservationId('');setFloorView('map');setPendingWalkin(row);setGuestName(row.guest_name);setGuestPhone(row.phone);setGuestEmail(row.email);setPartySize(row.party_size);setSelectedTableIds([]);setShowSeatPanel(true)}} />
       {pendingWalkin&&<div data-design-block="copy.eb305b57f537aed6.1" className="wt-card" role="status"><strong><ScreenText id="FloorPage.72ad81f5e33ac981">Seating </ScreenText>{pendingWalkin.guest_name}<ScreenText id="FloorPage.0e1b1fe85997c7d1"> · party of </ScreenText>{pendingWalkin.party_size}</strong><p data-design-block="copy.0cae27057d8f304b.1"><ScreenText id="FloorPage.aaf48aa3abcc020d">Select their tables, then press Seat. Their check-in is marked seated when seating succeeds.</ScreenText></p><button data-design-block="copy.b1a3fd87f11bd6fb.1" type="button" disabled={saving} onClick={()=>{setPendingWalkin(null);setGuestName('');setGuestPhone('');setGuestEmail('');setPartySize(1)}}><ScreenText id="FloorPage.a3bf126804af00d4">Cancel walk-in selection</ScreenText></button></div>}
 
@@ -1690,6 +1692,7 @@ const [partySize, setPartySize] = useState(1)
         </div>
       )}
 
+      <div className="floor-map-and-guests">
       <div className="floor-workspace-panel floor-map-workspace">
       {arrangeMode && (
         <div data-design-block="copy.49af0c766e6ec77b.1"
@@ -1877,6 +1880,8 @@ const [partySize, setPartySize] = useState(1)
       </div>
       </div>
 
+      {floorAccess.can('floor','reservations')&&<FloorGuestSidebar day={reservationToday()} reservations={reservations} parties={activeSessions} tableName={id=>tables.find(t=>t.id===id)?.table_name??'Table unavailable'} serverName={memberName} busy={saving} canSeat={activeShift?.status==='open'&&activeShift.shift_date===reservationToday()} onAdd={()=>setManualReservation(true)} onManage={()=>{setSidebarReservationId('');setShowReservationsPanel(true)}} onDetails={id=>{setSidebarReservationId(id);setShowReservationsPanel(true)}} onSeat={id=>{const r=reservations.find(r=>r.id===id);if(r)beginReservationSeating(r)}} onParty={id=>{const p=activeSessions.find(p=>p.id===id);if(!p)return;const ids=p.tableIds.length?p.tableIds:[p.primaryTableId];setSelectedTableIds(ids);const t=tables.find(t=>t.id===p.primaryTableId||t.id===ids[0]);if(t)setActiveRoomId(t.room_id);setShowTablePanel(true)}}/>}
+      </div>
        {/* TABLE ACTION BAR */}
       {selectedTableIds.length > 0 && (
         <div data-design-block="copy.a17dccd7e00ce5cf.1" className="floor-action-bar">
@@ -1972,10 +1977,10 @@ const [partySize, setPartySize] = useState(1)
       )}
 
       {largePartyInquiry&&<FloorFloatingPanel title="Large party inquiry" open onClose={()=>{if(window.confirm('Close inquiry form? Save your inquiry first to keep entered details.'))setLargePartyInquiry(false)}}><ReservationInquiryPage largeParty initialDate={activeShift?.shift_date}/></FloorFloatingPanel>}
-      {manualReservation&&<ManualReservation floating location={locationId} organization={organizationId} tables={tables} initialDate={activeShift?.shift_date??reservationToday()} onClose={()=>setManualReservation(false)} onSaved={message=>{setReservationUploadMessage(message);setShowReservationsPanel(true);void loadReservations(locationId)}}/>}
+      {manualReservation&&<ManualReservation floating location={locationId} organization={organizationId} tables={tables} initialDate={activeShift?.shift_date??reservationToday()} onClose={()=>setManualReservation(false)} onSaved={message=>{setReservationUploadMessage(message);setSidebarReservationId('');setShowReservationsPanel(true);void loadReservations(locationId)}}/>}
       {showReservationsPanel && (
-        <AccessSection page="floor" section="reservations"><FloorFloatingPanel title="Reservations" open onClose={()=>setShowReservationsPanel(false)}><div className="feed-actions"><button type="button" disabled={!locationId||!organizationId} onClick={()=>setManualReservation(true)}>+ Reservation</button>{floorAccess.can('guests','host')&&<button type="button" disabled={!locationId} onClick={()=>setLargePartyInquiry(true)}>+ Large Party Inquiry</button>}<ReservationFileUpload location={locationId} organization={organizationId} initialDate={activeShift?.shift_date??reservationToday()} onSaved={message=>{setReservationUploadMessage(message);void loadReservations(locationId)}}/></div><FutureReservations location={locationId} onChanged={()=>void loadReservations(locationId)}/>
-            <ReservationGuestbook location={locationId}/>
+        <AccessSection page="floor" section="reservations"><FloorFloatingPanel title={sidebarReservationId?'Reservation details':'Reservation tools & history'} open onClose={()=>{setShowReservationsPanel(false);setSidebarReservationId('')}}>{!sidebarReservationId&&<><div className="feed-actions"><button type="button" disabled={!locationId||!organizationId} onClick={()=>setManualReservation(true)}>+ Reservation</button>{floorAccess.can('guests','host')&&<button type="button" disabled={!locationId} onClick={()=>setLargePartyInquiry(true)}>+ Large Party Inquiry</button>}<ReservationFileUpload location={locationId} organization={organizationId} initialDate={activeShift?.shift_date??reservationToday()} onSaved={message=>{setReservationUploadMessage(message);void loadReservations(locationId)}}/></div><FutureReservations location={locationId} onChanged={()=>void loadReservations(locationId)}/>
+            <ReservationGuestbook location={locationId}/></>}
             <p data-design-block="copy.b78f32efa3eeed28.3" className="eyebrow"><ScreenText id="FloorPage.58f3288ba914ecb7">Reservations</ScreenText></p>
             <AccessSection page="floor" section="reservations"><h2 data-design-block="copy.2e495f44a1c1f630.4"><ScreenText id="FloorPage.def1336055c8be14">Today's Reservations</ScreenText></h2></AccessSection>
 
@@ -2005,7 +2010,7 @@ const [partySize, setPartySize] = useState(1)
                   No reservations uploaded for this shift.
                 </ScreenText></div>
               ) : (
-                reservations.map((reservation) => (
+                reservations.filter(r=>!sidebarReservationId||r.id===sidebarReservationId).map((reservation) => (
                   <div data-design-block="copy.05463b1af064b774.1"
                     key={reservation.id}
                     style={{
