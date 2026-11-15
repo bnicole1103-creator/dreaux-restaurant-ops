@@ -1084,7 +1084,7 @@ const [partySize, setPartySize] = useState(1)
   async function recordFloorSeating(tableIds:string[],serverId:string,covers:number,reservationId=seatReservationId,walkin=pendingWalkin){
     const payload={p_location_id:locationId,p_shift_id:activeShiftId,p_table_ids:[...tableIds].sort(),p_server_id:serverId||null,p_guest_name:guestName,p_guest_phone:guestPhone,p_guest_email:guestEmail,p_party_size:covers,p_source:reservationId?'reservation':'walk_in',p_reservation_id:reservationId||null,p_walkin_id:walkin?.id??null,p_walkin_version:walkin?.version??null}
     const key=JSON.stringify(payload);if(seatingRequest.current?.key!==key)seatingRequest.current={key,id:crypto.randomUUID()}
-    const r=await supabase.rpc('floor_seat_and_rotate_v1',{...payload,p_request_id:seatingRequest.current.id});if(r.error)throw r.error
+    const r=await supabase.rpc('floor_seat_and_rotate_v1',{...payload,p_request_id:seatingRequest.current.id});if(r.error)throw new Error([r.error.message,r.error.details,r.error.hint].filter(Boolean).join(' · '))
     notifyReservationsChanged();setFloorNotice('Guests seated. Future assignments were reviewed automatically; check reservations with tables pending.')
     await Promise.all([loadRotation(activeShiftId),loadRotationLog(activeShiftId),loadTableSessions(activeShiftId),loadSeatingHistory(activeShiftId)])
   }
