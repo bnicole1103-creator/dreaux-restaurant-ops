@@ -1,3 +1,5 @@
+import {replanReservations} from '../lib/reservationPlanning'
+import {capacityClock,type CapacityData,type CapacityBooking} from '../lib/reservationCapacity'
 import {FloorGuestSidebar} from '../components/FloorGuestSidebar'
 import {TableMapChoice} from '../components/TableMapChoice'
 import {PartySizeInput} from '../components/PartySizeInput'
@@ -1085,8 +1087,17 @@ const [partySize, setPartySize] = useState(1)
   async function recordFloorSeating(tableIds:string[],serverId:string,covers:number,reservationId=seatReservationId,walkin=pendingWalkin){
     const payload={p_location_id:locationId,p_shift_id:activeShiftId,p_table_ids:[...tableIds].sort(),p_server_id:serverId||null,p_guest_name:guestName,p_guest_phone:guestPhone,p_guest_email:guestEmail,p_party_size:covers,p_source:reservationId?'reservation':'walk_in',p_reservation_id:reservationId||null,p_walkin_id:walkin?.id??null,p_walkin_version:walkin?.version??null}
     const key=JSON.stringify(payload);if(seatingRequest.current?.key!==key)seatingRequest.current={key,id:crypto.randomUUID()}
-    const r=await supabase.rpc('floor_seat_and_rotate_v1',{...payload,p_request_id:seatingRequest.current.id});if(r.error)throw r.error
-    notifyReservationsChanged();setFloorNotice('Guests seated. Reservation, table and rotation lists updated.')
+    const loaded=await supabase.rpc('reservation_capacity_load',{p_location_id:locationId,p_day:activeShift?.shift_date??reservationToday()});if(loaded.error)throw loaded.error
+    const capacity=loaded.data as CapacityData
+    const remaining={...capacity,bookings:capacity.bookings.filter(row=>row.id!==reservationId)}
+    const candidate:CapacityBooking={id:'seating-candidate',name:guestName||'Arriving party',party:covers,start:capacity.now,end:Math.max(capacity.close,capacity.now+capacity.config.duration),tableIds,room:'',version:0,live:true}
+    const plan=replanReservations(remaining,candidate)
+    const affected=capacity.bookings.filter(row=>!row.live&&row.id!==reservationId&&row.start!=null&&row.start>=capacity.now&&row.tableIds.some(id=>tableIds.includes(id)))
+    if(!plan.ok&&affected.length&&!window.confirm('Seat this party and keep these upcoming reservations saved with tables pending?\n'+affected.map(row=>row.name+' · '+capacityClock(row.start!)+' · '+row.party+' guests').join('\n')))throw Error('Seating canceled. The reservations and table assignments were kept.')
+    const r=await supabase.rpc('floor_seat_replanned',{p_payload:{...payload,p_request_id:seatingRequest.current.id},p_day:capacity.day,p_fingerprint:capacity.fingerprint,p_assignments:plan.ok?plan.assignments:null});if(r.error)throw r.error
+    const changes=(r.data?.table_changes??[]) as {name:string;to:string[]}[]
+    const changed=changes.map(row=>row.name+': '+(row.to.length?row.to.map(id=>tables.find(t=>t.id===id)?.table_name??id).join(' + '):'tables pending')).join('; ')
+    notifyReservationsChanged();setFloorNotice('Guests seated.'+(changed?' Upcoming reservation updates — '+changed: ' Reservation, table and rotation lists updated.'))
     await Promise.all([loadRotation(activeShiftId),loadRotationLog(activeShiftId),loadTableSessions(activeShiftId),loadSeatingHistory(activeShiftId)])
   }
   function resizeRotationSetup(countValue: number) {
