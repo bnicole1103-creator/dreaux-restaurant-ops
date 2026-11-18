@@ -18,7 +18,7 @@ export function ReservationMessagesButton({location,reservationId,message,disabl
    })
   }
   refresh()
-  const stop=watchGuestRefresh(refresh)
+  const stop=watchGuestRefresh(refresh,location)
   return()=>{live=false;generation++;stop()}
  },[location,reservationId])
  const apple=/iPhone|iPad|iPod|Macintosh/.test(navigator.userAgent)

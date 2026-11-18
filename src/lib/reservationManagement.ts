@@ -2,7 +2,8 @@ import {supabase} from './supabase'
 import type {InquiryReservationSource} from '../components/InquiryReservationDialog'
 export type ManagementBooking={id:string;guest_name:string;reservation_date:string;reservation_time:string|null;party_size:number;phone:string|null;email:string|null;notes:string|null;status:string;edit_version:number;occasion:string;birthday:boolean;vip:boolean}
 export type ManagementInquiry=InquiryReservationSource&{received:string;status:string}
-export const inquiryStudio='https://justinis-inquiry-studio.h8w8547sfq.chatgpt.site'
+import {inquiryStudio} from './inquiryConnection'
+export {inquiryStudio}
 export async function requestStudio(location:string,data?:unknown,signal?:AbortSignal){
  const {data:auth,error}=await supabase.auth.getSession();if(error||!auth.session)throw Error('Please sign in again.')
  const response=await fetch(`${inquiryStudio}/api/main-app?location=${encodeURIComponent(location)}`,{method:data?'POST':'GET',cache:'no-store',signal:signal??AbortSignal.timeout(20000),headers:{Authorization:`Bearer ${auth.session.access_token}`,apikey:import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,'Content-Type':'application/json'},...(data?{body:JSON.stringify(data)}:{})})

@@ -22,7 +22,7 @@ export async function runOperations(){
  const cursors=await admin.from('operations_inquiry_sync').select('*');if(cursors.error)throw cursors.error
  for(const cursor of cursors.data??[])try{
   // Feed is restaurant-scoped; the database seed rejects ambiguous restaurant locations.
-  const endpoint=new URL('https://justinis-inquiry-studio.tealguppy.chatgpt.site/api/notification-feed');endpoint.searchParams.set('since',cursor.received);endpoint.searchParams.set('after',cursor.source_id)
+  const endpoint=new URL('/api/notification-feed',Deno.env.get('INQUIRY_STUDIO_URL')||'https://justinis-inquiry-studio.tealguppy.chatgpt.site');endpoint.searchParams.set('since',cursor.received);endpoint.searchParams.set('after',cursor.source_id)
   const response=await fetch(endpoint,{headers:{Authorization:'Bearer '+secret},signal:AbortSignal.timeout(15000)});if(!response.ok)throw Error('Inquiry feed returned '+response.status)
   const data=await response.json();if(!Array.isArray(data.inquiries))throw Error('Invalid inquiry feed')
   for(const r of data.inquiries){

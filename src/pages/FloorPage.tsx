@@ -1,3 +1,5 @@
+import {watchReservations} from '../lib/reservationRefresh'
+import {ServerWorkload} from '../components/ServerWorkload'
 import {replanReservations} from '../lib/reservationPlanning'
 import {capacityClock,type CapacityData,type CapacityBooking} from '../lib/reservationCapacity'
 import {FloorGuestSidebar} from '../components/FloorGuestSidebar'
@@ -1082,7 +1084,7 @@ const [partySize, setPartySize] = useState(1)
   }
   useEffect(()=>{let live=true;setSeatingHistory([]);setHistoryError('');if(!locationId||!activeShiftId)return;
     const refresh=async()=>{const r=await supabase.rpc('floor_seating_history_load_v1',{p_location_id:locationId,p_shift_id:activeShiftId});if(!live)return;if(r.error)setHistoryError(r.error.message);else{setHistoryError('');setSeatingHistory(r.data??[])}}
-    void refresh();const timer=setInterval(()=>{if(document.visibilityState==='visible'){void refresh();void loadRotation(activeShiftId)}},30000);return()=>{live=false;clearInterval(timer)}
+    void refresh();const stop=watchReservations(locationId,()=>{void refresh();void loadRotation(activeShiftId)});return()=>{live=false;stop()}
   },[locationId,activeShiftId])
   async function recordFloorSeating(tableIds:string[],serverId:string,covers:number,reservationId=seatReservationId,walkin=pendingWalkin){
     const payload={p_location_id:locationId,p_shift_id:activeShiftId,p_table_ids:[...tableIds].sort(),p_server_id:serverId||null,p_guest_name:guestName,p_guest_phone:guestPhone,p_guest_email:guestEmail,p_party_size:covers,p_source:reservationId?'reservation':'walk_in',p_reservation_id:reservationId||null,p_walkin_id:walkin?.id??null,p_walkin_version:walkin?.version??null}
@@ -1703,7 +1705,7 @@ const [partySize, setPartySize] = useState(1)
         </div>
       )}
 
-      <div className="floor-map-and-guests">
+      <ServerWorkload servers={rotationServers} parties={activeSessions} name={memberName}/><div className="floor-map-and-guests">
       <div className="floor-workspace-panel floor-map-workspace">
       {arrangeMode && (
         <div data-design-block="copy.49af0c766e6ec77b.1"

@@ -25,7 +25,7 @@ export type TenantData = {
   locations: Location[]
 }
 
-export async function loadTenantData(): Promise<TenantData> {
+async function fetchTenantData(): Promise<TenantData> {
   const {
     data: { user },
     error: userError,
@@ -85,4 +85,16 @@ export async function loadTenantData(): Promise<TenantData> {
     organization,
     locations: locations ?? [],
   }
+}
+
+let cached:{user:string;until:number;result:Promise<TenantData>}|undefined
+supabase.auth.onAuthStateChange((event)=>{if(event!=='TOKEN_REFRESHED')cached=undefined})
+export async function loadTenantData():Promise<TenantData>{
+ const session=await supabase.auth.getSession();if(session.error)throw session.error
+ const user=session.data.session?.user.id;if(!user){cached=undefined;throw Error('No signed-in user was found.')}
+ if(!cached||cached.user!==user||cached.until<=Date.now()){
+  const entry={user,until:Date.now()+30000,result:fetchTenantData()};cached=entry
+  entry.result.catch(()=>{if(cached===entry)cached=undefined})
+ }
+ return structuredClone(await cached.result)
 }
