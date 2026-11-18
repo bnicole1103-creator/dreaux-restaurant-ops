@@ -9,3 +9,5 @@
 
 .prepare-day{padding-bottom:100px}.prepare-flow-header h2{scroll-margin-top:180px}
 .prepare-module{border:1px solid var(--app-border,#d8c3ab);border-radius:12px;padding:12px;margin-block:12px}.prepare-module>summary{font-weight:700;cursor:pointer;min-height:44px;display:list-item}.prepare-module .page{padding:0}.prepare-module h1{font-size:1.2rem}
+
+.prepare-phase-nav{display:flex;flex-wrap:wrap;gap:8px;margin-block:16px}.prepare-phase-nav button{flex:1;min-width:140px}.prepare-phase-nav [aria-current="step"]{font-weight:700;border:2px solid currentColor}
