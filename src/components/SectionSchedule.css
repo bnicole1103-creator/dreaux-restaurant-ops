@@ -1,0 +1,81 @@
+.section-assignment-form fieldset {
+  border:0;
+  padding:0;
+  min-width:0
+}
+
+.section-assignment-form label:not(:has(input[type="checkbox"])) {
+  display:grid;
+  gap:8px;
+  margin-block:14px
+}
+
+.section-assignment-form input:not([type="checkbox"]),.section-assignment-form select {
+  width:100%;
+  min-width:0;
+  box-sizing:border-box
+}
+
+.section-assignment-form details {
+  margin-block:12px
+}
+
+.section-assignment-form summary {
+  cursor:pointer;
+  min-height:44px;
+  padding-block:8px
+}
+
+.section-assignment-selection {
+  padding:12px;
+  border:1px solid var(--app-border);
+  border-radius:12px
+}
+
+.section-assignment-tables {
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(90px,1fr));
+  gap:8px
+}
+
+.section-assignment-tables label,.section-assignment-check {
+  display:flex;
+  gap:8px;
+  align-items:center;
+  min-height:44px
+}
+
+.section-assignment-actions {
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-top:16px
+}
+
+.section-assignment-actions button {
+  min-height:44px
+}
+
+.section-assignment-actions .primary-button {
+  flex:1
+}
+
+.section-assignment-hours {
+  display:grid;
+  gap:8px
+}
+
+.section-assignment-form .scheduled-section-roster {
+  max-height:220px;
+  overflow:auto
+}
+
+@media(max-width:600px) {
+  .section-assignment-actions button {
+  flex:1
+}
+
+
+}
+
+
