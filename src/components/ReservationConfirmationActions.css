@@ -1,0 +1,5 @@
+.reservation-confirmation-actions{display:block;margin:8px 0;font-weight:400;font-size:.9rem;overflow-wrap:anywhere}
+.reservation-confirmation-actions>strong{display:block;font-weight:700}
+.reservation-confirmation-actions .guest-confirmed{color:var(--app-text,#493022);text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:3px}
+.reservation-confirmation-buttons{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.reservation-confirmation-buttons button{min-height:44px;font:inherit;white-space:normal}

@@ -1,5 +1,5 @@
 export function normalizeInquiryStatus(value:string){
- const labels:Record<string,string>={new:'New',ready_for_review:'Ready for review',awaiting_guest:'Awaiting guest',contacted:'Contacted',confirmed:'Confirmed',closed:'Closed'}
+ const labels:Record<string,string>={new:'New',ready_for_review:'Ready for review',awaiting_guest:'Awaiting guest',contacted:'Contacted',booked:'Booked',confirmed:'Confirmed',closed:'Closed'}
  return labels[value?.trim().toLowerCase().replace(/[ -]+/g,'_')]??value??'New'
 }
 export function inquiryDetailLabel(key:string){const labels:Record<string,string>={time:'First time',firstTime:'First time',preferred_time:'First time',secondTime:'Second time',second_preferred_time:'Second time',thirdTime:'Third time',third_preferred_time:'Third time'};return labels[key]??key}
