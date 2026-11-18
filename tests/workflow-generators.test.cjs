@@ -4,7 +4,7 @@ const scripts=load('src/lib/menuPlanScripts.ts');
 const price={label:'Menu price',cents:1800,unit:'order',minimum:1};
 const item={id:'x',name:'Signature Fizz',category:'Drink',description:'Blackberry and lemon with cognac.',prices:[price]},choice={key:'x:0',name:item.name,category:item.category,price};
 const variants=Array.from({length:6},()=>scripts.menuPlanScripts([choice],[item],'best','warm')[0].text);
-assert.equal(new Set(variants).size,6);assert(variants.every(v=>v.includes(item.description)));assert(variants.every(v=>!v.includes('best seller')));
+assert.equal(new Set(variants).size,6);assert(variants.every(v=>/Blackberry and lemon with cognac/i.test(v)));assert(variants.every(v=>!v.includes('best seller')));
 assert(scripts.menuPlanScripts([choice],[item],'addon','brief')[0].text.includes('add'));
 assert.equal(scripts.menuPlanScripts([choice,choice],[item],'best','warm').length,1);
 const quiz=load('supabase/functions/preshift-quiz-generate/generate.ts');

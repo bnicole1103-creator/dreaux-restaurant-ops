@@ -1,3 +1,4 @@
+import {OperationsAssistant} from '../components/OperationsAssistant'
 import {TimeInput12} from '../components/TimeInput12'
 import {CloseoutSection} from '../components/CloseoutSection'
 import { CloseoutReceiptWallet, ReceiptSubmissionLog, useReceiptDraft } from '../components/CloseoutReceiptWallet'
@@ -1157,6 +1158,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
     {message&&<p className="quick-success" role="status">{message}</p>}
     {error&&<p role="alert" className="quick-field-error">{error}</p>}
     {visibleIssues.length>0&&<section id="closeout-errors" tabIndex={-1} role="alert" className="quick-errors"><h2>Finish these before submitting</h2><ul>{visibleIssues.map(x=><li key={x.message}><a href={'#quick-'+x.field} onClick={e=>{e.preventDefault();if(x.field==='shift')setShiftOpen(true);if(x.field==='report')setReportOpen(true);focusCloseoutIssue(x)}}>{x.message}</a></li>)}</ul></section>}
+    <OperationsAssistant location={locationId} day={closeoutDay} kind="closeout" disabled={saving} snapshot={{source:"Unsaved closeout draft",missing:visibleIssues.map(issue=>issue.message),net_sales:netSales,cash_deposit:cashDeposit,role:jobRole}}/>
     <fieldset disabled={saving} className="quick-fields">
     <DesignSection as="section" data-design-block="closeout.quick.shift" className="card" id="quick-shift">
       <CloseoutSection title="1. Your shift" initialOpen><p><strong>{ROLE_LABELS[jobRole]}</strong> · {scheduledTime||'Start needed'}{clockOutTime?' – '+clockOutTime:''}</p>

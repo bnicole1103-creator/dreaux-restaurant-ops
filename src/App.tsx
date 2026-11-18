@@ -1,44 +1,13 @@
-import {ReservationPrivacy} from './pages/ReservationPrivacy'
-import {ReservationGuestConfirmation} from './pages/ReservationGuestConfirmation'
-import {RestaurantGamesPage} from './pages/RestaurantGamesPage'
-import {PrepareDayPage} from './pages/PrepareDayPage'
-import {ServiceTrainingPage} from './pages/ServiceTrainingPage'
 import {PageCanvas} from './components/PageLayout'
-import {CrewSchedulePage} from './pages/CrewSchedulePage'
-import {ReportsPage} from './pages/ReportsPage'
 import {AccessSection} from './components/AppAccess'
-import {GuestServicesPage} from './pages/GuestServicesPage'
 import {AppAccessProvider,AppPageAccess} from './components/AppAccess'
 // page-designer-instrumented
-import {StaffViewPage} from './pages/StaffViewPage'
-import { CalendarPage } from './pages/CalendarPage'
 import { PageWord } from "./components/PageDesign"
-import { ScreenWordingPage } from './pages/ScreenWordingPage'
-import { TrainingPage } from './pages/TrainingPage'
-import { CocktailTrainingPage } from './pages/CocktailTrainingPage'
-import { InventoryPage } from './pages/InventoryPage'
-import { GuestFeedbackPage } from './pages/GuestFeedbackPage'
-import { GuestFeedbackInbox } from './pages/GuestFeedbackInbox'
-import { WalkInPage } from './pages/WalkInPage'
 import { useLocation } from 'react-router-dom'
-import {SalesCalculatorPage} from './pages/SalesCalculatorPage'
-import { SalesTargetsPage } from './pages/SalesTargetsPage'
-import { TasksPage } from './pages/TasksPage'
-import { SettingsPage } from './pages/SettingsPage'
-import { SummaryPage } from './pages/SummaryPage'
 import { ManagementOnly as AppearanceGuard } from './components/ManagementAccess'
-import { PreshiftFeedPage } from './pages/PreshiftFeedPage'
-import { QuizBuilderPage } from './pages/QuizBuilderPage'
-import { QuizzesPage } from './pages/QuizzesPage'
 import { SignupGate } from './components/SignupGate'
-import { PermissionsPage } from './pages/PermissionsPage'
 import { ManagementOnly } from './components/ManagementAccess'
-import { CloseoutHub } from './pages/CloseoutHub'
-import { CloseoutSettingsPage } from './pages/CloseoutSettingsPage'
-import { ManagerCloseoutPage } from './pages/ManagerCloseoutPage'
-import { PointsPage } from './pages/PointsPage'
-import { ResetPasswordPage } from './pages/ResetPasswordPage'
-import { useEffect, useState } from 'react'
+import { Component, lazy, Suspense, useEffect, useState, type ReactNode } from 'react'
 import type { Session } from '@supabase/supabase-js'
 import {
   Navigate,
@@ -49,19 +18,55 @@ import {
 import { supabase } from './lib/supabase'
 import { AppShell } from './components/AppShell'
 
-import { LoginPage } from './pages/LoginPage'
-import { DashboardPage } from './pages/DashboardPage'
-import {ReservationsPage} from './pages/ReservationsPage'
-import { FloorPage } from './pages/FloorPage'
-import { PlaceholderPage } from './pages/PlaceholderPage'
-import { TeamPage } from './pages/TeamPage'
-import { CloseoutPage } from './pages/CloseoutPage'
-import { ReservationInquiryPage } from './pages/ReservationInquiryPage'
-import { InquiryStudioPage } from './pages/InquiryStudioPage'
 
-
-import {ReservationMessagingPage} from './pages/ReservationMessagingPage'
-export default function App() {
+const ReservationPrivacy=lazy(()=>import('./pages/ReservationPrivacy').then(module=>({default:module.ReservationPrivacy})))
+const ReservationGuestConfirmation=lazy(()=>import('./pages/ReservationGuestConfirmation').then(module=>({default:module.ReservationGuestConfirmation})))
+const RestaurantGamesPage=lazy(()=>import('./pages/RestaurantGamesPage').then(module=>({default:module.RestaurantGamesPage})))
+const PrepareDayPage=lazy(()=>import('./pages/PrepareDayPage').then(module=>({default:module.PrepareDayPage})))
+const ServiceTrainingPage=lazy(()=>import('./pages/ServiceTrainingPage').then(module=>({default:module.ServiceTrainingPage})))
+const CrewSchedulePage=lazy(()=>import('./pages/CrewSchedulePage').then(module=>({default:module.CrewSchedulePage})))
+const ReportsPage=lazy(()=>import('./pages/ReportsPage').then(module=>({default:module.ReportsPage})))
+const GuestServicesPage=lazy(()=>import('./pages/GuestServicesPage').then(module=>({default:module.GuestServicesPage})))
+const StaffViewPage=lazy(()=>import('./pages/StaffViewPage').then(module=>({default:module.StaffViewPage})))
+const CalendarPage=lazy(()=>import('./pages/CalendarPage').then(module=>({default:module.CalendarPage})))
+const ScreenWordingPage=lazy(()=>import('./pages/ScreenWordingPage').then(module=>({default:module.ScreenWordingPage})))
+const TrainingPage=lazy(()=>import('./pages/TrainingPage').then(module=>({default:module.TrainingPage})))
+const CocktailTrainingPage=lazy(()=>import('./pages/CocktailTrainingPage').then(module=>({default:module.CocktailTrainingPage})))
+const InventoryPage=lazy(()=>import('./pages/InventoryPage').then(module=>({default:module.InventoryPage})))
+const GuestFeedbackPage=lazy(()=>import('./pages/GuestFeedbackPage').then(module=>({default:module.GuestFeedbackPage})))
+const GuestFeedbackInbox=lazy(()=>import('./pages/GuestFeedbackInbox').then(module=>({default:module.GuestFeedbackInbox})))
+const WalkInPage=lazy(()=>import('./pages/WalkInPage').then(module=>({default:module.WalkInPage})))
+const SalesCalculatorPage=lazy(()=>import('./pages/SalesCalculatorPage').then(module=>({default:module.SalesCalculatorPage})))
+const SalesTargetsPage=lazy(()=>import('./pages/SalesTargetsPage').then(module=>({default:module.SalesTargetsPage})))
+const TasksPage=lazy(()=>import('./pages/TasksPage').then(module=>({default:module.TasksPage})))
+const SettingsPage=lazy(()=>import('./pages/SettingsPage').then(module=>({default:module.SettingsPage})))
+const SummaryPage=lazy(()=>import('./pages/SummaryPage').then(module=>({default:module.SummaryPage})))
+const PreshiftFeedPage=lazy(()=>import('./pages/PreshiftFeedPage').then(module=>({default:module.PreshiftFeedPage})))
+const QuizBuilderPage=lazy(()=>import('./pages/QuizBuilderPage').then(module=>({default:module.QuizBuilderPage})))
+const QuizzesPage=lazy(()=>import('./pages/QuizzesPage').then(module=>({default:module.QuizzesPage})))
+const PermissionsPage=lazy(()=>import('./pages/PermissionsPage').then(module=>({default:module.PermissionsPage})))
+const CloseoutHub=lazy(()=>import('./pages/CloseoutHub').then(module=>({default:module.CloseoutHub})))
+const CloseoutSettingsPage=lazy(()=>import('./pages/CloseoutSettingsPage').then(module=>({default:module.CloseoutSettingsPage})))
+const ManagerCloseoutPage=lazy(()=>import('./pages/ManagerCloseoutPage').then(module=>({default:module.ManagerCloseoutPage})))
+const PointsPage=lazy(()=>import('./pages/PointsPage').then(module=>({default:module.PointsPage})))
+const ResetPasswordPage=lazy(()=>import('./pages/ResetPasswordPage').then(module=>({default:module.ResetPasswordPage})))
+const LoginPage=lazy(()=>import('./pages/LoginPage').then(module=>({default:module.LoginPage})))
+const DashboardPage=lazy(()=>import('./pages/DashboardPage').then(module=>({default:module.DashboardPage})))
+const ReservationsPage=lazy(()=>import('./pages/ReservationsPage').then(module=>({default:module.ReservationsPage})))
+const FloorPage=lazy(()=>import('./pages/FloorPage').then(module=>({default:module.FloorPage})))
+const PlaceholderPage=lazy(()=>import('./pages/PlaceholderPage').then(module=>({default:module.PlaceholderPage})))
+const TeamPage=lazy(()=>import('./pages/TeamPage').then(module=>({default:module.TeamPage})))
+const CloseoutPage=lazy(()=>import('./pages/CloseoutPage').then(module=>({default:module.CloseoutPage})))
+const ReservationInquiryPage=lazy(()=>import('./pages/ReservationInquiryPage').then(module=>({default:module.ReservationInquiryPage})))
+const InquiryStudioPage=lazy(()=>import('./pages/InquiryStudioPage').then(module=>({default:module.InquiryStudioPage})))
+const ReservationMessagingPage=lazy(()=>import('./pages/ReservationMessagingPage').then(module=>({default:module.ReservationMessagingPage})))
+class PageLoadBoundary extends Component<{children:ReactNode},{failed:boolean}>{
+ state={failed:false}
+ static getDerivedStateFromError(){return {failed:true}}
+ render(){return this.state.failed?<section className="page" role="alert"><h1>This page could not load</h1><p>Your saved work is unchanged. Check your connection and reload the app.</p><button type="button" onClick={()=>window.location.reload()}>Reload app</button></section>:this.props.children}
+}
+export default function App(){return <PageLoadBoundary><Suspense fallback={<div className="app-loading" role="status">Loading page…</div>}><AppContent/></Suspense></PageLoadBoundary>}
+function AppContent() {
   const walkinPath=useLocation().pathname
   const [recovering, setRecovering] = useState(() => {
     const hash = new URLSearchParams(window.location.hash.slice(1))

@@ -16,7 +16,7 @@ import './GuestFeedback.css'
 import './InquiryStaffEditor.css'
 import {inquiryDetailLabel,inquiryDetailValue,normalizeInquiryStatus} from '../lib/inquiryDisplay'
 
-const studio = 'https://justinis-inquiry-studio.h8w8547sfq.chatgpt.site'
+import {inquiryStudio as studio} from '../lib/inquiryConnection'
 type Row = { id:string; source:'Guest form'|'Host'; name:string; email:string; phone:string; guests:number; date:string; received:string; status:string; notes:string; details:Record<string,unknown> }
 const receivedTime=(value:string)=>{const time=Date.parse(value);return Number.isFinite(time)?time:0}
 const newestReceived=(a:Row,b:Row)=>receivedTime(b.received)-receivedTime(a.received)||a.source.localeCompare(b.source)||a.id.localeCompare(b.id)

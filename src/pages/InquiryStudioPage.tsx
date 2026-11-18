@@ -5,7 +5,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { loadTenantData } from '../lib/tenant'
-const studio='https://justinis-inquiry-studio.h8w8547sfq.chatgpt.site'
+import {inquiryStudio as studio} from '../lib/inquiryConnection'
 export function InquiryStudioPage(){
  const appAccess=useAppAccess()
  const allowed=appAccess.ready&&appAccess.can('guests','studio')

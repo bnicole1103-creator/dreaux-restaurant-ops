@@ -1,5 +1,5 @@
 import {useEffect,useRef,useState} from 'react'
-import {supabase} from '../lib/supabase'
+import {readConfirmation,createStaffConfirmationLink} from '../lib/confirmationSummary'
 import {watchGuestRefresh} from '../lib/guestContact'
 import {notifyReservationsChanged} from '../lib/reservationSync'
 import {confirmationInvitation,confirmationOrigin,guestConfirmationLabel,type ConfirmationState} from '../lib/reservationConfirmation'
@@ -8,36 +8,29 @@ import {ReservationMessagesButton} from './ReservationMessagesButton'
 import {TaskDialog} from './TaskDialog'
 import './ReservationConfirmationActions.css'
 
-// Share simultaneous reads when a booking appears in more than one visible list.
-const pending=new Map<string,Promise<ConfirmationState|null>>()
-function readStatus(id:string){
- const existing=pending.get(id);if(existing)return existing
- const request=Promise.resolve(supabase.rpc('reservation_guest_link_status',{p_id:id}).abortSignal(AbortSignal.timeout(15000))).then(r=>{if(r.error)throw Error(r.error.message);return r.data as ConfirmationState|null}).finally(()=>pending.delete(id))
- pending.set(id,request);return request
-}
-export function ReservationConfirmationActions({location,reservationId,status}:{location:string;reservationId:string;status?:string|null}){
- const [audit,setAudit]=useState<ConfirmationState|null>(null),[loaded,setLoaded]=useState(false),[error,setError]=useState(''),[dialog,setDialog]=useState(false),[link,setLink]=useState(''),[busy,setBusy]=useState(false),[actionError,setActionError]=useState(''),[revision,setRevision]=useState(0)
+export function ReservationConfirmationActions({location,reservationId,status,initiallyOpen=false,onClose}:{location:string;reservationId:string;status?:string|null;initiallyOpen?:boolean;onClose?:()=>void}){
+ const [audit,setAudit]=useState<ConfirmationState|null>(null),[loaded,setLoaded]=useState(false),[error,setError]=useState(''),[dialog,setDialog]=useState(initiallyOpen),[link,setLink]=useState(''),[busy,setBusy]=useState(false),[actionError,setActionError]=useState(''),[revision,setRevision]=useState(0)
  const host=useRef<HTMLSpanElement>(null),lock=useRef(false),identity=useRef('');identity.current=location+':'+reservationId
  useEffect(()=>{
   let live=true,sequence=0;setAudit(null);setLoaded(false);setError('')
-  const refresh=()=>{const ticket=++sequence;void readStatus(reservationId).then(value=>{if(live&&sequence===ticket){setAudit(value);if(!value?.valid)setLink('');setLoaded(true);setError('')}}).catch(e=>{if(live&&sequence===ticket){setAudit(null);setLoaded(false);setError(e.message)}})}
-  refresh();const stop=watchGuestRefresh(()=>{if(host.current?.getClientRects().length)refresh()});return()=>{live=false;sequence++;stop()}
+  const refresh=()=>{const ticket=++sequence;void readConfirmation(location,reservationId).then(value=>{if(live&&sequence===ticket){setAudit(value);if(!value?.valid)setLink('');setLoaded(true);setError('')}}).catch(e=>{if(live&&sequence===ticket){setAudit(null);setLoaded(false);setError(e.message)}})}
+  refresh();const stop=watchGuestRefresh(()=>{if(host.current?.getClientRects().length)refresh()},location);return()=>{live=false;sequence++;stop()}
  },[location,reservationId,revision])
- useEffect(()=>{setLink('');setDialog(false);setActionError('')},[location,reservationId])
+ useEffect(()=>{setLink('');setDialog(initiallyOpen);setActionError('')},[location,reservationId,initiallyOpen])
  const active=!['cancelled','canceled','removed','expired','no_show','completed','departed','seated'].includes((status??'').toLowerCase())
  async function generate(){
   if(lock.current)return
   lock.current=true;setBusy(true);setActionError('');setDialog(true)
   const key=identity.current
   try{
-   {const r=await supabase.rpc('reservation_guest_link_create',{p_id:reservationId});if(r.error)throw Error(r.error.message);if(!r.data?.token)throw Error('Confirmation link was not returned.');if(identity.current!==key)return;setLink(confirmationOrigin+'/reservation-confirmation#token='+r.data.token);setRevision(v=>v+1);notifyReservationsChanged()}
+   {const r=await createStaffConfirmationLink(reservationId);if(r.error)throw Error(r.error.message);if(!r.data?.token)throw Error('Confirmation link was not returned.');if(identity.current!==key)return;setLink(confirmationOrigin+'/reservation-confirmation#token='+r.data.token);setRevision(v=>v+1);notifyReservationsChanged()}
   }catch(e){if(identity.current===key)setActionError(String((e as Error).message??e))}finally{lock.current=false;if(identity.current===key)setBusy(false)}
  }
  return <span ref={host} className="reservation-confirmation-actions">
   <strong role="status" className={loaded&&guestConfirmationLabel(audit)==='Confirmed'?'guest-confirmed':'guest-unconfirmed'}>Guest confirmation: {error?'Unavailable':loaded?guestConfirmationLabel(audit):'Loading…'}</strong>
   {error&&<span role="alert">{error} <button type="button" onClick={()=>setRevision(v=>v+1)}>Retry confirmation status</button></span>}
   {active&&<span className="reservation-confirmation-buttons"><button type="button" disabled={busy} onClick={()=>{setActionError('');setDialog(true)}}>Resend confirmation link</button><button type="button" disabled={busy} onClick={()=>{setActionError('');setDialog(true)}}>Open Messages</button></span>}
-  {dialog&&<TaskDialog title="Generate confirmation link" busy={busy} onClose={()=>setDialog(false)}>
+  {dialog&&<TaskDialog title="Generate confirmation link" busy={busy} onClose={()=>{setDialog(false);onClose?.()}}>
    <ReservationLinkContact location={location} reservationId={reservationId}/>
    <p>Generate the confirmation link, then open Messages with the guest’s phone number and invitation filled in.</p>
    {(audit?.expires_at||audit?.responded_at)&&<p role="note">Generating a replacement link will stop the previous link from working. The guest will need to confirm again.</p>}

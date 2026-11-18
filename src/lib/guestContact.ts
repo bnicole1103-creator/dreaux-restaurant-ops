@@ -1,3 +1,4 @@
+import {watchReservations} from './reservationRefresh'
 import {supabase} from './supabase'
 export type GuestContact={key:string;id:string|null;name:string;phone:string|null;email:string|null;notes:string|null;date:string;status:string;version:number;party:number;arrived:number|null;guest_id:string|null;source?:string}
 type Waiter={key:string;resolve:(row:GuestContact)=>void;reject:(error:Error)=>void}
@@ -17,6 +18,4 @@ export function readGuestContact(location:string,key:string):Promise<GuestContac
  })
 }
 
-const watchers=new Set<()=>void>();let timer:ReturnType<typeof setInterval>|undefined
-const refresh=()=>{if(document.visibilityState==='visible')for(const fn of watchers)fn()}
-export function watchGuestRefresh(fn:()=>void){watchers.add(fn);if(!timer){timer=setInterval(refresh,30000);window.addEventListener('focus',refresh);window.addEventListener('reservations-changed',refresh)}return()=>{watchers.delete(fn);if(!watchers.size&&timer){clearInterval(timer);timer=undefined;window.removeEventListener('focus',refresh);window.removeEventListener('reservations-changed',refresh)}}}
+export function watchGuestRefresh(fn:()=>void,location=''){return watchReservations(location,fn)}
