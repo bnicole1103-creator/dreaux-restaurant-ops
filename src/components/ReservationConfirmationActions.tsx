@@ -3,6 +3,7 @@ import {supabase} from '../lib/supabase'
 import {watchGuestRefresh} from '../lib/guestContact'
 import {notifyReservationsChanged} from '../lib/reservationSync'
 import {confirmationInvitation,confirmationOrigin,guestConfirmationLabel,type ConfirmationState} from '../lib/reservationConfirmation'
+import {ReservationLinkContact} from './ReservationLinkContact'
 import {ReservationMessagesButton} from './ReservationMessagesButton'
 import {TaskDialog} from './TaskDialog'
 import './ReservationConfirmationActions.css'
@@ -15,7 +16,7 @@ function readStatus(id:string){
  pending.set(id,request);return request
 }
 export function ReservationConfirmationActions({location,reservationId,status}:{location:string;reservationId:string;status?:string|null}){
- const [audit,setAudit]=useState<ConfirmationState|null>(null),[loaded,setLoaded]=useState(false),[error,setError]=useState(''),[dialog,setDialog]=useState(false),[link,setLink]=useState(''),[busy,setBusy]=useState(false),[openMessages,setOpenMessages]=useState(false),[actionError,setActionError]=useState(''),[revision,setRevision]=useState(0)
+ const [audit,setAudit]=useState<ConfirmationState|null>(null),[loaded,setLoaded]=useState(false),[error,setError]=useState(''),[dialog,setDialog]=useState(false),[link,setLink]=useState(''),[busy,setBusy]=useState(false),[actionError,setActionError]=useState(''),[revision,setRevision]=useState(0)
  const host=useRef<HTMLSpanElement>(null),lock=useRef(false),identity=useRef('');identity.current=location+':'+reservationId
  useEffect(()=>{
   let live=true,sequence=0;setAudit(null);setLoaded(false);setError('')
@@ -24,22 +25,26 @@ export function ReservationConfirmationActions({location,reservationId,status}:{
  },[location,reservationId,revision])
  useEffect(()=>{setLink('');setDialog(false);setActionError('')},[location,reservationId])
  const active=!['cancelled','canceled','removed','expired','no_show','completed','departed','seated'].includes((status??'').toLowerCase())
- async function prepare(resend:boolean){
+ async function generate(){
   if(lock.current)return
-  if((resend||!link)&&(audit?.expires_at||audit?.responded_at)&&!window.confirm('Generate a replacement confirmation link? The previous link will stop working and the guest will need to confirm again.'))return
-  lock.current=true;setBusy(true);setActionError('');setOpenMessages(true);setDialog(true)
+  lock.current=true;setBusy(true);setActionError('');setDialog(true)
   const key=identity.current
   try{
-   if(resend||!link){const r=await supabase.rpc('reservation_guest_link_create',{p_id:reservationId});if(r.error)throw Error(r.error.message);if(!r.data?.token)throw Error('Confirmation link was not returned.');if(identity.current!==key)return;setLink(confirmationOrigin+'/reservation-confirmation#token='+r.data.token);setRevision(v=>v+1);notifyReservationsChanged()}
+   {const r=await supabase.rpc('reservation_guest_link_create',{p_id:reservationId});if(r.error)throw Error(r.error.message);if(!r.data?.token)throw Error('Confirmation link was not returned.');if(identity.current!==key)return;setLink(confirmationOrigin+'/reservation-confirmation#token='+r.data.token);setRevision(v=>v+1);notifyReservationsChanged()}
   }catch(e){if(identity.current===key)setActionError(String((e as Error).message??e))}finally{lock.current=false;if(identity.current===key)setBusy(false)}
  }
  return <span ref={host} className="reservation-confirmation-actions">
   <strong role="status" className={loaded&&guestConfirmationLabel(audit)==='Confirmed'?'guest-confirmed':'guest-unconfirmed'}>Guest confirmation: {error?'Unavailable':loaded?guestConfirmationLabel(audit):'Loading…'}</strong>
   {error&&<span role="alert">{error} <button type="button" onClick={()=>setRevision(v=>v+1)}>Retry confirmation status</button></span>}
-  {active&&<span className="reservation-confirmation-buttons"><button type="button" disabled={busy||!loaded} onClick={()=>void prepare(true)}>Resend confirmation link</button><button type="button" disabled={busy||!loaded} onClick={()=>void prepare(false)}>Open Messages</button></span>}
-  {dialog&&<TaskDialog title="Guest confirmation message" busy={busy} onClose={()=>setDialog(false)}>
+  {active&&<span className="reservation-confirmation-buttons"><button type="button" disabled={busy} onClick={()=>{setActionError('');setDialog(true)}}>Resend confirmation link</button><button type="button" disabled={busy} onClick={()=>{setActionError('');setDialog(true)}}>Open Messages</button></span>}
+  {dialog&&<TaskDialog title="Generate confirmation link" busy={busy} onClose={()=>setDialog(false)}>
+   <ReservationLinkContact location={location} reservationId={reservationId}/>
+   <p>Generate the confirmation link, then open Messages with the guest’s phone number and invitation filled in.</p>
+   {(audit?.expires_at||audit?.responded_at)&&<p role="note">Generating a replacement link will stop the previous link from working. The guest will need to confirm again.</p>}
+   <button type="button" disabled={busy||!loaded} onClick={()=>void generate()}>{busy?'Generating…':link?'Generate replacement link':'Generate link'}</button>
+   {!loaded&&<p role="status">{error||'Loading confirmation status…'}{error&&<button type="button" onClick={()=>setRevision(v=>v+1)}>Retry</button>}</p>}
    {busy&&<p role="status">Preparing confirmation link…</p>}{actionError&&<p role="alert">{actionError}</p>}
-   {!busy&&!actionError&&link&&<><ReservationMessagesButton key={link+String(openMessages)} location={location} reservationId={reservationId} message={confirmationInvitation(link)} autoOpen={openMessages}/><label>Confirmation message<textarea readOnly rows={6} value={confirmationInvitation(link)}/></label><p>Review the message and press Send in Messages. Opening a draft does not mark it sent or confirmed.</p></>}
+   {!busy&&!actionError&&link&&<><ReservationMessagesButton key={link} location={location} reservationId={reservationId} message={confirmationInvitation(link)}/><label>Confirmation message<textarea readOnly rows={6} value={confirmationInvitation(link)}/></label><p>Review the message and press Send in Messages. Opening a draft does not mark it sent or confirmed.</p></>}
   </TaskDialog>}
  </span>
 }
