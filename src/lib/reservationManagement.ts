@@ -11,6 +11,6 @@ export async function requestStudio(location:string,data?:unknown,signal?:AbortS
  return body
 }
 export function studioInquiry(r:any):ManagementInquiry{let details:Record<string,unknown>={};try{details=typeof r.details==='string'?JSON.parse(r.details):r.details??{}}catch{details={Details:r.details}}return {id:r.id,source:'Guest form',name:r.name,phone:r.phone??'',email:r.email??'',guests:r.guests,date:r.event_date??'',notes:r.notes??'',status:r.status??'New',received:r.received,details:{...details,Package:r.package_name}}}
-export function hostInquiry(r:any):ManagementInquiry{return {id:r.id,source:'Host',name:r.guest_name,phone:r.phone??'',email:r.email??'',guests:r.party_size,date:r.preferred_date??'',notes:r.internal_notes??'',status:r.status??'New',received:r.created_at,details:{'First time':r.preferred_time,'Second time':r.second_preferred_time,'Guest notes':r.guest_notes,Type:r.inquiry_type}}}
+export function hostInquiry(r:any):ManagementInquiry{return {id:r.id,source:'Host',name:r.guest_name,phone:r.phone??'',email:r.email??'',guests:r.party_size,date:r.preferred_date??'',notes:r.internal_notes??'',status:r.status??'New',received:r.created_at,details:{'First time':r.preferred_time,'Second time':r.second_preferred_time,'Third time':r.third_preferred_time,'Guest notes':r.guest_notes,Type:r.inquiry_type}}}
 export const inquiryKey=(r:ManagementInquiry)=>r.source+':'+r.id
 export function dayShift(day:string,offset:number){const d=new Date(day+'T12:00:00Z');d.setUTCDate(d.getUTCDate()+offset);return d.toISOString().slice(0,10)}
