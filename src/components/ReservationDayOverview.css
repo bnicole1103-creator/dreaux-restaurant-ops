@@ -1,0 +1,9 @@
+.reservation-day-inquiry{margin:16px 0;padding:12px;border:1px solid var(--app-border);border-radius:14px}
+.reservation-day-heading,.reservation-day-time{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.reservation-day-overview h3,.reservation-day-heading h3{margin:8px 0}
+.reservation-day-overview h4{margin:.75rem 0 .35rem}
+.reservation-day-overview ul{padding-left:1.15rem;margin:.35rem 0}
+.reservation-day-arrivals{list-style:none;padding:0;display:grid;gap:8px}
+.reservation-day-arrivals>li{padding:10px 12px;background:var(--app-card);border:1px solid var(--app-border);border-radius:10px}
+.reservation-day-time{border-bottom:1px solid var(--app-border);padding-bottom:5px}
+.reservation-day-arrivals small{display:block}
