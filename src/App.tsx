@@ -20,6 +20,7 @@ import { AppShell } from './components/AppShell'
 
 
 const ReservationPrivacy=lazy(()=>import('./pages/ReservationPrivacy').then(module=>({default:module.ReservationPrivacy})))
+const ReservationArrivalOptions=lazy(()=>import('./pages/ReservationArrivalOptions').then(module=>({default:module.ReservationArrivalOptions})))
 const ReservationGuestConfirmation=lazy(()=>import('./pages/ReservationGuestConfirmation').then(module=>({default:module.ReservationGuestConfirmation})))
 const RestaurantGamesPage=lazy(()=>import('./pages/RestaurantGamesPage').then(module=>({default:module.RestaurantGamesPage})))
 const PrepareDayPage=lazy(()=>import('./pages/PrepareDayPage').then(module=>({default:module.PrepareDayPage})))
@@ -130,6 +131,7 @@ function AppContent() {
   if (walkinPath.startsWith('/walk-in/')) return <PageCanvas><WalkInPage key={walkinPath} publicKey={walkinPath.slice('/walk-in/'.length)} /></PageCanvas>
 
   // Guest-only pages must render before the staff session/loading gate.
+  if (walkinPath.replace(/\/$/,'')==='/reservation-arrival-options') return <ReservationArrivalOptions/>
   if (walkinPath.replace(/\/$/,'')==='/reservation-confirmation') return <ReservationGuestConfirmation/>
   if (['/privacy','/messaging-terms'].includes(walkinPath.replace(/\/$/,''))) return <ReservationPrivacy/>
   if (walkinPath.replace(/\/$/,'')==='/reservation-messaging') return <ReservationMessagingPage/>

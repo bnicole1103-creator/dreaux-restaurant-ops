@@ -1,3 +1,4 @@
+import { InquiryArrivalOffer } from '../components/InquiryArrivalOffer'
 import {ReservationConfirmationActions} from '../components/ReservationConfirmationActions'
 import {InquiryTags,InquiryTagBadges} from '../components/InquiryTags'
 import './InquiryInboxFilters.css'
@@ -113,7 +114,7 @@ export function InquiryInboxPage() {
         <button type="submit">{saving?'Saving…':'Save follow-up'}</button>
         <p>Saving follow-up does not create or change a reservation or send a guest message.</p>
       </fieldset></form>
-      <button type="button" disabled={saving||loading||!!error} onClick={()=>setConverting({...selected})}>{linked[selected.source+':'+selected.id]?'View linked reservation':'Create reservation'}</button>{linked[selected.source+':'+selected.id]&&<ReservationConfirmationActions location={location} reservationId={linked[selected.source+':'+selected.id]}/>}<p>Booked inquiries leave Needs follow-up automatically and remain available under Booked or All statuses.</p>
+      {!linked[selected.source+':'+selected.id]&&<InquiryArrivalOffer key={selected.source+':'+selected.id} location={location} inquiry={selected}/>}<button type="button" disabled={saving||loading||!!error} onClick={()=>setConverting({...selected})}>{linked[selected.source+':'+selected.id]?'View linked reservation':'Create reservation'}</button>{linked[selected.source+':'+selected.id]&&<ReservationConfirmationActions location={location} reservationId={linked[selected.source+':'+selected.id]}/>}<p>Booked inquiries leave Needs follow-up automatically and remain available under Booked or All statuses.</p>
       <button disabled={saving} onClick={()=>{if(window.confirm('Close without saving inquiry edits?'))setSelected(null)}}><PageWord id="sectioncopy.7e43ffe46f5cb3578932">{"Close details"}</PageWord></button>
     </DesignSection></TaskDialog>}
   </DesignSection>
