@@ -62,7 +62,11 @@ function renderTemplate(template: string, values: Record<string, string>) {
   )
 }
 
-export function ReservationInquiryPage({largeParty=false,initialDate}:{largeParty?:boolean;initialDate?:string}={}) {
+export function ReservationInquiryPage({initialDate, initialLocationId, onEditorState}: {
+  initialDate?: string
+  initialLocationId?: string
+  onEditorState?: (state: { busy: boolean; dirty: boolean }) => void
+} = {}) {
   const [locationId, setLocationId] = useState('')
   const [locationName, setLocationName] = useState('JusTini’s')
   const [presets, setPresets] = useState<Preset[]>([])
@@ -85,13 +89,22 @@ export function ReservationInquiryPage({largeParty=false,initialDate}:{largePart
   const [guestName, setGuestName] = useState('')
   const [phone, setPhone] = useState('')
   const [email, setEmail] = useState('')
-  const [partySize, setPartySize] = useState(largeParty?'16':'2')
-  const [preferredDate, setPreferredDate] = useState(initialDate??todayCentral())
+  const defaultPartySize = '2'
+  const [partySize, setPartySize] = useState(defaultPartySize)
+  const [defaultDate] = useState(() => initialDate || todayCentral())
+  const [preferredDate, setPreferredDate] = useState(defaultDate)
   const [preferredTime, setPreferredTime] = useState('')
   const [secondTime, setSecondTime] = useState('')
   const [thirdTime, setThirdTime] = useState('')
   const [guestNotes, setGuestNotes] = useState('')
   const [internalNotes, setInternalNotes] = useState('')
+
+  const dirty = Boolean(guestName || phone || email || guestNotes || internalNotes
+    || partySize !== defaultPartySize || preferredDate !== defaultDate
+    || preferredTime || secondTime || thirdTime || editingPresets)
+  useEffect(() => {
+    onEditorState?.({ busy: saving, dirty })
+  }, [onEditorState, saving, dirty])
 
   const partyCount = Number(partySize) || 0
   const isLargeParty = partyCount > 15
@@ -125,7 +138,9 @@ export function ReservationInquiryPage({largeParty=false,initialDate}:{largePart
     void (async () => {
       try {
         const tenant = await loadTenantData()
-        const loc = tenant.locations[0]
+        const loc = initialLocationId
+          ? tenant.locations.find(location => location.id === initialLocationId)
+          : tenant.locations[0]
         if (!loc) throw Error('No active location found.')
         if (!live) return
         setLocationId(loc.id)
@@ -140,7 +155,7 @@ export function ReservationInquiryPage({largeParty=false,initialDate}:{largePart
     return () => {
       live = false
     }
-  }, [])
+  }, [initialLocationId])
 
   async function removeInquiry(row:Inquiry){if(saving||!window.confirm('Remove this inquiry? Its record and any linked reservation will be kept.'))return;setSaving(true);setError('');try{const r=await supabase.rpc('inquiry_archive',{p_location_id:locationId,p_source:'Host',p_id:row.id});if(r.error)throw r.error;setRecent(rows=>rows.filter(x=>x.id!==row.id))}catch(e){setError(String((e as Error).message??e))}finally{setSaving(false)}}
   async function load(location: string) {
@@ -194,8 +209,8 @@ export function ReservationInquiryPage({largeParty=false,initialDate}:{largePart
       setGuestName('')
       setPhone('')
       setEmail('')
-      setPartySize(largeParty?'16':'2')
-      setPreferredDate(todayCentral())
+      setPartySize(defaultPartySize)
+      setPreferredDate(defaultDate)
       setPreferredTime('')
       setSecondTime('')
       setThirdTime('')
@@ -266,7 +281,7 @@ export function ReservationInquiryPage({largeParty=false,initialDate}:{largePart
       </h1>
       {canManage && <p><Link to="/inquiry-inbox"><PageWord id="sectioncopy.c1397930d735b54c3683">{"Open shared inquiry inbox"}</PageWord></Link></p>}
       <p>
-        <ScreenText id="ReservationInquiryPage.intro">Hosts can capture the inquiry, route parties of 15 or fewer into table seating, and route parties over 15 into private party follow-up.</ScreenText>
+        <ScreenText id="ReservationInquiryPage.intro">Use this form to save a request for follow-up while availability is being checked. Parties over 15 go to private party follow-up.</ScreenText>
       </p>
 
       {error && <p role="alert">{error}</p>}
@@ -275,7 +290,7 @@ export function ReservationInquiryPage({largeParty=false,initialDate}:{largePart
       {!loading && (
         <>
           <form className="gf-entry" onSubmit={submit}>
-            <fieldset data-design-block="section.a2c3cacddd029af6fb74" disabled={saving}>
+            <fieldset data-design-block="section.a2c3cacddd029af6fb74" disabled={saving || !locationId}>
               <label>
                 <ScreenText id="ReservationInquiryPage.guestName">Guest name</ScreenText>
                 <input required maxLength={200} value={guestName} onChange={(event) => setGuestName(event.target.value)} />
