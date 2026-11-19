@@ -1,3 +1,4 @@
+import { time12 } from '../lib/time12'
 import {DesignSection} from './DesignSection'
 import { TeamProfileName } from './TeamProfileName'
 // page-designer-instrumented
@@ -88,11 +89,8 @@ function getReservationCovers(
 function getReservationTime(
   reservation: Reservation,
 ) {
-  return (
-    reservation.reservation_time ||
-    reservation.time ||
-    ''
-  )
+  const time = reservation.reservation_time || reservation.time
+  return time ? time12(time) : ''
 }
 
 function isUpcoming(

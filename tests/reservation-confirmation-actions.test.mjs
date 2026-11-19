@@ -15,7 +15,8 @@ assert.equal(guestConfirmationLabel({valid:true,responded_at:'2026-11-18'}),'Not
 const invitation=confirmationInvitation('https://example.test/confirmation#token=abc')
 assert.ok(invitation.includes('https://example.test/confirmation#token=abc'))
 assert.ok(invitation.includes('Messaging is optional'))
-const {normalizeInquiryStatus}=await moduleAt('src/lib/inquiryDisplay.ts')
+const {time12}=await moduleAt('src/lib/time12.ts')
+const {normalizeInquiryStatus}=await moduleAt('src/lib/inquiryDisplay.ts',s=>s.replace("import { time12 } from './time12'",time12.toString()))
 const {bookedInquiryRows,inquiryNeedsAction,inquiryQueue}=await moduleAt('src/lib/inquiryQueue.ts',s=>s.replace("import {normalizeInquiryStatus} from './inquiryDisplay'",normalizeInquiryStatus.toString()))
 const row=(id,source,status='New')=>({id,source,status,name:'Guest',email:'',phone:'',notes:'',date:'2026-11-19',received:'2026-11-18T15:00:00Z'})
 const original=[row('same','Host'),row('same','Guest form'),row('closed','Host','Closed')]

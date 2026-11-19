@@ -1,4 +1,4 @@
-import {time12} from '../lib/time12'
+import { time12 } from '../lib/time12'
 import {useEffect,useRef,useState} from 'react'
 import {supabase} from '../lib/supabase'
 export type ReservationDraft={guest_name:string|null;phone:string|null;email:string|null;reservation_date:string|null;reservation_time:string|null;party_size:number|null;notes:string|null}
