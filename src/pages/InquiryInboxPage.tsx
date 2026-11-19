@@ -1,3 +1,4 @@
+import { inquiryDetails } from '../lib/inquiryReservationFields'
 import {ReservationConfirmationActions} from '../components/ReservationConfirmationActions'
 import {InquiryTags,InquiryTagBadges} from '../components/InquiryTags'
 import './InquiryInboxFilters.css'
@@ -61,7 +62,7 @@ export function InquiryInboxPage() {
     const next:Row[]=[];const errors:string[]=[]
     const links=await supabase.rpc('inquiry_reservation_links',{p_location_id:loc}).abortSignal(AbortSignal.timeout(20000));if(links.error)errors.push('Reservation links could not load: '+links.error.message)
     if(results[0].status==='fulfilled') for(const r of results[0].value.inquiries) {
-      let details:Record<string,unknown>={};try{details=JSON.parse(r.details)}catch{details={Details:r.details}}
+      const details=inquiryDetails(r.details)
       next.push({id:r.id,source:'Guest form',name:r.name,email:r.email,phone:r.phone,guests:r.guests,date:r.event_date,received:r.received,status:r.status,notes:r.notes,details:{...details,Package:r.package_name,'Guest follow-up':r.response,'Email delivery':r.mail_status}})
     } else errors.push(String(results[0].reason?.message||results[0].reason))
     if(results[1].status==='fulfilled'&&!results[1].value.error) for(const r of results[1].value.data||[]) next.push({id:r.id,source:'Host',name:r.guest_name,email:r.email||'',phone:r.phone||'',guests:r.party_size,date:r.preferred_date||'',received:r.created_at,status:r.status,notes:r.internal_notes,details:{Type:r.inquiry_type,'First time':r.preferred_time,'Second time':r.second_preferred_time,'Third time':r.third_preferred_time,'Guest notes':r.guest_notes,Package:r.preset_label}})
