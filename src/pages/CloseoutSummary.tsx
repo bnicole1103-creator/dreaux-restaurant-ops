@@ -1,3 +1,4 @@
+import {displayReportTime} from '../lib/time12'
 import {ManagerCashDaySummary} from '../components/ManagerCashDaySummary'
 import {SummaryDisclosure} from '../components/SummaryDisclosure'
 import {ManagerCloseoutDetails} from '../components/ManagerCloseoutDetails'
@@ -416,7 +417,7 @@ function CloseoutDay({selectedDate,refresh,onDeleted,locationId,locationName,cur
       `Voids: ${totals.totalVoidCount}, totaling ${money(totals.totalVoids)}. Discounts: ${money(totals.totalDiscounts)}.`,
       `Average shift score: ${closeouts.length ? totals.averageScore.toFixed(1) : 'Not available'}.`,
       `Cash report — total deposited on manager closeouts: ${managerCloseouts.length ? money(managerCash) : 'No manager closeout submitted'}.`,
-      ...managerCloseouts.map(m=>`${m.shift_name}: ${m.cash_deposit==null?'Deposit not recorded':money(m.cash_deposit)+' deposited'}; cash left: ${m.cash_left_at||'Not recorded'}. Submitted by ${m.submitted_by_name||'Manager'} at ${submissionLabel(m.submitted_at)}.`),
+      ...managerCloseouts.map(m=>`${m.shift_name}: ${m.cash_deposit==null?'Deposit not recorded':money(m.cash_deposit)+' deposited'}; cash left: ${displayReportTime(m.cash_left_at||'Not recorded')}. Submitted by ${m.submitted_by_name||'Manager'} at ${submissionLabel(m.submitted_at)}.`),
     ]
   },[closeouts,managerCloseouts,totals,profileMap])
 
@@ -813,7 +814,7 @@ function CloseoutDay({selectedDate,refresh,onDeleted,locationId,locationName,cur
                     {expandedManager===row.shift_id&&<><div data-design-block="copy.manager-closeouts-summary.10" className="closeout-summary-details">
                       <div data-design-block="copy.manager-closeouts-summary.11"><span><ScreenText id="CloseoutSummary.managerSubmitted">Submitted</ScreenText></span><strong>{submissionLabel(row.submitted_at)}</strong></div>
                       <div data-design-block="copy.manager-closeouts-summary.12"><span><ScreenText id="CloseoutSummary.managerRegister">Register</ScreenText></span><strong>{row.register_balanced == null ? 'Not recorded' : row.register_balanced ? 'Balanced' : `Off by ${money(row.register_difference)}`}</strong></div>
-                      <div data-design-block="copy.manager-closeouts-summary.13"><span><ScreenText id="CloseoutSummary.managerCashLeft">Cash left at</ScreenText></span><strong>{row.cash_left_at || 'Not recorded'}</strong></div>
+                      <div data-design-block="copy.manager-closeouts-summary.13"><span><ScreenText id="CloseoutSummary.managerCashLeft">Cash left at</ScreenText></span><strong>{displayReportTime(row.cash_left_at || 'Not recorded')}</strong></div>
                       <div data-design-block="copy.manager-closeouts-summary.14"><span><ScreenText id="CloseoutSummary.managerAverageRating">Average rating</ScreenText></span><strong>{row.average_rating == null ? '—' : row.average_rating.toFixed(1)}</strong></div>
                       <div data-design-block="copy.manager-closeouts-summary.15"><span><ScreenText id="CloseoutSummary.managerMvp">Shift MVP</ScreenText></span><strong>{row.shift_mvp?<TeamProfileName locationId={locationId} userId={row.shift_mvp} name={row.shift_mvp_name||'Team member'}/>:'Not selected'}</strong></div>
                       {row.register_notes && <div data-design-block="copy.manager-closeouts-summary.16" style={{gridColumn:'1 / -1'}}><span><ScreenText id="CloseoutSummary.managerRegisterNotes">Register notes</ScreenText></span><strong>{row.register_notes}</strong></div>}

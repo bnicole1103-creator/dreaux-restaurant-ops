@@ -427,7 +427,7 @@ export function ReservationInquiryPage({largeParty=false,initialDate}:{largePart
                 <article data-design-block="section.577616ec714396313121" className="gf-entry" key={row.id}>
                   <h3>{row.guest_name}<PageWord id="sectioncopy.664f55c1bf30f4479ac6">{" · "}</PageWord>{row.party_size}<PageWord id="sectioncopy.c35ce2c112ef3aa8144f">{" guests"}</PageWord></h3>
                   <p>{row.inquiry_type === 'private_party' ? 'Private party' : 'Table seating'}<PageWord id="sectioncopy.0d070e2831979e704a81">{" · "}</PageWord>{row.status}</p>
-                  <p>{new Date(row.created_at).toLocaleString('en-US', { timeZone: 'America/Chicago' })}<PageWord id="sectioncopy.5024fcdf97b20a4624ea">{" Central"}</PageWord></p>
+                  <p>{new Date(row.created_at).toLocaleString('en-US', { timeZone: 'America/Chicago' ,hour12:true})}<PageWord id="sectioncopy.5024fcdf97b20a4624ea">{" Central"}</PageWord></p>
                   {(row.phone || row.email) && <p>{[row.phone, row.email].filter(Boolean).join(' · ')}</p>}
                   {row.preferred_date && <p>{row.preferred_date}<PageWord id="sectioncopy.ca8208864a7e20457497">{" · "}</PageWord>{[timeLabel(row.preferred_time ?? ''), timeLabel(row.second_preferred_time ?? ''), timeLabel(row.third_preferred_time ?? '')].filter(Boolean).join(' / ')}</p>}
                   {row.guest_notes && <p className="gf-message">{row.guest_notes}</p>}<button type="button" disabled={saving} onClick={()=>void removeInquiry(row)}>Remove inquiry</button>
