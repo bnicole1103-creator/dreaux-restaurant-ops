@@ -29,3 +29,13 @@ assert.equal(inquiryQueue(reconciled,'All','','open','all','2026-11-18').length,
 assert.equal(inquiryQueue(reconciled,'All','','all','all','2026-11-18').length,3,'history is retained')
 assert.equal(inquiryQueue(reconciled,'All','','Booked','all','2026-11-18')[0].id,'same')
 console.log('Confirmation states, invitation, and converted inquiry queue checks passed.')
+
+const queuedByArrival=[
+ {...reconciled[0],id:'later-received',date:'2026-11-20',received:'2026-11-19T10:00:00-06:00'},
+ {...reconciled[0],id:'first-received',date:'2026-11-25',received:'2026-11-19T14:00:00Z'},
+ {...reconciled[0],id:'missing-receipt',date:'',received:''},
+]
+const sortQueue=sort=>inquiryQueue(queuedByArrival,'All','','all','all','2026-11-19',sort).map(row=>row.id)
+assert.deepEqual(sortQueue('oldest'),['first-received','later-received','missing-receipt'])
+assert.deepEqual(sortQueue('newest'),['later-received','first-received','missing-receipt'])
+assert.deepEqual(sortQueue('event'),['later-received','first-received','missing-receipt'])
