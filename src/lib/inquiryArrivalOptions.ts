@@ -1,3 +1,4 @@
+import { inquirySeatingPreference, seatingArea } from './reservationSeating'
 import { planCapacity, type CapacityData } from './reservationCapacity'
 import type { InquiryReservationSource } from '../components/InquiryReservationDialog'
 
@@ -25,11 +26,13 @@ function requestedClock(value: unknown) {
   return String(hour).padStart(2, '0') + ':' + match[2]
 }
 
-export function nextInquiryArrivals(data: CapacityData, inquiry: InquiryReservationSource) {
+export function nextInquiryArrivalOffers(data: CapacityData, inquiry: InquiryReservationSource) {
   if (!data.configured || data.config.closed) return []
   const requested = requestedKeys.map(key => requestedClock(inquiry.details[key])).filter(Boolean)
   const first = requested[0] ?? ''
-  const verified: number[] = []
+  const verified: {minute:number;area:string}[] = []
+  // Legacy callers and inquiries without an explicit preference default to indoor.
+  const seating = inquirySeatingPreference(inquiry.details)
   for (const slot of [...data.slots].sort((a, b) => a.value - b.value)) {
     const instant = new Date(slot.value * 60000)
     const clock = arrivalClockValue(instant)
@@ -37,9 +40,9 @@ export function nextInquiryArrivals(data: CapacityData, inquiry: InquiryReservat
       || clock < first || requested.includes(clock)) continue
     const plan = planCapacity(data, {
       id: 'candidate', name: 'New reservation', party: Number(inquiry.guests),
-      start: slot.value, end: slot.value + data.config.duration, tableIds: [], room: '', version: 0,
+      start: slot.value, end: slot.value + data.config.duration, tableIds: [], room: '', version: 0, seating,
     })
-    if (plan.ok) verified.push(slot.value)
+    if (plan.ok) verified.push({minute:slot.value,area:seatingArea(data.tables.filter(t=>plan.assignments.candidate?.includes(t.id)))})
     if (verified.length === 3) break
   }
   return verified

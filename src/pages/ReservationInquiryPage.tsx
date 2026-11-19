@@ -1,3 +1,4 @@
+import { seatingOptions, seatingLabel, type SeatingPreference } from '../lib/reservationSeating'
 import {InquiryTags} from '../components/InquiryTags'
 import {TimeInput12} from '../components/TimeInput12'
 import {DesignSection} from '../components/DesignSection'
@@ -96,11 +97,12 @@ export function ReservationInquiryPage({initialDate, initialLocationId, onEditor
   const [preferredTime, setPreferredTime] = useState('')
   const [secondTime, setSecondTime] = useState('')
   const [thirdTime, setThirdTime] = useState('')
+  const [seating,setSeating] = useState<SeatingPreference>('indoor')
   const [guestNotes, setGuestNotes] = useState('')
   const [internalNotes, setInternalNotes] = useState('')
 
   const dirty = Boolean(guestName || phone || email || guestNotes || internalNotes
-    || partySize !== defaultPartySize || preferredDate !== defaultDate
+    || seating !== 'indoor' || partySize !== defaultPartySize || preferredDate !== defaultDate
     || preferredTime || secondTime || thirdTime || editingPresets)
   useEffect(() => {
     onEditorState?.({ busy: saving, dirty })
@@ -200,7 +202,7 @@ export function ReservationInquiryPage({initialDate, initialLocationId, onEditor
           preferred_time: isLargeParty ? null : preferredTime,
           second_preferred_time: isLargeParty ? null : secondTime,
           third_preferred_time: isLargeParty ? null : thirdTime,
-          guest_notes: guestNotes,
+          guest_notes: ['Seating preference: ' + seatingLabel(seating), guestNotes].filter(Boolean).join('\n'),
           internal_notes: internalNotes,
         },
       })
@@ -214,6 +216,7 @@ export function ReservationInquiryPage({initialDate, initialLocationId, onEditor
       setPreferredTime('')
       setSecondTime('')
       setThirdTime('')
+      setSeating('indoor')
       setGuestNotes('')
       setInternalNotes('')
       await load(locationId)
@@ -307,6 +310,13 @@ export function ReservationInquiryPage({initialDate, initialLocationId, onEditor
                 <ScreenText id="ReservationInquiryPage.partySize">Party size</ScreenText>
                 <input required type="number" min={1} max={500} step={1} value={partySize} onChange={(event) => setPartySize(event.target.value)} />
               </label>
+
+              <fieldset>
+                <legend>Seating preference</legend>
+                {seatingOptions.map(([value,label]) => <button key={value} type="button"
+                  aria-pressed={seating===value} className={seating===value?'primary-button':undefined}
+                  onClick={()=>setSeating(value)}>{label}</button>)}
+              </fieldset>
 
               {isLargeParty ? (
                 <DesignSection as="section" data-design-block="section.926b40180d996ab24b0a" className="gf-entry">

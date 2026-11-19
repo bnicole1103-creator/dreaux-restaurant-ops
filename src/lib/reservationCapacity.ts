@@ -1,6 +1,7 @@
+import { reservationSeatingRank, type SeatingPreference } from './reservationSeating'
 export type CapacityBlock={id:string;scope:string;reason:string;starts_at:string;ends_at:string;tableIds:string[];room_id?:string;section_id?:string;version:number}
 export type CapacityTable={id:string;name:string;seats:number;room:string;roomName:string}
-export type CapacityBooking={id:string;name:string;party:number;start:number|null;end:number|null;tableIds:string[];room:string;version:number;live?:boolean;source?:string}
+export type CapacityBooking={id:string;name:string;party:number;start:number|null;end:number|null;tableIds:string[];room:string;version:number;live?:boolean;source?:string;seating?:SeatingPreference}
 export type CapacityConfig={duration:number;buffer:number;step:number;open:string;close:string;closed:boolean;joinGroups:string[][];blockedTables:string[]}
 export type CapacityData={day:string;now:number;open:number;close:number;configured:boolean;config:CapacityConfig;tables:CapacityTable[];bookings:CapacityBooking[];fingerprint:string;canManage:boolean;organization:string;blocks?:CapacityBlock[];sections?:{id:string;name:string;tableIds:string[]}[];slots:{value:number;label:string}[]}
 export const capacityClock=(minute:number)=>new Intl.DateTimeFormat('en-US',{timeZone:'America/Chicago',hour:'numeric',minute:'2-digit',hour12:true}).format(new Date(minute*60000))
@@ -19,11 +20,12 @@ export function planCapacity(data:CapacityData,candidate?:CapacityBooking,maxNod
   const flexible=reassignFuture&&!row.live&&row.start!>=data.now&&row.id!==candidate?.id;
   const sets=row.tableIds.length&&!flexible?[row.tableIds]:[...(row.tableIds.length?[row.tableIds]:[]),...tables.map(t=>[t.id]),...data.config.joinGroups];
   const same=(a:string[],b:string[])=>a.length===b.length&&a.every(id=>b.includes(id));
-  const choices=sets.filter(ids=>fits(ids)&&!blocked(ids)).sort((a,b)=>Number(!same(a,row.tableIds))-Number(!same(b,row.tableIds))||a.reduce((n,id)=>n+byId.get(id)!.seats,0)-b.reduce((n,id)=>n+byId.get(id)!.seats,0)||a.length-b.length);
+  const rank=(ids:string[])=>row.seating?reservationSeatingRank(ids.map(id=>byId.get(id)!),row.party,row.seating):0
+  const choices=sets.filter(ids=>fits(ids)&&!blocked(ids)&&Number.isFinite(rank(ids))).sort((a,b)=>rank(a)-rank(b)||Number(!same(a,row.tableIds))-Number(!same(b,row.tableIds))||a.reduce((n,id)=>n+byId.get(id)!.seats,0)-b.reduce((n,id)=>n+byId.get(id)!.seats,0)||a.length-b.length);
   if(!choices.length)return fail(`${row.name}: no table or approved joined-table group fits this party and room.`)
   options.set(row.id,choices)
  }
- rows.sort((a,b)=>Number(!!b.tableIds.length)-Number(!!a.tableIds.length)||options.get(a.id)!.length-options.get(b.id)!.length||b.party-a.party||a.start!-b.start!);
+ rows.sort((a,b)=>Number(!!b.seating)-Number(!!a.seating)||Number(!!b.tableIds.length)-Number(!!a.tableIds.length)||options.get(a.id)!.length-options.get(b.id)!.length||b.party-a.party||a.start!-b.start!);
  const assignments:Record<string,string[]>={};let nodes=0,exhausted=false;
  function search(index:number):boolean{
   if(++nodes>maxNodes){exhausted=true;return false}if(index===rows.length)return true;

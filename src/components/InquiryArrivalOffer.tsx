@@ -1,6 +1,7 @@
+import { inquirySeatingPreference } from '../lib/reservationSeating'
 import { useEffect, useRef, useState } from 'react'
 import type { InquiryReservationSource } from './InquiryReservationDialog'
-import { nextInquiryArrivals, arrivalClockValue } from '../lib/inquiryArrivalOptions'
+import { nextInquiryArrivalOffers, arrivalClockValue } from '../lib/inquiryArrivalOptions'
 import { time12 } from '../lib/time12'
 import { confirmationOrigin } from '../lib/reservationConfirmation'
 import { messageComposerUrl } from '../lib/messageComposer'
@@ -14,7 +15,7 @@ export function InquiryArrivalOffer({ location, inquiry, onUse }: {
   onUse?: (day: string, time: string) => void
 }) {
   const [selection, setSelection] = useState<Selection | null>(null)
-  const [offer, setOffer] = useState<{ link: string; arrivals: number[] } | null>(null)
+  const [offer, setOffer] = useState<{ link: string; arrivals: ReturnType<typeof nextInquiryArrivalOffers> } | null>(null)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
@@ -52,10 +53,10 @@ export function InquiryArrivalOffer({ location, inquiry, onUse }: {
         p_location_id: location, p_day: inquiry.date,
       }).abortSignal(AbortSignal.timeout(15000))
       if (capacity.error) throw capacity.error
-      const arrivals = nextInquiryArrivals(capacity.data, inquiry)
+      const arrivals = nextInquiryArrivalOffers(capacity.data, inquiry)
       if (!arrivals.length) throw Error('No later arrival time is available on the requested date. Ask the guest about another date.')
       const result = await supabase.rpc('inquiry_arrival_offer_create', {
-        ...args, p_day: inquiry.date, p_party: guests, p_minutes: arrivals, p_fingerprint: capacity.data.fingerprint, p_replace: replace,
+        ...args, p_day: inquiry.date, p_party: guests, p_minutes: arrivals.map(option=>option.minute), p_fingerprint: capacity.data.fingerprint, p_replace: replace,
       }).abortSignal(AbortSignal.timeout(15000))
       if (result.error) throw result.error
       setSelection(null)
@@ -69,7 +70,14 @@ export function InquiryArrivalOffer({ location, inquiry, onUse }: {
   }
 
   const time = selection && arrivalClockValue(new Date(selection.arrival))
-  const message = offer && 'JusTini’s New Orleans: We’re unable to accommodate your requested reservation times. Please choose an alternate arrival time here: ' + offer.link
+  const preference = inquirySeatingPreference(inquiry.details)
+  const offeredTimes = offer?.arrivals.map(option => {
+    const time = time12(arrivalClockValue(new Date(option.minute * 60000)))
+    const area = preference === 'indoor' && option.area === 'outdoor seating in the Courtyard'
+      ? 'outdoor Courtyard seating only' : option.area
+    return area ? time + ' (' + area + ')' : time
+  }).join(', ')
+  const message = offer && 'JusTini’s New Orleans: We’re unable to accommodate your requested reservation times. Available on ' + inquiry.date + ': ' + offeredTimes + ' Central. Choose a time here: ' + offer.link
   const sms = message && messageComposerUrl(inquiry.phone, message, /iPhone|iPad|iPod|Macintosh/.test(navigator.userAgent))
 
   return <section aria-label="Alternate arrival times">
@@ -86,7 +94,7 @@ export function InquiryArrivalOffer({ location, inquiry, onUse }: {
       {!canOffer && <p>Add the inquiry date and party size to offer alternate times.</p>}
     </>}
     {offer && message && !selection && <>
-      <p>Offering {offer.arrivals.map(minute => time12(arrivalClockValue(new Date(minute * 60000)))).join(', ')} Central on {inquiry.date}.</p>
+      <p>Offering {offeredTimes} Central on {inquiry.date}.</p>
       <label>Guest invitation<textarea readOnly rows={4} value={message} onFocus={event => event.target.select()} /></label>
       <div className="feed-actions">
         <button type="button" onClick={() => void Promise.resolve().then(() => navigator.clipboard.writeText(message))

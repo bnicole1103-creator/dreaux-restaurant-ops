@@ -5,8 +5,8 @@ export function activeReservations<T extends {status?:string|null}>(rows:T[]):T[
 }
 export function notifyReservationsChanged(){window.dispatchEvent(new Event('reservations-changed'))}
 // Realtime where enabled, with focus and polling fallback for other devices.
-export function useReservationRevision(location:string){
+export function useReservationRevision(location:string,enabled=true){
  const [revision,setRevision]=useState(0)
- useEffect(()=>location?watchReservations(location,()=>setRevision(v=>v+1)):undefined,[location])
+ useEffect(()=>location&&enabled?watchReservations(location,()=>setRevision(v=>v+1)):undefined,[location,enabled])
  return revision
 }

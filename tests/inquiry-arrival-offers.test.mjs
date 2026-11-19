@@ -6,13 +6,14 @@ import { build } from 'esbuild'
 const { outputFiles } = await build({
   entryPoints: ['src/lib/inquiryArrivalOptions.ts'], bundle: true, format: 'esm', write: false,
 })
-const { nextInquiryArrivals } = await import('data:text/javascript;base64,' + Buffer.from(outputFiles[0].contents).toString('base64'))
+const { nextInquiryArrivalOffers } = await import('data:text/javascript;base64,' + Buffer.from(outputFiles[0].contents).toString('base64'))
+const nextInquiryArrivals = (...args) => nextInquiryArrivalOffers(...args).map(option=>option.minute)
 const minute = hour => Date.parse('2026-11-19T' + hour + ':00-06:00') / 60000
 const slots = ['17:00', '17:30', '18:00', '18:30', '19:00'].map(clock => ({ value: minute(clock), label: clock }))
 const data = {
   day: '2026-11-19', configured: true, now: minute('16:00'), close: minute('21:00'),
   config: { duration: 60, buffer: 15, joinGroups: [], blockedTables: [] },
-  tables: [{ id: 't', seats: 4, room: 'r', roomName: 'Dining room' }],
+  tables: [{ id: 't', name: 'T1', seats: 4, room: 'r', roomName: 'Dining room' }],
   bookings: [{ id: 'existing', party: 4, tableIds: ['t'], start: minute('17:00'), end: minute('18:00'), room: '', version: 1 }],
   slots,
 }
