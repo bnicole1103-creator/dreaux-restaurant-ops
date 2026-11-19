@@ -1,3 +1,4 @@
+import {displayReportTime} from '../lib/time12'
 import {OperationsAssistant} from '../components/OperationsAssistant'
 import {OperationsReportBuilder} from '../components/OperationsReportBuilder'
 import {InventoryOperationsReports} from '../components/InventoryOperationsReports'
@@ -12,7 +13,7 @@ type Library={datasets:{id:string;name:string;count:number}[];reports:Saved[]}
 const errorText=(e:unknown)=>String((e as {message?:string})?.message??e)
 async function call<T>(name:string,args:Record<string,unknown>):Promise<T>{const controller=new AbortController();let timer:ReturnType<typeof setTimeout>|undefined;try{const r=await Promise.race([supabase.rpc(name,args).abortSignal(controller.signal),new Promise<never>((_,reject)=>{timer=setTimeout(()=>{reject(Error('The server did not confirm the request. Reload the report library before retrying a save or import.'));controller.abort()},30000)})]);if(r.error)throw r.error;return r.data as T}finally{if(timer)clearTimeout(timer)}}
 function download(name:string,content:string,type:string){const url=URL.createObjectURL(new Blob([content],{type}));const a=document.createElement('a');a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000)}
-const display=(value:unknown)=>typeof value==='number'?new Intl.NumberFormat('en-US',{maximumFractionDigits:2}).format(value):String(value??'')
+const display=(value:unknown)=>typeof value==='number'?new Intl.NumberFormat('en-US',{maximumFractionDigits:2}).format(value):typeof value==='string'&&value?displayReportTime(value):String(value??'')
 export function ReportsPage(){
  const [location,setLocation]=useState(''),[library,setLibrary]=useState<Library>({datasets:[],reports:[]}),[saved,setSaved]=useState<Saved|null>(null)
  const [title,setTitle]=useState('Custom report'),[source,setSource]=useState('closeouts'),[dataset,setDataset]=useState(''),[from,setFrom]=useState(()=>addDays(calendarToday(),-29)),[to,setTo]=useState(calendarToday)

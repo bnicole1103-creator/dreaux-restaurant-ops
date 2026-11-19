@@ -9,7 +9,7 @@ export type LeaderboardPublication = {
 }
 export function publicationLabel(publication: LeaderboardPublication) {
   return new Intl.DateTimeFormat('en-US', {
-    timeZone: 'America/Chicago', dateStyle: 'medium', timeStyle: 'short',
+    timeZone: 'America/Chicago', dateStyle: 'medium', timeStyle: 'short', hour12: true,
   }).format(new Date(publication.published_at)) + ' (Central)'
 }
 function StandingsTable({ rows, caption, locationId }: {

@@ -1,3 +1,4 @@
+import { shiftClock } from '../lib/calendarDates'
 import {OperationsAssistant} from '../components/OperationsAssistant'
 import {TimeInput12} from '../components/TimeInput12'
 import {CloseoutSection} from '../components/CloseoutSection'
@@ -1166,7 +1167,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
         {shown('staff_1')&&<div className="quick-grid"><label data-closeout-field="clockInTime">Actual clock-in<TimeInput12 aria-label="Clock-in time"  required value={clockInTime} onChange={e=>setClockInTime(e.target.value)}/></label><label data-closeout-field="clockOutTime">Actual clock-out<TimeInput12 aria-label="Clock-out time"  required value={clockOutTime} onChange={e=>setClockOutTime(e.target.value)}/></label></div>}
       <div className="closeout-question-group"><h3>Shift details</h3>
         <p role="status">{scheduleNotice}</p>
-        {quickShifts.length>0&&<label>Confirmed shift<select value={quickShift} onChange={e=>{const s=quickShifts.find(s=>s.key===e.target.value);if(s)chooseQuickShift(s)}}><option value="">Select shift</option>{quickShifts.map(s=><option key={s.key} value={s.key}>{s.role} · {centralTime(s.start)} – {centralTime(s.end)}</option>)}</select></label>}
+        {quickShifts.length>0&&<label>Confirmed shift<select value={quickShift} onChange={e=>{const s=quickShifts.find(s=>s.key===e.target.value);if(s)chooseQuickShift(s)}}><option value="">Select shift</option>{quickShifts.map(s=><option key={s.key} value={s.key}>{s.role} · {shiftClock(s.start)} – {shiftClock(s.end)}</option>)}</select></label>}
         <div className="quick-grid">
           {shown('staff_0')&&<label data-closeout-field="scheduledTime">{questionLabel(config,'staff_0','Scheduled start')}<TimeInput12 aria-label="Scheduled start"  required value={scheduledTime} onChange={e=>{touched.current.shift=true;setScheduledTime(e.target.value)}}/></label>}
           <label>Role worked<select value={jobRole} onChange={e=>{touched.current.shift=true;setJobRole(e.target.value as JobRole)}}>{Object.entries(ROLE_LABELS).map(([id,label])=><option key={id} value={id}>{label}</option>)}</select></label>
