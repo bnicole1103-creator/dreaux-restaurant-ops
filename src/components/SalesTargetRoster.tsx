@@ -32,7 +32,7 @@ export function SalesTargetRoster({location,date,disabled,onDirty,onSaved}:Props
   if(prepared.stage('sales_target_roster_save',{p_location_id:location,p_date:date,p_version:data.version,p_rows:rows.map(r=>({...r,user_id:r.user_id||null,hours:Number(r.hours)}))})){onDirty(false);return;}
 const r=await supabase.rpc('sales_target_roster_save',{p_location_id:location,p_date:date,p_version:data.version,p_rows:rows.map(r=>({...r,user_id:r.user_id||null,hours:Number(r.hours)}))});if(r.error)throw r.error;setData({...data,version:data.version+1,manual:true});setDirty(false);onDirty(false);onSaved()
  }catch(e){setError(String((e as Error).message??e))}finally{setBusy(false)}}
- const prepared=usePreparedAction('target-roster','target-roster','Sales target employee roster',[date,rows,data?.version])
+ const prepared=usePreparedAction('target-roster','target-roster','Sales target employee roster',[date,rows,data?.version],dirty)
  usePrepareWorkStatus({id:'target-roster',phase:'service',label:'Sales target roster',dirty,busy:busy||!data&&!error,error,detail:prepared.queued?'Queued for release.':'Existing sales roster loaded.'})
  return <section className="task-card" aria-label="Sales target employees"><h2>Manage sales target employees</h2>{prepared.queued&&<p role="status">Roster queued for final release; not saved yet.</p>}
  <p>App accounts are optional. Save imported employees as they are, or add a name without an account. You can link an account later. Start time and scheduled duration describe the full shift. Only the overlap with dining hours counts toward sales targets; prep and closing duties remain on the schedule.</p>

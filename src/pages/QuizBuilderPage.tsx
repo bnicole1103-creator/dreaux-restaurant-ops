@@ -47,7 +47,7 @@ export function QuizBuilderPage({publishedView=false,initialDate,generatedDraft,
  const [generated,setGenerated]=useState<GeneratedQuiz|null>(null)
  const [loadFailed,setLoadFailed]=useState(false)
  const importedDraft=useRef<GeneratedQuiz|null>(null)
- const prepared=usePreparedAction('quiz:'+quizId,'quiz-editor','Quiz: '+title,[date,quizId,version,title,instructions,questions.map(({editorKey,...q})=>q),releaseAnswers])
+ const prepared=usePreparedAction('quiz:'+quizId,'quiz-editor','Quiz: '+title,[date,quizId,version,title,instructions,questions.map(({editorKey,...q})=>q),releaseAnswers],dirty)
  usePrepareWorkStatus({id:'quiz-editor',phase:'quizzes',label:'Quiz editor',dirty,busy,error,detail:quizId&&version>0?(published?'Published quiz loaded or saved.':'Quiz draft saved; not published.'):'No quiz saved from this editor yet.'})
  useEffect(()=>{onStateChange?.({dirty,busy})},[dirty,busy])
  useEffect(()=>{
