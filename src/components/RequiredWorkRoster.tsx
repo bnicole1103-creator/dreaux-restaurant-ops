@@ -1,3 +1,5 @@
+import { workingPositionKey } from '../lib/workingPositions'
+import { WorkingPositionSelect } from './WorkingPositionSelect'
 import {TimeInput12} from './TimeInput12'
 import { TeamProfileName } from './TeamProfileName'
 import { useEffect, useState } from 'react'
@@ -12,7 +14,7 @@ type Draft = Omit<Row, 'start_at' | 'end_at'> & { start: string; end: string }
 function initial(data: Data): Draft[] {
  const rows = data.confirmed_at ? data.shifts : (data.schedule?.rows ?? []).filter(s => s.assigned).map(s => ({
   shift_key: s.id, user_id: data.staff.find(p => p.employee_key === s.employee_key)?.id ?? '', start_at: s.start, end_at: s.end,
-  role_name: s.role, requires_closeout: /server|bartender/i.test(s.role)
+  role_name: s.role, requires_closeout: ['server','bartender'].includes(workingPositionKey(s.role))
  }))
  return rows.map(s => ({ ...s, start: localTime(s.start_at), end: localTime(s.end_at) }))
 }
@@ -49,14 +51,14 @@ export function RequiredWorkRoster({ location, day, data, onSaved }: { location:
    </select></label>
    <button type="button" disabled={!adding} onClick={() => {
     const person = data.staff.find(p => p.id === adding); if (!person) return
-    setRows(v => [...v, { shift_key: 'manual:'+crypto.randomUUID(), user_id: person.id, start: '16:00', end: '23:00', role_name: person.role, requires_closeout: /server|bartender/i.test(person.role) }]);
+    setRows(v => [...v, { shift_key: 'manual:'+crypto.randomUUID(), user_id: person.id, start: '16:00', end: '23:00', role_name: person.role, requires_closeout: ['server','bartender'].includes(workingPositionKey(person.role)) }]);
     setAdding(''); setDirty(true); setMessage('')
    }}>Add to roster</button>
    {rows.map((r,index) => <article key={r.shift_key} className="task-card" aria-label={'Roster shift '+(index+1)}>
     <label>Team member <select value={r.user_id} onChange={e => change(r.shift_key, {user_id: e.target.value})}>
      <option value="">Choose the app account</option>{data.staff.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
     </select></label>
-    <p><TeamProfileName locationId={location} userId={r.user_id} name={data.staff.find(p=>p.id===r.user_id)?.name??'Choose employee'}/></p><label>Position <input value={r.role_name} maxLength={100} onChange={e => change(r.shift_key,{role_name:e.target.value})}/></label>
+    <p><TeamProfileName locationId={location} userId={r.user_id} name={data.staff.find(p=>p.id===r.user_id)?.name??'Choose employee'}/></p><label>Position <WorkingPositionSelect value={r.role_name} onChange={role_name=>change(r.shift_key,{role_name,requires_closeout:['server','bartender'].includes(workingPositionKey(role_name))})}/></label>
     <div style={{display:'flex',flexWrap:'wrap',gap:16}}>
      <label>Start time <TimeInput12  value={r.start} onChange={e => change(r.shift_key,{start:e.target.value})}/></label>
      <label>End time <TimeInput12  value={r.end} onChange={e => change(r.shift_key,{end:e.target.value})}/></label>

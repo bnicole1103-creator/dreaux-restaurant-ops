@@ -1,3 +1,4 @@
+import { WorkingPositionSelect } from './WorkingPositionSelect'
 import {usePrepareWorkStatus} from './PrepareWorkStatus'
 import {usePreparedAction} from './PrepareRelease'
 import {TimeInput12} from './TimeInput12'
@@ -45,7 +46,7 @@ const r=await supabase.rpc('sales_target_roster_save',{p_location_id:location,p_
  {rows.map((r,i)=><article className="task-card" key={r.id} aria-label={'Sales shift '+(i+1)}><strong>{r.user_id?<TeamProfileName userId={r.user_id} locationId={location} name={r.name}/>:r.name||'Employee without an account'}</strong><div className="sales-target-fields">
  <label>App account (optional)<select value={r.user_id} onChange={e=>account(r,e.target.value)}><option value="">No app account — save without linking</option>{data.employees.map(p=><option key={p.id} value={p.id}>{p.name}</option>)}</select></label>
  {!r.user_id&&<label>Employee name<input maxLength={200} value={r.name} onChange={e=>change(r.id,{name:e.target.value})}/></label>}
- <label>Position<input value={r.role} maxLength={100} onChange={e=>change(r.id,{role:e.target.value})}/></label>
+ <label>Position<WorkingPositionSelect value={r.role} onChange={role=>change(r.id,{role,group:shiftGroup({id:r.id,role} as SalesShift,{overrides:{},settings:{role_groups:data.role_groups}} as TargetInputs)})}/></label>
  <label>Pool<select value={r.group} onChange={e=>change(r.id,{group:e.target.value as TargetGroup})}><option value="bar">Bar</option><option value="floor">Floor</option><option value="exclude">Exclude</option></select></label>
  <label>Start time (Central)<TimeInput12  value={r.start_time} onChange={e=>change(r.id,{start_time:e.target.value})}/></label>
  <label>Scheduled duration (hours)<input type="number" min="0.01" max="24" step="0.01" value={r.hours} onChange={e=>change(r.id,{hours:e.target.value})}/></label></div>
