@@ -1,3 +1,4 @@
+import { bookingSeating } from '../lib/bookingSeating'
 import {useEffect,useRef,useState} from 'react'
 import {readConfirmation,createStaffConfirmationLink} from '../lib/confirmationSummary'
 import {watchGuestRefresh} from '../lib/guestContact'
@@ -17,13 +18,14 @@ export function ReservationConfirmationActions({location,reservationId,status,in
   refresh();const stop=watchGuestRefresh(()=>{if(host.current?.getClientRects().length)refresh()},location);return()=>{live=false;sequence++;stop()}
  },[location,reservationId,revision])
  useEffect(()=>{setLink('');setDialog(initiallyOpen);setActionError('')},[location,reservationId,initiallyOpen])
+ const [seating,setSeating]=useState('')
  const active=!['cancelled','canceled','removed','expired','no_show','completed','departed','seated'].includes((status??'').toLowerCase())
  async function generate(){
   if(lock.current)return
   lock.current=true;setBusy(true);setActionError('');setDialog(true)
   const key=identity.current
   try{
-   {const r=await createStaffConfirmationLink(reservationId);if(r.error)throw Error(r.error.message);if(!r.data?.token)throw Error('Confirmation link was not returned.');if(identity.current!==key)return;setLink(confirmationOrigin+'/reservation-confirmation#token='+r.data.token);setRevision(v=>v+1);notifyReservationsChanged()}
+   {const r=await createStaffConfirmationLink(reservationId);if(r.error)throw Error(r.error.message);if(!r.data?.token)throw Error('Confirmation link was not returned.');const area=await bookingSeating(location,reservationId).catch(()=>'');if(identity.current!==key)return;setSeating(area);setLink(confirmationOrigin+'/reservation-confirmation#token='+r.data.token);setRevision(v=>v+1);notifyReservationsChanged()}
   }catch(e){if(identity.current===key)setActionError(String((e as Error).message??e))}finally{lock.current=false;if(identity.current===key)setBusy(false)}
  }
  return <span ref={host} className="reservation-confirmation-actions">
@@ -37,7 +39,7 @@ export function ReservationConfirmationActions({location,reservationId,status,in
    <button type="button" disabled={busy||!loaded} onClick={()=>void generate()}>{busy?'Generating…':link?'Generate replacement link':'Generate link'}</button>
    {!loaded&&<p role="status">{error||'Loading confirmation status…'}{error&&<button type="button" onClick={()=>setRevision(v=>v+1)}>Retry</button>}</p>}
    {busy&&<p role="status">Preparing confirmation link…</p>}{actionError&&<p role="alert">{actionError}</p>}
-   {!busy&&!actionError&&link&&<><ReservationMessagesButton key={link} location={location} reservationId={reservationId} message={confirmationInvitation(link)}/><label>Confirmation message<textarea readOnly rows={6} value={confirmationInvitation(link)}/></label><p>Review the message and press Send in Messages. Opening a draft does not mark it sent or confirmed.</p></>}
+   {!busy&&!actionError&&link&&<><ReservationMessagesButton key={link} location={location} reservationId={reservationId} message={confirmationInvitation(link,seating)}/><label>Confirmation message<textarea readOnly rows={6} value={confirmationInvitation(link,seating)}/></label><p>Review the message and press Send in Messages. Opening a draft does not mark it sent or confirmed.</p></>}
   </TaskDialog>}
  </span>
 }
