@@ -1,12 +1,72 @@
-import {useEffect,useState} from 'react'
-import {supabase} from '../lib/supabase'
-import {serviceDay} from '../lib/serviceDay'
-type Access={manager:boolean;permissions:{day:string;apply_points:boolean}[];staff:{id:string;name:string}[]}
-export function PastCloseoutControls({location,day,disabled,onDay,onPolicy}:{location:string;day:string;disabled:boolean;onDay:(day:string)=>void;onPolicy:(apply:boolean|null,reason:string)=>void}){
- const [access,setAccess]=useState<Access|null>(null),[error,setError]=useState(''),[notice,setNotice]=useState(''),[apply,setApply]=useState(true),[reason,setReason]=useState(''),[user,setUser]=useState(''),[busy,setBusy]=useState(false),[refresh,setRefresh]=useState(0)
- const today=serviceDay(),past=day<today,permission=access?.permissions.find(p=>p.day===day)
- useEffect(()=>{let live=true;setAccess(null);setError('');if(location)void supabase.rpc('operations_closeout_access',{p_location_id:location}).then(r=>{if(!live)return;if(r.error)setError(r.error.message);else setAccess(r.data)});return()=>{live=false}},[location,refresh])
- useEffect(()=>{onPolicy(past?(access?.manager?apply:permission?.apply_points??null):null,reason)},[past,access,apply,permission?.apply_points,reason,onPolicy])
- async function permit(active:boolean){if(busy)return;setBusy(true);setError('');setNotice('');try{const r=await supabase.rpc('operations_closeout_date_permission',{p_location_id:location,p_day:day,p_apply_points:apply,p_reason:reason.trim(),p_active:active});if(r.error)throw r.error;setNotice(active?'Past-date submissions allowed for staff on this service date.':'Past-date permissions revoked for staff on this service date.');setRefresh(v=>v+1)}catch(e){setError(String((e as Error).message??e))}finally{setBusy(false)}}
- return <section className="card" aria-label="Closeout service date"><label>Service date<input type="date" max={today} value={day} disabled={disabled||busy} onChange={e=>{if(e.target.value)onDay(e.target.value)}}/></label><p>The service day rolls over at 4 AM Central. Actual submission time is always recorded.</p>{error&&<p role="alert">{error}</p>}{notice&&<p role="status">{notice}</p>}{past&&<>{!access&&<p>Loading past-date permission…</p>}{access?.manager?<><label><input type="checkbox" checked={apply} disabled={disabled||busy} onChange={e=>setApply(e.target.checked)}/>Apply closeout points and credit the matching missing-closeout requirement</label><label>Reason for past-date submission / permission<textarea maxLength={1000} value={reason} disabled={disabled||busy} onChange={e=>setReason(e.target.value)}/></label><details open><summary>Allow staff submissions for this date</summary><p>Applies to the staff listed by the existing closeout permission service. No employee selection is required. Staff submit their own closeouts against the original service date; existing submitted records are not reopened.</p><button type="button" disabled={disabled||busy||reason.trim().length<3} onClick={()=>void permit(true)}>Allow staff submissions for this date</button><button type="button" disabled={disabled||busy||reason.trim().length<3} onClick={()=>void permit(false)}>Revoke date permissions</button></details></>:permission?<p>Manager-approved past-date submission · {permission.apply_points?'points apply':'no point changes'}.</p>:access&&<p role="alert">A manager must allow submissions for this date before you can submit.</p>}<p>{(access?.manager?apply:permission?.apply_points)?'Standard closeout scoring applies. A matching missing-closeout deduction is cleared.':'No closeout points are added or deducted. Existing missed-closeout deductions remain unchanged.'}</p></>}</section>
+import { useRef, useState } from 'react'
+import { supabase } from '../lib/supabase'
+import { closeoutDate } from '../lib/closeoutNavigation'
+import { usePastCloseoutAccess } from '../lib/pastCloseoutAccess'
+import { serviceDateLabel } from '../lib/serviceDay'
+import { useManagementAccess } from './ManagementAccess'
+
+export function PastCloseoutControls({location,today,initialDay}:{location:string;today:string;initialDay:string}){
+ const management=useManagementAccess()
+ const [open,setOpen]=useState(false)
+ const {access,error:accessError,loading}=usePastCloseoutAccess(open?location:'')
+ const [day,setDay]=useState(initialDay<today?initialDay:'')
+ const [apply,setApply]=useState(true)
+ const [reason,setReason]=useState('')
+ const [error,setError]=useState('')
+ const [notice,setNotice]=useState('')
+ const [busy,setBusy]=useState(false)
+ const lock=useRef(false)
+ const lastPastDay=new Date(today+'T12:00:00Z')
+ lastPastDay.setUTCDate(lastPastDay.getUTCDate()-1)
+ const latestDate=lastPastDay.toISOString().slice(0,10)
+
+ async function permit(active:boolean){
+  if(lock.current||!access?.manager)return
+  setError('')
+  setNotice('')
+  if(!closeoutDate(day,latestDate)){setError('Choose a past service date.');return}
+  if(reason.trim().length<3){setError('Enter a brief reason for this approval or revocation.');return}
+  lock.current=true
+  setBusy(true)
+  try{
+   const result=await supabase.rpc('operations_closeout_date_permission',{
+    p_location_id:location,p_day:day,p_apply_points:apply,p_reason:reason.trim(),p_active:active,
+   }).abortSignal(AbortSignal.timeout(25000))
+   if(result.error)throw result.error
+   const staff=Number(result.data?.staff_permissions_updated??0)
+   const date=serviceDateLabel(day)
+   setNotice(active
+    ? `${date} opened for ${staff} staff account${staff===1?'':'s'}. Staff can choose this date under Closeout.`
+    : `Staff submissions are closed for ${date}.`)
+   setReason('')
+   window.dispatchEvent(new Event('past-closeout-access-changed'))
+  }catch(caught){
+   setError(String((caught as Error).message??caught))
+  }finally{
+   lock.current=false
+   setBusy(false)
+  }
+ }
+
+ if(!management.manager)return null
+ return <section className="page closeout-summary-toolbar" aria-label="Past-date staff closeouts">
+  <details onToggle={event=>setOpen(event.currentTarget.open)}>
+   <summary>Open a past-date closeout</summary>
+   {loading&&<p role="status">Loading approval access…</p>}
+   {accessError&&<p role="alert">Approval access could not load. {accessError}</p>}
+   {access&&!access.manager&&<p role="alert">Management closeout approval access is required.</p>}
+   {access?.manager&&<fieldset disabled={busy}>
+    <label>Past service date<input type="date" max={latestDate} value={day}
+     onChange={event=>{setDay(event.target.value);setError('');setNotice('')}}/></label>
+    <label><input type="checkbox" checked={apply} onChange={event=>setApply(event.target.checked)}/>
+     Apply closeout points and clear the matching missing-closeout deduction</label>
+    <label>Reason<textarea required minLength={3} maxLength={1000} rows={2} value={reason}
+     onChange={event=>setReason(event.target.value)} placeholder="Why are staff submitting late?"/></label>
+    <button type="button" className="primary-button" onClick={()=>void permit(true)}>Allow staff submissions</button>
+    <button type="button" onClick={()=>void permit(false)}>Revoke date permissions</button>
+   </fieldset>}
+   {notice&&<p role="status">{notice}</p>}
+   {error&&<p role="alert">{error}</p>}
+  </details>
+ </section>
 }

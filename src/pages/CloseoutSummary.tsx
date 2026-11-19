@@ -1,3 +1,4 @@
+import { PastCloseoutControls } from '../components/PastCloseoutControls'
 import {displayReportTime} from '../lib/time12'
 import {ManagerCashDaySummary} from '../components/ManagerCashDaySummary'
 import {SummaryDisclosure} from '../components/SummaryDisclosure'
@@ -1250,6 +1251,7 @@ export function CloseoutSummaryPage() {
   <div className="page closeout-summary-toolbar" aria-label="Closeout summary navigation"><strong>{serviceDateLabel(selectedDate)}</strong>{selectedDate!==day&&<button type="button" onClick={()=>choose(day)}>Back to today</button>}<button type="button" onClick={reload}>Refresh closeouts</button>
    <details className="closeout-archive-picker" ref={archivePicker}><summary>Archives{selectedDate!==day?' · viewing '+serviceDateLabel(selectedDate):''}</summary><label>Archived service day<select aria-label="Archived service day" value={selectedDate<day?selectedDate:''} onChange={e=>choose(e.target.value)}><option value="">Today · {serviceDateLabel(day)}</option>{selectedDate<day&&!history.some(e=>e.day===selectedDate)&&<option value={selectedDate}>{serviceDateLabel(selectedDate)} · linked date</option>}{months.map(([month,entries])=><optgroup key={month} label={serviceDateLabel(month,true)}>{entries.map(e=><option key={e.day} value={e.day}>{serviceDateLabel(e.day)} · {e.staff_count!==undefined&&e.manager_count!==undefined?`${e.staff_count} staff / ${e.manager_count} manager`:`${e.count} closeouts`}</option>)}</optgroup>)}</select></label>{historyLoading&&<p role="status">Loading archives…</p>}{error&&<p role="alert">Archives could not load: {error}</p>}{!historyLoading&&!error&&!history.length&&<p>No previous closeouts returned.</p>}</details>
   </div>
+  <PastCloseoutControls key={location.id+':'+selectedDate} location={location.id} today={day} initialDay={selectedDate}/>
   <CloseoutDay key={location.id+':'+selectedDate} selectedDate={selectedDate} current={selectedDate===day} focusId={focusId} managerFocusId={managerFocusId} refresh={refresh} locationId={location.id} locationName={location.name} onDeleted={reload}/>
  </>
 }
