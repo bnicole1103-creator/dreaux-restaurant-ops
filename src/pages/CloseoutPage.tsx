@@ -1,11 +1,10 @@
+import { approvedCloseoutDays, usePastCloseoutAccess } from '../lib/pastCloseoutAccess'
 import { shiftClock } from '../lib/calendarDates'
-import {OperationsAssistant} from '../components/OperationsAssistant'
 import {TimeInput12} from '../components/TimeInput12'
 import {CloseoutSection} from '../components/CloseoutSection'
 import { CloseoutReceiptWallet, ReceiptSubmissionLog, useReceiptDraft } from '../components/CloseoutReceiptWallet'
 import { summarizeCloseoutReceipts, type CloseoutReceipt } from '../lib/closeoutReceipts'
 import {DesignSection} from '../components/DesignSection'
-import {PastCloseoutControls} from '../components/PastCloseoutControls'
 import {closeoutErrorMessage} from '../lib/closeoutError'
 import { CloseoutStockQuestion } from '../components/CloseoutStockQuestion'
 import { closeoutStockItems } from '../lib/stockItems'
@@ -13,7 +12,7 @@ import { closeoutStockItems } from '../lib/stockItems'
 import { PageWord } from "../components/PageDesign"
 import './QuickCloseout.css'
 import { quickCloseoutIssues, roleFromSchedule, centralTime, type QuickShift } from '../lib/quickCloseout'
-import { serviceDay } from '../lib/serviceDay'
+import { serviceDay, serviceDateLabel } from '../lib/serviceDay'
 import { ScreenText } from "../components/ScreenText"
 import {focusCloseoutIssue} from '../lib/closeoutFocus'
 import { closeoutHours } from '../lib/closeoutHours'
@@ -22,7 +21,7 @@ import { submissionLabel } from '../lib/submissionTime'
 import { Link } from 'react-router-dom'
 import { CloseoutQuestions, useCloseoutConfig, checkAnswers, questionLabel, questionActive } from '../components/CloseoutConfig'
 import type { Answers } from '../components/CloseoutConfig'
-import { useEffect, useMemo, useState , useRef, useCallback } from 'react'
+import { useEffect, useMemo, useState, useRef } from 'react'
 import { supabase } from '../lib/supabase'
 import { loadTenantData } from '../lib/tenant'
 
@@ -359,8 +358,14 @@ export function CloseoutPage() {
     useState('')
 
   const [closeoutDay,setCloseoutDay] = useState(serviceDay)
-  const [datePinned,setDatePinned]=useState(true),[pastPoints,setPastPoints]=useState<boolean|null>(null),[pastReason,setPastReason]=useState('')
-  const pastPolicy=useCallback((apply:boolean|null,reason:string)=>{setPastPoints(apply);setPastReason(reason)},[])
+  const today=serviceDay()
+  const {access:lateAccess,error:lateError}=usePastCloseoutAccess(locationId)
+  const approvedDates=approvedCloseoutDays(lateAccess,today)
+  const past=closeoutDay<today
+  const permission=approvedDates.find(entry=>entry.day===closeoutDay)
+  const pastPoints=past?permission?.apply_points??null:null
+  const pastReason=past&&permission&&lateAccess?.manager?permission.reason||'Approved past-date submission':''
+
   const receiptDraft=useReceiptDraft(locationId,closeoutDay)
   const closeoutRequest=useRef('')
   closeoutRequest.current=receiptDraft.key
@@ -837,7 +842,6 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
       receiptRows,
     ])
 
-  useEffect(()=>{const timer=window.setInterval(()=>{if(!datePinned)setCloseoutDay(serviceDay())},30000);return()=>clearInterval(timer)},[datePinned])
   useEffect(()=>{
     let live=true;setSalesTarget('0')
     if(!locationId||!scheduledTime){setTargetState({loading:false,ready:false,reason:'Enter your scheduled start and role to load your target.'});return}
@@ -906,6 +910,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
       setSaving(true)
       setError('')
       setMessage('')
+      if(past&&!permission){setError('Ask management to open this date in Summary before submitting.');return}
       const failures=currentIssues()
       setIssues(failures)
       if(failures.length){setShiftOpen(failures.some(x=>x.field==='shift'));setReportOpen(failures.some(x=>x.field==='report'));focusCloseoutIssue(failures[0]);return}
@@ -1094,7 +1099,7 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
     }
   }
 
-  function changeServiceDay(day:string){if(day===closeoutDay||saving)return;if(!window.confirm('Change the service date and clear this unsaved closeout?'))return;resetForm();setFloorShiftId('');setFloorTablesNotice('');setReceiptRows([]);setSubmittedReceiptKey('');setCloseoutDay(day);setDatePinned(true);setError('');setMessage('')}
+  function changeServiceDay(day:string){if(day===closeoutDay||saving)return;if(!window.confirm('Change the service date and clear this unsaved closeout?'))return;resetForm();setFloorShiftId('');setFloorTablesNotice('');setReceiptRows([]);setSubmittedReceiptKey('');setCloseoutDay(day);setError('');setMessage('')}
 
   const draftKey=ownerId&&locationId&&receiptDraft.key?'justinis.quick-closeout.v1.'+ownerId+'.'+locationId+'.'+closeoutDay+'.'+receiptDraft.key:''
   useEffect(()=>{
@@ -1155,11 +1160,16 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
   if(loading)return <section className="page closeout-mobile"><h1>Staff closeout</h1><p role="status">Loading your closeout…</p></section>
   return <DesignSection as="section" data-design-block="closeout.quick.page" className="page closeout-mobile quick-closeout">
     <header><p>{locationName} · {closeoutDay}</p><h1>Finish my shift</h1><p>Enter your times and totals, add any receipts, then submit. Missing details will open automatically.</p><small role="status">{draftStatus}</small></header>
-    {closeoutDay!==serviceDay()&&<p role="status">You are closing out {closeoutDay}. Today’s service date is {serviceDay()}.</p>}
+    {(approvedDates.length>0||past)&&<label>Service date<select value={closeoutDay} disabled={saving} onChange={event=>changeServiceDay(event.target.value)}>
+      <option value={today}>Today · {serviceDateLabel(today)}</option>
+      {past&&!permission&&<option value={closeoutDay} disabled>{serviceDateLabel(closeoutDay)} · approval required</option>}
+      {approvedDates.map(entry=><option key={entry.day} value={entry.day}>{serviceDateLabel(entry.day)} · approved</option>)}
+    </select></label>}
+    {past&&!permission&&<p role="status">{lateError?'Approval status could not load. Reopen Closeout to check again.':'Ask management to open this date in Summary.'}</p>}
+
     {message&&<p className="quick-success" role="status">{message}</p>}
     {error&&<p role="alert" className="quick-field-error">{error}</p>}
     {visibleIssues.length>0&&<section id="closeout-errors" tabIndex={-1} role="alert" className="quick-errors"><h2>Finish these before submitting</h2><ul>{visibleIssues.map(x=><li key={x.message}><a href={'#quick-'+x.field} onClick={e=>{e.preventDefault();if(x.field==='shift')setShiftOpen(true);if(x.field==='report')setReportOpen(true);focusCloseoutIssue(x)}}>{x.message}</a></li>)}</ul></section>}
-    <OperationsAssistant location={locationId} day={closeoutDay} kind="closeout" disabled={saving} snapshot={{source:"Unsaved closeout draft",missing:visibleIssues.map(issue=>issue.message),net_sales:netSales,cash_deposit:cashDeposit,role:jobRole}}/>
     <fieldset disabled={saving} className="quick-fields">
     <DesignSection as="section" data-design-block="closeout.quick.shift" className="card" id="quick-shift">
       <CloseoutSection title="1. Your shift" initialOpen><p><strong>{ROLE_LABELS[jobRole]}</strong> · {scheduledTime||'Start needed'}{clockOutTime?' – '+clockOutTime:''}</p>
@@ -1175,7 +1185,6 @@ const [registerVerifiedBy, setRegisterVerifiedBy] =
         {closeoutHours(clockInTime,clockOutTime)!==null&&<p>{closeoutHours(clockInTime,clockOutTime)!.toFixed(2)} hours · after-midnight end times count toward this shift.</p>}
         {!targetState.ready&&<p role="status">Target unavailable: {targetState.reason} No sales-target points are estimated without a target.</p>}<button type="button" disabled={targetState.loading} onClick={()=>setTargetRefresh(v=>v+1)}>Refresh target</button>
         <div className="closeout-question-group"><h3>Tables worked · {selectedTables.length}</h3><p>{floorTablesNotice}</p><label>Floor shift (optional)<select value={floorShiftId} onChange={e=>setFloorShiftId(e.target.value)}><option value="">All my assignments this day</option>{floorShifts.map(s=><option key={s.id} value={s.id}>{s.shift_name}</option>)}</select></label><button type="button" onClick={()=>{touched.current.tables=true;void pullFloorTables()}}>Reload my Floor tables</button>{Object.entries(groupedTables).map(([room,rows])=><div key={room}><h3>{room}</h3><div className="closeout-table-grid">{rows.map(t=><button type="button" key={t.id} aria-pressed={selectedTableIds.includes(t.id)} className={'table-select-button'+(selectedTableIds.includes(t.id)?' selected':'')} onClick={()=>{touched.current.tables=true;toggleTable(t.id)}}>{t.table_name}</button>)}</div></div>)}</div>
-        <div className="closeout-question-group"><h3>Different service date / approved past closeout</h3><PastCloseoutControls location={locationId} day={closeoutDay} disabled={saving} onDay={changeServiceDay} onPolicy={pastPolicy}/></div>
       </div>{fieldError('shift')}
     </CloseoutSection></DesignSection>
     <DesignSection as="section" data-design-block="closeout.quick.totals" className="card" id="quick-totals">
