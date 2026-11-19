@@ -8,3 +8,10 @@
 .sales-target-table table { width: 100%; border-collapse: collapse; }
 .sales-target-table th,.sales-target-table td { padding: 8px; text-align: left; }
 @media(max-width:650px){.sales-history-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }.sales-shift-row { grid-template-columns: 1fr 1fr; }.sales-shift-row > strong { grid-column: 1 / -1; }}
+
+.sales-allocation-person{display:grid;grid-template-columns:minmax(120px,1fr) minmax(0,4fr);gap:10px;align-items:center;border-top:1px solid var(--app-border);padding:8px 0}
+.sales-allocation-person>.task-card{margin:0;padding:0;border:0;background:transparent;grid-column:2}
+.sales-allocation-controls{display:flex;align-items:center;flex-wrap:wrap;gap:8px 14px}
+.sales-allocation-controls label{display:flex;align-items:center;gap:6px;margin:0}
+.sales-allocation-controls input[type=number]{width:75px}
+@media(max-width:620px){.sales-allocation-person{display:block}.sales-allocation-person>.task-card{margin-top:6px}}

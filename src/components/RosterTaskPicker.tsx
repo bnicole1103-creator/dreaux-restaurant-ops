@@ -1,4 +1,54 @@
-import {useEffect,useState} from 'react'
-import {supabase} from '../lib/supabase'
-type Pick={id:string;version:number}
-export function RosterTaskPicker({location,options,value,onChange}:{location:string;options:{id:string;title:string;version:number}[];value:Pick[];onChange:(v:Pick[])=>void}){const [query,setQuery]=useState(''),[preview,setPreview]=useState<Record<string,string[]>>({}),[error,setError]=useState('');useEffect(()=>{let live=true;void Promise.resolve(supabase.rpc('staff_tasks_templates',{p_location_id:location})).then(r=>{if(!live)return;if(r.error)setError('Task previews unavailable: '+r.error.message);else setPreview(Object.fromEntries((r.data??[]).map((t:{id:string;items:string[]})=>[t.id,t.items])))}).catch(e=>{if(live)setError('Task previews unavailable: '+String(e.message??e))});return()=>{live=false}},[location]);return <details><summary>Task lists · {value.length?value.length+' selected':'Choose lists (optional)'}</summary><label>Find a task list<input value={query} onChange={e=>setQuery(e.target.value)}/></label>{error&&<p role="alert">{error}</p>}<div style={{maxHeight:320,overflowY:'auto',display:'grid',gap:8}}>{options.filter(t=>t.title.toLowerCase().includes(query.toLowerCase())).map(t=><div key={t.id}><label style={{display:'flex',gap:8,alignItems:'start'}}><input type="checkbox" checked={value.some(v=>v.id===t.id)} onChange={e=>onChange(e.target.checked?[...value,{id:t.id,version:t.version}]:value.filter(v=>v.id!==t.id))}/>{t.title}</label><details><summary>Preview tasks</summary>{preview[t.id]?<ol>{preview[t.id].map((item,i)=><li key={i}>{item}</li>)}</ol>:<p>Preview unavailable.</p>}</details></div>)}</div><p>Optional. Multiple lists may be selected. Shared lists for overlapping shifts retain the existing task-splitting rules.</p></details>}
+import { useEffect, useState } from 'react'
+import { supabase } from '../lib/supabase'
+import { taskPositionMatches } from '../lib/workingPositions'
+
+type Pick = { id:string; version:number }
+type Template = { id:string; items:string[]; position:string }
+
+export function RosterTaskPicker({ location, position, options, value, onChange }: {
+  location:string
+  position:string
+  options:{ id:string;title:string;version:number }[]
+  value:Pick[]
+  onChange:(value:Pick[])=>void
+}) {
+  const [query,setQuery]=useState('')
+  const [templates,setTemplates]=useState<Record<string,Template>>({})
+  const [showOther,setShowOther]=useState(false)
+  const [error,setError]=useState('')
+  useEffect(()=>{
+    let live=true
+    void Promise.resolve(supabase.rpc('staff_tasks_templates',{p_location_id:location})).then(result=>{
+      if(!live)return
+      if(result.error)throw result.error
+      setTemplates(Object.fromEntries((result.data??[]).map((template:Template)=>[template.id,template])))
+    }).catch(caught=>{if(live)setError('Task previews unavailable: '+String(caught.message??caught))})
+    return()=>{live=false}
+  },[location])
+
+  const selected=new Set(value.map(item=>item.id))
+  const visible=options.filter(option=>{
+    const template=templates[option.id]
+    return option.title.toLowerCase().includes(query.trim().toLowerCase())
+      && (showOther||selected.has(option.id)||!template||taskPositionMatches(template.position,position))
+  })
+  return <details>
+    <summary>Task lists · {value.length?value.length+' selected':'Choose lists (optional)'}</summary>
+    <label>Find a task list<input value={query} onChange={event=>setQuery(event.target.value)}/></label>
+    <label><input type="checkbox" checked={showOther} onChange={event=>setShowOther(event.target.checked)}/>Show lists for other positions</label>
+    {error&&<p role="alert">{error}</p>}
+    {!visible.length&&<p>No matching lists. Change the search or show other positions.</p>}
+    <div style={{maxHeight:320,overflowY:'auto',display:'grid',gap:8}}>
+      {visible.map(option=><div key={option.id}>
+        <label style={{display:'flex',gap:8,alignItems:'start'}}>
+          <input type="checkbox" checked={selected.has(option.id)}
+            onChange={event=>onChange(event.target.checked?[...value,{id:option.id,version:option.version}]:value.filter(item=>item.id!==option.id))}/>
+          {option.title}
+        </label>
+        <details><summary>Preview tasks</summary>
+          {templates[option.id]?<ol>{templates[option.id].items.map((item,index)=><li key={index}>{item}</li>)}</ol>:<p>Preview unavailable.</p>}
+        </details>
+      </div>)}
+    </div>
+  </details>
+}
