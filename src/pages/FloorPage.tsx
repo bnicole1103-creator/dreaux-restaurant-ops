@@ -14,7 +14,6 @@ import {ReservationCapacityPlanner} from '../components/ReservationCapacityPlann
 // reservation-capacity-planner-v1
 import './FloorCompactCards.css'
 import '../components/FloorCompactStatus.css'
-import {ReservationInquiryPage} from './ReservationInquiryPage'
 import {ReservationFileUpload} from '../components/ReservationFileUpload'
 import {reservationFilesImport} from '../lib/reservationCsv'
 import {ReservationGuestbook} from '../components/ReservationGuestbook'
@@ -178,7 +177,6 @@ export function FloorPage() {
   const [smartError,setSmartError]=useState('')
   const [floorNotice,setFloorNotice]=useState('')
   const [seatServerId,setSeatServerId]=useState('')
-  const [largePartyInquiry,setLargePartyInquiry]=useState(false)
   const [manualReservation,setManualReservation]=useState(false)
   const [organizationId, setOrganizationId] = useState('')
   const [locationId, setLocationId] = useState('')
@@ -1989,10 +1987,9 @@ const [partySize, setPartySize] = useState(1)
         </div>
       )}
 
-      {largePartyInquiry&&<FloorFloatingPanel title="Large party inquiry" open onClose={()=>{if(window.confirm('Close inquiry form? Save your inquiry first to keep entered details.'))setLargePartyInquiry(false)}}><ReservationInquiryPage largeParty initialDate={activeShift?.shift_date}/></FloorFloatingPanel>}
       {manualReservation&&<ManualReservation floating location={locationId} organization={organizationId} tables={tables} initialDate={activeShift?.shift_date??reservationToday()} onClose={()=>setManualReservation(false)} onSaved={message=>{setReservationUploadMessage(message);setSidebarReservationId('');setShowReservationsPanel(true);void loadReservations(locationId)}}/>}
       {showReservationsPanel && (
-        <AccessSection page="floor" section="reservations"><FloorFloatingPanel title={sidebarReservationId?'Reservation details':'Reservation tools & history'} open onClose={()=>{setShowReservationsPanel(false);setSidebarReservationId('')}}>{!sidebarReservationId&&<><div className="feed-actions"><button type="button" disabled={!locationId||!organizationId} onClick={()=>setManualReservation(true)}>+ Reservation</button>{floorAccess.can('guests','host')&&<button type="button" disabled={!locationId} onClick={()=>setLargePartyInquiry(true)}>+ Large Party Inquiry</button>}<ReservationFileUpload location={locationId} organization={organizationId} initialDate={activeShift?.shift_date??reservationToday()} onSaved={message=>{setReservationUploadMessage(message);void loadReservations(locationId)}}/></div><FutureReservations location={locationId} onChanged={()=>void loadReservations(locationId)}/>
+        <AccessSection page="floor" section="reservations"><FloorFloatingPanel title={sidebarReservationId?'Reservation details':'Reservation tools & history'} open onClose={()=>{setShowReservationsPanel(false);setSidebarReservationId('')}}>{!sidebarReservationId&&<><div className="feed-actions"><button type="button" disabled={!locationId||!organizationId} onClick={()=>setManualReservation(true)}>+ Reservation</button><ReservationFileUpload location={locationId} organization={organizationId} initialDate={activeShift?.shift_date??reservationToday()} onSaved={message=>{setReservationUploadMessage(message);void loadReservations(locationId)}}/></div><FutureReservations location={locationId} onChanged={()=>void loadReservations(locationId)}/>
             <ReservationGuestbook location={locationId}/></>}
             <p data-design-block="copy.b78f32efa3eeed28.3" className="eyebrow"><ScreenText id="FloorPage.58f3288ba914ecb7">Reservations</ScreenText></p>
             <AccessSection page="floor" section="reservations"><h2 data-design-block="copy.2e495f44a1c1f630.4"><ScreenText id="FloorPage.def1336055c8be14">Today's Reservations</ScreenText></h2></AccessSection>
