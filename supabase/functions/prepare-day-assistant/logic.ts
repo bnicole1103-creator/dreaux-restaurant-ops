@@ -34,6 +34,19 @@ export function contextFrom(data:Record<string,{data?:any;error?:any}>,day:strin
  else{arr(menu.data.items).filter((r:any)=>!r.archived).slice(0,80).forEach((r:any,i:number)=>add('menu_'+(i+1),`${String(r.data?.name||'Unnamed item').slice(0,160)}: ${r.data?.available===true?'available':r.data?.available===false?'unavailable':'availability not checked'}.`,'Menu catalog'));}
  return {facts,labels,checks};
 }
+export function reservationContext(rows:unknown,day:string):Context{
+ if(!Array.isArray(rows)||rows.length>500)throw Error('The booking list could not be verified or is too large to scan.');
+ const facts=rows.map((row,index)=>{
+  const rawTime=typeof row.reservation_time==='string'?row.reservation_time:'';
+  const time=/^([01]\d|2[0-3]):([0-5]\d)(?::[0-5]\d)?$/.exec(rawTime);
+  const hour=time?Number(time[1]):0;
+  const arrival=time?`${hour%12||12}:${time[2]} ${hour<12?'AM':'PM'} Central`:'Time unavailable';
+  const size=Number(row.party_size);
+  const party=Number.isInteger(size)&&size>0?`${size} guests`:'Party size unavailable';
+  return {id:'booking_'+(index+1),text:[day,arrival,party,row.birthday===true?'Birthday':'',row.vip===true?'VIP':''].filter(Boolean).join(' · '),source:'Saved day bookings'};
+ });
+ return {facts,labels:{},checks:[]};
+}
 const evidence={type:'array',items:{type:'string'}};
 const item={type:'object',additionalProperties:false,required:['text','evidence_ids'],properties:{text:{type:'string'},evidence_ids:evidence}};
 const schema={type:'object',additionalProperties:false,required:['summary','priorities','coaching','briefing','questions'],properties:{summary:{type:'string'},priorities:{type:'array',items:item},coaching:{type:'array',items:{type:'object',additionalProperties:false,required:['staff_key','text','evidence_ids'],properties:{staff_key:{type:'string'},text:{type:'string'},evidence_ids:evidence}}},briefing:{type:'object',additionalProperties:false,required:['title','body','evidence_ids'],properties:{title:{type:'string'},body:{type:'string'},evidence_ids:evidence}},questions:{type:'array',items:{type:'string'}}}};

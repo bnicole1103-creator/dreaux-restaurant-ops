@@ -1,4 +1,4 @@
-import {contextFrom,parseResult,requestBody,version} from './logic.ts';
+import {contextFrom,parseResult,requestBody,reservationContext,version} from './logic.ts';
 type Deps={client:(auth:string)=>any;env:(key:string)=>string|undefined;fetch:typeof fetch;now?:()=>Date};
 export function createHandler(deps:Deps){return async(req:Request)=>{
  const headers={'Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers':'authorization,x-client-info,apikey,content-type,x-retry-count,traceparent,tracestate,baggage','Access-Control-Allow-Methods':'POST,OPTIONS','Content-Type':'application/json'};
@@ -13,6 +13,24 @@ export function createHandler(deps:Deps){return async(req:Request)=>{
  const client=deps.client(auth),user=await client.auth.getUser();if(user.error||!user.data?.user)return send({error:'Sign in again before reviewing the day.'},401);
  const key=deps.env('OPENAI_API_KEY');if(!key)return send({error:'AI review is not configured. Ask management to finish AI setup.'},503);
  const claim=await client.rpc('prepare_day_assistant_claim',{p_location_id:location_id});if(claim.error)return send({error:claim.error.message},claim.error.code==='42501'?403:429);if(claim.data!==true)return send({error:'Management access required.'},403);
+ if(input.mode==='reservations'){
+  const rows=[];
+  for(let offset=0;;offset+=50){
+   const source=await client.rpc('reservation_management_search_v2',{p_location:location_id,p_day:date,p_query:'',p_offset:offset,p_include_history:false});
+   if(source.error||!Array.isArray(source.data?.reservations))throw Error('The day’s bookings could not be loaded.');
+   rows.push(...source.data.reservations.filter((row:any)=>row.reservation_date===date&&!['removed','expired','departed','no-show'].includes(String(row.status??'').trim().toLowerCase())));
+   if(!source.data.has_more)break;
+   if(offset>=450)throw Error('The booking list is too large to scan.');
+  }
+  const context=reservationContext(rows,date);
+  if(!context.facts.length)return send({mode:'reservations',service_date:date,notes:''});
+  const request=requestBody(deps.env('PREPARE_DAY_AI_MODEL')??deps.env('PRESHIFT_GENERATION_MODEL')??'gpt-4.1-mini',context,'');
+  request.instructions+=' For this reservations-only request, return a short briefing.body about booked party sizes, arrival clusters, VIP and birthday flags. No heading, names, table assignments, exact availability, other operating topics, or claims of guest special requests. Use empty priorities, coaching and questions arrays. Cite supplied booking IDs.';
+  const response=await deps.fetch('https://api.openai.com/v1/responses',{method:'POST',headers:{Authorization:'Bearer '+key,'Content-Type':'application/json'},body:JSON.stringify(request),signal:AbortSignal.timeout(35000)});
+  if(!response.ok)return send({error:'AI could not draft reservation notes. Try again.'},502);
+  const review=parseResult(await response.json(),context,'');
+  return send({mode:'reservations',service_date:date,notes:review.briefing.body});
+ }
  const requests=[['crew','prepare_day_assistant_roster',{p_location_id:location_id,p_day:date,p_rows:proposed_roster}],['targets','personal_sales_targets_load',{p_location_id:location_id,p_date:date}],['capacity','reservation_capacity_load',{p_location_id:location_id,p_day:date}],['menu','menu_catalog_load',{p_location_id:location_id}]] as const;
  const results=await Promise.all(requests.map(async([name,rpc,args])=>{let timer:any;try{const result=await Promise.race([client.rpc(rpc,args),new Promise((_,reject)=>{timer=setTimeout(()=>reject(Error('Source timed out')),15000)})]);return [name,result] as const;}catch{return [name,{error:'Source unavailable'}] as const;}finally{clearTimeout(timer)}}));
  const data=Object.fromEntries(results);if(data.crew.error)return send({error:'The roster could not be checked. Reload it or review your schedule access.'},400);
