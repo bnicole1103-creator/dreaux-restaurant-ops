@@ -271,6 +271,11 @@ export function FloorPage() {
     ...activePlans.map(p=>({id:p.id,configurationId:p.id,name:`${p.name} (scheduled)`,employeeId:p.employee_id,guestName:p.guest_name,tableIds:p.table_ids,totalSeats:p.table_ids.reduce((sum,id)=>sum+(tables.find(t=>t.id===id)?.seat_count??0),0)}))
   ],[baseSectionCards,activePlans,plannedTables,tables])
 
+  const [tableAssignmentDraft, setTableAssignmentDraft] = useState<{reservation: ReservationRecord; tableIds: string[]} | null>(null)
+  const [tableAssignmentSaving, setTableAssignmentSaving] = useState(false)
+  const [tableAssignmentError, setTableAssignmentError] = useState('')
+  const assignmentMapRef = useRef<HTMLElement>(null)
+
   const [activeRoomId, setActiveRoomId] = useState('')
 
   const [selectedTableIds, setSelectedTableIds] =
@@ -798,6 +803,45 @@ const [partySize, setPartySize] = useState(1)
     void Promise.resolve(supabase.rpc('reservation_capacity_load',{p_location_id:locationId,p_day:activeShift.shift_date})).then(r=>{if(!live)return;if(r.error){setSeatGroupError('Joined-table options could not load. Single-table suggestions remain available.');return}if(r.data?.configured&&Array.isArray(r.data.config?.joinGroups))setApprovedSeatGroups(r.data.config.joinGroups)}).catch(()=>{if(live)setSeatGroupError('Joined-table options could not load. Single-table suggestions remain available.')});return()=>{live=false}
   },[showSeatPanel,locationId,activeShift?.shift_date,reservationRevision])
   useEffect(()=>{const params=new URLSearchParams(seatingRoute.search),id=params.get('seatReservation');if(!id||!locationId||!shifts.length)return;const shift=shifts.find(s=>s.shift_date===reservationToday()&&s.status==='open');if(!shift){setError('Open today’s service on Floor before seating this reservation.');return}if(activeShiftId!==shift.id){setActiveShiftId(shift.id);return}const row=reservations.find(r=>r.id===id);if(!row)return;if(['cancelled','canceled','no_show','seated','completed'].includes(row.status)){setError('This reservation is not available for seating. Refresh or correct its status first.');return}beginReservationSeating(row);params.delete('seatReservation');window.history.replaceState(window.history.state,'',window.location.pathname+(params.size?'?'+params.toString():''))},[locationId,shifts,activeShiftId,reservations,seatingRoute.search])
+  function beginTableAssignment(reservation: ReservationRecord) {
+    const tableIds = reservation.table_ids?.length ? reservation.table_ids : reservation.table_id ? [reservation.table_id] : []
+    const firstTable = tables.find(table => table.id === tableIds[0])
+    setTableAssignmentError('')
+    setTableAssignmentDraft({reservation, tableIds})
+    if (firstTable) setActiveRoomId(firstTable.room_id)
+    assignmentMapRef.current?.focus()
+  }
+
+  const bookingAssignmentTables = tables.filter(table=>tableAssignmentDraft?.tableIds.includes(table.id))
+  const bookingAssignmentSeats = bookingAssignmentTables.reduce((count, table)=>count+table.seat_count, 0)
+
+  async function saveTableAssignment() {
+    if (!tableAssignmentDraft?.tableIds.length || tableAssignmentSaving || !floorAccess.can('floor','reservations')) return
+    const {reservation, tableIds} = tableAssignmentDraft
+    setTableAssignmentSaving(true)
+    setTableAssignmentError('')
+    try {
+      const {error} = await supabase.rpc('reservation_edit_tables', {
+        p_location_id: locationId,
+        p_reservation_id: reservation.id,
+        p_version: reservation.edit_version,
+        p_party_size: reservation.party_size,
+        p_table_ids: tableIds,
+        p_server_id: reservation.assigned_server_id,
+        p_notes: reservation.notes ?? '',
+      })
+      if (error) throw error
+      setTableAssignmentDraft(null)
+      setFloorNotice('Tables saved for ' + reservation.guest_name + '.')
+      notifyReservationsChanged()
+    } catch (error) {
+      setTableAssignmentError((error as Error).message)
+      void loadReservations(locationId)
+    } finally {
+      setTableAssignmentSaving(false)
+    }
+  }
+
   function toggleTable(tableId: string) {
     if (arrangeMode) return
 
@@ -1665,7 +1709,7 @@ const [partySize, setPartySize] = useState(1)
         {arrangeMode&&<button type="button" onClick={()=>setArrangeMode(false)}>Done arranging</button>}
       </nav>
       <FloorFloatingPanel title="Rooms & layout" open={floorView==='rooms'} onClose={()=>setFloorView('map')}><button type="button" disabled={!activeRoomId} onClick={()=>{setShowAddTablePanel(true);setFloorView('map')}}>+ Add table</button>
-        <button type="button" onClick={()=>{setArrangeMode(v=>!v);setSelectedTableIds([]);setFloorView('map')}}>{arrangeMode?'Done arranging tables':'Arrange tables on map'}</button>
+        <button type="button" disabled={!!tableAssignmentDraft} onClick={()=>{setArrangeMode(v=>!v);setSelectedTableIds([]);setFloorView('map')}}>{arrangeMode?'Done arranging tables':'Arrange tables on map'}</button>
         <p>Room order on this device. Use the arrows to rearrange the room tabs.</p>
         {rooms.map((room,i)=><div className="floor-room-order-row" key={room.id}><button type="button" onClick={()=>setActiveRoomId(room.id)} aria-pressed={activeRoomId===room.id}>{room.name}</button>{[-1,1].map(direction=><button key={direction} type="button" aria-label={`Move ${room.name} ${direction<0?'earlier':'later'}`} disabled={i+direction<0||i+direction>=rooms.length} onClick={()=>{const next=[...rooms];[next[i],next[i+direction]]=[next[i+direction],next[i]];setRooms(next);try{localStorage.setItem('floor-room-order:'+locationId,JSON.stringify(next.map(r=>r.id)))}catch{setFloorNotice('Room order changed for this session; device storage is unavailable.')}}}>{direction<0?'↑':'↓'}</button>)}</div>)}
       </FloorFloatingPanel>
@@ -1704,7 +1748,16 @@ const [partySize, setPartySize] = useState(1)
       )}
 
       <ServerWorkload servers={rotationServers} parties={activeSessions} name={memberName}/><div className="floor-map-and-guests">
-      <div className="floor-workspace-panel floor-map-workspace">
+      {floorAccess.can('floor','reservations')&&<FloorGuestSidebar location={locationId} day={reservationToday()} reservations={reservations} parties={activeSessions} tableName={id=>tables.find(t=>t.id===id)?.table_name??'Table unavailable'} serverName={memberName} busy={saving||!!tableAssignmentDraft} assignDisabled={arrangeMode||!!tableAssignmentDraft} assigningId={tableAssignmentDraft?.reservation.id} onAssign={id=>{const row=reservations.find(r=>r.id===id);if(row)beginTableAssignment(row)}} canSeat={activeShift?.status==='open'&&activeShift.shift_date===reservationToday()} onAdd={()=>setManualReservation(true)} onManage={()=>{setSidebarReservationId('');setShowReservationsPanel(true)}} onDetails={id=>{setSidebarReservationId(id);setShowReservationsPanel(true)}} onSeat={id=>{const r=reservations.find(r=>r.id===id);if(r)beginReservationSeating(r)}} onParty={id=>{const p=activeSessions.find(p=>p.id===id);if(!p)return;const ids=p.tableIds.length?p.tableIds:[p.primaryTableId];setSelectedTableIds(ids);const t=tables.find(t=>t.id===p.primaryTableId||t.id===ids[0]);if(t)setActiveRoomId(t.room_id);setShowTablePanel(true)}}/>}
+      <section className="floor-workspace-panel floor-map-workspace" aria-label="Floor map" tabIndex={-1} ref={assignmentMapRef}>
+        {tableAssignmentDraft && <div className="floor-booking-assignment">
+          <strong>Assign tables · {tableAssignmentDraft.reservation.guest_name} · {tableAssignmentDraft.reservation.party_size} guests</strong>
+          <p>Tap tables on the map, then save.</p>
+          <p role="status">{bookingAssignmentTables.length ? bookingAssignmentTables.map(table=>table.table_name).join(' + ') + ' · ' + bookingAssignmentSeats + ' seats' : 'No tables selected'}</p>
+          <button type="button" disabled={tableAssignmentSaving||!tableAssignmentDraft.tableIds.length} onClick={()=>void saveTableAssignment()}>{tableAssignmentSaving?'Saving…':'Save tables'}</button>
+          <button type="button" disabled={tableAssignmentSaving} onClick={()=>setTableAssignmentDraft(null)}>Cancel</button>
+          {tableAssignmentError && <p role="alert">{tableAssignmentError}</p>}
+        </div>}
       {arrangeMode && (
         <div data-design-block="copy.49af0c766e6ec77b.1"
           style={{
@@ -1763,10 +1816,7 @@ const [partySize, setPartySize] = useState(1)
         }
       >
         {activeTables.map((table) => {
-          const selected =
-            selectedTableIds.includes(
-              table.id,
-            )
+          const selected = (tableAssignmentDraft?.tableIds ?? selectedTableIds).includes(table.id)
 
           const assignedServer =
             tableServer(table.id)
@@ -1813,9 +1863,20 @@ const [partySize, setPartySize] = useState(1)
                     ? 0.7
                     : undefined,
               }}
-              onClick={() =>
-                (suppressTableClick.current?undefined:toggleTable(table.id))
-              }
+              disabled={tableAssignmentSaving}
+              onClick={() => {
+                if (suppressTableClick.current) return
+                if (!tableAssignmentDraft) {
+                  toggleTable(table.id)
+                  return
+                }
+                setTableAssignmentDraft(draft=>draft && ({
+                  ...draft,
+                  tableIds: draft.tableIds.includes(table.id)
+                    ? draft.tableIds.filter(id=>id!==table.id)
+                    : [...draft.tableIds, table.id],
+                }))
+              }}
               onPointerDown={(event) =>
                 handleTablePointerDown(
                   event,
@@ -1890,11 +1951,10 @@ const [partySize, setPartySize] = useState(1)
         <p data-design-block="copy.246dedbdf65249c2.1" className="floor-map-room-name">{rooms.find(r=>r.id===activeRoomId)?.name}</p>
       </div>
       </div>
-
-      {floorAccess.can('floor','reservations')&&<FloorGuestSidebar location={locationId} day={reservationToday()} reservations={reservations} parties={activeSessions} tableName={id=>tables.find(t=>t.id===id)?.table_name??'Table unavailable'} serverName={memberName} busy={saving} canSeat={activeShift?.status==='open'&&activeShift.shift_date===reservationToday()} onAdd={()=>setManualReservation(true)} onManage={()=>{setSidebarReservationId('');setShowReservationsPanel(true)}} onDetails={id=>{setSidebarReservationId(id);setShowReservationsPanel(true)}} onSeat={id=>{const r=reservations.find(r=>r.id===id);if(r)beginReservationSeating(r)}} onParty={id=>{const p=activeSessions.find(p=>p.id===id);if(!p)return;const ids=p.tableIds.length?p.tableIds:[p.primaryTableId];setSelectedTableIds(ids);const t=tables.find(t=>t.id===p.primaryTableId||t.id===ids[0]);if(t)setActiveRoomId(t.room_id);setShowTablePanel(true)}}/>}
+      </section>
       </div>
        {/* TABLE ACTION BAR */}
-      {selectedTableIds.length > 0 && (
+      {!tableAssignmentDraft && selectedTableIds.length > 0 && (
         <div data-design-block="copy.a17dccd7e00ce5cf.1" className="floor-action-bar">
           <span>
             {selectedTableIds.length}{' '}
@@ -1935,7 +1995,6 @@ const [partySize, setPartySize] = useState(1)
         </div>
       )}
 
-      </div>
       {/* OPEN SHIFT PANEL */}
       {showShiftPanel && (
         <div data-design-block="copy.4c37ee59da8684e0.1" className="modal-backdrop">

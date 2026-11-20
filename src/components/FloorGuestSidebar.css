@@ -1,5 +1,9 @@
-.floor-map-and-guests{display:grid;grid-template-columns:minmax(0,1fr) 290px;gap:14px;align-items:start;min-width:0}
-.floor-map-and-guests>.floor-map-workspace{min-width:0;margin:0}
+.floor-map-and-guests{display:grid;grid-template-columns:minmax(220px, 290px) minmax(0,1fr);gap:14px;align-items:start;min-width:0}
+.floor-map-and-guests>.floor-map-workspace{min-width:0;margin:0;scroll-margin-top:85px}
+.floor-map-and-guests>.floor-map-workspace:only-child{grid-column:1/-1}
+.floor-booking-assignment{padding:12px;margin-bottom:12px;border:1px solid var(--app-border);border-radius:12px;background:var(--app-card)}
+.floor-booking-assignment p{margin:6px 0}.floor-booking-assignment button+button{margin-inline-start:8px}
+.floor-guest-list article[data-assigning=true]{box-shadow:inset 3px 0 var(--app-accent);background:var(--app-bg)}
 .floor-guest-sidebar{position:sticky;top:78px;min-width:0;border:1px solid var(--app-border,#d8c3ab);border-radius:16px;background:var(--app-card,#fff1dc);overflow:hidden;text-align:left}
 .floor-guest-sidebar header{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px}
 .floor-guest-sidebar h2{font-size:1.15rem;margin:0}.floor-guest-sidebar header p{font-size:.8rem;margin:3px 0 0}
