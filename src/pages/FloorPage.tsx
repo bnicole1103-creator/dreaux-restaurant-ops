@@ -1,3 +1,4 @@
+import {ClearReservationButton} from '../components/ClearReservationButton'
 import {watchReservations} from '../lib/reservationRefresh'
 import {ServerWorkload} from '../components/ServerWorkload'
 import {replanReservations} from '../lib/reservationPlanning'
@@ -2112,6 +2113,7 @@ const [partySize, setPartySize] = useState(1)
                     {reservation.assigned_server_id && <p><PageWord id="sectioncopy.4322959eecd190a1ccfd">{"Server: "}</PageWord>{memberName(reservation.assigned_server_id)}</p>}
                     {reservation.notes && <p>{reservation.notes}</p>}
                     <button type="button" disabled={['cancelled','canceled','no_show','seated','completed'].includes(reservation.status)} onClick={()=>beginReservationSeating(reservation)}>Seat reservation</button>
+                    <ClearReservationButton location={locationId} day={reservationToday()} reservation={reservation} disabled={saving}/>
                     <ReservationEditor reservation={reservation} locationId={locationId} tables={tables} team={team} onSaved={()=>{void loadReservations(locationId)}} />
                   </div>
                 ))
