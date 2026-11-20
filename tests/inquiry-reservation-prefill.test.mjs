@@ -20,4 +20,7 @@ for (const input of [form, JSON.stringify(form)]) {
 assert.equal(inquiryReservationFields({ ...saved, date: '', guests: 0, details: form }).size, '3')
 assert.equal(inquiryReservationFields({ ...saved, date: '', guests: 0, details: form }).date, form.eventDate)
 assert.deepEqual(inquiryDetails('Plain notes'), { Details: 'Plain notes' })
+assert.deepEqual(inquiryDetails(JSON.stringify({
+  time:'17:00','Text messaging':'Not opted in',reservationTextChoice:{optedIn:false,phone:'5045550100'},
+})), {time:'17:00','Text messaging':'Not opted in'})
 console.log('Saved inquiry fields, object and JSON details, AM/PM times and fallback checks passed.')

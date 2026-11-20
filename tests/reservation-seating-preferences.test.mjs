@@ -29,5 +29,5 @@ assert.deepEqual(pick(2,'indoor',tables.filter(t=>!['Bar 1','C1','G1'].includes(
 assert.equal(pick(4,'indoor',tables.filter(t=>t.id!=='G1').map(t=>t.id)),undefined)
 assert.equal(pick(11),undefined)
 assert.equal(inquirySeatingPreference({'Guest notes':'Seating preference: Outdoor seating in the Courtyard\nBirthday'}),'courtyard')
-assert.match(confirmationInvitation('https://example.test/link',seatingArea([tables[5]])),/outdoor seating in the Courtyard/)
+assert.doesNotMatch(confirmationInvitation('https://example.test/link'),/Courtyard|table|seating/i)
 console.log('Two-tops, Great Room, high-top, bar opt-in, Courtyard fallback and guest text checks passed.')

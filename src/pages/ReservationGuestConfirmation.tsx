@@ -1,21 +1,49 @@
 import {time12} from '../lib/time12'
 import {useEffect,useRef,useState} from 'react'
 import {supabase} from '../lib/supabase'
-import {usePolicyContact,smsConsent,emailConsent} from './ReservationPrivacy'
-type GuestBooking={guest_name?:string;date:string;time:string;guests:number;room:string|null;phone_hint:string;has_phone:boolean;has_email:boolean;responded_at:string|null;booking_confirmed:boolean;sms_opt_in:boolean;email_opt_in:boolean;policy_accepted:boolean;confirmation_state:string;house_rules:null|{id:string;title:string;body:string;published_at:string};house_acceptance:null|{accepted_at:string;policy_id:string}}
+import {usePolicyContact} from './ReservationPrivacy'
+type GuestBooking={
+ guest_name?:string
+ date:string
+ time:string
+ guests:number
+ booking_confirmed:boolean
+ policy_accepted:boolean
+ house_rules:null|{id:string;title:string;body:string}
+}
 const readToken=()=>new URLSearchParams(window.location.hash.slice(1)).get('token')??''
 export function ReservationGuestConfirmation(){
- const [token,setToken]=useState(readToken),[booking,setBooking]=useState<GuestBooking|null>(null),[confirm,setConfirm]=useState(false),[rulesAccepted,setRulesAccepted]=useState(false),[sms,setSms]=useState(false),[email,setEmail]=useState(false),[busy,setBusy]=useState(false),[error,setError]=useState('')
+ const [token,setToken]=useState(readToken),[booking,setBooking]=useState<GuestBooking|null>(null),[busy,setBusy]=useState(false),[error,setError]=useState('')
  const {contact,error:contactError}=usePolicyContact();const sequence=useRef(0),lock=useRef(false)
- useEffect(()=>{const change=()=>{sequence.current++;lock.current=false;setBusy(false);setToken(readToken());setBooking(null);setConfirm(false);setRulesAccepted(false);setSms(false);setEmail(false);setError('')};window.addEventListener('hashchange',change);return()=>window.removeEventListener('hashchange',change)},[])
+ useEffect(()=>{const change=()=>{sequence.current++;lock.current=false;setBusy(false);setToken(readToken());setBooking(null);setError('')};window.addEventListener('hashchange',change);return()=>window.removeEventListener('hashchange',change)},[])
  useEffect(()=>{const ref=document.createElement('meta');ref.name='referrer';ref.content='no-referrer';document.head.append(ref);const ticket=++sequence.current;setBooking(null);if(!token){setError('This link is missing its private reservation code. Ask JusTini’s for a new link.');return()=>{sequence.current++;ref.remove()}}void Promise.resolve(supabase.rpc('reservation_guest_link_load',{p_token:token}).abortSignal(AbortSignal.timeout(15000))).then(r=>{if(ticket!==sequence.current)return;if(r.error)setError(r.error.message);else{setBooking(r.data);setError('')}}).catch(e=>{if(ticket===sequence.current)setError(String(e?.message??'Could not load this reservation. Reopen your link.'))});return()=>{sequence.current++;ref.remove()}},[token])
  async function submit(){
   if(lock.current)return
-  if(!confirm||!rulesAccepted||!booking?.house_rules){setError('Confirm the reservation details and accept the displayed house rules first.');return}
+  if(!booking?.house_rules||(booking.booking_confirmed&&booking.policy_accepted))return
   lock.current=true;const ticket=sequence.current;setBusy(true);setError('')
-  try{if(contact?.version!=='2026-11-06-reservation-sms-v2')throw Error('The restaurant needs to update online confirmation. Contact JusTini’s directly.');const r=await supabase.rpc('reservation_guest_link_respond_v3',{p_token:token,p_booking:true,p_accept_rules:true,p_policy_id:booking.house_rules.id,p_sms:sms,p_email:email,p_version:contact.version}).abortSignal(AbortSignal.timeout(20000));if(ticket!==sequence.current)return;if(r.error)throw r.error;setBooking(r.data)}catch(e){if(ticket===sequence.current)setError(String((e as Error).message??e))}finally{if(ticket===sequence.current){lock.current=false;setBusy(false)}}
+  try{if(contact?.version!=='2026-11-06-reservation-sms-v2')throw Error('The restaurant needs to update online confirmation. Contact JusTini’s directly.');const r=await supabase.rpc('reservation_guest_link_respond_v3',{p_token:token,p_booking:true,p_accept_rules:true,p_policy_id:booking.house_rules.id,p_sms:false,p_email:false,p_version:contact.version}).abortSignal(AbortSignal.timeout(20000));if(ticket!==sequence.current)return;if(r.error)throw r.error;setBooking(r.data)}catch(e){if(ticket===sequence.current)setError(String((e as Error).message??e))}finally{if(ticket===sequence.current){lock.current=false;setBusy(false)}}
  }
  const ready=!!booking?.house_rules&&contact?.ready&&contact.version==='2026-11-06-reservation-sms-v2'
  const confirmed=booking?.policy_accepted&&booking?.booking_confirmed
- return <main className="page" style={{maxWidth:760,margin:'24px auto',padding:24}}><h1>JusTini’s reservation confirmation</h1><p>Review your reservation and house rules. Accepting the house rules is required to confirm; text and email permissions are optional.</p>{(error||contactError)&&<p role="alert">{error||contactError}</p>}{booking?<><h2>Your reservation</h2><p><strong>Guest name:</strong> {booking.guest_name||'Name unavailable — contact JusTini’s'}</p><p>{booking.date} at {time12(booking.time)} Central · {booking.guests} guests{booking.room?' · '+booking.room:''}</p><p role="status">{confirmed?'Confirmed — house rules accepted':'Awaiting your confirmation and policy acceptance'}</p>{booking.house_rules?<section aria-label="Required house rules"><h2>{booking.house_rules.title}</h2><div style={{whiteSpace:'pre-wrap',overflowWrap:'anywhere'}}>{booking.house_rules.body}</div><p>Policy version: {booking.house_rules.id}</p></section>:<p role="alert">This older link has no house rules attached. Ask JusTini’s for a new confirmation link. Your opening this page does not confirm the reservation.</p>}{confirmed?<section role="status"><h2>Your reservation is confirmed</h2><p>House rules accepted: {booking.house_acceptance?new Date(booking.house_acceptance.accepted_at).toLocaleString('en-US',{timeZone:'America/Chicago',hour12:true})+' CT':'Recorded'}</p><ul><li>Text confirmation permission: {booking.sms_opt_in?'Yes':'Not selected'}</li><li>Email confirmation permission: {booking.email_opt_in?'Yes':'Not selected'}</li></ul><p>No message is sent automatically by this page. Contact JusTini’s to request changes.</p></section>:<form onSubmit={e=>{e.preventDefault();void submit()}}><fieldset disabled={busy||!ready}><legend>Required reservation confirmation</legend><label style={{display:'block',margin:'16px 0'}}><input required type="checkbox" checked={confirm} onChange={e=>setConfirm(e.target.checked)}/> I confirm that the reservation details above are correct.</label><label style={{display:'block',margin:'16px 0'}}><input required type="checkbox" checked={rulesAccepted} onChange={e=>setRulesAccepted(e.target.checked)}/> I have read and agree to the house rules and reservation policies displayed above.</label><h3>Optional messages</h3><label style={{display:'block',margin:'16px 0'}}><input type="checkbox" disabled={!booking.has_phone} checked={sms} onChange={e=>setSms(e.target.checked)}/> {smsConsent}{booking.phone_hint?' Number ending '+booking.phone_hint+'.':''}</label><label style={{display:'block',margin:'16px 0'}}><input type="checkbox" disabled={!booking.has_email} checked={email} onChange={e=>setEmail(e.target.checked)}/> {emailConsent}</label><p>You can confirm without selecting text or email permission. Neither permission includes marketing.</p><p><a href="/privacy" target="_blank" rel="noopener noreferrer">Privacy Policy</a> · <a href="/messaging-terms" target="_blank" rel="noopener noreferrer">Messaging Terms</a></p><button type="submit" disabled={busy||!confirm||!rulesAccepted}>{busy?'Confirming…':'Accept policies and confirm reservation'}</button></fieldset>{!ready&&<p role="alert">Online confirmation needs restaurant setup or a fresh link. Contact JusTini’s directly.</p>}</form>}</>:!error&&<p role="status">Loading your reservation…</p>}{contact?.ready&&<p>Questions or changes? <a href={'mailto:'+contact.email}>{contact.email}</a> · {contact.phone}</p>}<p><a href="/privacy">Privacy Policy & Messaging Terms</a></p></main>
+ return <main className="page" style={{maxWidth:760,margin:'24px auto',padding:24}}>
+  <h1>Confirm your JusTini’s reservation</h1>
+  {(error||contactError)&&<p role="alert">{error||contactError}</p>}
+  {booking ? <>
+   {booking.guest_name&&<p><strong>{booking.guest_name}</strong></p>}
+   <p>{booking.date} at {time12(booking.time)} Central · {booking.guests} {booking.guests===1?'guest':'guests'}</p>
+   {confirmed ? <p role="status"><strong>Your reservation is confirmed.</strong></p> : <>
+    {booking.house_rules&&<details>
+     <summary>{booking.house_rules.title}</summary>
+     <div style={{whiteSpace:'pre-wrap',overflowWrap:'anywhere'}}>{booking.house_rules.body}</div>
+    </details>}
+    <p>By confirming, you agree to the house rules above.</p>
+    <button type="button" className="primary-button" disabled={busy||!ready} onClick={()=>void submit()}>
+     {busy?'Confirming…':'Confirm reservation'}
+    </button>
+    {!ready&&<p role="alert">Ask JusTini’s for a fresh confirmation link.</p>}
+   </>}
+  </> : !error&&<p role="status">Loading your reservation…</p>}
+  {contact?.ready&&<p>Questions or changes? <a href={'mailto:'+contact.email}>{contact.email}</a> · {contact.phone}</p>}
+  <p><a href="/privacy">Privacy Policy & Messaging Terms</a></p>
+ </main>
 }

@@ -3,9 +3,8 @@ export function inquiryDetails(value: unknown): Record<string, unknown> {
   if (typeof details === 'string') {
     try { details = JSON.parse(details) } catch { return { Details: details } }
   }
-  return details && typeof details === 'object' && !Array.isArray(details)
-    ? details as Record<string, unknown>
-    : {}
+  if (!details || typeof details !== 'object' || Array.isArray(details)) return {}
+  return Object.fromEntries(Object.entries(details).filter(([key]) => key !== 'reservationTextChoice'))
 }
 
 export function inquiryReservationFields(inquiry: {

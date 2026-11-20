@@ -3,4 +3,6 @@ export function guestConfirmationLabel(state:ConfirmationState|null){
  return (state?.confirmation_current??(state?.booking_confirmed===true&&state.valid===true))?'Confirmed':'Not confirmed'
 }
 export const confirmationOrigin='https://justinis-nola.vercel.app'
-export function confirmationInvitation(link:string,seating?:string){return `JusTini’s New Orleans: ${seating ? 'Your reservation is for ' + seating + '. ' : ''}Please review your reservation and choose whether you want text or email confirmation. Messaging is optional. Submit your choices here:\n${link}\nPrivacy Policy & Messaging Terms: ${confirmationOrigin}/privacy`}
+export function confirmationInvitation(link:string,opening=false){
+ return `JusTini’s New Orleans: ${opening?'A spot opened up for your party! ':''}Please review and confirm your reservation here:\n${link}`
+}
