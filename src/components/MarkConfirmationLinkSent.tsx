@@ -2,8 +2,8 @@ import {useRef,useState} from 'react'
 import {supabase} from '../lib/supabase'
 import {notifyReservationsChanged} from '../lib/reservationSync'
 
-export function MarkConfirmationLinkSent({location,reservationId,link,onSaved}:{
- location:string;reservationId:string;link:string;onSaved?:()=>void
+export function MarkConfirmationLinkSent({location,reservationId,link,linkId,onSaved}:{
+ location:string;reservationId:string;link?:string;linkId?:string;onSaved?:(sentAt:string)=>void
 }){
  const [busy,setBusy]=useState(false)
  const [sent,setSent]=useState(false)
@@ -15,13 +15,14 @@ export function MarkConfirmationLinkSent({location,reservationId,link,onSaved}:{
   setBusy(true)
   setError('')
   try{
-   const token=new URLSearchParams(new URL(link).hash.slice(1)).get('token')
-   const result=await supabase.rpc('reservation_staff_link_mark_sent',{
-    p_location:location,p_id:reservationId,p_token:token,
-   }).abortSignal(AbortSignal.timeout(15000))
+   const params={p_location:location,p_id:reservationId}
+   const result=await (linkId
+    ? supabase.rpc('reservation_staff_current_link_mark_sent',{...params,p_link:linkId})
+    : supabase.rpc('reservation_staff_link_mark_sent',{...params,p_token:link?new URLSearchParams(new URL(link).hash.slice(1)).get('token'):null})
+   ).abortSignal(AbortSignal.timeout(15000))
    if(result.error)throw result.error
    setSent(true)
-   onSaved?.()
+   onSaved?.(result.data)
    notifyReservationsChanged()
   }catch(problem){
    setError(String((problem as Error).message??problem))

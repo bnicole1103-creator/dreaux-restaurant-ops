@@ -35,12 +35,17 @@ export function ReservationConfirmationActions({location,reservationId,status,in
  return <span ref={host} className="reservation-confirmation-actions">
   <strong role="status" className={loaded&&guestConfirmationLabel(audit)==='Confirmed'?'guest-confirmed':'guest-unconfirmed'}>Guest confirmation: {error?'Unavailable':loaded?(active||guestConfirmationLabel(audit)==='Confirmed'?confirmationWorkflowLabel(audit):'Not confirmed'):'Loading…'}</strong>
   {error&&<span role="alert">{error} <button type="button" onClick={()=>setRevision(v=>v+1)}>Retry confirmation status</button></span>}
-  {active&&!initiallyOpen&&<span className="reservation-confirmation-buttons"><button type="button" disabled={busy} onClick={openDialog}>Resend confirmation link</button><button type="button" disabled={busy} onClick={openDialog}>Open Messages</button></span>}
+  {active&&!initiallyOpen&&audit?.confirmation_open!==false&&<span className="reservation-confirmation-buttons"><button type="button" disabled={busy} onClick={openDialog}>{audit?.link_sent_at?'Resend confirmation link':'Send confirmation link'}</button><button type="button" disabled={busy} onClick={openDialog}>Open Messages</button></span>}
+  {active&&!initiallyOpen&&audit?.link_id&&!audit.link_sent_at&&guestConfirmationLabel(audit)!=='Confirmed'&&
+   <MarkConfirmationLinkSent key={audit.link_id} location={location} reservationId={reservationId} linkId={audit.link_id}
+    onSaved={sentAt=>{setAudit(previous=>previous?{...previous,link_sent_at:sentAt}:previous);setRevision(v=>v+1)}}/>}
   {dialog&&<TaskDialog title="Generate confirmation link" busy={busy} onClose={()=>{setDialog(false);onClose?.()}}>
    <ReservationLinkContact location={location} reservationId={reservationId}/>
-   <p>Generate the confirmation link, then open Messages with the guest’s phone number and invitation filled in.</p>
+   <p>Generate a link to open a prefilled message.</p>
+   {!link&&audit?.link_id&&!audit.link_sent_at&&guestConfirmationLabel(audit)!=='Confirmed'&&
+    <MarkConfirmationLinkSent key={audit.link_id} location={location} reservationId={reservationId} linkId={audit.link_id} onSaved={()=>setRevision(v=>v+1)}/>}
    {(audit?.expires_at||audit?.responded_at)&&<p role="note">Generating a replacement link will stop the previous link from working. The guest will need to confirm again.</p>}
-   <button type="button" disabled={busy||!loaded} onClick={()=>void generate()}>{busy?'Generating…':link?'Generate replacement link':'Generate link'}</button>
+   <button type="button" disabled={busy||!loaded||audit?.confirmation_open===false} onClick={()=>void generate()}>{busy?'Generating…':link?'Generate replacement link':'Generate link'}</button>
    {!loaded&&<p role="status">{error||'Loading confirmation status…'}{error&&<button type="button" onClick={()=>setRevision(v=>v+1)}>Retry</button>}</p>}
    {busy&&<p role="status">Preparing confirmation link…</p>}{actionError&&<p role="alert">{actionError}</p>}
    {!busy&&!actionError&&link&&<><ReservationMessagesButton key={link} location={location} reservationId={reservationId} message={confirmationInvitation(link)}/><label>Confirmation message<textarea readOnly rows={6} value={confirmationInvitation(link)}/></label><MarkConfirmationLinkSent key={link} location={location} reservationId={reservationId} link={link} onSaved={()=>setRevision(v=>v+1)}/></>}

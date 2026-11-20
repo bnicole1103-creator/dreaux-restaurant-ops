@@ -29,13 +29,19 @@ const summary=async()=> (await db.query('SELECT public.reservation_confirmation_
 assert.equal((await summary()).confirmation_current,false)
 const linkSentMigration=readFileSync('supabase/migrations/20261120_confirmation_link_sent.sql','utf8')
 await db.exec(linkSentMigration);await db.exec(linkSentMigration)
+const currentSendMigration=readFileSync('supabase/migrations/20261120_record_current_confirmation_send.sql','utf8')
+await db.exec(currentSendMigration);await db.exec(currentSendMigration)
 const create=async()=>(await db.query('SELECT public.reservation_staff_link_create($1) AS value',[id])).rows[0].value.token
 const mark=async(token,location=loc)=>(await db.query('SELECT public.reservation_staff_link_mark_sent($1,$2,$3) AS value',[location,id,token])).rows[0].value
 const token=await create()
 assert.equal((await summary()).valid,true)
 assert.equal((await summary()).link_sent_at,null,'generating a link does not record a send')
 await assert.rejects(()=>mark(token,'33333333-3333-3333-3333-333333333333'),/Active reservation access/)
+const linkId=(await summary()).link_id
+const markCurrent=async idOfLink=>(await db.query('SELECT public.reservation_staff_current_link_mark_sent($1,$2,$3) AS value',[loc,id,idOfLink])).rows[0].value
+const recorded=await markCurrent(linkId)
 const saved=await mark(token)
+assert.deepEqual(recorded,saved)
 assert.deepEqual(await mark(token),saved,'mark sent is idempotent')
 assert.equal(new Date((await summary()).link_sent_at).getTime(),saved.getTime())
 assert.equal((await summary()).confirmation_current,false)

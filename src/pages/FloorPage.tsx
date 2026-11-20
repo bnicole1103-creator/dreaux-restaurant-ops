@@ -2030,10 +2030,7 @@ const [partySize, setPartySize] = useState(1)
                       border: '1px solid var(--app-border)',
                     }}
                   >
-                    <strong>
-                      {formatReservationTime(reservation.reservation_time)}<PageWord id="copy.93d18fae2672d0ce.3">·</PageWord>{' '}
-                      <ReservationGuestInfo location={locationId} reservationKey={reservation.id} name={reservation.guest_name} status={reservation.status} onSeat={c=>beginReservationSeating({...reservation,phone:c.phone,email:c.email})}/>
-                    </strong>
+                    <ReservationGuestInfo location={locationId} reservationKey={reservation.id} name={reservation.guest_name} party={reservation.party_size} date={reservationToday()} time={reservation.reservation_time} status={reservation.status} onSeat={c=>beginReservationSeating({...reservation,phone:c.phone,email:c.email})}/>
 
                     <div data-design-block="copy.282e4b288c06818d.1" style={{ marginTop: '4px' }}>
                       {reservation.party_size}<ScreenText id="FloorPage.bc0b2dc8673deba3"> guests
