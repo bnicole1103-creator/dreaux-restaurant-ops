@@ -1,3 +1,4 @@
+import { inquiryReservationFields } from '../lib/inquiryReservationFields'
 import { inquirySeatingPreference } from '../lib/reservationSeating'
 import { useEffect, useRef, useState } from 'react'
 import type { InquiryReservationSource } from './InquiryReservationDialog'
@@ -53,10 +54,12 @@ export function InquiryArrivalOffer({ location, inquiry, onUse }: {
         p_location_id: location, p_day: inquiry.date,
       }).abortSignal(AbortSignal.timeout(15000))
       if (capacity.error) throw capacity.error
-      const arrivals = nextInquiryArrivalOffers(capacity.data, inquiry)
-      if (!arrivals.length) throw Error('No later arrival time is available on the requested date. Ask the guest about another date.')
-      const result = await supabase.rpc('inquiry_arrival_offer_create', {
-        ...args, p_day: inquiry.date, p_party: guests, p_minutes: arrivals.map(option=>option.minute), p_fingerprint: capacity.data.fingerprint, p_replace: replace,
+      const arrivals = capacity.data?.configured ? nextInquiryArrivalOffers(capacity.data, inquiry) : []
+      const {name, phone, email, time} = inquiryReservationFields(inquiry)
+      const result = await supabase.rpc('inquiry_guest_followup_create', {
+        ...args, p_day: inquiry.date, p_party: guests, p_minutes: arrivals.map(option=>option.minute),
+        p_fingerprint: capacity.data?.fingerprint ?? null, p_replace: replace,
+        p_contact: {name, phone, email, time, details: {seatingPreference: inquirySeatingPreference(inquiry.details)}},
       }).abortSignal(AbortSignal.timeout(15000))
       if (result.error) throw result.error
       setSelection(null)
@@ -77,7 +80,11 @@ export function InquiryArrivalOffer({ location, inquiry, onUse }: {
       ? 'outdoor Courtyard seating only' : option.area
     return area ? time + ' (' + area + ')' : time
   }).join(', ')
-  const message = offer && 'JusTini’s New Orleans: We’re unable to accommodate your requested reservation times. Available on ' + inquiry.date + ': ' + offeredTimes + ' Central. Choose a time here: ' + offer.link
+  const noAlternateTimes = offer?.arrivals.length === 0
+  const message = offer && 'JusTini’s New Orleans: The reservation times you requested are unavailable. ' +
+    (offeredTimes ? 'Available on ' + inquiry.date + ': ' + offeredTimes + ' Central. ' : '') +
+    'Use this link to ' + (offeredTimes ? 'choose a time, ' : '') +
+    'pick another date or join the waitlist: ' + offer.link
   const sms = message && messageComposerUrl(inquiry.phone, message, /iPhone|iPad|iPod|Macintosh/.test(navigator.userAgent))
 
   return <section aria-label="Alternate arrival times">
@@ -89,21 +96,21 @@ export function InquiryArrivalOffer({ location, inquiry, onUse }: {
       {onUse && <button type="button" onClick={() => onUse(selection.day, time)}>Use guest’s selected time</button>}
     </> : <>
       <button type="button" disabled={busy || !canOffer} onClick={() => void generate()}>
-        {busy ? 'Checking availability…' : 'Generate alternate-times link'}
+        {busy ? 'Checking availability…' : 'Generate guest options link'}
       </button>
       {!canOffer && <p>Add the inquiry date and party size to offer alternate times.</p>}
     </>}
-    {offer && message && !selection && <>
-      <p>Offering {offeredTimes} Central on {inquiry.date}.</p>
+    {message && (noAlternateTimes || !selection) && <>
+      {noAlternateTimes ? <p role="status">No alternate times found for {inquiry.date}.</p> : <p>Offering {offeredTimes} Central on {inquiry.date}.</p>}
       <label>Guest invitation<textarea readOnly rows={4} value={message} onFocus={event => event.target.select()} /></label>
       <div className="feed-actions">
         <button type="button" onClick={() => void Promise.resolve().then(() => navigator.clipboard.writeText(message))
-          .then(() => setNotice('Invitation copied.')).catch(() => setNotice('Select the invitation text to copy it.'))}>Copy invitation</button>
+          .then(() => setNotice('Message copied.')).catch(() => setNotice('Select the message text to copy it.'))}>Copy invitation</button>
         {sms && <a href={sms}>Open in Messages</a>}
         {inquiry.email && <a href={'mailto:' + encodeURIComponent(inquiry.email) + '?subject=' +
-          encodeURIComponent('Alternate arrival times at JusTini’s') + '&body=' + encodeURIComponent(message)}>Open email draft</a>}
+          encodeURIComponent(noAlternateTimes ? 'Your reservation inquiry at JusTini’s' : 'Alternate arrival times at JusTini’s') + '&body=' + encodeURIComponent(message)}>Open email draft</a>}
       </div>
-      <p>Send the invitation to the guest. Keep the inquiry open so staff can review the selected time.</p>
+      <p>Keep the inquiry open to receive the guest’s selection.</p>
     </>}
     {notice && <p role="status">{notice}</p>}
     {error && <p role="alert">{error}</p>}

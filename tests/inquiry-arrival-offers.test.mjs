@@ -40,7 +40,7 @@ try {
     CREATE TABLE public.floor_tables(id uuid, location_id uuid);
     CREATE TABLE public.rooms(id uuid, location_id uuid);
     CREATE TABLE capacity_private.lengths(reservation_id uuid, minutes int);
-    CREATE TABLE inquiry_booking_private.links(location_id uuid, source text, inquiry_id text);
+    CREATE TABLE inquiry_booking_private.links(location_id uuid, source text, inquiry_id text, reservation_id uuid);
     CREATE FUNCTION capacity_private.block_config(uuid,date) RETURNS jsonb LANGUAGE sql AS $$ SELECT '{"closed":false}'::jsonb $$;
     CREATE FUNCTION capacity_private.block_rows(uuid,timestamptz,timestamptz) RETURNS jsonb LANGUAGE sql AS $$ SELECT '[]'::jsonb $$;
     CREATE FUNCTION public.reservation_capacity_load(uuid,date) RETURNS jsonb LANGUAGE sql AS $$
@@ -83,6 +83,48 @@ try {
   await db.query("INSERT INTO public.reservations VALUES(gen_random_uuid(),$1,"+day+",'booked','Private guest')",[loc])
   assert.deepEqual((await guest(changed)).options,[])
   await assert.rejects(() => guest(changed,choice), /no longer available/)
+  const followupMigration = readFileSync('supabase/migrations/20261120_inquiry_guest_followup.sql','utf8')
+  await db.exec(followupMigration)
+  await db.exec(followupMigration)
+  const createFollowup = (id, withArrival = false) => one(`
+    SELECT public.inquiry_guest_followup_create($1,'Guest form',$2,${day},4,
+      CASE WHEN $3::boolean THEN ARRAY[(extract(epoch from (((${day})+time '18:00') AT TIME ZONE 'America/Chicago'))/60)::bigint] ELSE '{}'::bigint[] END,
+      'current','{"name":"Private guest","phone":"5045551111","time":"19:00","details":{}}'::jsonb) AS value`,
+    [loc,id,withArrival])
+  const waitlist = await createFollowup('waitlist')
+  const dateToken = await createFollowup('date')
+  const mixedToken = await createFollowup('mixed',true)
+  const list = (offset = 0) => one(`SELECT public.inquiry_guest_followup_list($1,(${day})+${offset}) AS value`,[loc])
+  const followup = (link) => one('SELECT public.inquiry_guest_followup($1) AS value',[link])
+  const request = (link, kind, offset) => one(`
+    SELECT public.inquiry_guest_followup($1,$2,(${day})+$3::int,'19:00','Test Guest','5045552222') AS value`,
+    [link,kind,offset])
+  await db.exec('SET ROLE anon')
+  const available = await followup(waitlist)
+  assert.equal(available.can_request,true)
+  assert.deepEqual(available.options,[])
+  assert.ok(!JSON.stringify(available).includes('5045551111'))
+  assert.equal((await followup(token)).selected,offer.options[0])
+  await assert.rejects(() => list(), /permission denied/)
+  await assert.rejects(() => request(dateToken,'date',0), /future date/)
+  assert.equal((await request(waitlist,'waitlist',0)).request_kind,'waitlist')
+  assert.equal((await request(waitlist,'date',1)).request_kind,'waitlist','submitted requests are idempotent')
+  assert.equal((await request(dateToken,'date',1)).request_kind,'date')
+  const mixedOption=(await followup(mixedToken)).options[0]
+  assert.ok(mixedOption)
+  await request(mixedToken,'waitlist',0)
+  await assert.rejects(() => guest(mixedToken,mixedOption), /already received/)
+  await db.exec('RESET ROLE')
+  assert.equal((await list()).find(row=>row.id==='waitlist').phone,'5045552222')
+  assert.equal((await list(1))[0].id,'date')
+  const reservation = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb'
+  await db.query("INSERT INTO inquiry_booking_private.links VALUES($1,'Guest form','waitlist',$2)",[loc,reservation])
+  assert.equal((await list()).find(row=>row.id==='waitlist').reservation_id,reservation)
+  assert.equal((await followup(waitlist)).booked,true)
+  await assert.rejects(() => createFollowup('waitlist'), /already booked/)
+  assert.notEqual(await createFollowup('date'),dateToken)
+  await assert.rejects(() => followup(dateToken), /unavailable/)
+  assert.equal((await list(1))[0].id,'date','reissuing a link preserves submitted requests')
   console.log('Arrival order, table capacity, link replacement, public data scope, selection and stale availability checks passed.')
 } finally {
   await db.close()
