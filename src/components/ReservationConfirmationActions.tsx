@@ -9,7 +9,7 @@ import {ReservationMessagesButton} from './ReservationMessagesButton'
 import {TaskDialog} from './TaskDialog'
 import './ReservationConfirmationActions.css'
 
-export function ReservationConfirmationActions({location,reservationId,status,initiallyOpen=false,onClose}:{location:string;reservationId:string;status?:string|null;initiallyOpen?:boolean;onClose?:()=>void}){
+export function ReservationConfirmationActions({location,reservationId,status,initiallyOpen=false,onClose,onOpen}:{onOpen?:()=>void;location:string;reservationId:string;status?:string|null;initiallyOpen?:boolean;onClose?:()=>void}){
  const [audit,setAudit]=useState<ConfirmationState|null>(null),[loaded,setLoaded]=useState(false),[error,setError]=useState(''),[dialog,setDialog]=useState(initiallyOpen),[link,setLink]=useState(''),[busy,setBusy]=useState(false),[actionError,setActionError]=useState(''),[revision,setRevision]=useState(0)
  const host=useRef<HTMLSpanElement>(null),lock=useRef(false),identity=useRef('');identity.current=location+':'+reservationId
  useEffect(()=>{
@@ -20,6 +20,11 @@ export function ReservationConfirmationActions({location,reservationId,status,in
  useEffect(()=>{setLink('');setDialog(initiallyOpen);setActionError('')},[location,reservationId,initiallyOpen])
  const [seating,setSeating]=useState('')
  const active=!['cancelled','canceled','removed','expired','no_show','completed','departed','seated'].includes((status??'').toLowerCase())
+ function openDialog(){
+  setActionError('')
+  if(onOpen)onOpen()
+  else setDialog(true)
+ }
  async function generate(){
   if(lock.current)return
   lock.current=true;setBusy(true);setActionError('');setDialog(true)
@@ -31,7 +36,7 @@ export function ReservationConfirmationActions({location,reservationId,status,in
  return <span ref={host} className="reservation-confirmation-actions">
   <strong role="status" className={loaded&&guestConfirmationLabel(audit)==='Confirmed'?'guest-confirmed':'guest-unconfirmed'}>Guest confirmation: {error?'Unavailable':loaded?guestConfirmationLabel(audit):'Loading…'}</strong>
   {error&&<span role="alert">{error} <button type="button" onClick={()=>setRevision(v=>v+1)}>Retry confirmation status</button></span>}
-  {active&&<span className="reservation-confirmation-buttons"><button type="button" disabled={busy} onClick={()=>{setActionError('');setDialog(true)}}>Resend confirmation link</button><button type="button" disabled={busy} onClick={()=>{setActionError('');setDialog(true)}}>Open Messages</button></span>}
+  {active&&!initiallyOpen&&<span className="reservation-confirmation-buttons"><button type="button" disabled={busy} onClick={openDialog}>Resend confirmation link</button><button type="button" disabled={busy} onClick={openDialog}>Open Messages</button></span>}
   {dialog&&<TaskDialog title="Generate confirmation link" busy={busy} onClose={()=>{setDialog(false);onClose?.()}}>
    <ReservationLinkContact location={location} reservationId={reservationId}/>
    <p>Generate the confirmation link, then open Messages with the guest’s phone number and invitation filled in.</p>
