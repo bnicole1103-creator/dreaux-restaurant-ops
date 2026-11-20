@@ -28,6 +28,18 @@ export function SalesTargetsPage({initialDate}:{initialDate?:string}={}){
  useEffect(()=>{if(!location)return;let live=true;setLoading(true);setInputs(null);setShifts([]);setError('');setScheduleError('');setMessage('');setDirty(false);setRosterDirty(false)
  void(async()=>{const r=await supabase.rpc('sales_target_inputs',{p_location_id:location,p_date:date});if(r.error)throw r.error;if(!live)return;setInputs(r.data);setHistory(Object.fromEntries((r.data.weekday_totals??[]).map((h:{weekday:number;total:number|null})=>[String(h.weekday),h.total==null?'':String(h.total)])));setThrough(r.data.weekday_totals?.[0]?.through_date??yesterday());try{const d=await loadSalesTargets(location,date);if(live){setShifts(d.shifts);setInputs(v=>v?{...v,locked_day:d.inputs.locked_day}:v)}}catch(e){if(live)setScheduleError(String((e as Error).message))}})().catch(e=>{if(live)setError(String(e.message??e))}).finally(()=>{if(live)setLoading(false)});return()=>{live=false}},[location,date,refresh])
  useEffect(()=>{const updated=()=>setRefresh(v=>v+1);window.addEventListener('prepare-day-released',updated);return()=>window.removeEventListener('prepare-day-released',updated)},[])
+ useEffect(()=>{
+  if(!location||!initialDate)return
+  let active=true
+  const reloadRoster=()=>{
+   if(!dirty){setRefresh(value=>value+1);return}
+   void loadSalesTargets(location,date).then(data=>{
+    if(active){setShifts(data.shifts);setScheduleError('')}
+   }).catch(error=>{if(active)setScheduleError(String(error.message??error))})
+  }
+  window.addEventListener('prepare-roster-saved',reloadRoster)
+  return()=>{active=false;window.removeEventListener('prepare-roster-saved',reloadRoster)}
+ },[location,initialDate,date,dirty])
  function patch(change:Partial<TargetInputs>){setInputs(v=>v?{...v,...change}:v);setDirty(true);setMessage('')}
  async function save(){if(!inputs||saving)return false;setSaving(true);setError('');setMessage('');try{
  if(!through||through>=today()||through>=date)throw Error('Choose a completed six-week period ending before the target date.');
