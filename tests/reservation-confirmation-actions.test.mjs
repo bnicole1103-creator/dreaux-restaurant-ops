@@ -6,12 +6,16 @@ async function moduleAt(path,replace=source=>source){
  const compiled=ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.ESNext,target:ts.ScriptTarget.ES2020}}).outputText
  return import('data:text/javascript;base64,'+Buffer.from(compiled).toString('base64'))
 }
-const {guestConfirmationLabel,confirmationInvitation}=await moduleAt('src/lib/reservationConfirmation.ts')
+const {guestConfirmationLabel,confirmationWorkflowLabel,confirmationInvitation}=await moduleAt('src/lib/reservationConfirmation.ts')
 assert.equal(guestConfirmationLabel(null),'Not confirmed')
 assert.equal(guestConfirmationLabel({valid:true,booking_confirmed:false}),'Not confirmed')
 assert.equal(guestConfirmationLabel({valid:true,booking_confirmed:true}),'Confirmed')
 assert.equal(guestConfirmationLabel({valid:false,booking_confirmed:true}),'Not confirmed','stale reservation snapshot cannot confirm an edited booking')
 assert.equal(guestConfirmationLabel({valid:true,responded_at:'2026-11-18'}),'Not confirmed','opt-in response alone is not booking confirmation')
+assert.equal(confirmationWorkflowLabel({valid:true}),'Needs confirmation link sent')
+assert.equal(confirmationWorkflowLabel({valid:true,link_sent_at:'2026-11-20T14:00:00Z'}),'Confirmation link sent · Awaiting guest')
+assert.equal(confirmationWorkflowLabel({valid:false,link_sent_at:'2026-11-20T14:00:00Z'}),'Needs confirmation link sent')
+assert.equal(confirmationWorkflowLabel({confirmation_current:true}),'Confirmed')
 const invitation=confirmationInvitation('https://example.test/confirmation#token=abc')
 assert.ok(invitation.includes('https://example.test/confirmation#token=abc'))
 assert.match(invitation,/Please review and confirm your reservation here/);

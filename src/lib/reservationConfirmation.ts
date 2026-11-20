@@ -1,6 +1,11 @@
-export type ConfirmationState={booking_confirmed?:boolean;confirmation_current?:boolean;valid?:boolean;responded_at?:string|null;expires_at?:string|null}
+export type ConfirmationState={link_sent_at?:string|null;booking_confirmed?:boolean;confirmation_current?:boolean;valid?:boolean;responded_at?:string|null;expires_at?:string|null}
 export function guestConfirmationLabel(state:ConfirmationState|null){
  return (state?.confirmation_current??(state?.booking_confirmed===true&&state.valid===true))?'Confirmed':'Not confirmed'
+}
+export function confirmationWorkflowLabel(state:ConfirmationState|null){
+ if(guestConfirmationLabel(state)==='Confirmed')return 'Confirmed'
+ if(state?.valid&&state.link_sent_at)return 'Confirmation link sent · Awaiting guest'
+ return 'Needs confirmation link sent'
 }
 export const confirmationOrigin='https://justinis-nola.vercel.app'
 export function confirmationInvitation(link:string,opening=false){

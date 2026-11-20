@@ -1,8 +1,9 @@
+import {MarkConfirmationLinkSent} from './MarkConfirmationLinkSent'
 import {useEffect,useRef,useState} from 'react'
 import {readConfirmation,createStaffConfirmationLink} from '../lib/confirmationSummary'
 import {watchGuestRefresh} from '../lib/guestContact'
 import {notifyReservationsChanged} from '../lib/reservationSync'
-import {confirmationInvitation,confirmationOrigin,guestConfirmationLabel,type ConfirmationState} from '../lib/reservationConfirmation'
+import {confirmationInvitation,confirmationOrigin,confirmationWorkflowLabel,guestConfirmationLabel,type ConfirmationState} from '../lib/reservationConfirmation'
 import {ReservationLinkContact} from './ReservationLinkContact'
 import {ReservationMessagesButton} from './ReservationMessagesButton'
 import {TaskDialog} from './TaskDialog'
@@ -32,7 +33,7 @@ export function ReservationConfirmationActions({location,reservationId,status,in
   }catch(e){if(identity.current===key)setActionError(String((e as Error).message??e))}finally{lock.current=false;if(identity.current===key)setBusy(false)}
  }
  return <span ref={host} className="reservation-confirmation-actions">
-  <strong role="status" className={loaded&&guestConfirmationLabel(audit)==='Confirmed'?'guest-confirmed':'guest-unconfirmed'}>Guest confirmation: {error?'Unavailable':loaded?guestConfirmationLabel(audit):'Loading…'}</strong>
+  <strong role="status" className={loaded&&guestConfirmationLabel(audit)==='Confirmed'?'guest-confirmed':'guest-unconfirmed'}>Guest confirmation: {error?'Unavailable':loaded?(active||guestConfirmationLabel(audit)==='Confirmed'?confirmationWorkflowLabel(audit):'Not confirmed'):'Loading…'}</strong>
   {error&&<span role="alert">{error} <button type="button" onClick={()=>setRevision(v=>v+1)}>Retry confirmation status</button></span>}
   {active&&!initiallyOpen&&<span className="reservation-confirmation-buttons"><button type="button" disabled={busy} onClick={openDialog}>Resend confirmation link</button><button type="button" disabled={busy} onClick={openDialog}>Open Messages</button></span>}
   {dialog&&<TaskDialog title="Generate confirmation link" busy={busy} onClose={()=>{setDialog(false);onClose?.()}}>
@@ -42,7 +43,7 @@ export function ReservationConfirmationActions({location,reservationId,status,in
    <button type="button" disabled={busy||!loaded} onClick={()=>void generate()}>{busy?'Generating…':link?'Generate replacement link':'Generate link'}</button>
    {!loaded&&<p role="status">{error||'Loading confirmation status…'}{error&&<button type="button" onClick={()=>setRevision(v=>v+1)}>Retry</button>}</p>}
    {busy&&<p role="status">Preparing confirmation link…</p>}{actionError&&<p role="alert">{actionError}</p>}
-   {!busy&&!actionError&&link&&<><ReservationMessagesButton key={link} location={location} reservationId={reservationId} message={confirmationInvitation(link)}/><label>Confirmation message<textarea readOnly rows={6} value={confirmationInvitation(link)}/></label><p>Review the message and press Send in Messages. Opening a draft does not mark it sent or confirmed.</p></>}
+   {!busy&&!actionError&&link&&<><ReservationMessagesButton key={link} location={location} reservationId={reservationId} message={confirmationInvitation(link)}/><label>Confirmation message<textarea readOnly rows={6} value={confirmationInvitation(link)}/></label><MarkConfirmationLinkSent key={link} location={location} reservationId={reservationId} link={link} onSaved={()=>setRevision(v=>v+1)}/></>}
   </TaskDialog>}
  </span>
 }
