@@ -1,3 +1,4 @@
+import {AIReservationPostNotes} from '../components/AIReservationPostNotes'
 import { DateTimeInput12 } from '../components/DateTimeInput12'
 import {useWorkspaceRecovery,useWorkspaceScroll} from '../lib/workspaceRecovery'
 import {MediaLinkText} from '../components/MediaLinkText'
@@ -159,6 +160,7 @@ export function PreshiftFeedPage(){
    </details>
    <AccessSection page="settings" section="sales"><details className="preshift-extra"><summary>Add sales targets to post</summary><SalesTargetPreview location={location} date={date} disabled={saving||uploading||generating} onAdd={text=>{setBody(mergePostTargets(body,text));setNotice('Sales targets added. Review the post, then save or publish.')}}/></details></AccessSection>
    <details className="preshift-extra"><summary><ScreenText id="PreshiftWorkspace.reservations">Reservation notes</ScreenText></summary>
+   <AIReservationPostNotes key={'scan-'+builderKey} location={location} date={date} disabled={saving||uploading||generating||reservationsLoading} onAdd={notes=>{setBody(mergeReservationNotes(body,notes));setNotice('Reservation notes added to the draft.')}}/>
    <ReservationPostNotes key={builderKey} location={location} date={date} disabled={saving||uploading||generating} editing={!!editing||!!draft||!!body.trim()} onLoading={setReservationsLoading} onChange={text=>setBody(mergeReservationNotes(body,text))}/>
    </details>
    <details className="preshift-extra"><summary><ScreenText id="PreshiftWorkspace.sections">Floor sections</ScreenText></summary>

@@ -14,6 +14,21 @@ assert.equal((await handler(request({location_id:loc,date:day},false))).status,4
 assert.equal((await handler(request({location_id:loc,date:'2026-02-30'}))).status,400);assert.equal((await handler(request({location_id:loc,date:day,notes:'x'.repeat(6001)}))).status,400);
 claimError={code:'42501',message:'Management access required.'};assert.equal((await handler(request({location_id:loc,date:day}))).status,403);assert.equal(aiCalls,0);claimError=null;
 const ok=await handler(request({location_id:loc,date:day}));assert.equal(ok.status,200);assert.equal((await ok.json()).version,'prepare-day-ai-v1');assert.equal(aiCalls,1);assert.ok(calls.every(c=>['prepare_day_assistant_claim','prepare_day_assistant_roster','personal_sales_targets_load','reservation_capacity_load','menu_catalog_load'].includes(c.name)));
+let scanSources=[];
+const scan=createHandler({env:()=> 'test',client:()=>({auth:client.auth,rpc:async(name,args)=>{
+ scanSources.push(name);
+ if(name==='prepare_day_assistant_claim')return {data:true};
+ assert.equal(args.p_day,day);
+ return {data:{reservations:[{reservation_date:day,reservation_time:'18:30:00',party_size:8,birthday:true,guest_name:'Hidden Name',notes:'Private Notes'}]}};
+}}),fetch:async(_,options)=>{
+ const input=String(options?.body);
+ assert.match(input,/6:30 PM Central/);
+ assert.doesNotMatch(input,/Hidden Name|Private Notes/);
+ return new Response(JSON.stringify(response({...model,priorities:[],coaching:[],briefing:{title:'Bookings',body:'An eight-person birthday arrives at 6:30 PM.',evidence_ids:['booking_1']}})));
+}});
+const scanned=await scan(request({location_id:loc,date:day,mode:'reservations'}));
+assert.equal((await scanned.json()).mode,'reservations');
+assert.deepEqual(scanSources,['prepare_day_assistant_claim','reservation_management_search_v2']);
 const db=new PGlite();await db.exec(`CREATE ROLE anon;CREATE ROLE authenticated;CREATE SCHEMA auth;CREATE SCHEMA crew_ops_private;CREATE FUNCTION auth.uid() RETURNS uuid LANGUAGE sql AS $$SELECT '${user}'::uuid$$;CREATE FUNCTION public.closeout_is_member(uuid) RETURNS boolean LANGUAGE sql AS $$SELECT coalesce(current_setting('test.member',true),'yes')='yes'$$;CREATE FUNCTION public.mod_is_manager(uuid) RETURNS boolean LANGUAGE sql AS $$SELECT coalesce(current_setting('test.manager',true),'yes')='yes'$$;CREATE FUNCTION public.app_access_assert(uuid,text,text) RETURNS void LANGUAGE plpgsql AS $$BEGIN IF coalesce(current_setting('test.access',true),'yes')<>'yes' THEN RAISE EXCEPTION 'Page access denied' USING errcode='42501';END IF;END$$;CREATE FUNCTION public.crew_schedule_tools_load(uuid,date) RETURNS jsonb LANGUAGE sql AS $$SELECT '{"rows":[],"snapshot":[]}'::jsonb$$;CREATE FUNCTION crew_ops_private.canonical(uuid,date,jsonb) RETURNS jsonb LANGUAGE sql AS $$SELECT $3$$;`);
 const sql=readFileSync('supabase/migrations/20261112_prepare_day_assistant.sql','utf8');await db.exec(sql);
 for(let i=0;i<5;i++)await db.query('SELECT public.prepare_day_assistant_claim($1)',[loc]);await assert.rejects(()=>db.query('SELECT public.prepare_day_assistant_claim($1)',[loc]));
