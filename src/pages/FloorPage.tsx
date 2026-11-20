@@ -1792,11 +1792,11 @@ const [partySize, setPartySize] = useState(1)
         ))}
       </div>
 
-       <p data-design-block="copy.47e8f14106004bf5.1" className="floor-map-hint"><ScreenText id="FloorPage.f3780ffe48f2e882">Swipe left or right to switch floor plans. Tap multiple tables to select them.</ScreenText></p>
+       <p data-design-block="copy.47e8f14106004bf5.1" className="floor-map-hint"><span className="floor-map-swipe-hint"><ScreenText id="FloorPage.f3780ffe48f2e882">Swipe left or right to switch floor plans. Tap multiple tables to select them.</ScreenText></span><span className="floor-map-pan-hint">Scroll the map sideways to see more tables. Use the room buttons to switch rooms.</span></p>
        {!!serverKeys.length&&<div className="floor-server-legend" aria-label="Server colors">{serverKeys.map(key=>{const assignment=assignments.find(a=>(a.server_id||'guest:'+a.guest_name)===key)!;return <span key={key}><i style={{background:serverSwatch(key)}}/>{assignment.server_id?memberName(assignment.server_id):assignment.guest_name||'Unlinked team member'}</span>})}</div>}
        {/* LIVE FLOOR */}
-       <div data-design-block="copy.04d68e17bc6f50c2.1" className="floor-map-scroll" style={arrangeMode?undefined:{touchAction:'pan-y',overflowX:'hidden'}}
-        onTouchStart={e=>{suppressTableClick.current=false;swipeStart.current=!arrangeMode&&e.touches.length===1?{x:e.touches[0].clientX,y:e.touches[0].clientY}:null}}
+       <div data-design-block="copy.04d68e17bc6f50c2.1" className="floor-map-scroll"
+        onTouchStart={e=>{suppressTableClick.current=false;swipeStart.current=!arrangeMode&&e.currentTarget.scrollWidth<=e.currentTarget.clientWidth&&e.touches.length===1?{x:e.touches[0].clientX,y:e.touches[0].clientY}:null}}
         onTouchMove={e=>{const start=swipeStart.current;if(start&&e.touches.length===1&&Math.abs(e.touches[0].clientX-start.x)>20)suppressTableClick.current=true;else if(e.touches.length!==1)swipeStart.current=null}}
         onTouchCancel={()=>{swipeStart.current=null}}
         onTouchEnd={e=>{const start=swipeStart.current;swipeStart.current=null;if(!start||arrangeMode||!e.changedTouches.length)return;const dx=e.changedTouches[0].clientX-start.x,dy=e.changedTouches[0].clientY-start.y;if(Math.abs(dx)>70&&Math.abs(dx)>Math.abs(dy)*1.5){suppressTableClick.current=true;switchRoom(dx<0?1:-1)}}}>
