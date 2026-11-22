@@ -4,7 +4,7 @@ export function inquiryNeedsAction(row:Item){return !['Booked','Confirmed','Clos
 export type InquirySort = 'oldest' | 'newest' | 'event'
 export function inquiryQueue<T extends Item>(rows:T[],source:string,query:string,view:string,dateView:string,today:string,sort:InquirySort='oldest'){
  const day=(r:T)=>/^\d{4}-\d{2}-\d{2}$/.test(r.date)?r.date:''
- return rows.filter(r=>(source==='All'||r.source===source)&&(view==='all'||view==='open'&&inquiryNeedsAction(r)||normalizeInquiryStatus(r.status)===view)&&(dateView==='all'||dateView==='upcoming'&&!!day(r)&&day(r)>=today||dateView==='undated'&&!day(r))&&[r.name,r.email,r.phone,normalizeInquiryStatus(r.status),r.notes,r.date].join(' ').toLowerCase().includes(query.trim().toLowerCase())).sort((a,b)=>{
+ return rows.filter(r=>(source==='All'||r.source===source)&&(view==='all'||view==='open'&&inquiryNeedsAction(r)||normalizeInquiryStatus(r.status)===view)&&(dateView==='all'||dateView==='upcoming'&&!!day(r)&&day(r)>=today||dateView==='undated'&&!day(r)||!!day(r)&&day(r)===dateView)&&[r.name,r.email,r.phone,normalizeInquiryStatus(r.status),r.notes,r.date].join(' ').toLowerCase().includes(query.trim().toLowerCase())).sort((a,b)=>{
   const left=Date.parse(a.received),right=Date.parse(b.received)
   const received=Number.isFinite(left)&&Number.isFinite(right)
    ? (sort==='newest'?right-left:left-right)
