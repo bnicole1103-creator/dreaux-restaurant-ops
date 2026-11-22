@@ -19,6 +19,7 @@ const msg=(e:unknown)=>String((e as Error).message??e)
 export function SectionSchedule({editRequest,refreshKey=0,locationId,selectedTableIds,tables,employees,onLoaded,onSelect,onShowTables,children}:{onShowTables?:(ids:string[])=>void;editRequest?:SectionEditRequest;refreshKey?:number;locationId:string;selectedTableIds:string[];tables:Table[];employees:{id:string;name:string}[];onLoaded:(plans:SectionPlan[],offset:number)=>void;onSelect:(ids:string[])=>void;children?:ReactNode}){
  const [plans,setPlans]=useState<SectionPlan[]>([]),[presets,setPresets]=useState<SectionTablePreset[]>([]),[preset,setPreset]=useState(''),[canManage,setCanManage]=useState(false),[error,setError]=useState(''),[busy,setBusy]=useState(false),[editing,setEditing]=useState<SectionPlan|null>(null),[show,setShow]=useState(false),[legacy,setLegacy]=useState<SectionEditRequest['legacy']>(),[mode,setMode]=useState<'now'|'schedule'>('now'),[publish,setPublish]=useState(false)
  const [date,setDate]=useState(()=>parts(new Date()).date),[start,setStart]=useState(''),[end,setEnd]=useState(''),[name,setName]=useState(''),[employee,setEmployee]=useState<string|null>(''),[guestName,setGuestName]=useState(''),[notice,setNotice]=useState('')
+ const [presetEditor,setPresetEditor]=useState<{original:SectionTablePreset;name:string;tableIds:string[]} | null>(null)
  type Shift=SectionRosterShift
  const [confirmed,setConfirmed]=useState<Shift[]>([]),[manualTimes,setManualTimes]=useState(false),[shiftChoice,setShiftChoice]=useState(''),[hoursLoading,setHoursLoading]=useState(false),[scheduleRefresh,setScheduleRefresh]=useState(0),[scheduleError,setScheduleError]=useState(''),[reviewedSchedule,setReviewedSchedule]=useState(false)
  useEffect(()=>{let live=true;if(!show)return;setHoursLoading(true);setConfirmed([]);setScheduleError('');setReviewedSchedule(false);void Promise.resolve(supabase.rpc('crew_schedule_tools_load',{p_location_id:locationId,p_day:date})).then(r=>{if(!live)return;if(r.error){setScheduleError('Schedule could not be loaded. Refresh or enter optional time overrides.');return}setConfirmed(sectionRoster(r.data?.rows??[]));setReviewedSchedule(!!(r.data?.override||r.data?.dining_preserve||r.data?.confirmed_at))}).catch(()=>{if(live)setScheduleError('Schedule unavailable. Refresh or enter optional time overrides.')}).finally(()=>{if(live)setHoursLoading(false)});return()=>{live=false}},[locationId,date,show,scheduleRefresh])
@@ -27,7 +28,7 @@ export function SectionSchedule({editRequest,refreshKey=0,locationId,selectedTab
  const request=useRef(crypto.randomUUID()),lock=useRef(false),callback=useRef(onLoaded),editor=useRef<HTMLFormElement>(null);callback.current=onLoaded
  async function load(){const r=await supabase.rpc('floor_schedule_list',{p_location_id:locationId});if(r.error)throw r.error;setPlans(r.data.plans??[]);setCanManage(!!r.data.can_manage);callback.current(r.data.plans??[],new Date(r.data.server_now).getTime()-Date.now());const p=await supabase.rpc('floor_section_presets',{p_location_id:locationId});if(p.error)throw p.error;setPresets(p.data??[])}
  useEffect(()=>{let live=true;async function refresh(){try{const r=await supabase.rpc('floor_schedule_list',{p_location_id:locationId});if(r.error)throw r.error;if(!live)return;setPlans(r.data.plans??[]);setCanManage(!!r.data.can_manage);callback.current(r.data.plans??[],new Date(r.data.server_now).getTime()-Date.now());const p=await supabase.rpc('floor_section_presets',{p_location_id:locationId});if(p.error)throw p.error;if(live)setPresets(p.data??[])}catch(e){if(live)setError(msg(e))}}if(locationId)void refresh();const stop=watchReservations(locationId,()=>void refresh());return()=>{live=false;stop()}},[locationId,refreshKey])
- function open(plan:SectionPlan|null,old?:SectionEditRequest['legacy']){if(lock.current)return;if(show&&!window.confirm('Discard the unsaved section changes?'))return;setEditing(plan);setManualTimes(!!plan||!!old);setShiftChoice('');setLegacy(old);setPreset('');setShow(true);setError('');setNotice('');request.current=crypto.randomUUID();setName(plan?.name??old?.name??'');setEmployee(plan?.employee_id??old?.employee_id??(plan?.guest_name||old?.guest_name?null:''));setGuestName(plan?.guest_name??old?.guest_name??'');setDate(plan?parts(new Date(plan.starts_at)).date:parts(new Date()).date);setStart(plan?parts(new Date(plan.starts_at)).time:'');setEnd(plan?parts(new Date(plan.ends_at)).time:'');setMode(plan?'schedule':'now');setPublish(plan?!!plan.published_at:!old);if(plan||old)onSelect(plan?.table_ids??old!.table_ids);}
+ function open(plan:SectionPlan|null,old?:SectionEditRequest['legacy']){if(lock.current||presetEditor)return;if(show&&!window.confirm('Discard the unsaved section changes?'))return;setEditing(plan);setManualTimes(!!plan||!!old);setShiftChoice('');setLegacy(old);setPreset('');setShow(true);setError('');setNotice('');request.current=crypto.randomUUID();setName(plan?.name??old?.name??'');setEmployee(plan?.employee_id??old?.employee_id??(plan?.guest_name||old?.guest_name?null:''));setGuestName(plan?.guest_name??old?.guest_name??'');setDate(plan?parts(new Date(plan.starts_at)).date:parts(new Date()).date);setStart(plan?parts(new Date(plan.starts_at)).time:'');setEnd(plan?parts(new Date(plan.ends_at)).time:'');setMode(plan?'schedule':'now');setPublish(plan?!!plan.published_at:!old);if(plan||old)onSelect(plan?.table_ids??old!.table_ids);}
  function reviewPreset(preset:SectionTablePreset, shift:SectionRosterShift, day:string) {
   if(show || lock.current) return
   open(null)
@@ -40,11 +41,61 @@ export function SectionSchedule({editRequest,refreshKey=0,locationId,selectedTab
   setShiftChoice(shift.id)
   setPublish(false)
  }
- const opened=useRef<number>();useEffect(()=>{if(!editRequest||opened.current===editRequest.nonce||!canManage)return;const p=plans.find(p=>p.id===editRequest.id);if(editRequest.id&&!p&&!editRequest.legacy)return;opened.current=editRequest.nonce;open(p??null,editRequest.legacy);if(editRequest.employee_id)setEmployee(editRequest.employee_id);if(editRequest.guest_name){setEmployee(null);setGuestName(editRequest.guest_name)}if(editRequest.date){setDate(editRequest.date);setMode('schedule')}},[editRequest,plans,canManage])
+ const opened=useRef<number>();useEffect(()=>{if(!editRequest||opened.current===editRequest.nonce||!canManage||presetEditor)return;const p=plans.find(p=>p.id===editRequest.id);if(editRequest.id&&!p&&!editRequest.legacy)return;opened.current=editRequest.nonce;open(p??null,editRequest.legacy);if(editRequest.employee_id)setEmployee(editRequest.employee_id);if(editRequest.guest_name){setEmployee(null);setGuestName(editRequest.guest_name)}if(editRequest.date){setDate(editRequest.date);setMode('schedule')}},[editRequest,plans,canManage,presetEditor])
  async function work(fn:()=>Promise<void>){if(lock.current)return;lock.current=true;setBusy(true);setError('');try{await fn();await load()}catch(e){setError(msg(e))}finally{lock.current=false;setBusy(false)}}
  async function save(){await work(async()=>{if(!manualTimes&&!chosenShift)throw Error('Choose a scheduled shift with valid times, or enable optional time overrides.');const r=await supabase.rpc('floor_section_save_window',{p_location_id:locationId,p_id:editing?.id??null,p_version:editing?.version??null,p_name:name.trim()||('Tables '+tables.filter(t=>selectedTableIds.includes(t.id)).map(t=>t.table_name).sort((a,b)=>a.localeCompare(b,undefined,{numeric:true})).join(' + ')).slice(0,100),p_employee_id:employee,p_guest_name:employee===null?guestName.trim():null,p_table_ids:selectedTableIds,p_date:!manualTimes?defaultStart!.date:date,p_start:!manualTimes?defaultStart!.time:start||null,p_end:!manualTimes?defaultEnd!.time:end||null,p_request_id:request.current,p_mode:!manualTimes?'schedule':mode,p_publish:manualTimes&&mode==='now'||publish,p_legacy_id:legacy?.id??null,p_legacy_expected:legacy?{name:legacy.name,employee_id:legacy.employee_id,guest_name:legacy.guest_name,table_ids:[...legacy.table_ids].sort()}:null});if(r.error)throw r.error;setShow(false);setEditing(null);setLegacy(undefined);setNotice(manualTimes&&mode==='now'?'Section assigned until its end time.':publish?'Future section scheduled and published.':'Section draft saved. Publish when ready.');onSelect([])})}
  async function savePreset(remove=false,copy=false){const current=presets.find(p=>p.id===preset);if(remove&&!window.confirm('Remove this saved table preset? Existing assignments stay unchanged.'))return;await work(async()=>{const r=await supabase.rpc('floor_section_preset_save',{p_location_id:locationId,p_id:copy?null:current?.id??null,p_version:copy?null:current?.version??null,p_name:name.trim(),p_table_ids:selectedTableIds,p_remove:remove});if(r.error)throw r.error;setPreset(remove?'':String(r.data));setNotice(remove?'Preset removed.':'Table preset saved. Choose a person and time each time you use it.')})}
- return <section className="card" aria-label="Section assignments"><h2>Assigned &amp; scheduled sections</h2><p>Select tables, choose a person, then assign now or schedule a future window. Every assignment has an end time. Seated parties keep their server.</p>{error&&<p role="alert">{error}</p>}{notice&&<p role="status">{notice}</p>}{canManage&&<button type="button" disabled={busy} onClick={()=>open(null)}>Assign section</button>}{canManage&&<SmartSectionPresetDraft key={locationId} locationId={locationId} initialDay={parts(new Date()).date} presets={presets} plans={plans} tables={tables} disabled={busy||show} onReview={reviewPreset}/>}
+ async function saveEditedPreset(remove=false) {
+  if(!presetEditor||lock.current) return
+  const {original,name,tableIds}=presetEditor
+  if(remove&&!window.confirm('Remove the “'+original.name+'” preset?')) return
+  if(!remove&&(!name.trim()||!tableIds.length)) return
+  await work(async()=>{
+   const r=await supabase.rpc('floor_section_preset_save',{
+    p_location_id:locationId,p_id:original.id,p_version:original.version,
+    p_name:name.trim(),p_table_ids:tableIds,p_remove:remove,
+   })
+   if(r.error) throw r.error
+   setPresetEditor(null)
+   setNotice(remove?'Preset removed.':'Preset updated.')
+  })
+ }
+ return <section className="card" aria-label="Section assignments"><h2>Assigned &amp; scheduled sections</h2><p>Select tables, choose a person, then assign now or schedule a future window. Every assignment has an end time. Seated parties keep their server.</p>{error&&<p role="alert">{error}</p>}{notice&&<p role="status">{notice}</p>}{canManage&&<button type="button" disabled={busy} onClick={()=>open(null)}>Assign section</button>}{canManage&&<SmartSectionPresetDraft key={locationId} locationId={locationId} initialDay={parts(new Date()).date} presets={presets} plans={plans} tables={tables} disabled={busy||show||!!presetEditor} onReview={reviewPreset}/>}
+ {canManage&&<details>
+  <summary>Manage section presets ({presets.length})</summary>
+  {presets.length===0&&<p>Use Assign section to save your first table preset.</p>}
+  {presets.map(item=><div key={item.id} className="section-assignment-actions">
+   <strong>{item.name}</strong>
+   <button type="button" disabled={busy||show||!!presetEditor} onClick={()=>{
+    setError('');setNotice('')
+    setPresetEditor({original:item,name:item.name,tableIds:item.table_ids.filter(id=>tables.some(table=>table.id===id))})
+   }}>Edit or remove</button>
+  </div>)}
+ </details>}
+ {canManage&&presetEditor&&<TaskDialog title="Edit section preset" busy={busy} onClose={()=>setPresetEditor(null)}>
+  <form className="section-assignment-form" onSubmit={e=>{e.preventDefault();void saveEditedPreset()}}>
+   <fieldset disabled={busy}>
+    <legend>Saved table preset</legend>
+    {error&&<p role="alert">{error}</p>}
+    <label>Preset name<input required maxLength={100} value={presetEditor.name} onChange={e=>{
+     const name=e.target.value
+     setPresetEditor(current=>current&&({...current,name}))
+    }}/></label>
+    <TableMapChoice location={locationId} selected={presetEditor.tableIds}
+     onChange={tableIds=>setPresetEditor(current=>current&&({...current,tableIds}))} disabled={busy} allowSeatCorrection={false}/>
+    <details><summary>Choose tables from a list</summary><div className="section-assignment-tables">
+     {tables.map(table=><label key={table.id}><input type="checkbox" checked={presetEditor.tableIds.includes(table.id)} onChange={e=>{
+      const checked=e.target.checked
+      setPresetEditor(current=>current&&({...current,tableIds:checked?[...current.tableIds,table.id]:current.tableIds.filter(id=>id!==table.id)}))
+     }}/>{table.table_name}</label>)}
+    </div></details>
+    <div className="section-assignment-actions">
+     <button type="submit" className="primary-button" disabled={!presetEditor.name.trim()||!presetEditor.tableIds.length}>Save preset changes</button>
+     <button type="button" onClick={()=>void saveEditedPreset(true)}>Remove preset</button>
+    </div>
+   </fieldset>
+  </form>
+ </TaskDialog>}
  {children}
 
  <details open><summary>Sections, tables & publishing ({plans.length})</summary><div style={{display:'grid',gap:10,marginTop:12}}>{plans.map(plan=><article className="card" key={plan.id}><strong>{plan.name} · {plan.employee_id?<TeamProfileName userId={plan.employee_id} locationId={locationId} name={employees.find(e=>e.id===plan.employee_id)?.name||'Team member'}/>:plan.guest_name}</strong><p>{plan.published_at?'Published':'Draft · not published on Home'} · {label(plan.starts_at)} – {label(plan.ends_at)}</p><p>{plan.table_ids.map(id=>tables.find(t=>t.id===id)?.table_name??'Unavailable table').join(', ')}</p>{!plan.assignable&&<p role="alert">Employee is inactive; choose another employee.</p>}<button type="button" onClick={()=>{if(onShowTables)onShowTables(plan.table_ids);else onSelect(plan.table_ids)}}>Show tables</button>{canManage&&<><button type="button" disabled={busy} onClick={()=>open(plan)}>Edit person / tables / time</button><button type="button" disabled={busy} onClick={()=>void work(async()=>{const r=await supabase.rpc('floor_schedule_publish',{p_location_id:locationId,p_id:plan.id,p_version:plan.version,p_publish:!plan.published_at});if(r.error)throw r.error})}>{plan.published_at?'Unpublish':'Publish'}</button><button type="button" disabled={busy} onClick={()=>{if(window.confirm('Remove '+plan.name+'?'))void work(async()=>{const r=await supabase.rpc('floor_schedule_cancel',{p_location_id:locationId,p_id:plan.id,p_version:plan.version});if(r.error)throw r.error})}}>Remove</button></>}</article>)}</div></details>
