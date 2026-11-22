@@ -74,7 +74,7 @@
 
 .app-shell.polished-app.app-shell-floor > .app-content {
   display: flex;
-  flex: 1;
+  flex: 1 1 0px;
   flex-direction: column;
   min-height: 0;
   max-width: none;
@@ -85,7 +85,7 @@
 .app-shell-floor .app-sticker-content,
 .app-shell-floor .floor-workspace {
   display: flex;
-  flex: 1;
+  flex: 1 1 0px;
   flex-direction: column;
   min-height: 0;
 }
@@ -93,6 +93,11 @@
 .app-shell-floor .floor-workspace {
   margin: 0;
   padding: 0;
+}
+
+.app-shell-floor .floor-workspace-nav {
+  flex: none;
+  align-items: center;
 }
 
 .floor-workspace-title {
@@ -104,9 +109,10 @@
 }
 
 .app-shell-floor .floor-map-and-guests {
-  flex: 1;
+  flex: 1 1 0px;
   min-height: 0;
   align-items: stretch;
+  grid-template-rows: minmax(0, 1fr);
   grid-template-columns: clamp(230px, 33%, 420px) minmax(0, 1fr);
   gap: 3px;
 }
@@ -123,10 +129,16 @@
   border-radius: 0;
 }
 
+.app-shell-floor .floor-guest-sidebar > :not(.floor-guest-list) {
+  flex-shrink: 0;
+}
+
 .app-shell-floor .floor-guest-list {
-  flex: 1;
+  flex: 1 1 0px;
   min-height: 0;
   max-height: none;
+  overflow-y: auto;
+  touch-action: pan-y;
 }
 
 .app-shell-floor .floor-map-workspace {
@@ -138,15 +150,26 @@
 }
 
 .app-shell-floor .floor-map-scroll {
-  flex: 1;
+  flex: 1 1 0px;
   min-height: min(180px, 35dvh);
   margin: 0;
   border-radius: 0;
 }
 
 .app-shell-floor .floor-map-scroll[data-fit-room="true"] .floor-canvas[data-swipe-enabled="true"] {
-  height: 100%;
+  height: auto;
   min-height: 0;
+  margin-inline: auto;
+}
+
+@supports (width: 1cqh) {
+  .app-shell-floor .floor-map-scroll[data-fit-room="true"] {
+    container-type: size;
+  }
+
+  .app-shell-floor .floor-map-scroll[data-fit-room="true"] .floor-canvas[data-swipe-enabled="true"] {
+    width: min(100%, calc(100cqh * var(--floor-room-aspect)));
+  }
 }
 
 .app-shell-floor .floor-map-workspace .room-tabs,

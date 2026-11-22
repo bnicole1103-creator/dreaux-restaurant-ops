@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react'
 import {ClearReservationButton} from '../components/ClearReservationButton'
 import {watchReservations} from '../lib/reservationRefresh'
 import {ServerWorkload} from '../components/ServerWorkload'
@@ -1682,6 +1683,13 @@ const [partySize, setPartySize] = useState(1)
     )
   }
 
+  const roomAspect = 1 / floorRoomRatio(rooms.find(room => room.id === activeRoomId)?.name ?? '')
+  const canvasStyle: CSSProperties & { '--floor-room-aspect': number } = {
+    position: 'relative',
+    aspectRatio: String(roomAspect),
+    '--floor-room-aspect': roomAspect,
+  }
+
   return (
     <DesignSection as="section" data-design-block="copy.e0e08178068651dc.1" className="floor-workspace">
       <nav className="floor-workspace-nav" aria-label="Floor tools">
@@ -1792,16 +1800,11 @@ const [partySize, setPartySize] = useState(1)
         className="floor-canvas"
         ref={floorCanvasRef}
         data-swipe-enabled={!arrangeMode}
-        style={
-          arrangeMode
-            ? {
-                position: 'relative',
-                border: '1px dashed var(--app-accent, #d7b795)',
-                aspectRatio: String(1/floorRoomRatio(rooms.find(r=>r.id===activeRoomId)?.name??'')),
-                touchAction: 'none',
-              }
-            : { position: 'relative',aspectRatio: String(1/floorRoomRatio(rooms.find(r=>r.id===activeRoomId)?.name??'')) }
-        }
+        style={arrangeMode ? {
+          ...canvasStyle,
+          border: '1px dashed var(--app-accent, #d7b795)',
+          touchAction: 'none',
+        } : canvasStyle}
       >
         {activeTables.map((table) => {
           const selected = (tableAssignmentDraft?.tableIds ?? selectedTableIds).includes(table.id)
