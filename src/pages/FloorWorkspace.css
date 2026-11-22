@@ -30,3 +30,146 @@
   min-height: 44px;
   padding: 4px 7px !important;
 }
+
+/* The Floor route uses the viewport as its workspace on phones and tablets. */
+.app-shell.polished-app.app-shell-floor {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  min-height: 0;
+  box-sizing: border-box;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right)
+    env(safe-area-inset-bottom) env(safe-area-inset-left);
+  overflow: hidden;
+}
+
+.app-shell-floor > :is(.desktop-nav, .bottom-nav) {
+  display: none !important;
+}
+
+.app-shell.polished-app.app-shell-floor > .app-header {
+  position: relative;
+  inset: auto;
+  margin: 0;
+  display: flex;
+  flex: none;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 0 6px;
+  min-height: 0;
+}
+
+.app-shell-floor > .app-header .app-brand span {
+  display: none;
+}
+
+.app-shell-floor > .app-header :is(.floor-workspace-menu, .logout-button) {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 44px;
+  padding: 4px 6px;
+  font-size: .85rem;
+}
+
+.app-shell.polished-app.app-shell-floor > .app-content {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+}
+
+.app-shell-floor .app-sticker-content,
+.app-shell-floor .floor-workspace {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.app-shell-floor .floor-workspace {
+  margin: 0;
+  padding: 0;
+}
+
+.floor-workspace-title {
+  flex: none;
+  align-self: center;
+  margin: 0 6px;
+  font-size: 1rem;
+  white-space: nowrap;
+}
+
+.app-shell-floor .floor-map-and-guests {
+  flex: 1;
+  min-height: 0;
+  align-items: stretch;
+  grid-template-columns: clamp(230px, 33%, 420px) minmax(0, 1fr);
+  gap: 3px;
+}
+
+.app-shell-floor .floor-map-and-guests > :is(.floor-map-workspace, .floor-guest-sidebar) {
+  position: static;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+}
+
+.app-shell-floor .floor-guest-sidebar {
+  border-radius: 0;
+}
+
+.app-shell-floor .floor-guest-list {
+  flex: 1;
+  min-height: 0;
+  max-height: none;
+}
+
+.app-shell-floor .floor-map-workspace {
+  overflow: auto;
+}
+
+.app-shell-floor .floor-map-workspace > :not(.floor-map-scroll) {
+  flex-shrink: 0;
+}
+
+.app-shell-floor .floor-map-scroll {
+  flex: 1;
+  min-height: min(180px, 35dvh);
+  margin: 0;
+  border-radius: 0;
+}
+
+.app-shell-floor .floor-map-scroll[data-fit-room="true"] .floor-canvas[data-swipe-enabled="true"] {
+  height: 100%;
+  min-height: 0;
+}
+
+.app-shell-floor .floor-map-workspace .room-tabs,
+.app-shell-floor .floor-workspace .floor-action-bar {
+  position: static;
+  margin: 0;
+}
+
+.app-shell-floor .floor-workspace .floor-action-bar {
+  flex: none;
+  flex-wrap: nowrap;
+  align-items: center;
+  overflow-x: auto;
+  white-space: nowrap;
+  padding: 2px 6px;
+}
+
+@media (max-width: 580px) {
+  .app-shell-floor .floor-map-and-guests {
+    grid-template-columns: minmax(0, 42%) minmax(0, 1fr);
+  }
+
+  .app-shell-floor .floor-guest-sidebar header {
+    padding-inline: 4px;
+  }
+}

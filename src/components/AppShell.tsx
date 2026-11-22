@@ -91,6 +91,7 @@ export function AppShell({
   children,
 }: Props) {
   const { pathname } = useLocation()
+  const floorWorkspace = pathname === '/floor'
   const pageAccess=useAppAccess()
   const [more, setMore] = useState(false)
   const [signingOut, setSigningOut] = useState(false)
@@ -140,10 +141,13 @@ export function AppShell({
   }
 
   return (
-    <div data-design-block="copy.45d24048ce7bc1e6.1" className="app-shell polished-app">
+    <div data-design-block="copy.45d24048ce7bc1e6.1" className={`app-shell polished-app${floorWorkspace ? ' app-shell-floor' : ''}`}>
       <a className="skip-link" href="#app-main"><PageWord id="sectioncopy.814ff0c2cb2ec5ecee02">{"Skip to content"}</PageWord></a>
 
       <header data-design-block="copy.edeb9250004ef168.1" className="app-header">
+        {floorWorkspace && <button type="button" className="floor-workspace-menu"
+          aria-haspopup="dialog" aria-expanded={more} aria-controls="workspace-menu"
+          onClick={() => setMore(true)}><MoreHorizontal size={20} aria-hidden="true" /> Menu</button>}
         <AppearanceHeader /><AppThemeRuntime />
 
         <div data-design-block="copy.4440213bd6ff846f.1" className="app-brand">
@@ -183,7 +187,7 @@ export function AppShell({
       </nav>
       <dialog ref={dialog} id="workspace-menu" className="workspace-menu" aria-labelledby="workspace-menu-title" onCancel={() => setMore(false)} onClose={() => setMore(false)}>
         <div className="workspace-menu-heading"><h2 id="workspace-menu-title"><ScreenText id="AppShell.workspace">Workspace</ScreenText></h2><button type="button" aria-label="Close menu" onClick={() => setMore(false)}><X size={20}/></button></div>
-        <nav data-design-block="section.e7e3f0725c6512fd5af5" aria-label="More pages">{extras.map(navItem)}</nav>
+        <nav data-design-block="section.e7e3f0725c6512fd5af5" aria-label="More pages">{(floorWorkspace ? links : extras).map(navItem)}</nav>
       </dialog>
 
     </div>

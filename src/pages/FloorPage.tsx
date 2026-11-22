@@ -181,7 +181,6 @@ export function FloorPage() {
   const [manualReservation,setManualReservation]=useState(false)
   const [organizationId, setOrganizationId] = useState('')
   const [locationId, setLocationId] = useState('')
-  const [locationName, setLocationName] = useState('')
 
   const swipeStart=useRef<{x:number;y:number}|null>(null)
   const suppressTableClick=useRef(false)
@@ -318,7 +317,6 @@ const [partySize, setPartySize] = useState(1)
 
         setOrganizationId(tenant.organization.id)
         setLocationId(location.id)
-        setLocationName(location.name)
 
         const [
           roomResult,
@@ -1686,21 +1684,8 @@ const [partySize, setPartySize] = useState(1)
 
   return (
     <DesignSection as="section" data-design-block="copy.e0e08178068651dc.1" className="floor-workspace">
-      <div data-design-block="copy.f7ffc53a3422b77e.1" className="page-heading">
-        <p data-design-block="copy.b78f32efa3eeed28.1" className="eyebrow"><ScreenText id="FloorPage.5e1b43a1ec471952">
-          FloorFlow
-        </ScreenText></p>
-
-        <h1 data-design-block="copy.608c26ee764b5a88.1"><ScreenText id="FloorPage.6cd9d194a59b8361">Live floor</ScreenText></h1>
-
-        <p data-design-block="copy.549a424af7c1bace.1" className="muted">
-          {locationName}
-        </p>
-      </div>
-
-
-
       <nav className="floor-workspace-nav" aria-label="Floor tools">
+        <h1 className="floor-workspace-title"><ScreenText id="FloorPage.6cd9d194a59b8361">Live floor</ScreenText></h1>
         <AccessSection page="floor" section="reservations"><ReservationCapacityPlanner location={locationId} initialDate={activeShift?.shift_date??serviceDay()}/></AccessSection>
         {floorAccess.can('floor','sections')&&<button type="button" aria-expanded={floorView==='sections'} onClick={()=>setFloorView(floorView==='sections'?'map':'sections')}>Sections ▾</button>}
         <WalkinPanel locationId={locationId} refreshKey={walkinRefresh} onSeat={row=>{setSeatReservationId('');setFloorView('map');setPendingWalkin(row);setGuestName(row.guest_name);setGuestPhone(row.phone);setGuestEmail(row.email);setPartySize(row.party_size);setSelectedTableIds([]);setShowSeatPanel(true)}} />
@@ -1951,7 +1936,6 @@ const [partySize, setPartySize] = useState(1)
             </button>
           )
         })}
-        <p data-design-block="copy.246dedbdf65249c2.1" className="floor-map-room-name">{rooms.find(r=>r.id===activeRoomId)?.name}</p>
       </div>
       </div>
       </section>
