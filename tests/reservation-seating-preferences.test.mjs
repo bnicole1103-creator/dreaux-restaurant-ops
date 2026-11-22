@@ -31,3 +31,26 @@ assert.equal(pick(11),undefined)
 assert.equal(inquirySeatingPreference({'Guest notes':'Seating preference: Outdoor seating in the Courtyard\nBirthday'}),'courtyard')
 assert.doesNotMatch(confirmationInvitation('https://example.test/link'),/Courtyard|table|seating/i)
 console.log('Two-tops, Great Room, high-top, bar opt-in, Courtyard fallback and guest text checks passed.')
+
+const brutTables = [
+  table('L5', 3, 'Brut Bar'), table('L6', 3, 'Brut Bar'),
+  table('L7', 3, 'Brut Bar'), table('L8', 3, 'Brut Bar'),
+  table('L9', 3, 'Brut Bar'), table('L10', 3, 'Brut Bar'), table('L11', 3, 'Brut Bar'),
+  table('L12', 2, 'Brut Bar'), table('L13', 2, 'Brut Bar'),
+]
+const firstGroup = brutTables.slice(0, 4).map(t=>t.id)
+const secondGroup = brutTables.slice(4, 7).map(t=>t.id)
+const brutBarSeats = Array.from({length:4},(_,i)=>table('BB'+(i+1),1,'Brut Bar'))
+const brutDay = {...data, tables:[...tables,...brutTables,...brutBarSeats], config:{...data.config,joinGroups:[firstGroup,secondGroup]}}
+const booking = (id,party,room,tableIds=[])=>({id,name:id,party,room,tableIds,seating:'indoor',start:60,end:120,version:0})
+const existing = [booking('Five',5,'Great Room',['G1']),booking('Twelve',12,'Brut Bar',firstGroup)]
+const plan = planCapacity({...brutDay,bookings:existing},booking('Nine',9,'Brut Bar'))
+assert.equal(plan.ok,true)
+assert.deepEqual(plan.assignments.Nine,secondGroup)
+assert.deepEqual(planCapacity(brutDay,booking('Twelve',12,'')).assignments.Twelve,firstGroup)
+assert.equal(seatingArea(brutTables),'indoor dining in the Brut Bar')
+assert.equal(seatingArea(brutBarSeats),'bar seating')
+assert.deepEqual(planCapacity(brutDay,{...booking('Bar',1,'Brut Bar'),seating:'bar'}).assignments.Bar,['BB1'])
+assert.equal(planCapacity(brutDay,booking('Indoor',1,'Brut Bar',['BB1'])).ok,false)
+assert.equal(planCapacity(brutDay,{...booking('Bar',1,'Brut Bar',['L13']),seating:'bar'}).ok,false)
+assert.equal(planCapacity({...brutDay,bookings:existing,config:{...brutDay.config,joinGroups:[firstGroup]}},booking('Nine',9,'Brut Bar')).ok,false)

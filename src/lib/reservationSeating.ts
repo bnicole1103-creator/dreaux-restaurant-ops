@@ -18,7 +18,10 @@ const highTop = (table: CapacityTable) => /^H[1-8]$/i.test((table.name ?? '').tr
 const diningTable = (table: CapacityTable) => /^T[1-6]$/i.test((table.name ?? '').trim())
 const greatRoom = (table: CapacityTable) => /great\s*room/i.test(table.roomName)
 const courtyard = (table: CapacityTable) => /courtyard|outdoor|patio/i.test(table.roomName)
-const bar = (table: CapacityTable) => !highTop(table) && /\bbar\b/i.test(table.roomName + ' ' + table.name)
+const brutDiningTable = (table: CapacityTable) =>
+  /^brut\s+bar$/i.test(table.roomName.trim()) && /^L(?:[5-9]|1[0-3])$/i.test(table.name.trim())
+const bar = (table: CapacityTable) =>
+  !highTop(table) && !brutDiningTable(table) && /\bbar\b/i.test(table.roomName + ' ' + table.name)
 
 export function seatingArea(tables: CapacityTable[]) {
   if (!tables.length) return ''
@@ -26,6 +29,7 @@ export function seatingArea(tables: CapacityTable[]) {
   if (tables.every(bar)) return 'bar seating'
   if (tables.every(highTop)) return 'the indoor high-top'
   if (tables.every(greatRoom)) return 'the Great Room'
+  if (tables.every(brutDiningTable)) return 'indoor dining in the Brut Bar'
   return 'indoor dining'
 }
 
