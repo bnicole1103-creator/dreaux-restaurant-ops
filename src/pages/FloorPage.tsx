@@ -1775,6 +1775,7 @@ const [partySize, setPartySize] = useState(1)
         </ScreenText></div>
       )}
 
+      <div className="floor-room-toolbar">
       <div data-design-block="copy.284d5689c459e90b.1" className="room-tabs">
         {rooms.map((room) => (
           <button data-design-block="copy.595be0a573b364cb.1"
@@ -1792,11 +1793,9 @@ const [partySize, setPartySize] = useState(1)
           </button>
         ))}
       </div>
-
-       {!arrangeMode&&<div className="floor-room-view-control">
-         <button type="button" onClick={()=>setFitRoom(value=>!value)}>{fitRoom?'Zoom room':'Fit room'}</button>
-         {!fitRoom&&<small>Scroll to see more tables.</small>}
-       </div>}
+        {!arrangeMode&&<button type="button" className="floor-room-zoom" aria-label={fitRoom?'Zoom room':'Fit room'}
+          onClick={()=>setFitRoom(value=>!value)}>{fitRoom?'Zoom':'Fit'}</button>}
+      </div>
        {!!serverKeys.length&&<div className="floor-server-legend" aria-label="Server colors">{serverKeys.map(key=>{const assignment=assignments.find(a=>(a.server_id||'guest:'+a.guest_name)===key)!;return <span key={key}><i style={{background:serverSwatch(key)}}/>{assignment.server_id?memberName(assignment.server_id):assignment.guest_name||'Unlinked team member'}</span>})}</div>}
        {/* LIVE FLOOR */}
        <div data-design-block="copy.04d68e17bc6f50c2.1" className="floor-map-scroll" data-fit-room={fitRoom}

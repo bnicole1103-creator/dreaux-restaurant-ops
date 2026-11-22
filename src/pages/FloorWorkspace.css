@@ -15,3 +15,18 @@
 .floor-workspace .page-heading .muted { margin: 2px 0 0; }
 .floor-workspace .floor-workspace-nav { padding-block: 2px; gap: 5px; }
 .floor-workspace .floor-workspace-nav button:not(dialog button) { padding: 4px 8px; }
+
+.floor-workspace .floor-workspace-nav {
+  flex-wrap: nowrap !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  margin-block: 0 4px !important;
+  min-width: 0;
+}
+.floor-workspace .floor-workspace-nav button:not(dialog button) {
+  flex: 0 0 auto;
+  font-size: .8rem !important;
+  line-height: 1.1;
+  min-height: 44px;
+  padding: 4px 7px !important;
+}
