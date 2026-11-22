@@ -40,7 +40,7 @@
   box-sizing: border-box;
   padding: env(safe-area-inset-top) env(safe-area-inset-right)
     env(safe-area-inset-bottom) env(safe-area-inset-left);
-  overflow: hidden;
+  overflow-y: auto;
 }
 
 .app-shell-floor > :is(.desktop-nav, .bottom-nav) {
@@ -74,7 +74,7 @@
 
 .app-shell.polished-app.app-shell-floor > .app-content {
   display: flex;
-  flex: 1 1 0px;
+  flex: 1;
   flex-direction: column;
   min-height: 0;
   max-width: none;
@@ -85,7 +85,7 @@
 .app-shell-floor .app-sticker-content,
 .app-shell-floor .floor-workspace {
   display: flex;
-  flex: 1 1 0px;
+  flex: 1;
   flex-direction: column;
   min-height: 0;
 }
@@ -100,7 +100,7 @@
   align-items: center;
 }
 
-.floor-workspace-title {
+.app-shell-floor .app-content .floor-workspace-title {
   flex: none;
   align-self: center;
   margin: 0 6px;
@@ -109,8 +109,11 @@
 }
 
 .app-shell-floor .floor-map-and-guests {
-  flex: 1 1 0px;
-  min-height: 0;
+  flex: 1 1 auto;
+  /* Keep both panes visible even if an enclosing layout has an indefinite height. */
+  height: max(50vh, calc(100vh - 110px));
+  height: max(50dvh, calc(100dvh - 110px - env(safe-area-inset-top) - env(safe-area-inset-bottom)));
+  min-height: 50dvh;
   align-items: stretch;
   grid-template-rows: minmax(0, 1fr);
   grid-template-columns: clamp(230px, 33%, 420px) minmax(0, 1fr);
