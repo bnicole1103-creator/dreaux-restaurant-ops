@@ -164,7 +164,7 @@ type RotationLogEntry = {
 export function FloorPage() {
  const seatingRoute=useLocation()
  const floorAccess=useAppAccess()
- const [floorView,setFloorView]=useState<'map'|'sections'|'crew'|'tools'|'rooms'>('map')
+ const [floorView,setFloorView]=useState<'map'|'sections'|'overview'|'tools'|'rooms'>('map')
   const [seatReservationId,setSeatReservationId]=useState('')
   const [seatingHistory,setSeatingHistory]=useState<{session_id:string;server_id:string;server_name:string;table_names:string;party_size:number;source:string;seated_at:string;closed_at:string|null;status:string}[]>([])
   const [historyError,setHistoryError]=useState('')
@@ -277,6 +277,7 @@ export function FloorPage() {
   const [tableAssignmentError, setTableAssignmentError] = useState('')
   const assignmentMapRef = useRef<HTMLElement>(null)
 
+  const [fitRoom, setFitRoom] = useState(true)
   const [activeRoomId, setActiveRoomId] = useState('')
 
   const [selectedTableIds, setSelectedTableIds] =
@@ -1698,17 +1699,22 @@ const [partySize, setPartySize] = useState(1)
       </div>
 
 
-      <div className="floor-top-status"><AccessSection page="floor" section="schedule"><FloorScheduleBox compact location={locationId} date={activeShift?.shift_date??serviceDay()}/></AccessSection><LiveSeatingFinder location={locationId} canSeat={!saving&&activeShift?.status==='open'&&activeShift.shift_date===reservationToday()} onShow={ids=>{setSelectedTableIds(ids);const table=tables.find(t=>t.id===ids[0]);if(table)setActiveRoomId(table.room_id);setFloorView('map')}} onSeat={(ids,party)=>{if(activeShift?.status!=='open'||activeShift.shift_date!==reservationToday()){setError('Open today’s shift before seating.');return}if((pendingWalkin||seatReservationId||guestName||guestPhone||guestEmail)&&!window.confirm('Replace the current seating draft with this new party?'))return;setPendingWalkin(null);setSeatReservationId('');setGuestName('');setGuestPhone('');setGuestEmail('');setPartySize(party);setSelectedTableIds(ids);const table=tables.find(t=>t.id===ids[0]);if(table)setActiveRoomId(table.room_id);const servers=[...new Set(ids.map(id=>assignments.find(a=>a.table_id===id)?.server_id).filter(Boolean))];setSeatServerId(servers.length===1?servers[0]??'':'');setFloorView('map');setShowReservationsPanel(false);setShowSeatPanel(true)}}/></div>
+
       <nav className="floor-workspace-nav" aria-label="Floor tools">
         <AccessSection page="floor" section="reservations"><ReservationCapacityPlanner location={locationId} initialDate={activeShift?.shift_date??serviceDay()}/></AccessSection>
         {floorAccess.can('floor','sections')&&<button type="button" aria-expanded={floorView==='sections'} onClick={()=>setFloorView(floorView==='sections'?'map':'sections')}>Sections ▾</button>}
-        <button type="button" aria-expanded={floorView==='crew'} onClick={()=>setFloorView(floorView==='crew'?'map':'crew')}>Walk-ins ▾</button>
+        <WalkinPanel locationId={locationId} refreshKey={walkinRefresh} onSeat={row=>{setSeatReservationId('');setFloorView('map');setPendingWalkin(row);setGuestName(row.guest_name);setGuestPhone(row.phone);setGuestEmail(row.email);setPartySize(row.party_size);setSelectedTableIds([]);setShowSeatPanel(true)}} />
+        <button type="button" aria-expanded={floorView==='overview'} onClick={()=>setFloorView(floorView==='overview'?'map':'overview')}>Schedule & covers</button>
 
         <button type="button" disabled={!activeShiftId} aria-expanded={showRotationPanel} onClick={()=>setShowRotationPanel(v=>!v)}>Rotation & seating ▾</button>
         <button type="button" aria-expanded={floorView==='rooms'} onClick={()=>setFloorView(floorView==='rooms'?'map':'rooms')}>Rooms & layout ▾</button>
 
         {arrangeMode&&<button type="button" onClick={()=>setArrangeMode(false)}>Done arranging</button>}
       </nav>
+      <FloorFloatingPanel wide title="Schedule & covers" open={floorView==='overview'} onClose={()=>setFloorView('map')}>
+      <div className="floor-top-status"><AccessSection page="floor" section="schedule"><FloorScheduleBox compact location={locationId} date={activeShift?.shift_date??serviceDay()}/></AccessSection><LiveSeatingFinder location={locationId} canSeat={!saving&&activeShift?.status==='open'&&activeShift.shift_date===reservationToday()} onShow={ids=>{setSelectedTableIds(ids);const table=tables.find(t=>t.id===ids[0]);if(table)setActiveRoomId(table.room_id);setFloorView('map')}} onSeat={(ids,party)=>{if(activeShift?.status!=='open'||activeShift.shift_date!==reservationToday()){setError('Open today’s shift before seating.');return}if((pendingWalkin||seatReservationId||guestName||guestPhone||guestEmail)&&!window.confirm('Replace the current seating draft with this new party?'))return;setPendingWalkin(null);setSeatReservationId('');setGuestName('');setGuestPhone('');setGuestEmail('');setPartySize(party);setSelectedTableIds(ids);const table=tables.find(t=>t.id===ids[0]);if(table)setActiveRoomId(table.room_id);const servers=[...new Set(ids.map(id=>assignments.find(a=>a.table_id===id)?.server_id).filter(Boolean))];setSeatServerId(servers.length===1?servers[0]??'':'');setFloorView('map');setShowReservationsPanel(false);setShowSeatPanel(true)}}/></div>
+        <ServerWorkload servers={rotationServers} parties={activeSessions} name={memberName}/>
+      </FloorFloatingPanel>
       <FloorFloatingPanel title="Rooms & layout" open={floorView==='rooms'} onClose={()=>setFloorView('map')}><button type="button" disabled={!activeRoomId} onClick={()=>{setShowAddTablePanel(true);setFloorView('map')}}>+ Add table</button>
         <button type="button" disabled={!!tableAssignmentDraft} onClick={()=>{setArrangeMode(v=>!v);setSelectedTableIds([]);setFloorView('map')}}>{arrangeMode?'Done arranging tables':'Arrange tables on map'}</button>
         <p>Room order on this device. Use the arrows to rearrange the room tabs.</p>
@@ -1716,13 +1722,7 @@ const [partySize, setPartySize] = useState(1)
       </FloorFloatingPanel>
       {floorNotice&&<p role="status">{floorNotice}</p>}
       {seatReservationId&&!showSeatPanel&&<p role="status">Select tables for the chosen reservation, then tap Seat.</p>}
-      {pendingWalkin&&floorView!=='crew'&&<p role="status">Seating {pendingWalkin.guest_name} · select tables on the map, then Seat.</p>}
-      <FloorFloatingPanel title="Walk-ins" open={floorView==='crew'} onClose={()=>setFloorView('map')}>
-
-      <WalkinPanel locationId={locationId} refreshKey={walkinRefresh} onSeat={row=>{setSeatReservationId('');setFloorView('map');setPendingWalkin(row);setGuestName(row.guest_name);setGuestPhone(row.phone);setGuestEmail(row.email);setPartySize(row.party_size);setSelectedTableIds([]);setShowSeatPanel(true)}} />
-      {pendingWalkin&&<div data-design-block="copy.eb305b57f537aed6.1" className="wt-card" role="status"><strong><ScreenText id="FloorPage.72ad81f5e33ac981">Seating </ScreenText>{pendingWalkin.guest_name}<ScreenText id="FloorPage.0e1b1fe85997c7d1"> · party of </ScreenText>{pendingWalkin.party_size}</strong><p data-design-block="copy.0cae27057d8f304b.1"><ScreenText id="FloorPage.aaf48aa3abcc020d">Select their tables, then press Seat. Their check-in is marked seated when seating succeeds.</ScreenText></p><button data-design-block="copy.b1a3fd87f11bd6fb.1" type="button" disabled={saving} onClick={()=>{setPendingWalkin(null);setGuestName('');setGuestPhone('');setGuestEmail('');setPartySize(1)}}><ScreenText id="FloorPage.a3bf126804af00d4">Cancel walk-in selection</ScreenText></button></div>}
-
-      </FloorFloatingPanel>
+      {pendingWalkin&&!showSeatPanel&&<div data-design-block="copy.eb305b57f537aed6.1" className="wt-card" role="status"><strong><ScreenText id="FloorPage.72ad81f5e33ac981">Seating </ScreenText>{pendingWalkin.guest_name}<ScreenText id="FloorPage.0e1b1fe85997c7d1"> · party of </ScreenText>{pendingWalkin.party_size}</strong><p data-design-block="copy.0cae27057d8f304b.1"><ScreenText id="FloorPage.aaf48aa3abcc020d">Select their tables, then press Seat. Their check-in is marked seated when seating succeeds.</ScreenText></p><button data-design-block="copy.b1a3fd87f11bd6fb.1" type="button" disabled={saving} onClick={()=>{setPendingWalkin(null);setGuestName('');setGuestPhone('');setGuestEmail('');setPartySize(1)}}><ScreenText id="FloorPage.a3bf126804af00d4">Cancel walk-in selection</ScreenText></button></div>}
       <FloorFloatingPanel wide title="Sections" open={floorView==='sections'} onClose={()=>setFloorView('map')}>      <div className="floor-day-strip" aria-label="Day and section assignment">
         <label>Day / shift<select aria-label="Floor day and shift" value={activeShiftId} onChange={e=>{setActiveShiftId(e.target.value);setSelectedTableIds([])}}><option value="">Choose shift</option>{shifts.map(s=><option key={s.id} value={s.id}>{s.shift_date} · {s.shift_name} · {s.status}</option>)}</select></label>
         <button type="button" disabled={saving||activeShift?.status==='open'} onClick={()=>setShowShiftPanel(true)}>{activeShift?.status==='open'?'Shift open':'Open shift'}</button>
@@ -1748,7 +1748,7 @@ const [partySize, setPartySize] = useState(1)
         </div>
       )}
 
-      <ServerWorkload servers={rotationServers} parties={activeSessions} name={memberName}/><div className="floor-map-and-guests">
+      <div className="floor-map-and-guests">
       {floorAccess.can('floor','reservations')&&<FloorGuestSidebar location={locationId} day={reservationToday()} reservations={reservations} parties={activeSessions} tableName={id=>tables.find(t=>t.id===id)?.table_name??'Table unavailable'} serverName={memberName} busy={saving||!!tableAssignmentDraft} assignDisabled={arrangeMode||!!tableAssignmentDraft} assigningId={tableAssignmentDraft?.reservation.id} onAssign={id=>{const row=reservations.find(r=>r.id===id);if(row)beginTableAssignment(row)}} canSeat={activeShift?.status==='open'&&activeShift.shift_date===reservationToday()} onAdd={()=>setManualReservation(true)} onManage={()=>{setSidebarReservationId('');setShowReservationsPanel(true)}} onDetails={id=>{setSidebarReservationId(id);setShowReservationsPanel(true)}} onSeat={id=>{const r=reservations.find(r=>r.id===id);if(r)beginReservationSeating(r)}} onParty={id=>{const p=activeSessions.find(p=>p.id===id);if(!p)return;const ids=p.tableIds.length?p.tableIds:[p.primaryTableId];setSelectedTableIds(ids);const t=tables.find(t=>t.id===p.primaryTableId||t.id===ids[0]);if(t)setActiveRoomId(t.room_id);setShowTablePanel(true)}}/>}
       <section className="floor-workspace-panel floor-map-workspace" aria-label="Floor map" tabIndex={-1} ref={assignmentMapRef}>
         {tableAssignmentDraft && <div className="floor-booking-assignment">
@@ -1793,10 +1793,13 @@ const [partySize, setPartySize] = useState(1)
         ))}
       </div>
 
-       <p data-design-block="copy.47e8f14106004bf5.1" className="floor-map-hint"><span className="floor-map-swipe-hint"><ScreenText id="FloorPage.f3780ffe48f2e882">Swipe left or right to switch floor plans. Tap multiple tables to select them.</ScreenText></span><span className="floor-map-pan-hint">Scroll the map sideways to see more tables. Use the room buttons to switch rooms.</span></p>
+       {!arrangeMode&&<div className="floor-room-view-control">
+         <button type="button" onClick={()=>setFitRoom(value=>!value)}>{fitRoom?'Zoom room':'Fit room'}</button>
+         {!fitRoom&&<small>Scroll to see more tables.</small>}
+       </div>}
        {!!serverKeys.length&&<div className="floor-server-legend" aria-label="Server colors">{serverKeys.map(key=>{const assignment=assignments.find(a=>(a.server_id||'guest:'+a.guest_name)===key)!;return <span key={key}><i style={{background:serverSwatch(key)}}/>{assignment.server_id?memberName(assignment.server_id):assignment.guest_name||'Unlinked team member'}</span>})}</div>}
        {/* LIVE FLOOR */}
-       <div data-design-block="copy.04d68e17bc6f50c2.1" className="floor-map-scroll"
+       <div data-design-block="copy.04d68e17bc6f50c2.1" className="floor-map-scroll" data-fit-room={fitRoom}
         onTouchStart={e=>{suppressTableClick.current=false;swipeStart.current=!arrangeMode&&e.currentTarget.scrollWidth<=e.currentTarget.clientWidth&&e.touches.length===1?{x:e.touches[0].clientX,y:e.touches[0].clientY}:null}}
         onTouchMove={e=>{const start=swipeStart.current;if(start&&e.touches.length===1&&Math.abs(e.touches[0].clientX-start.x)>20)suppressTableClick.current=true;else if(e.touches.length!==1)swipeStart.current=null}}
         onTouchCancel={()=>{swipeStart.current=null}}
