@@ -20,7 +20,7 @@ import {ReservationFileUpload} from '../components/ReservationFileUpload'
 import {reservationFilesImport} from '../lib/reservationCsv'
 import {ReservationGuestbook} from '../components/ReservationGuestbook'
 import {notifyReservationsChanged} from '../lib/reservationSync'
-import {activeReservations,useReservationRevision} from '../lib/reservationSync'
+import {activeReservations,isCanceledReservation,useReservationRevision} from '../lib/reservationSync'
 import {FloorFloatingPanel} from '../components/FloorFloatingPanel'
 import './FloorWorkspace.css'
 import {orderRooms} from '../lib/roomOrder'
@@ -107,6 +107,7 @@ type ActiveTableSession = {
 
 
 type ReservationRecord = {
+  cancellation_cleared_at?: string | null
   table_ids: string[]
   assigned_server_id: string | null
   edit_version: number
@@ -206,6 +207,7 @@ export function FloorPage() {
   const [activeSessions, setActiveSessions] =
     useState<ActiveTableSession[]>([])
 
+  const [canceledBookings, setCanceledBookings] = useState<ReservationRecord[]>([])
   const [reservations, setReservations] =
     useState<ReservationRecord[]>([])
 
@@ -648,7 +650,8 @@ const [partySize, setPartySize] = useState(1)
           is_vip,
           notes,
           assigned_server_id,
-          edit_version
+          edit_version,
+          cancellation_cleared_at
         `)
         .eq('location_id', locationIdValue)
         .eq('reservation_date', reservationDate)
@@ -659,7 +662,9 @@ const [partySize, setPartySize] = useState(1)
       return
     }
 
-    setReservations(activeReservations((data ?? []) as ReservationRecord[]))
+    const bookings = (data ?? []) as ReservationRecord[]
+    setCanceledBookings(bookings.filter(booking=>isCanceledReservation(booking.status)&&!booking.cancellation_cleared_at))
+    setReservations(activeReservations(bookings))
   }
 
   async function handleReservationUpload(
@@ -1742,7 +1747,7 @@ const [partySize, setPartySize] = useState(1)
       )}
 
       <div className="floor-map-and-guests">
-      {floorAccess.can('floor','reservations')&&<FloorGuestSidebar location={locationId} day={reservationToday()} reservations={reservations} parties={activeSessions} tableName={id=>tables.find(t=>t.id===id)?.table_name??'Table unavailable'} serverName={memberName} busy={saving||!!tableAssignmentDraft} assignDisabled={arrangeMode||!!tableAssignmentDraft} assigningId={tableAssignmentDraft?.reservation.id} onAssign={id=>{const row=reservations.find(r=>r.id===id);if(row)beginTableAssignment(row)}} canSeat={activeShift?.status==='open'&&activeShift.shift_date===reservationToday()} onAdd={()=>setManualReservation(true)} onManage={()=>{setSidebarReservationId('');setShowReservationsPanel(true)}} onDetails={id=>{setSidebarReservationId(id);setShowReservationsPanel(true)}} onSeat={id=>{const r=reservations.find(r=>r.id===id);if(r)beginReservationSeating(r)}} onParty={id=>{const p=activeSessions.find(p=>p.id===id);if(!p)return;const ids=p.tableIds.length?p.tableIds:[p.primaryTableId];setSelectedTableIds(ids);const t=tables.find(t=>t.id===p.primaryTableId||t.id===ids[0]);if(t)setActiveRoomId(t.room_id);setShowTablePanel(true)}}/>}
+      {floorAccess.can('floor','reservations')&&<FloorGuestSidebar location={locationId} day={reservationToday()} reservations={reservations} canceledBookings={canceledBookings} parties={activeSessions} tableName={id=>tables.find(t=>t.id===id)?.table_name??'Table unavailable'} serverName={memberName} busy={saving||!!tableAssignmentDraft} assignDisabled={arrangeMode||!!tableAssignmentDraft} assigningId={tableAssignmentDraft?.reservation.id} onAssign={id=>{const row=reservations.find(r=>r.id===id);if(row)beginTableAssignment(row)}} canSeat={activeShift?.status==='open'&&activeShift.shift_date===reservationToday()} onAdd={()=>setManualReservation(true)} onManage={()=>{setSidebarReservationId('');setShowReservationsPanel(true)}} onDetails={id=>{setSidebarReservationId(id);setShowReservationsPanel(true)}} onSeat={id=>{const r=reservations.find(r=>r.id===id);if(r)beginReservationSeating(r)}} onParty={id=>{const p=activeSessions.find(p=>p.id===id);if(!p)return;const ids=p.tableIds.length?p.tableIds:[p.primaryTableId];setSelectedTableIds(ids);const t=tables.find(t=>t.id===p.primaryTableId||t.id===ids[0]);if(t)setActiveRoomId(t.room_id);setShowTablePanel(true)}}/>}
       <section className="floor-workspace-panel floor-map-workspace" aria-label="Floor map" tabIndex={-1} ref={assignmentMapRef}>
         {tableAssignmentDraft && <div className="floor-booking-assignment">
           <strong>Assign tables · {tableAssignmentDraft.reservation.guest_name} · {tableAssignmentDraft.reservation.party_size} guests</strong>

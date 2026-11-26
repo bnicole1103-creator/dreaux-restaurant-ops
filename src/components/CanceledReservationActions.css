@@ -1,0 +1,15 @@
+.reservation-canceled {
+  color: #a52222;
+  font-weight: 800;
+}
+
+.canceled-reservation-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .5rem;
+}
+
+.canceled-reservation-actions [role="alert"] {
+  flex-basis: 100%;
+}

@@ -1,5 +1,8 @@
 import {useEffect,useState} from 'react'
 import {watchReservations} from './reservationRefresh'
+export function isCanceledReservation(status?:string|null){
+ return ['cancelled','canceled'].includes((status??'').trim().toLowerCase())
+}
 export function activeReservations<T extends {status?:string|null}>(rows:T[]):T[]{
  return rows.filter(row=>!['cancelled','canceled','seated','completed','no_show','removed','expired'].includes((row.status??'').trim().toLowerCase()))
 }
