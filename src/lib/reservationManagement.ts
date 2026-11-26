@@ -1,7 +1,7 @@
 import { inquiryDetails } from './inquiryReservationFields'
 import {supabase} from './supabase'
 import type {InquiryReservationSource} from '../components/InquiryReservationDialog'
-export type ManagementBooking={id:string;guest_name:string;reservation_date:string;reservation_time:string|null;party_size:number;phone:string|null;email:string|null;notes:string|null;status:string;edit_version:number;occasion:string;birthday:boolean;vip:boolean}
+export type ManagementBooking={id:string;guest_name:string;reservation_date:string;reservation_time:string|null;party_size:number;phone:string|null;email:string|null;notes:string|null;status:string;cancellation_cleared_at?:string|null;edit_version:number;occasion:string;birthday:boolean;vip:boolean}
 export type ManagementInquiry=InquiryReservationSource&{received:string;status:string}
 import {inquiryStudio} from './inquiryConnection'
 export {inquiryStudio}
