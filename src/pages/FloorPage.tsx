@@ -808,7 +808,7 @@ const [partySize, setPartySize] = useState(1)
     const tableIds = reservation.table_ids?.length ? reservation.table_ids : reservation.table_id ? [reservation.table_id] : []
     const firstTable = tables.find(table => table.id === tableIds[0])
     setTableAssignmentError('')
-    setTableAssignmentDraft({reservation, tableIds})
+    setTableAssignmentDraft({reservation, tableIds: []})
     if (firstTable) setActiveRoomId(firstTable.room_id)
     assignmentMapRef.current?.focus()
   }
@@ -822,14 +822,11 @@ const [partySize, setPartySize] = useState(1)
     setTableAssignmentSaving(true)
     setTableAssignmentError('')
     try {
-      const {error} = await supabase.rpc('reservation_edit_tables', {
+      const {error} = await supabase.rpc('floor_reservation_move_tables', {
         p_location_id: locationId,
-        p_reservation_id: reservation.id,
+        p_id: reservation.id,
         p_version: reservation.edit_version,
-        p_party_size: reservation.party_size,
         p_table_ids: tableIds,
-        p_server_id: reservation.assigned_server_id,
-        p_notes: reservation.notes ?? '',
       })
       if (error) throw error
       setTableAssignmentDraft(null)
@@ -1746,7 +1743,7 @@ const [partySize, setPartySize] = useState(1)
       <section className="floor-workspace-panel floor-map-workspace" aria-label="Floor map" tabIndex={-1} ref={assignmentMapRef}>
         {tableAssignmentDraft && <div className="floor-booking-assignment">
           <strong>Assign tables · {tableAssignmentDraft.reservation.guest_name} · {tableAssignmentDraft.reservation.party_size} guests</strong>
-          <p>Tap tables on the map, then save.</p>
+          <p>Select the replacement tables, then save.</p>
           <p role="status">{bookingAssignmentTables.length ? bookingAssignmentTables.map(table=>table.table_name).join(' + ') + ' · ' + bookingAssignmentSeats + ' seats' : 'No tables selected'}</p>
           <button type="button" disabled={tableAssignmentSaving||!tableAssignmentDraft.tableIds.length} onClick={()=>void saveTableAssignment()}>{tableAssignmentSaving?'Saving…':'Save tables'}</button>
           <button type="button" disabled={tableAssignmentSaving} onClick={()=>setTableAssignmentDraft(null)}>Cancel</button>
